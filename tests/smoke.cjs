@@ -37,6 +37,34 @@ async function caseBoard(req) {
   if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
   await next();
 }
+// The 2000s layer: Messenger nudge, the brick phone (texts and Snake), wallpapers.
+async function retro() {
+  const SHOTS = process.argv[3] || require('os').tmpdir();
+  const start = async id => { if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="' + id + '"]'); } else { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="' + id + '"]'); } await visible('#' + id); };
+  await start('w-mieke');
+  const before = await p.$$eval('#mieke-log .msg.them', l => l.length);
+  await p.click('#btn-nudge');
+  await p.waitForFunction(n => document.querySelectorAll('#mieke-log .msg.them').length === n + 1, before);
+  if (!(await p.textContent('#mieke-log')).includes('You have just sent a nudge.') || !(await p.textContent('#mieke-log')).includes('Mieke says:')) throw new Error('nudge or Messenger lines missing');
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/messenger.png' });
+  await start('w-phone');
+  await p.click('#phone-keys [data-k="2"]');
+  if (!(await p.textContent('#phone-screen')).includes('Mum')) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
+  await p.click('#phone-keys [data-k="back"]'); await p.click('#phone-keys [data-k="1"]');
+  if (!(await p.$('#phone-screen canvas.ph-snake'))) throw new Error('Snake did not start');
+  await p.click('#phone-keys [data-k="8"]'); await p.waitForTimeout(600);
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/phone.png' });
+  await p.click('#phone-keys [data-k="back"]');
+  await start('w-display');
+  const wp = await p.$$eval('#display-grid .wp', l => l.map(b => b.className));
+  if (wp.length !== 5 || wp.filter(c => c.includes('locked')).length !== 4 || !wp[0].includes(' on')) throw new Error('wallpapers wrong: ' + wp);
+  await p.click('#display-grid .wp >> nth=2');
+  if (!(await p.textContent('#toast')).includes('Locked')) throw new Error('locked wallpaper did not explain');
+  if (!(await p.evaluate(() => document.getElementById('desktop').style.backgroundImage)).includes('svg')) throw new Error('no wallpaper painted');
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/display.png' });
+  await p.click('#w-display .tb.close'); await p.click('#w-phone .tb.close'); await p.click('#w-mieke .tb.close');
+  if (MOBILE) await p.click('.task:has-text("Call")');
+}
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
 async function academy() {
   await visible('#w-academy');
@@ -206,10 +234,21 @@ async function followUp() {
     if (req === 0) {
       const f = await p.textContent('#found');
       if (!/^[1-9]\d* \/ \d+$/.test(f)) throw new Error('found-facts counter did not move: ' + f);
+      await retro();
     }
     await p.click('#btn-hangup');
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
+    if (req === 0) {
+      // Staply turns up on the case board with confidently bad advice.
+      await p.waitForSelector('#staply:not([hidden])');
+      if (!(await p.textContent('#staply')).includes('learning styles')) throw new Error('Staply said the wrong thing: ' + await p.textContent('#staply'));
+      if (!MOBILE) { await p.waitForTimeout(600); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/staply.png' }); }
+      await p.click('#staply [data-st="yes"]');
+      if ((await p.textContent('#staply .st-text')).includes('learning styles questionnaire?') || await p.isVisible('#staply .st-actions')) throw new Error('Staply did not answer the yes');
+      await p.waitForSelector('#im-pop:not([hidden]) >> text=stapler');
+      await p.evaluate(() => { document.getElementById('staply').hidden = true; document.getElementById('im-pop').hidden = true; });
+    }
     if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/write.png" });
     if (req === 1) {
       // Memo mode: the long form is still there for those who want it.

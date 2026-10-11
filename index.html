@@ -105,6 +105,7 @@
         <button type="button" class="desk-icon" data-app="w-write"><span class="di">📌</span>Case board</button>
         <button type="button" class="desk-icon" data-app="w-mieke"><span class="di">☕</span>Mieke</button>
         <button type="button" class="desk-icon" data-app="w-scores"><span class="di">🏆</span>My scores.txt</button>
+        <button type="button" class="desk-icon" data-app="w-phone"><span class="di">📱</span>My mobile</button>
         <button type="button" class="desk-icon" data-app="bin"><span class="di">🗑</span>Recycle Bin</button>
       </nav>
 
@@ -237,7 +238,12 @@
       </div>
 
       <!-- Colleague -->
-      <div class="win" id="w-mieke" data-title="Mieke - senior learning consultant" data-icon="☕">
+      <div class="win messenger" id="w-mieke" data-title="Mieke - Conversation" data-task="Mieke" data-icon="💬">
+        <div class="im-head">
+          <svg class="im-avatar" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="im-av" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f29d38"/></linearGradient></defs><rect x="1" y="1" width="46" height="46" rx="6" fill="url(#im-av)" stroke="#9a6a1c"/><path d="M14 30h17v5a6 6 0 0 1-6 6h-5a6 6 0 0 1-6-6z" fill="#fff" stroke="#6b3d10" stroke-width="2"/><path d="M31 32h3a3 3 0 0 1 0 6h-3" fill="none" stroke="#6b3d10" stroke-width="2"/><path d="M18 26c0-3 3-3 3-6M24 26c0-3 3-3 3-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="im-who"><b>Mieke</b> <span class="im-dot" aria-hidden="true">●</span> <span class="im-status">Online</span><br><span class="im-msg">~*~ ask why ~*~ (then ask why again)</span></div>
+          <button type="button" id="btn-nudge" class="im-nudge" title="Send Mieke a nudge">📳 Nudge</button>
+        </div>
         <p class="fine mieke-intro">Mieke sits two cubicles over and has heard "we need a course" a thousand times. She only knows what you tell her: the request, the case file, your call and your notes. <b id="mieke-left"></b></p>
         <div id="mieke-log" class="chat-log mieke-log" aria-live="polite"></div>
         <div class="row quick">
@@ -404,6 +410,7 @@
         <div id="p-wait" class="pane">
           <p id="wait-line" class="narration small"></p>
           <div class="progress" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p class="fine"><button type="button" id="btn-wait-snake" class="link">📱 Play Snake while you wait</button></p>
         </div>
         <div id="p-score" class="pane">
           <h2 id="score-title"></h2>
@@ -421,6 +428,27 @@
         </div>
       </div>
 
+      <!-- The brick phone: texts from people who are not in the building, and Snake -->
+      <div class="win" id="w-phone" data-title="My mobile" data-icon="📱">
+        <div class="brick">
+          <div class="brick-top"><span class="brick-ear"></span><span id="phone-unread" class="brick-env" hidden></span></div>
+          <div id="phone-screen" class="brick-screen" aria-live="polite"></div>
+          <div class="brick-brand">BRIKKO 2000</div>
+          <div id="phone-keys" class="brick-keys">
+            <button type="button" data-k="back" class="bk-soft">C</button><button type="button" data-k="ok" class="bk-soft">OK</button>
+            <button type="button" data-k="1">1</button><button type="button" data-k="2">2 ▲</button><button type="button" data-k="3">3</button>
+            <button type="button" data-k="4">◀ 4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6 ▶</button>
+            <button type="button" data-k="7">7</button><button type="button" data-k="8">8 ▼</button><button type="button" data-k="9">9</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Display properties: wallpapers you unlock with your titles -->
+      <div class="win" id="w-display" data-title="Display Properties" data-icon="🖼">
+        <p class="fine">Desktop background. New ones unlock when you finish a week with a better title.</p>
+        <div id="display-grid" class="display-grid"></div>
+      </div>
+
       <!-- Start menu -->
       <div id="start-menu" class="start-menu" hidden>
         <div class="start-head">Learning professional</div>
@@ -430,12 +458,20 @@
         <button data-open="w-coe">🗂 Center of Excellence</button>
         <button data-open="w-academy">🎓 CoE Academy</button>
         <button data-open="w-scores">🏆 My scores</button>
+        <button data-open="w-phone">📱 My mobile</button>
+        <button data-open="w-display">🖼 Display properties</button>
+        <button id="btn-staply">📎 Staply: on</button>
         <button id="btn-sound">🔊 Sound: on</button>
         <button id="btn-tidy">▦ Tidy the windows</button>
         <button id="btn-logoff" class="logoff">⏻ Log off (quit this week)</button>
       </div>
     </div>
 
+    <div id="im-pop" class="im-pop" hidden role="status"><div class="im-pop-bar">💬 Doors Messenger</div><b class="im-from"></b><p class="im-text"></p><span class="fine">Click to open</span></div>
+    <div id="staply" class="staply" hidden role="dialog" aria-label="Staply, your office assistant">
+      <div class="st-balloon"><p class="st-text"></p><div class="st-actions"><button type="button" data-st="yes">Yes please!</button><button type="button" data-st="no">No</button><button type="button" data-st="off" class="link">Don't show me this again</button></div></div>
+      <svg class="st-body" viewBox="0 0 90 80" aria-hidden="true"><defs><linearGradient id="st-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9eef5"/><stop offset="1" stop-color="#8f9bad"/></linearGradient></defs><path d="M6 64h78v8H6z" fill="#3b3f47" rx="3"/><path d="M10 60 C 20 34, 60 30, 82 46 L84 60 Z" fill="url(#st-m)" stroke="#4a5160" stroke-width="2"/><path d="M14 58 C 26 40, 58 38, 78 50" fill="none" stroke="#c0392b" stroke-width="5" stroke-linecap="round"/><g class="st-eyes"><ellipse cx="38" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><ellipse cx="58" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><circle cx="41" cy="24" r="3.5" fill="#222"/><circle cx="61" cy="24" r="3.5" fill="#222"/><path d="M29 9 q9 -6 17 -2 M67 9 q-9 -6 -17 -2" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/></g></svg>
+    </div>
     <div id="stamp" class="stamp" hidden aria-live="polite"><span class="stamp-t">💡 FOUND</span><span class="stamp-n"></span></div>
     <footer class="taskbar">
       <button id="btn-startmenu" class="start-btn">start</button>
@@ -487,6 +523,7 @@
 <script src="js/academy.js?v=dev"></script>
 <script src="js/story.js?v=dev"></script>
 <script src="js/sound.js?v=dev"></script>
+<script src="js/retro.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
 </html>

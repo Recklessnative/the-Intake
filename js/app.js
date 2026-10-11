@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
@@ -370,6 +370,7 @@
     if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) toast('New here? The Center of Excellence folder on your desktop has the intake flowchart.', 'info');
     if (state.index) Sound.ding();
     if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
+    retroMorning();
     save();
   }
 
@@ -874,8 +875,15 @@
     if (!replay) state.run.mieke.push({ who: who || 'them', text });
     const d = document.createElement('div');
     d.className = 'msg ' + (who || 'them');
-    d.textContent = text;
+    if (who === 'sys') d.textContent = text;
+    else {
+      const n = document.createElement('span');
+      n.className = 'im-says';
+      n.textContent = (who === 'you' ? 'You' : 'Mieke') + ' says:';
+      d.append(n, document.createTextNode(text));
+    }
     $('mieke-log').appendChild(d);
+    if (!replay && (who || 'them') === 'them') Sound.im();
     $('mieke-log').scrollTop = $('mieke-log').scrollHeight;
   }
   function miekeLeft() {
@@ -918,12 +926,76 @@
       r.miekeLeft++;
       toast(e.message);
     } finally {
+      $('btn-nudge').disabled = false;
       miekeLeft();
     }
   }
   document.querySelectorAll('#w-mieke .quick button').forEach(b => { b.onclick = () => askMieke(b.dataset.ask); });
   $('mieke-form').onsubmit = ev => { ev.preventDefault(); const v = $('mieke-input').value; $('mieke-input').value = ''; askMieke(v); };
   document.querySelectorAll('.btn-mieke').forEach(b => { b.onclick = () => Desktop.open('w-mieke', Desktop.floating['w-mieke']); });
+
+  // ---------- the 2000s: Messenger, the brick phone, Staply, wallpapers ----------
+  const NUDGED = [
+    'I sit two cubicles away. I can see you nudging me.',
+    'Yes? I am here. Ask me something, I have a deadline too.',
+    'Nudging is not a question. Questions are a question.',
+    'If you nudge me once more I am setting my status to Away.'
+  ];
+  $('btn-nudge').onclick = () => {
+    const r = state.run;
+    if (!r) return;
+    Retro.nudge('w-mieke');
+    miekeSays('You have just sent a nudge.', 'sys');
+    r.nudges = (r.nudges || 0) + 1;
+    setTimeout(() => { miekeSays(NUDGED[Math.min(r.nudges, NUDGED.length) - 1]); save(); }, 900);
+  };
+  // Who pings you on Messenger at the start of a request, and what lands on your mobile.
+  const PINGS = [
+    ['Darren (CEO)', 'How is it going? Remember: no avatars.'],
+    ['Jo from IT', 'Did you restart it? Restart it.'],
+    ['Mieke', 'Coffee machine is fixed. It is the one thing in this building that knows what it is for.'],
+    ['Darren (CEO)', 'Client on line 2 wants "something viral". Asking for a friend: what is viral?'],
+    ['Facilities', 'Whoever left a cheese sandwich in the printer: we know.'],
+    ['Mieke', 'Before you write anything: what will they do differently on Monday?']
+  ];
+  const TEXTS = [
+    ['Mum', 'Did u eat? x'],
+    ['Network', 'You have 3 free texts left this month. Upgrade to 100 texts for only 4.99!'],
+    ['Sam', 'pub fri? :)'],
+    ['Darren', 'In airport. Signal bad. Tell client yes. Or no. Whichever is cheaper'],
+    ['Unknown', 'U have won a FREE ringtone! Reply CRAZY to claim'],
+    ['Mum', 'How do I make the letters small again on the phone'],
+    ['Sam', 'Did u see the iPhone. 600 dollars. For a phone. lol'],
+    ['Mieke', 'Bring biscuits tmrw. Board people are nicer with biscuits']
+  ];
+  function retroMorning() {
+    if (state.hard) return;
+    const n = (state.weekNo - 1) * 3 + state.index;
+    const t = TEXTS[n % TEXTS.length];
+    Retro.sms(t[0], t[1]);
+    const ping = !state.index ? ['Mieke', 'Morning! Do the CoE module first, it is short. Then open the request. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
+    setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }), 1200);
+  }
+  // Staply turns up at most once per request, and never in hard mode.
+  function staply(trigger) {
+    const r = state.run;
+    if (state.hard || !r || r.staply) return;
+    if (Retro.staply(trigger)) r.staply = trigger;
+  }
+  const staplyLabel = () => { $('btn-staply').textContent = Retro.staplyOn() ? '📎 Staply: on' : '📎 Staply: off'; };
+  $('btn-staply').onclick = () => { $('start-menu').hidden = true; Retro.setStaply(!Retro.staplyOn()); staplyLabel(); toast(Retro.staplyOn() ? 'Staply is back. He missed you.' : 'Staply is off.', 'info'); };
+  Retro.init({
+    toast,
+    onStaplyYes: () => { if (!state.hard) setTimeout(() => Retro.im('Mieke', 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.', () => openApp('w-mieke')), 1800); },
+    onStaplyChange: staplyLabel
+  });
+  staplyLabel();
+  // Wallpapers unlock with the best title you have finished a week with.
+  function wallpaperLevel() {
+    return scoreHistory().weeks.filter(w => w.done).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
+  }
+  Retro.setLevel(wallpaperLevel());
+  $('btn-wait-snake').onclick = () => { Retro.phone.view = 'snake'; openApp('w-phone'); Retro.renderPhone(); };
 
   // ---------- the case board ----------
   // Five short steps built on what the stakeholder actually said. Each step locks before the
@@ -976,6 +1048,7 @@
     }
     $('board').classList.toggle('fade2', (b.fade || 1) >= 2);
     if (b.mode === 'memo4') {
+      staply('memo');
       const f = $('memo4-form').elements;
       ['need', 'measure', 'concept', 'risks'].forEach(k => { f[k].value = (b.memo4 || {})[k] || ''; });
       memo4Count();
@@ -984,6 +1057,8 @@
     }
     Desktop.title('w-write', b.mode === 'board' ? 'Case board - ' + r.card.stakeholder.name : 'Concept - WordPad', b.mode === 'board' ? 'Case board' : 'Concept');
     const at = STEPS.indexOf(b.step);
+    if (b.mode === 'memo') staply('write');
+    else if (!b.locked) staply({ diagnose: 'write', measure: 'measure', concept: 'concept', risks: 'risks' }[b.step]);
     document.querySelectorAll('#board-steps li').forEach((li, i) => { li.className = i < at || (i === at && b.locked) ? 'done' : i === at ? 'now' : ''; });
     document.querySelectorAll('.bstep').forEach(s => { s.hidden = s.dataset.step !== b.step; s.classList.toggle('locked', b.locked); s.querySelectorAll('input, select, button').forEach(el => { el.disabled = b.locked; }); });
     // What you already locked, as one-liners above the current step.
@@ -1445,7 +1520,11 @@
     $('end-board').hidden = !br;
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
     $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
+    const before = wallpaperLevel();
     recordWeek(score, title, br ? { decision: br.decision, total: br.points.total } : null);
+    const after = wallpaperLevel();
+    Retro.setLevel(after);
+    if (after > before) setTimeout(() => toast('New wallpaper unlocked: ' + Retro.WALLPAPERS[after].name + '. Start menu, Display properties.', 'info'), 1500);
     // Promotion to team lead: a week of 64+ with every diagnosis at 15+, or the week 4 tender.
     const h = scoreHistory(), w = thisWeek(h);
     const promoted = !state.hard && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
@@ -1491,6 +1570,7 @@
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
     const button = (text, onclick, cls) => { const b = el('button', cls || 'primary', text); b.type = 'button'; b.onclick = onclick; return b; };
     box.appendChild(el('p', 'eyebrow', 'Friday · the board room'));
+    if (B.stage === 'slide') staply('board');
     if (B.stage === 'pick') {
       box.appendChild(el('h2', null, 'Which concept do you take to the board?'));
       box.appendChild(el('p', 'muted', 'One slide, three board members, one shot. Pick the concept you can defend best, not necessarily your highest score.'));
@@ -1751,6 +1831,8 @@
     if (id === 'w-leads') renderLeads();
     if (id === 'w-scores') renderScores();
     if (id === 'w-coe' && !$('coe-doc').innerHTML) Coe.render($('coe-files'), $('coe-doc'), 'flow');
+    if (id === 'w-display') Retro.renderDisplay();
+    if (id === 'w-phone' && !$('w-phone').classList.contains('open')) Retro.renderPhone();
     Desktop.open(id, Desktop.floating[id]);
   }
   document.querySelectorAll('.desk-icon').forEach(b => { b.onclick = () => openApp(b.dataset.app); });
