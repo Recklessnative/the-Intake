@@ -63,6 +63,10 @@
     clearTimeout(toast.t);
     toast.t = setTimeout(() => t.classList.remove('show'), 6000);
   }
+  // Anything that breaks says so on screen, instead of a button that silently does nothing.
+  window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
+  window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Quick'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
