@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
@@ -217,8 +217,46 @@
     state.board = null;
     state.academy = state.hard ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
     state.run = null;
-    cubicle();
+    if (!state.hard && !seenIntro()) intro(cubicle); else cubicle();
   }
+
+  // ---------- the cold open: plays once before your first week, and from the title screen ----------
+  const INTRO = [
+    'The year is 2007.',
+    'Phones have keyboards. Slides have star wipes. Every training request ends in an e-learning.',
+    'AI that can write a whole course is fifteen years away.',
+    'You still have time to hone the one skill it won\'t replace.',
+    'Asking the right questions.'
+  ];
+  function seenIntro() { try { return window.localStorage.getItem('intake-intro') === 'seen'; } catch (e) { return true; } }
+  function intro(then) {
+    try { window.localStorage.setItem('intake-intro', 'seen'); } catch (e) { /* storage blocked */ }
+    show('s-intro');
+    let i = 0;
+    const box = $('intro-lines');
+    box.innerHTML = '';
+    $('intro-card').hidden = true;
+    const done = () => { clearTimeout(intro.t); then(); };
+    const next = () => {
+      clearTimeout(intro.t);
+      if (i < INTRO.length) {
+        const p = document.createElement('p');
+        p.textContent = INTRO[i];
+        p.className = 'intro-line' + (i === INTRO.length - 1 ? ' last' : '');
+        box.appendChild(p);
+        i++;
+        intro.t = setTimeout(next, i === INTRO.length ? 2200 : 2600);
+        return;
+      }
+      $('intro-card').hidden = false;
+      $('btn-intro-go').focus();
+    };
+    $('btn-intro-skip').onclick = done;
+    $('btn-intro-go').onclick = done;
+    $('s-intro').onclick = ev => { if (ev.target.tagName !== 'BUTTON' && $('intro-card').hidden) next(); };
+    next();
+  }
+  $('btn-watch-intro').onclick = () => intro(() => show('s-title'));
   $('btn-again').onclick = () => startWeek(state.hard);
 
   // The boot screen: the intro lines appear while the progress bar runs; they move on by
@@ -365,7 +403,7 @@
     if (calm) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
     if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
-    step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
+    step(Story.day(state.weekNo, state.days[state.index] || 0) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
     // Monday morning: this week's CoE Academy module waits on top, until you start it.
     if (state.academy && !state.academy.started && state.index === 0 && r.phase === 'inbox') openAcademy();
     if (r.phase !== 'inbox') callWindow();
@@ -403,6 +441,12 @@
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
     }));
+    // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
+    if (!state.hard) {
+      const sm = Story.storyMail(state.weekNo);
+      mails.push(Object.assign({ read: !!r.readMail[sm.subject], at: 8 * 60 + 12, story: true }, sm));
+      Story.news(state.weekNo, state.days[state.index] || 0).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
+    }
     // This week's CoE Academy module arrives first thing Monday.
     if (state.academy) {
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
@@ -1402,6 +1446,12 @@
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
     $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
     recordWeek(score, title, br ? { decision: br.decision, total: br.points.total } : null);
+    // Promotion to team lead: a week of 64+ with every diagnosis at 15+, or the week 4 tender.
+    const h = scoreHistory(), w = thisWeek(h);
+    const promoted = !state.hard && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
+    if (promoted) { h.promoted = { week: state.weekNo, at: Date.now() }; keepScores(h); }
+    $('end-memo').hidden = state.hard;
+    if (!state.hard) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
     shareCard(score, title);
     show('s-end');
   }

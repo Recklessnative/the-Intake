@@ -21,7 +21,21 @@
       <button id="btn-hard" class="ghost">Hard mode</button>
       <button id="btn-settings" class="ghost">Gemini key</button>
       <p id="runs-left" class="fine"></p>
+      <button id="btn-watch-intro" class="linkish">Watch the intro</button>
     </div>
+  </section>
+
+  <!-- The cold open: 2007, and AI is still years away -->
+  <section id="s-intro" class="screen intro">
+    <div class="intro-box">
+      <div id="intro-lines" aria-live="polite"></div>
+      <div id="intro-card" class="intro-card" hidden>
+        <p class="intro-co">Synergix <span>e-Learning Solutions</span></p>
+        <p class="intro-date">Monday 3 September 2007 · your first day</p>
+        <button id="btn-intro-go" class="boot-btn">Clock in</button>
+      </div>
+    </div>
+    <button id="btn-intro-skip" class="intro-skip">Skip intro ▸</button>
   </section>
 
   <!-- Settings / key -->
@@ -442,6 +456,10 @@
       <p id="end-score" class="score-total"></p>
       <p id="end-board" class="end-board" hidden></p>
       <p id="end-note"></p>
+      <div id="end-memo" class="end-memo" hidden>
+        <p class="end-memo-head"><b>From:</b> Darren (CEO) · <b>Subject:</b> Friday</p>
+        <p id="end-memo-body"></p>
+      </div>
       <div class="share">
         <p class="eyebrow">Your share card <span id="share-badge" class="badge" hidden>HARD MODE</span></p>
         <div id="share-img" class="share-img"></div>
@@ -467,6 +485,7 @@
 <script src="js/prompts.js?v=dev"></script>
 <script src="js/coe.js?v=dev"></script>
 <script src="js/academy.js?v=dev"></script>
+<script src="js/story.js?v=dev"></script>
 <script src="js/sound.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>

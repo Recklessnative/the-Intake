@@ -124,6 +124,14 @@ async function followUp() {
   await p.click('#btn-start');                      // no key -> settings
   await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
   await p.click('#btn-start');
+  // The cold open: 2007, AI years away. Click through it once.
+  await p.waitForSelector('#s-intro.active');
+  for (let i = 0; i < 5; i++) await p.click('#s-intro', { position: { x: 20, y: 20 } });
+  await p.waitForSelector('#intro-card:not([hidden])');
+  if (!(await p.textContent('#intro-lines')).includes('fifteen years away')) throw new Error('intro lines missing');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/intro.png' });
+  await p.click('#btn-intro-go');
+  await p.waitForSelector('#s-cubicle.active');
   let req = -1;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
@@ -131,6 +139,10 @@ async function followUp() {
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
+    // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
+    const inbox = await p.textContent('#mail-rows');
+    if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
+    if (n === 2 && !(await p.textContent('#os-step')).includes('Thursday 6 Sep 2007')) throw new Error('game date wrong: ' + await p.textContent('#os-step'));
     if (n === 0) {
       // First request ever: the CoE Academy module on top, the Center of Excellence open on the flowchart.
       const first = await p.evaluate(() => window.__intake.state);
@@ -246,6 +258,7 @@ async function followUp() {
   if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#s-end.active');
+  if (!(await p.textContent('#end-memo-body')).includes('A pilot. That is not a no') || !(await p.textContent('#end-memo-body')).includes('week 1 of 4')) throw new Error('Friday memo wrong: ' + await p.textContent('#end-memo-body'));
   if (!(await p.textContent('#end-board')).includes('Approved as a pilot') || !(await p.textContent('#share-text')).includes('as a pilot')) throw new Error('board result missing on the end screen');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');

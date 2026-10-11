@@ -467,3 +467,25 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
 .stamp[hidden] { display: none; }
 .chat-head > div:first-child { min-width: 0; }
 .chat-head .meters { flex: 1 1 260px; }
+
+/* The cold open */
+.intro { background: #000; color: #e8eef8; cursor: pointer; }
+.intro.active { display: flex; align-items: center; justify-content: center; }
+.intro-box { max-width: 640px; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+.intro-line { margin: 0; font: 22px/1.45 Georgia, "Times New Roman", serif; opacity: 0; animation: introIn 1.2s ease-out forwards; }
+.intro-line:first-child { font-size: 30px; }
+.intro-line.last { color: #9fd0ff; font-style: italic; font-size: 26px; }
+@keyframes introIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.intro-card { margin-top: 18px; border-top: 1px solid #333; padding-top: 18px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; animation: introIn 1s ease-out; }
+.intro-co { margin: 0; font: bold 30px "Trebuchet MS", Verdana, sans-serif; color: #fff; letter-spacing: -.01em; }
+.intro-co span { font-weight: normal; color: #8cc63f; font-style: italic; }
+.intro-date { margin: 0 0 10px; color: #9aa8bd; font-family: "Courier New", monospace; }
+.intro-skip { position: absolute; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: none; border: 1px solid #555; color: #aaa; border-radius: 3px; padding: 4px 10px; cursor: pointer; }
+.intro-skip:hover { color: #fff; border-color: #aaa; }
+.linkish { background: none; border: 0; color: inherit; text-decoration: underline; cursor: pointer; font-size: 12px; opacity: .8; }
+@media (prefers-reduced-motion: reduce) { .intro-line, .intro-card { animation: none; opacity: 1; } }
+/* Darren's Friday memo */
+.end-memo { background: #fff; border: 1px solid #b9c4d6; border-left: 4px solid #0a58d6; padding: 8px 12px; margin: 10px 0; text-align: left; }
+.end-memo-head { margin: 0 0 6px; font-size: 12px; color: #555; }
+#end-memo-body { margin: 0; white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }
+.intro { position: relative; }
