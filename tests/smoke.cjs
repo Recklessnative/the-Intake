@@ -13,7 +13,9 @@ const srv = http.createServer((q, s) => {
     calls++;
     const body = JSON.parse(route.request().postData());
     const sys = body.systemInstruction.parts[0].text;
-    if (!body.generationConfig.responseSchema) throw new Error('no schema');
+    if (!body.generationConfig.responseJsonSchema) throw new Error('no schema');
+    if ('temperature' in body.generationConfig) throw new Error('temperature sent');
+    if (!route.request().url().includes('gemini-3.5-flash-lite')) throw new Error('wrong model ' + route.request().url());
     let out;
     if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };

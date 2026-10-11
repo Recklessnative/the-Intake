@@ -159,7 +159,9 @@ try {
         $r = $in['request'] ?? [];
         if (!is_array($r) || !isset($r['contents']) || !is_array($r['contents'])) fail(400, 'Bad request.');
         $gen = is_array($r['generationConfig'] ?? null) ? $r['generationConfig'] : [];
-        $gen['maxOutputTokens'] = min((int)($gen['maxOutputTokens'] ?? 800), (int)$cfg['max_output']);
+        $gen['maxOutputTokens'] = min((int)($gen['maxOutputTokens'] ?? 2000), (int)$cfg['max_output']);
+        // Gemini 3.5+ ignores sampling settings and later models reject them.
+        unset($gen['temperature'], $gen['topP'], $gen['topK'], $gen['candidateCount']);
         $body = ['contents' => $r['contents'], 'generationConfig' => $gen];
         if (isset($r['systemInstruction'])) $body['systemInstruction'] = $r['systemInstruction'];
 

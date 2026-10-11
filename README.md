@@ -14,7 +14,7 @@ It's a static site with no build step. Serve the folder over http (the scenarios
 python3 -m http.server 8000
 ```
 
-Open http://localhost:8000 and add a Gemini API key under "Gemini key". A player's own key stays in their browser and is sent only to Google. The default model is `gemini-2.5-flash-lite`.
+Open http://localhost:8000 and add a Gemini API key under "Gemini key". A player's own key stays in their browser and is sent only to Google. The default model is `gemini-3.5-flash-lite`; a remembered model from the retired 1.x or 2.x families falls back to it.
 
 Without a key, the game uses the backend in `api/` when `js/config.js` points to it: Yannick's key, a few free weeks per player, then an unlock code or the player's own key.
 
