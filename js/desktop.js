@@ -7,7 +7,7 @@
 
   // Where windows go per phase, in percent of the desktop: [left, top, width, height].
   const LAYOUTS = {
-    inbox: { 'w-inbox': [2, 3, 55, 86], 'w-case': [59, 3, 39, 52], 'w-notes': [59, 57, 39, 32] },
+    inbox: { 'w-inbox': [2, 3, 62, 90], 'w-case': [66, 3, 32, 54], 'w-notes': [66, 60, 32, 33] },
     call: { 'w-call': [2, 3, 55, 92], 'w-case': [59, 3, 39, 46], 'w-notes': [59, 51, 39, 44] },
     write: { 'w-write': [2, 2, 54, 94], 'w-call': [58, 2, 40, 50], 'w-notes': [58, 54, 40, 23], 'w-case': [58, 79, 40, 17] },
     defence: { 'w-dialog': [2, 2, 54, 94], 'w-call': [58, 2, 40, 50], 'w-notes': [58, 54, 40, 23], 'w-case': [58, 79, 40, 17] },

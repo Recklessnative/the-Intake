@@ -31,8 +31,18 @@ const srv = http.createServer((q, s) => {
   await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
   await p.click('#btn-start');
   for (let req = 0; req < 3; req++) {
-    if (req === 0) { for (let i = 0; i < 3; i++) await p.click('#btn-sit'); }
+    if (req === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
+    if (req === 0) { while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit'); }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
+    if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
+    if (req === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
+    if (req === 0) {
+      await p.click('#mail-rows tr:has-text("cake?")');
+      if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
+      await p.click('[data-mail="delete"]');
+      await p.click('#mail-rows tr:has-text("❗")');
+      if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
+    }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
     await p.click('#btn-call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }

@@ -22,6 +22,7 @@
         voice: s.voice || ''
       },
       surfaceAsk: raw.opening_message || raw.surface_ask,
+      subject: (raw.surface_ask || 'Request: can you help?').replace(/\.$/, ''),
       realProblem: g.real_problem,
       rootCause: list(g.root_cause_types).join(', '),
       learningIsTheAnswer: g.is_training_the_lever,

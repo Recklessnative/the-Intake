@@ -14,10 +14,12 @@
     ['risks', 'Risks and dependencies', 10],
     ['pitch', 'Pitch and defence', 10]
   ];
+  // Shown while the office PC boots.
   const CUBICLE = [
     'Monday, 08:57. The coffee machine is broken again.',
-    'Your cubicle. Grey fabric walls, a plant on its last legs, and a sticky note that just says ASK WHY.',
-    'The laptop is already blinking. Somebody needs a course. Somebody always needs a course.'
+    'You press the power button. In the black screen you catch your own reflection. Tired, but employed.',
+    'Your cubicle: grey fabric walls, a plant on its last legs, and a sticky note on the monitor that just says ASK WHY.',
+    'Somebody needs a course. Somebody always needs a course.'
   ];
 
   const state = { pool: [], cards: [], index: 0, results: [], run: null };
@@ -43,9 +45,10 @@
     const h = Math.floor(r.clock / 60) % 24, m = r.clock % 60;
     $('os-clock').textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   }
-  function toast(msg) {
+  function toast(msg, kind) {
     const t = $('toast');
     t.textContent = msg;
+    t.classList.toggle('info', kind === 'info');
     t.classList.add('show');
     clearTimeout(toast.t);
     toast.t = setTimeout(() => t.classList.remove('show'), 6000);
@@ -149,19 +152,29 @@
   };
   $('btn-again').onclick = () => $('btn-start').onclick();
 
+  // The boot screen: the intro lines appear while the progress bar runs; they move on by
+  // themselves, or faster with the button. Logging on opens the desktop.
   function cubicle() {
     show('s-cubicle');
     let i = 0;
-    $('cubicle-line').textContent = CUBICLE[0];
-    $('btn-sit').textContent = 'Go on';
+    const line = $('cubicle-line');
+    const say = () => {
+      line.classList.remove('in');
+      void line.offsetWidth;
+      line.textContent = CUBICLE[i];
+      line.classList.add('in');
+      $('btn-sit').textContent = i === CUBICLE.length - 1 ? 'Log on' : 'Go on';
+    };
+    const next = () => {
+      clearTimeout(cubicle.t);
+      if (i < CUBICLE.length - 1) { i++; say(); cubicle.t = setTimeout(next, 4200); }
+    };
+    say();
+    cubicle.t = setTimeout(next, 4200);
     $('btn-sit').onclick = () => {
-      i++;
-      if (i < CUBICLE.length) {
-        $('cubicle-line').textContent = CUBICLE[i];
-        if (i === CUBICLE.length - 1) $('btn-sit').textContent = 'Sit down';
-      } else {
-        startRequest();
-      }
+      if (i < CUBICLE.length - 1) { next(); return; }
+      clearTimeout(cubicle.t);
+      startRequest();
     };
   }
 
@@ -172,14 +185,12 @@
     state.run = {
       card, trust: 100, questionsLeft: QUESTIONS, patience: card.patience || 3,
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
-      miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57
+      miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57,
+      readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null
     };
     show('s-desk');
     trust();
     tick(0);
-    $('mail-from').textContent = card.stakeholder.name;
-    $('mail-role').textContent = '(' + card.stakeholder.role + ')';
-    $('mail-body').textContent = card.surfaceAsk;
     $('notes').value = '';
     $('chat-log').innerHTML = '';
     $('w-call').classList.remove('ended');
@@ -189,7 +200,9 @@
     miekeLeft();
     briefing(card.briefing);
     Desktop.reset();
-    Desktop.title('w-inbox', 'Inbox - 1 unread from ' + card.stakeholder.name, 'Inbox');
+    mailbox();
+    contacts();
+    selectMail(state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
     Desktop.open('w-mieke', Desktop.floating['w-mieke']);
@@ -197,6 +210,91 @@
     Desktop.focus('w-inbox');
     step('Request ' + (state.index + 1) + ' of ' + state.cards.length);
   }
+
+  // ---------- the mailbox ----------
+  // Office mail that is not your request. Read it or don't; nothing here is graded.
+  const FILLER = [
+    { from: 'Facilities', subject: 'Coffee machine, 2nd floor', ago: 51,
+      body: 'The coffee machine on the 2nd floor is out of order. A technician will come "this week".\n\nPlease stop kicking it. It does not help and it has been noted.' },
+    { from: 'HR Communications', subject: 'REMINDER: complete your mandatory e-learning on mandatory e-learnings', ago: 44,
+      body: 'Dear colleague,\n\nOnly 61% of staff have completed "Getting the Most out of Mandatory E-learning" (45 min). Completion is mandatory before Friday.\n\nThis is an automated reminder. Replies are not read. Nor, statistically, is this.' },
+    { from: 'IT Service Desk', subject: 'Your mailbox is almost full (98%)', ago: 38,
+      body: 'Your mailbox has reached 98% of its limit. Please delete or archive items.\n\nTip: the attachment "Learning Styles Revisited FINAL v7.ppt" (41 MB) is a good place to start.' },
+    { from: 'Office of the CEO', subject: 'FW: FW: RE: our learning culture', ago: 27,
+      body: 'Team,\n\nRead an article on the plane. We should be more like Netflix. Thoughts?\n\nSent from my BlackBerry' },
+    { from: 'Mieke', subject: 'cake?', ago: 16,
+      body: 'There is cake in the kitchen. Nobody knows whose birthday it is. Don\'t ask, just eat.\n\nAlso: if a request lands on your desk and you want a second opinion, I\'m two cubicles over.\n\nM.' },
+    { from: 'Gamified Microlearning Solutions', subject: 'Re: quick question!!', ago: 9,
+      body: 'Hi there!\n\nJust circling back on my circle-back. Our AI-powered, gamified, bite-sized metaverse academy boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
+  ];
+  function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+
+  function mailbox() {
+    const r = state.run;
+    const mails = FILLER.map(f => Object.assign({ read: !!r.readMail[f.subject], at: r.clock - f.ago - 40 * state.index }, f));
+    state.cards.slice(0, state.index).forEach((c, i) => mails.push({
+      from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, at: 8 * 60 + 55 + 40 * i,
+      body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
+    }));
+    mails.push({ from: r.card.stakeholder.name, subject: r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, at: r.clock - 2, body: r.card.surfaceAsk });
+    mails.sort((a, b) => b.at - a.at);
+    r.mails = mails;
+    renderMail();
+  }
+  function renderMail() {
+    const r = state.run;
+    const rows = $('mail-rows');
+    rows.innerHTML = '';
+    r.mails.forEach(m => {
+      const tr = document.createElement('tr');
+      tr.className = (m.read ? '' : 'unread') + (m === r.selected ? ' sel' : '');
+      tr.tabIndex = 0;
+      const cells = [m.current ? '❗' : '', m.request && !m.done ? '📎' : '', (m.read ? '📭 ' : '📩 ') + m.from, m.subject, (m.done ? '✓ ' : '') + hhmm(m.at)];
+      cells.forEach((t, i) => { const td = document.createElement('td'); td.textContent = t; if (i < 2) td.className = 'ic'; if (i === 4) td.className = 'when'; tr.appendChild(td); });
+      tr.onclick = () => selectMail(m);
+      tr.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectMail(m); } };
+      rows.appendChild(tr);
+    });
+    const unread = r.mails.filter(m => !m.read).length;
+    $('mail-unread').textContent = unread ? '(' + unread + ')' : '';
+    Desktop.title('w-inbox', 'Inbox' + (unread ? ' (' + unread + ' unread)' : '') + ' - KimMail', 'Inbox');
+  }
+  function selectMail(m) {
+    const r = state.run;
+    r.selected = m;
+    if (!m.read) { m.read = true; if (m.current) r.readMail.current = true; else if (!m.request) r.readMail[m.subject] = true; }
+    const person = m.request ? m.request.stakeholder : null;
+    $('mail-from').textContent = m.from;
+    $('mail-role').textContent = person ? '(' + person.role + (person.org ? ', ' + person.org.split(',')[0] : '') + ')' : '';
+    $('mail-subject').textContent = m.subject;
+    $('mail-body').textContent = m.body;
+    $('mail-attach').hidden = !m.current;
+    $('mail-actions').hidden = !m.current;
+    renderMail();
+  }
+  function contacts() {
+    const ul = $('mail-contacts');
+    ul.innerHTML = '';
+    [['☕ Mieke', () => Desktop.open('w-mieke', Desktop.floating['w-mieke'])], ['👤 ' + state.run.card.stakeholder.name, () => selectMail(state.run.mails.find(m => m.current))]]
+      .forEach(([t, fn]) => { const li = document.createElement('li'); const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.onclick = fn; li.appendChild(b); ul.appendChild(li); });
+  }
+  const MAIL_JOKES = {
+    new: 'You start typing "Dear all", then think better of it.',
+    replyall: 'Reply All. To 400 people. Bold. No.',
+    forward: 'Forwarding it to someone else is a strategy, but not a learning strategy.',
+    delete: 'Deleting it won\'t make it go away. It will come back with the CEO in CC.',
+    sendrecv: 'No new messages. Thankfully.'
+  };
+  document.querySelectorAll('[data-mail]').forEach(b => {
+    b.onclick = () => {
+      const m = state.run.selected;
+      if (b.dataset.mail === 'reply' && m && m.current) { $('btn-call').onclick(); return; }
+      if (b.dataset.mail === 'reply') { toast('Nobody here reads replies. Pick up the phone for the ones that matter.', 'info'); return; }
+      if (b.dataset.mail === 'delete' && m && !m.request) { toast('Archived. It is still there, but in a folder you will never open.', 'info'); return; }
+      toast(MAIL_JOKES[b.dataset.mail], 'info');
+    };
+  });
+  $('mail-attach').onclick = () => Desktop.open('w-case');
 
   // Pre-call context a well-prepared professional would look up first (never the diagnosis).
   function briefing(b) {
@@ -211,6 +309,7 @@
   }
 
   $('btn-call').onclick = () => {
+    if (!state.run.readMail.current) selectMail(state.run.mails.find(m => m.current));
     const r = state.run;
     $('chat-who').textContent = r.card.stakeholder.name;
     $('chat-role').textContent = r.card.stakeholder.role;

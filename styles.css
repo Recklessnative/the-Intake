@@ -72,15 +72,38 @@ label.check input { width: auto; }
 .panel input, .panel textarea { margin-top: 4px; }
 .panel button.ghost { color: var(--ink); }
 
-/* The cubicle. */
-#s-cubicle { background: radial-gradient(ellipse at 50% 30%, #6b7368, #2d322c 70%); color: #f3f1e8; }
-.cubicle { width: 100%; max-width: 720px; text-align: center; }
-.monitor { width: 240px; height: 170px; margin: 0 auto 32px; border: 12px solid #d9d5c7; border-bottom-width: 22px; border-radius: 6px;
-  background: linear-gradient(#3a7fe0, #8bb8f0 55%, var(--hill) 56%, var(--hill-dark)); position: relative; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
-.monitor .glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, rgba(255,255,255,.35), transparent 70%); animation: flicker 3s infinite; }
-@keyframes flicker { 0%, 100% { opacity: .8 } 50% { opacity: 1 } 52% { opacity: .6 } }
-.narration { font-size: 20px; min-height: 3em; }
-.narration.small { font-size: 16px; min-height: 0; }
+/* The boot screen: black monitor, glare, your reflection, sticky-note logo, marching progress bar. */
+.boot { position: relative; overflow: hidden; background: #000; color: #fff; flex-direction: column; }
+.screen.boot.active { display: flex; }
+.glare { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 30%, rgba(255,255,255,.07) 38%, rgba(255,255,255,.02) 46%, transparent 52%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.9)),
+    radial-gradient(ellipse at 70% 15%, rgba(255,255,255,.06), transparent 40%); }
+.reflection { position: absolute; left: 50%; bottom: -4%; width: min(70vh, 80vw); transform: translateX(-30%);
+  opacity: .26; filter: blur(4px); animation: breathe 7s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: translateX(-30%) translateY(0); } 50% { transform: translateX(-29%) translateY(-6px); } }
+.boot-center { position: relative; z-index: 1; text-align: center; max-width: 640px; padding: 0 8px; }
+.boot-logo { display: grid; grid-template-columns: 34px 34px; gap: 5px; width: 73px; margin: 0 auto 14px; transform: rotate(-6deg) skewY(-4deg); }
+.boot-logo span { height: 34px; border-radius: 3px 8px 3px 3px; box-shadow: 0 0 14px rgba(255,255,255,.12); }
+.boot-logo span:nth-child(1) { background: linear-gradient(135deg, #ff7a3d, #e5381b); transform: rotate(-3deg); }
+.boot-logo span:nth-child(2) { background: linear-gradient(135deg, #8fe05a, #3f9e1d); transform: rotate(2deg); }
+.boot-logo span:nth-child(3) { background: linear-gradient(135deg, #5aa8ff, #1c5fd9); transform: rotate(1deg); }
+.boot-logo span:nth-child(4) { background: linear-gradient(135deg, #ffe066, #f2b10d); transform: rotate(-2deg); }
+.boot-name { font-size: 40px; font-weight: 700; margin: 0 0 30px; letter-spacing: -.01em; font-family: "Franklin Gothic Medium", Arial, sans-serif; }
+.boot-name em { font-size: 22px; color: #f39c1b; font-weight: 400; vertical-align: super; margin-left: 4px; }
+.boot-bar { position: relative; width: 150px; height: 20px; margin: 0 auto 34px; border: 2px solid #b2b2b2; border-radius: 4px; overflow: hidden; padding: 2px; }
+.boot-bar span { position: absolute; top: 3px; width: 9px; height: 10px; border-radius: 1px; background: linear-gradient(#a8c8ff, #2a5fe0 50%, #1a3ea8);
+  animation: boot-march 2.2s linear infinite; }
+.boot-bar span:nth-child(2) { animation-delay: .1s; }
+.boot-bar span:nth-child(3) { animation-delay: .2s; }
+@keyframes boot-march { from { left: -30px; } to { left: 160px; } }
+.boot-line { min-height: 4.5em; font-size: 18px; color: #d8d8d8; margin: 0 0 16px; }
+.boot-line.in { animation: fade-in .9s ease; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.boot-btn { background: transparent; color: #cfcfcf; border: 1px solid #555; }
+.boot-btn:hover { box-shadow: none; border-color: #aaa; color: #fff; }
+.boot-foot { position: absolute; bottom: 16px; left: 16px; right: 16px; z-index: 1; margin: 0; font-size: 11px; color: #777; }
 
 /* ---------- the desk: wallpaper, windows, taskbar ---------- */
 #s-desk { padding: 0; }
@@ -129,10 +152,41 @@ label.check input { width: auto; }
 .start-menu .logoff { border-top: 1px solid #ccc; }
 
 /* ---------- window contents ---------- */
-.mail { background: #fff; border: 1px solid var(--field-line); padding: 14px; }
-.mail-head { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ddd; }
-.mail-head span { color: var(--muted); }
-.mail-body { white-space: pre-wrap; font-size: 15px; }
+/* The mailbox. */
+#w-inbox .win-body { padding: 0; }
+.mail-toolbar { display: flex; gap: 2px; padding: 4px 6px; border-bottom: 1px solid #c9c4b2; flex: none; overflow-x: auto; }
+.mail-toolbar button { display: flex; flex-direction: column; align-items: center; min-width: 62px; padding: 2px 6px; font-size: 11px;
+  background: transparent; border: 1px solid transparent; }
+.mail-toolbar button span { font-size: 18px; line-height: 1.2; color: #1a4ba8; }
+.mail-toolbar button:hover { border-color: #c9c4b2; background: #fff; box-shadow: none; }
+.mail-client { flex: 1; display: grid; grid-template-columns: 170px minmax(0, 1fr); min-height: 0; }
+.mail-folders { border-right: 1px solid #c9c4b2; background: #fff; overflow: auto; font-size: 12px; }
+.mail-pane-head { padding: 3px 8px; background: linear-gradient(#f5f4ee, #dcd8c6); border-bottom: 1px solid #c9c4b2; font-weight: 700; }
+.mail-folders ul { list-style: none; margin: 0; padding: 4px 0 6px 8px; }
+.mail-folders ul ul { padding: 2px 0 0 12px; }
+.mail-folders li { padding: 2px 0; white-space: nowrap; }
+.mail-folders .f-sel b { background: #316ac5; color: #fff; padding: 0 3px; font-weight: 700; }
+.contacts button { border: 0; background: none; padding: 1px 2px; min-height: 0; font-size: 12px; text-align: left; }
+.contacts button:hover { text-decoration: underline; box-shadow: none; }
+.mail-main { display: flex; flex-direction: column; min-height: 0; }
+.mail-list { width: 100%; border-collapse: collapse; background: #fff; font-size: 12px; table-layout: fixed; flex: none; }
+.mail-main { overflow: auto; }
+.mail-list th { position: sticky; top: 0; text-align: left; font-weight: 400; padding: 2px 6px; border: 1px solid #c9c4b2; border-top: 0;
+  background: linear-gradient(#fff, #ebeadb); }
+.mail-list th.ic, .mail-list td.ic { width: 22px; padding: 2px; text-align: center; }
+.mail-list th.when, .mail-list td.when { width: 70px; }
+.mail-list th:nth-child(3) { width: 34%; }
+.mail-list td { padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; border-bottom: 1px solid #f0efe8; }
+.mail-list tr.unread td { font-weight: 700; }
+.mail-list tr.sel td { background: #316ac5; color: #fff; }
+.mail-list tr:focus-visible { outline: 1px dotted #000; }
+.mail-preview { flex: 1; border-top: 4px solid #d6d2c2; background: #fff; padding: 0 0 12px; }
+.mail-preview .mail-head { display: block; padding: 6px 12px; background: linear-gradient(#f5f4ee, #e6e2d0); border-bottom: 1px solid #c9c4b2; font-size: 12px; }
+.mail-head .lbl { display: inline-block; width: 52px; color: var(--muted); }
+.attach { margin-top: 4px; font-size: 12px; padding: 2px 8px; min-height: 0; }
+.attach[hidden], #mail-actions[hidden] { display: none; }
+.mail-body { white-space: pre-wrap; font-size: 15px; padding: 10px 14px 0; margin: 0 0 12px; font-family: Arial, sans-serif; }
+#mail-actions { padding: 0 14px; }
 
 .briefing { background: #fffef4; border: 1px solid var(--field-line); padding: 10px 14px; flex: 1; }
 .briefing h3 { margin: 0 0 6px; font-size: 14px; }
@@ -185,7 +239,7 @@ label.check input { width: auto; }
 .toast { position: fixed; bottom: 46px; right: 12px; background: #ffffe1; color: var(--ink); border: 1px solid #000; padding: 10px 14px; border-radius: 6px;
   display: none; max-width: min(420px, 90vw); z-index: 100002; box-shadow: 2px 2px 6px rgba(0,0,0,.3); }
 .toast.show { display: block; }
-.toast::before { content: "⚠ "; color: var(--bad); }
+.toast:not(.info)::before { content: "⚠ "; color: var(--bad); }
 
 /* ---------- narrow screens: one window at a time, the taskbar switches ---------- */
 @media (max-width: 899px) {
@@ -197,4 +251,8 @@ label.check input { width: auto; }
   .start-btn { padding: 0 12px; font-size: 16px; }
   .start-menu { position: fixed; bottom: 36px; }
   .msg { max-width: 94%; }
+  .mail-client { grid-template-columns: 1fr; }
+  .mail-folders { display: none; }
+  .mail-list th:nth-child(3) { width: 30%; }
+  .mail-list th.when, .mail-list td.when { width: 52px; }
 }
