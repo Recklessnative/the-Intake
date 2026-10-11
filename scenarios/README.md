@@ -8,6 +8,9 @@ Each card is one stakeholder request, written as JSON so the game can load it di
 
 | Card | Sector | Tier | Stakeholder | Opens with | What's really going on | Risk appetite |
 |---|---|---|---|---|---|---|
+| `hotel-upgrades` | Hospitality | 0 | Lien Vermeulen, Front Office Manager | Upselling training for reception | New hires never see the upgrade screen in the new hotel system | Medium |
+| `construction-cost-reports` | Construction | 0 | Pieter Goossens, Operations Director | Excel course for site managers | Newly promoted site managers can't estimate remaining cost on the new template | Medium |
+| `telecom-first-call` | Telecom customer service | 0 | Ines Dumont, Contact Centre Manager | More product training for new agents | New agents don't know they may give a 25-euro credit themselves | Medium |
 | `mfg-green-belts` | Manufacturing | 1 | Marc Peeters, Plant Manager | Green Belt for all 22 team leads | No daily management routine; half of all downtime coded "Other" | Medium |
 | `logistics-night-shift` | Retail logistics | 1 | Sofie Van den Broeck, Site Ops Manager | 15-minute safety refresher on phones | New agency drivers, nights, no supervisor, per-case bonus; phones are banned | Medium |
 | `healthcare-sepsis` | Healthcare | 2 | Annelies Maes, Director of Nursing | Sepsis e-learning, 100% completion | Nurses know it; they hesitate to call two dismissive doctors at night | Low |
@@ -19,7 +22,7 @@ Each card is one stakeholder request, written as JSON so the game can load it di
 | `ngo-volunteer-churn` | Non-profit | 2 | Hanne Claes, Head of Volunteering | Leadership course for volunteer coordinators | Six-week wait, then a compulsory phone-line period set by the founder | Medium |
 | `education-ai-cheating` | Higher education | 3 | Prof. Ilse Verbruggen, Vice-Dean of Education | AI-detection training for 600 lecturers | Take-home assessment, a biased detector and exam rules that block redesign | Low |
 
-Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open stakeholder with a real skill gap, tier 2 hides the root cause behind politics, and tier 3 is a problem where the best answer is mostly not training. A run draws one card per tier, from different sectors. The two v0.1 cards from the design doc are `tech-sales-motivation` (sales director) and `logistics-night-shift` (warehouse ops manager).
+Tier 0 cards are starters for a player's first intake: a friendly stakeholder, one clear root cause, 3 or 4 facts all found on the call, and two dependencies. Tiers 1 to 3 follow the run's difficulty ramp from the design doc: tier 1 is an open stakeholder with a real skill gap, tier 2 hides the root cause behind politics, and tier 3 is a problem where the best answer is mostly not training. A run draws one card per tier, from different sectors. The two v0.1 cards from the design doc are `tech-sales-motivation` (sales director) and `logistics-night-shift` (warehouse ops manager).
 
 ## Card schema (v1)
 
@@ -34,6 +37,10 @@ Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open st
 | `surface_ask` | Judge | The solution in disguise, in one line. |
 | `gold.real_problem`, `gold.root_cause_types`, `gold.is_training_the_lever`, `gold.need_statement` | Judge | The answer key for diagnosis. `root_cause_types` uses: skill, will, system, process, expectations, incentive, environment. `is_training_the_lever` is yes, partly or no. |
 | `hidden_facts[]` | Actor + game | Each has `id`, `fact`, `unlocks_when` (the kind of question that reveals it), `reveal_line` (in-voice), `weight` 1 to 3 and `critical`. The game flags a fact as surfaced when the actor reveals it. |
+| `hidden_facts[].found_at[]` | Game | Where the fact can be found in the lighter loop: `call` (intake call or callback with the stakeholder), `frontline` (corridor chat), or `data:kpi`, `data:org`, `data:process`, `data:policy`, `data:training` (data requests). The first entry is the most natural place. Only facts tagged `call` should be given to the stakeholder actor. |
+| `hidden_facts[].data_doc`, `data_source` | Game | Present when the fact has a `data:` tag: the untitled document text the player receives for that data request, and a short label for where it comes from (for example "Near-miss log, last quarter"). |
+| `hidden_facts[].frontline_line` | Actor | Present when the fact has a `frontline` tag: how the corridor-chat person says it. |
+| `frontline.name/role/voice` | Actor | The person on the floor the player can chat with in the corridor. |
 | `volunteered_facts[]` | Actor | Things the stakeholder says freely. |
 | `constraints` | Actor + judge | Budget, deadline, audience, schedule, languages, data available and not available. Fit is judged against these. |
 | `dependencies[]` | Judge + board | `who`, `concern`, `if_ignored`. The risks score checks whether the player named the ones that matter. |

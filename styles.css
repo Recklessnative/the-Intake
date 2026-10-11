@@ -84,12 +84,14 @@ label.check input { width: auto; }
   opacity: .26; filter: blur(4px); animation: breathe 7s ease-in-out infinite; }
 @keyframes breathe { 0%, 100% { transform: translateX(-30%) translateY(0); } 50% { transform: translateX(-29%) translateY(-6px); } }
 .boot-center { position: relative; z-index: 1; text-align: center; max-width: 640px; padding: 0 8px; }
-.boot-logo { display: grid; grid-template-columns: 34px 34px; gap: 5px; width: 73px; margin: 0 auto 14px; transform: rotate(-6deg) skewY(-4deg); }
-.boot-logo span { height: 34px; border-radius: 3px 8px 3px 3px; box-shadow: 0 0 14px rgba(255,255,255,.12); }
-.boot-logo span:nth-child(1) { background: linear-gradient(135deg, #ff7a3d, #e5381b); transform: rotate(-3deg); }
-.boot-logo span:nth-child(2) { background: linear-gradient(135deg, #8fe05a, #3f9e1d); transform: rotate(2deg); }
-.boot-logo span:nth-child(3) { background: linear-gradient(135deg, #5aa8ff, #1c5fd9); transform: rotate(1deg); }
-.boot-logo span:nth-child(4) { background: linear-gradient(135deg, #ffe066, #f2b10d); transform: rotate(-2deg); }
+/* An original logo: a half-open door, not anybody's flag. */
+.boot-logo { position: relative; display: flex; flex-direction: column; gap: 5px; width: 54px; height: 86px; margin: 0 auto 14px; padding: 6px;
+  border: 3px solid #c9c9c9; border-bottom: 0; border-radius: 4px 4px 0 0; background: #1b1b1b; transform: perspective(180px) rotateY(-24deg); transform-origin: left; }
+.boot-logo::after { content: ""; position: absolute; right: 5px; top: 52%; width: 7px; height: 7px; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 8px rgba(255,210,63,.7); }
+.boot-logo span { border-radius: 2px; box-shadow: 0 0 14px rgba(255,255,255,.1); }
+.boot-logo span:nth-child(1) { flex: 2; background: linear-gradient(135deg, #5aa8ff, #1c5fd9); }
+.boot-logo span:nth-child(2) { flex: 3; background: linear-gradient(135deg, #36c2a8, #138a73); }
+.boot-logo span:nth-child(n+3) { display: none; }
 .boot-name { font-size: 40px; font-weight: 700; margin: 0 0 30px; letter-spacing: -.01em; font-family: "Franklin Gothic Medium", Arial, sans-serif; }
 .boot-name em { font-size: 22px; color: #f39c1b; font-weight: 400; vertical-align: super; margin-left: 4px; }
 .boot-bar { position: relative; width: 150px; height: 20px; margin: 0 auto 34px; border: 2px solid #b2b2b2; border-radius: 4px; overflow: hidden; padding: 2px; }
@@ -270,6 +272,49 @@ label.check input { width: auto; }
 .toast.show { display: block; }
 .toast:not(.info)::before { content: "⚠ "; color: var(--bad); }
 
+
+/* Desktop icons, in a column on the left behind the windows. */
+.desk-icons { position: absolute; left: 6px; top: 8px; bottom: 8px; width: 84px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 4px; z-index: 1; }
+.desk-icon { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; min-height: 0; padding: 4px 2px; border: 1px solid transparent;
+  background: transparent; color: #fff; font-size: 11px; line-height: 1.2; text-align: center; text-shadow: 1px 1px 2px #000, 0 0 4px #000; border-radius: 2px; }
+.desk-icon .di { font-size: 30px; line-height: 1.1; text-shadow: 1px 2px 3px rgba(0,0,0,.4); }
+.desk-icon:hover, .desk-icon:focus-visible { background: rgba(49,106,197,.45); border-color: rgba(255,255,255,.5); box-shadow: none; }
+
+/* An explorer-style window: file list on the left, the open document on the right. */
+#w-coe .win-body { padding: 0; }
+.explorer { flex: 1; display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 0; }
+.ex-files { border-right: 1px solid #c9c4b2; background: #fff; overflow: auto; font-size: 12px; }
+.ex-files ul { list-style: none; margin: 0; padding: 4px; }
+.ex-files button { display: flex; gap: 6px; align-items: flex-start; width: 100%; text-align: left; border: 0; background: none; padding: 5px 6px; min-height: 0; font-size: 12px; border-radius: 0; }
+.ex-files button[aria-current="true"] { background: #316ac5; color: #fff; }
+.ex-files button:hover { box-shadow: none; text-decoration: underline; }
+.ex-doc { overflow: auto; padding: 16px 20px; background: #fff; font-size: 14px; line-height: 1.5; }
+.ex-doc h2 { margin: 0 0 4px; font-size: 19px; color: #1a3e8c; }
+.ex-doc h3 { margin: 16px 0 4px; font-size: 15px; }
+.ex-doc .doc-meta { color: #777; font-size: 12px; margin: 0 0 12px; }
+.ex-doc ul { margin: 4px 0; padding-left: 20px; }
+.ex-doc li { margin: 3px 0; }
+.ex-doc table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
+.ex-doc th, .ex-doc td { border: 1px solid #c9c4b2; padding: 5px 7px; text-align: left; vertical-align: top; }
+.ex-doc th { background: #f1efe2; }
+.ex-doc .archived { color: #a33; font-weight: 700; }
+.flow { width: 100%; max-width: 560px; height: auto; display: block; margin: 6px auto; }
+.flow rect, .flow polygon { stroke: #1a3e8c; stroke-width: 1.5; }
+.flow .box { fill: #eef3fd; }
+.flow .ask { fill: #fff6d6; stroke: #c99a06; }
+.flow .stop { fill: #fde8e3; stroke: #b5432a; }
+.flow text { font-family: Tahoma, Verdana, sans-serif; font-size: 12px; fill: #1b1b1b; }
+.flow text.h { font-weight: 700; font-size: 13px; }
+.flow .arr { stroke: #1a3e8c; stroke-width: 1.5; fill: none; }
+
+/* My scores: a plain text file, as the desktop icon promises. */
+#w-scores .win-body { padding: 0; }
+.scores { flex: 1; overflow: auto; padding: 10px 14px; background: #fff; font: 13px/1.5 "Lucida Console", "Courier New", monospace; }
+.scores h3 { font: inherit; font-weight: 700; margin: 14px 0 2px; }
+.scores p { margin: 0; white-space: pre-wrap; }
+.scores .muted { color: #777; }
+.tray .debug { min-height: 0; height: 24px; padding: 0 8px; font-size: 12px; color: #fff; background: #b5432a; border: 1px solid #fff; }
+
 /* ---------- narrow screens: one window at a time, the taskbar switches ---------- */
 @media (max-width: 899px) {
   .desktop { height: auto; min-height: calc(100vh - 36px); padding: 6px 6px 42px; overflow: visible; }
@@ -282,6 +327,9 @@ label.check input { width: auto; }
   .msg { max-width: 94%; }
   .mail-client { grid-template-columns: 1fr; }
   .mail-folders { display: none; }
+  .desk-icons { display: none; }
+  .explorer { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .ex-files { border-right: 0; border-bottom: 1px solid #c9c4b2; max-height: 30vh; }
   .ladder { grid-template-columns: 1fr; }
   .board-steps li { padding: 4px 6px; }
   .mail-list th:nth-child(3) { width: 30%; }

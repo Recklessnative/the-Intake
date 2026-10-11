@@ -1,0 +1,151 @@
+{
+  "id": "construction-cost-reports",
+  "schema_version": 1,
+  "sector": "Construction",
+  "tier": 0,
+  "tier_label": "Starter: open stakeholder, clear gap",
+  "title": "It's Not the Spreadsheet",
+  "briefing": {
+    "headline": "Construction project control: what you should know before the call",
+    "points": [
+      "Site managers run building projects day to day and report monthly on cost and progress.",
+      "A cost forecast compares the budget with what has been spent and what is still expected to be spent (the 'estimate to complete').",
+      "Finance uses these forecasts to warn early about projects going over budget.",
+      "Many site managers are promoted from foreman or site engineer roles."
+    ]
+  },
+  "stakeholder": {
+    "name": "Pieter Goossens",
+    "role": "Operations Director",
+    "org": "Bouwgroep Lievens, a building contractor with 20 site managers on about 25 projects",
+    "voice": "Down to earth, friendly, a former site manager himself. Speaks in plain terms, likes a straight question and gives a straight answer.",
+    "patience": 5,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Jolien Smet",
+    "role": "Site manager, promoted eight months ago",
+    "voice": "Capable, practical, a little overwhelmed by paperwork. Likes to talk about the actual building."
+  },
+  "opening_message": "Morning. Finance is on my back because the monthly cost reports from our sites keep coming in late, and half of them are wrong. I think my site managers need an Excel course. Can you set something up?",
+  "surface_ask": "An Excel course for 20 site managers.",
+  "gold": {
+    "real_problem": "Since January, finance uses a new monthly forecast template with an 'estimate to complete' column. Most late and wrong reports come from site managers promoted in the last year, who have never been taught how to forecast the remaining cost of a project. Their Excel skills are fine; they copy last month's figure or leave the column blank.",
+    "root_cause_types": ["skill", "process"],
+    "is_training_the_lever": "yes",
+    "need_statement": "Newer site managers need to learn how to estimate the remaining cost of their project and fill in the new forecast template. That is a forecasting skill, best practised on their own project with the finance controller, not an Excel course."
+  },
+  "hidden_facts": [
+    {
+      "id": "new_managers",
+      "fact": "Six of the eight late or wrong reports last month came from site managers promoted within the past year.",
+      "unlocks_when": "The player asks who exactly sends late or wrong reports, or whether it's everyone.",
+      "reveal_line": "Who? Hm. Not the old guys, they've done this for years. It's mostly the six I promoted this year. Good people. Great on site.",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "new_template",
+      "fact": "The problems started in January, when finance introduced a new forecast template with an 'estimate to complete' column.",
+      "unlocks_when": "The player asks since when this is happening, or what changed.",
+      "reveal_line": "Since January, now that I think of it. Finance brought in a new template. With a column called 'estimate to complete'.",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "copy_last_month",
+      "fact": "Newer site managers either copy last month's figure into the estimate-to-complete column or leave it blank. Their Excel use is fine; they don't know how to estimate what's still to come.",
+      "unlocks_when": "The player asks what site managers do now when they fill in the report, or where exactly they get stuck.",
+      "reveal_line": "What do they do? The controller told me they just copy last month's number. Or leave it empty. Excel isn't the problem, now I say it out loud. It's knowing what the building will still cost.",
+      "weight": 2,
+      "critical": false,
+      "found_at": ["call"]
+    },
+    {
+      "id": "accuracy_tracked",
+      "fact": "Finance tracks the submission date of each report and compares forecasts with the final cost when a project closes.",
+      "unlocks_when": "The player asks how lateness or quality of the reports is measured.",
+      "reveal_line": "Finance logs when each report comes in. And when a project closes, they compare the forecasts with the real cost. They love that comparison. Sadly.",
+      "weight": 1,
+      "critical": false,
+      "found_at": ["call"]
+    }
+  ],
+  "volunteered_facts": [
+    "Reports are late and often wrong.",
+    "Finance is pressing Pieter about it."
+  ],
+  "constraints": {
+    "budget": "About 4,000 euro.",
+    "deadline": "Before the quarterly results.",
+    "audience": "20 site managers, 6 of them promoted in the last year, spread across about 25 projects.",
+    "schedule": "Site managers are on site all day; the monthly site managers' meeting on Friday afternoon is the easiest slot.",
+    "languages": "Dutch.",
+    "data_available": [
+      "Report submission dates per site manager",
+      "Forecast versus final cost for closed projects"
+    ],
+    "data_not_available": [
+      "Any check of individual Excel skills"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Finance controller",
+      "concern": "Owns the template and knows what a good forecast looks like; needed as a co-trainer.",
+      "if_ignored": "Training teaches a method finance doesn't accept."
+    },
+    {
+      "who": "Experienced site managers",
+      "concern": "Their time would be needed to coach the newer ones.",
+      "if_ignored": "No one helps the new managers on their real projects."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Excel test scores.",
+      "Attendance at the course.",
+      "Only counting on-time reports, which a copied number also achieves."
+    ],
+    "gold_plan": {
+      "baseline": "On-time submission rate and share of reports with a filled-in estimate to complete, per site manager, over the last three months.",
+      "behaviour": "Newer site managers fill in a reasoned estimate to complete each month, checked by the controller.",
+      "leading_indicators": "Reports that pass the controller's check first time.",
+      "business_metric": "Forecast accuracy compared with final project cost, and earlier warning of overruns.",
+      "collection": "Finance's submission log and the controller's monthly check."
+    }
+  },
+  "concepts": {
+    "conventional": "An Excel course for all 20 site managers.",
+    "solid": "A short practical session for the six newer site managers with the finance controller: how to estimate remaining cost, worked on their own project's figures, followed by a check-in on their next two reports.",
+    "next_level_examples": [
+      "Pair each newer site manager with an experienced one for their next two forecasts, sitting together with the real numbers.",
+      "Add a short worked example and a few guiding questions to the template itself, so the help sits where the work happens."
+    ],
+    "also_valid": [
+      "A short session for all 20 is acceptable if the focus is forecasting, not Excel."
+    ],
+    "red_flags": [
+      "An Excel course.",
+      "Training all site managers the same way without noticing it's the newer ones.",
+      "Leaving finance out."
+    ]
+  },
+  "defence_objections": [
+    "Pairing them with the old guys? Those men will tell them to just 'feel' the number.",
+    "Changing finance's template? The controller is quite attached to it. It has colours."
+  ],
+  "question_you_didnt_ask": "What exactly do they do when they fill in the report?",
+  "actor_notes": [
+    "Pieter is open and straightforward: good questions get full answers.",
+    "He assumes it's an Excel problem until the player asks what site managers actually do with the template.",
+    "He likes practical, on-the-job ideas and distrusts anything that sounds like a long classroom course."
+  ],
+  "flavour_lines": [
+    "My site managers can read a construction drawing upside down in the rain. A spreadsheet, less so.",
+    "Finance calls it 'estimate to complete'. On site we call it 'we'll see'."
+  ]
+}

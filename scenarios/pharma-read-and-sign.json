@@ -23,6 +23,11 @@
     "risk_appetite": 1,
     "risk_appetite_label": "Low"
   },
+  "frontline": {
+    "name": "Sanne De Clercq",
+    "role": "Cleanroom operator, Line 4, seven months in",
+    "voice": "Conscientious, a bit nervous about saying the wrong thing in a GMP plant. Very concrete about what her hands do."
+  },
   "opening_message": "We've had a run of deviations on aseptic interventions. The CAPA says 'retrain operators'. I need all 140 cleanroom operators to re-read and sign the 23 relevant SOPs within the month, with a quiz. Can L&D set that up in the system?",
   "surface_ask": "Read-and-sign retraining on 23 SOPs plus a quiz for all 140 cleanroom operators.",
   "gold": {
@@ -41,7 +46,12 @@
       "unlocks_when": "The player asks where, on which line or in which area the deviations occur.",
       "reveal_line": "Fourteen of the sixteen are on Line 4, the new isolator. Lines 1 and 2 are practically boring. I like boring.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Line 1: 1, Line 2: 1, Line 4 (isolator): 14.",
+      "data_source": "Deviation log, last quarter, aseptic interventions"
     },
     {
       "id": "new_operators",
@@ -49,7 +59,13 @@
       "unlocks_when": "The player asks who was involved, how experienced they are, or whether it is all operators.",
       "reveal_line": "Mostly recent hires. We expanded fast for Line 4. The veterans stayed on the old lines. Of course they did.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Operators involved in Line 4 deviations, average tenure 5 months. None with more than 8 months on site.",
+      "data_source": "Deviation log joined with HR"
     },
     {
       "id": "trainer_left",
@@ -57,7 +73,12 @@
       "unlocks_when": "The player asks how operators are trained or qualified on the line, or what changed in onboarding.",
       "reveal_line": "We had Luc. Luc trained everyone at the glove port. Luc retired in March. Since then... they read the SOP and sign.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "Everyone says Luc used to train people at the glove port. I never met him. I read the SOP and signed. Then a colleague showed me once, between two batches."
     },
     {
       "id": "sop_length",
@@ -65,7 +86,14 @@
       "unlocks_when": "The player asks about the procedures themselves, their length, clarity or recent changes.",
       "reveal_line": "After the last inspection we made the intervention SOP 'more complete'. It's 41 pages. It is very complete.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:process",
+        "frontline"
+      ],
+      "data_doc": "SOP-ASE-014 'Aseptic interventions, isolator Line 4', version 6, 41 pages, effective after last inspection.",
+      "frontline_line": "The SOP is 41 pages. I read it. I signed. I could tell you what's on page 23. My hands still don't know it.",
+      "data_source": "Document control"
     },
     {
       "id": "mockup",
@@ -73,7 +101,11 @@
       "unlocks_when": "The player asks about practice facilities, simulators, equipment or how people could practise safely.",
       "reveal_line": "There's a mock-up. The supplier delivered it with the isolator. It's in room B-12, under a cover. Next to the Christmas decorations.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "There's a practice glove-port thing in B-12, under a cover. I found it looking for the Christmas tree. Nobody's ever used it."
     },
     {
       "id": "quiz_scores",
@@ -81,7 +113,13 @@
       "unlocks_when": "The player asks whether the operators already did quizzes or how well they know the procedures.",
       "reveal_line": "Their quiz scores are excellent. 92% on average. They know what the SOP says. Their gloves don't.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "SOP quizzes for operators involved in deviations, average score 92%.",
+      "data_source": "LMS report"
     }
   ],
   "volunteered_facts": [

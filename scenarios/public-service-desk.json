@@ -23,6 +23,11 @@
     "risk_appetite": 1,
     "risk_appetite_label": "Low"
   },
+  "frontline": {
+    "name": "Fatima El Amrani",
+    "role": "Counter clerk, citizen service desk",
+    "voice": "Warm, practical, frustrated by rules she has to enforce. Speaks plainly about citizens by name."
+  },
   "opening_message": "Complaints about our service desk are up 40% this year. The alderman would like a customer-friendliness training for all 35 counter staff. Something with a smile. Ideally before the local paper writes about us again.",
   "surface_ask": "A customer-friendliness training for 35 counter staff.",
   "gold": {
@@ -42,7 +47,13 @@
       "unlocks_when": "The player asks what changed, or when the complaints started rising.",
       "reveal_line": "When did it start? Let me see... March. We went appointment-only in February. Coincidence, in principle.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "Jan 21, Feb 24, Mar 49, Apr 52, May 47, Jun 55. Appointment-only service introduced 1 February.",
+      "data_source": "Complaint register, monthly"
     },
     {
       "id": "complaint_content",
@@ -50,7 +61,12 @@
       "unlocks_when": "The player asks what the complaints actually say, or whether they've been categorised.",
       "reveal_line": "Most of them are about being sent home. 'I came all this way', 'Nobody was there and they still sent me home'. That kind.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Turned away or could not book 61, waiting or opening hours 14, staff attitude 9, other 16.",
+      "data_source": "Complaint register, recategorised sample of 100 complaints since March"
     },
     {
       "id": "booking_access",
@@ -58,7 +74,11 @@
       "unlocks_when": "The player asks how citizens book, or about accessibility for elderly or non-Dutch-speaking citizens.",
       "reveal_line": "You book online. With the ID app. In Dutch. My mother can't do it. My mother is a retired teacher.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The booking site is Dutch only and you need the ID app. Yesterday a man of 80 came three times. He has a flip phone. I had to send him home. Again."
     },
     {
       "id": "no_walkins_rule",
@@ -66,7 +86,12 @@
       "unlocks_when": "The player asks what staff are allowed to do, how staff feel, or why walk-ins are turned away.",
       "reveal_line": "The staff hate it. They're not allowed to help walk-ins, even at an empty desk. It's a rule from the alderman's office. For efficiency.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "We're not allowed to help anyone without an appointment. Even when my desk is empty. It comes from the alderman's office. I've been crying in the toilet once. Only once."
     },
     {
       "id": "friendliness_rated",
@@ -74,7 +99,13 @@
       "unlocks_when": "The player asks for any data on staff behaviour, or about previous evaluations.",
       "reveal_line": "We had mystery visitors last year. 8.1 out of 10 on friendliness. They're friendly when they send people home, too.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "20 visits. Friendliness 8.1/10, competence 7.8/10, waiting time 4.9/10.",
+      "data_source": "Mystery visit study, last year"
     },
     {
       "id": "letters",
@@ -82,7 +113,12 @@
       "unlocks_when": "The player asks how citizens find out about the process, or about city communication.",
       "reveal_line": "The letter says 'please come to the service desk'. It doesn't say 'book first'. Hm. That's quite a big thing not to say.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:process"
+      ],
+      "data_doc": "'...please present yourself at the citizen service desk with a recent passport photo.' No mention of appointments.",
+      "data_source": "Template letter 'Your identity card expires soon'"
     },
     {
       "id": "waiting_time_win",
@@ -90,7 +126,13 @@
       "unlocks_when": "The player asks what the appointment system achieved, or why it was introduced.",
       "reveal_line": "To be fair, it works for people who book. Waiting went from 47 minutes to 9. The alderman mentions it often.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Average waiting time before February 47 min (ticket system). Since February, with appointment: 9 min.",
+      "data_source": "Queue system report"
     },
     {
       "id": "alderman_owns",
@@ -98,7 +140,10 @@
       "unlocks_when": "The player asks who decided on the system, who owns it, or about the politics.",
       "reveal_line": "It was the alderman's project. There was a press photo. With a ribbon. On a website.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
     }
   ],
   "volunteered_facts": [

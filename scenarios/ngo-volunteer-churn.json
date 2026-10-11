@@ -23,6 +23,11 @@
     "risk_appetite": 2,
     "risk_appetite_label": "Medium"
   },
+  "frontline": {
+    "name": "Wim Dewulf",
+    "role": "Volunteer coordinator in Aalst, himself a volunteer",
+    "voice": "Kind, retired schoolteacher, slightly guilty about the people who left. Tells stories rather than numbers."
+  },
   "opening_message": "We lose volunteers like a colander loses water. I think our 35 volunteer coordinators need a leadership course, how to motivate and keep people. We have a small grant, 6,000 euro. Can you help us before the winter campaign?",
   "surface_ask": "A leadership course for 35 volunteer coordinators.",
   "gold": {
@@ -42,7 +47,12 @@
       "unlocks_when": "The player asks when volunteers leave, or whether it's new or experienced volunteers.",
       "reveal_line": "When? Mostly early. Two thirds go in the first three months. If they survive that, they stay forever. We have a volunteer who's been here since 1998. She's 91.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Leavers in the last 12 months: 214. Left within 3 months: 146 (68%). Volunteers active more than a year: average tenure 6.5 years.",
+      "data_source": "Volunteer database"
     },
     {
       "id": "phone_line_rule",
@@ -50,7 +60,13 @@
       "unlocks_when": "The player asks what new volunteers do first, what they signed up for, or how onboarding works.",
       "reveal_line": "Everyone starts on the phone line. Three months. It's how Jos wanted it, so people learn to listen first. Most of them signed up to visit someone. They want a person, not a headset.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:process"
+      ],
+      "data_doc": "'All new volunteers start with three months on the listening line.' Sign-up form, preferred activity: home visits 80%, phone line 12%, events 8%.",
+      "data_source": "Volunteer handbook, section 2"
     },
     {
       "id": "six_weeks",
@@ -58,7 +74,13 @@
       "unlocks_when": "The player asks how long it takes to get started, or about the steps between sign-up and first activity.",
       "reveal_line": "Sign-up to first shift? About six weeks. The criminal record extract, then an intake, and our intake team is... me, on Thursdays.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:process",
+        "call"
+      ],
+      "data_doc": "Sign-up, criminal record extract request, intake interview (Thursdays, Head of Volunteering), first shift. Average days from sign-up to first shift: 43.",
+      "data_source": "Onboarding steps"
     },
     {
       "id": "exit_reasons",
@@ -66,7 +88,11 @@
       "unlocks_when": "The player asks why volunteers say they leave, or whether there is exit feedback.",
       "reveal_line": "The ones who bother to tell us say 'not what I expected' or 'nobody called me'. Ouch, both.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The ones who left? Lovely people. They wanted to visit someone, and we put them on a headset. A few told me nobody called them for weeks. I should have called. I have four hours a week."
     },
     {
       "id": "coordinators_volunteers",
@@ -74,7 +100,13 @@
       "unlocks_when": "The player asks who the coordinators are, how much time they have, or what their role involves.",
       "reveal_line": "Most coordinators are volunteers too. Four hours a week, on average. And now we want to send them on a leadership course. On a Saturday, I suppose.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:org",
+        "call"
+      ],
+      "data_doc": "35 volunteer coordinators, of whom 7 paid staff and 28 volunteers (average 4 hours a week).",
+      "data_source": "Org chart"
     },
     {
       "id": "founder_board",
@@ -82,7 +114,12 @@
       "unlocks_when": "The player asks who decides on the onboarding route, who else needs to agree, or whether the rule can change.",
       "reveal_line": "Jos founded us in 1994. He chairs the board. The phone line is his... baby. I've never brought it up. You don't bring things up with Jos. You bring cake.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "The phone line rule? That's Jos. You don't question Jos. Hanne certainly doesn't. We bring cake to the board meeting."
     }
   ],
   "volunteered_facts": [

@@ -23,6 +23,11 @@
     "risk_appetite": 3,
     "risk_appetite_label": "High"
   },
+  "frontline": {
+    "name": "Lotte Janssens",
+    "role": "Account executive, hired eleven months ago",
+    "voice": "Smart, ambitious, quietly anxious about her number. Speaks fast in sales jargon, drops it when she's honest."
+  },
   "opening_message": "Team's flat. Q3 bookings down 18%. I want a motivation workshop. Big energy, external speaker, maybe one of those ex-Navy SEAL guys. Off-site in November, budget's fine. Make it happen.",
   "surface_ask": "A motivational off-site with an external speaker for 60 account executives.",
   "gold": {
@@ -42,7 +47,13 @@
       "unlocks_when": "The player asks what changed this year, how reps are paid, or about incentives.",
       "reveal_line": "New comp plan in January. Multi-year accelerators, which is great, and a clawback over 20% discount, which is... a finance idea.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "8% of first-year ACV; 1.3x accelerator on multi-year deals; full commission clawback on deals with discount above 20%.",
+      "data_source": "Commission plan 2026"
     },
     {
       "id": "new_hire_drop",
@@ -50,7 +61,12 @@
       "unlocks_when": "The player asks whether the drop is across the whole team, who is behind, or asks to segment the numbers.",
       "reveal_line": "Is it everyone? Let me pull it up... no. My top fifteen are fine. The new ones, last twelve months, sit at about half of quota. Huh.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Tenure > 12 months (35 reps): 94%. Tenure < 12 months (25 reps): 52%.",
+      "data_source": "Quota attainment Q3 by cohort"
     },
     {
       "id": "pro_tier_stall",
@@ -58,7 +74,14 @@
       "unlocks_when": "The player asks where in the pipeline deals are lost, about win rates, or about products and pricing.",
       "reveal_line": "Pro is the future. Pro wins 14% of the time. Classic wins 31. The future is taking its time.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:kpi",
+        "frontline"
+      ],
+      "data_doc": "Classic 31%, Pro 14%. Pro deals lost at procurement stage: 58%.",
+      "frontline_line": "Pro is hard. Procurement asks why it costs 40% more and I don't have a good answer. Classic I can sell in my sleep.",
+      "data_source": "Win rate by tier, last two quarters"
     },
     {
       "id": "no_coaching",
@@ -66,7 +89,11 @@
       "unlocks_when": "The player asks about onboarding, ramp-up, or how managers coach their reps.",
       "reveal_line": "Two-day bootcamp, then they're on the field. Managers have their own number to hit, so coaching is... aspirational.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Onboarding was two days. Then: here's your territory, good luck. My manager has his own quota. We've done one deal review. In eleven months."
     },
     {
       "id": "last_offsite",
@@ -74,7 +101,13 @@
       "unlocks_when": "The player asks what was tried before or what happened after previous events.",
       "reveal_line": "Last year we had a guy who climbed Everest. Incredible talk. Standing ovation. Q1 went down 9%. Maybe it was the mountain.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Speaker 'Summit Mindset' (Everest climber). Satisfaction 9.1/10. Q1 bookings vs plan: -9%.",
+      "data_source": "Event report, last year's off-site"
     },
     {
       "id": "cfo_owns_comp",
@@ -82,7 +115,10 @@
       "unlocks_when": "The player asks who owns the commission plan, or whether it can change.",
       "reveal_line": "The CFO and the CRO built it. I said the clawback would bite. I lost that meeting. I don't lose many meetings.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
     }
   ],
   "volunteered_facts": [

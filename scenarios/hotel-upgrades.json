@@ -1,0 +1,151 @@
+{
+  "id": "hotel-upgrades",
+  "schema_version": 1,
+  "sector": "Hospitality",
+  "tier": 0,
+  "tier_label": "Starter: open stakeholder, clear gap",
+  "title": "Upsell, But Make It Friendly",
+  "briefing": {
+    "headline": "Hotel front office: what you should know before the call",
+    "points": [
+      "Receptionists check guests in and out and can offer paid room upgrades at the desk.",
+      "Hotels run on a property management system (PMS) that holds bookings, room availability and prices.",
+      "A revenue manager sets room prices and decides which upgrades can be offered at what price.",
+      "Upgrade revenue is usually reported as a share of total room revenue."
+    ]
+  },
+  "stakeholder": {
+    "name": "Lien Vermeulen",
+    "role": "Front Office Manager",
+    "org": "Hotel Sint-Joris, a 140-room city hotel in Bruges with 24 receptionists",
+    "voice": "Cheerful, chatty and helpful. Loves her team and her guests. Answers questions generously and often adds a little anecdote.",
+    "patience": 5,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Robin Claeys",
+    "role": "Receptionist, evening shift",
+    "voice": "Friendly, a bit shy, eager to do well. Happy to chat between check-ins."
+  },
+  "opening_message": "Hi! Our room upgrade revenue has dropped a lot this year and the general manager is asking questions. I'd love an upselling training for my reception team. Something friendly though, I don't want them to turn into car salesmen.",
+  "surface_ask": "An upselling training for 24 receptionists.",
+  "gold": {
+    "real_problem": "Upgrade revenue dropped after the hotel switched to a new property management system in April. The upgrade offer now sits two screens deep at check-in, and the nine receptionists hired since April only had a one-hour system demo, so most of them never see that an upgrade is available. The experienced receptionists still upsell well.",
+    "root_cause_types": ["skill", "system"],
+    "is_training_the_lever": "yes",
+    "need_statement": "Receptionists hired since April need to know where the upgrade options appear in the new system and how to offer them naturally at check-in. A short hands-on session at the desk, plus a quicker route to the upgrade screen, fixes most of it; a general upselling course does not."
+  },
+  "hidden_facts": [
+    {
+      "id": "since_april",
+      "fact": "Upgrade revenue fell from about 6% to 2% of room revenue right after the new property management system went live in April.",
+      "unlocks_when": "The player asks since when, what changed, or when the drop started.",
+      "reveal_line": "Since when? Let me think... spring. April! That's when we got the new hotel system. Oh. Do you think that's related?",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "new_hires",
+      "fact": "The drop comes almost entirely from the nine receptionists hired since April. The longer-serving receptionists still sell upgrades at the old rate.",
+      "unlocks_when": "The player asks who exactly is affected, or whether it's the whole team.",
+      "reveal_line": "Now that you ask, my old hands are fine. Annick sells upgrades like ice cream in July. It's mostly the nine new ones from this spring.",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "two_screens_deep",
+      "fact": "In the new system the upgrade options are two screens away from the check-in screen. New hires had only a one-hour system demo and most don't know where to find them.",
+      "unlocks_when": "The player asks what receptionists do now at check-in, or how they see that an upgrade is available.",
+      "reveal_line": "At check-in? In the old system a little star popped up when an upgrade was free. Now you have to click into 'room options', then 'availability'. The new ones had a one-hour demo from the supplier. One hour!",
+      "weight": 2,
+      "critical": false,
+      "found_at": ["call"]
+    },
+    {
+      "id": "report_exists",
+      "fact": "The system can report upgrade revenue per receptionist and per shift, but nobody has looked at it yet.",
+      "unlocks_when": "The player asks how upgrade revenue is measured or what data exists.",
+      "reveal_line": "The revenue manager says the system can show upgrades per receptionist and per shift. I've never opened that report. I should, shouldn't I?",
+      "weight": 1,
+      "critical": false,
+      "found_at": ["call"]
+    }
+  ],
+  "volunteered_facts": [
+    "Upgrade revenue has dropped a lot this year.",
+    "She doesn't want a pushy sales approach."
+  ],
+  "constraints": {
+    "budget": "About 3,000 euro.",
+    "deadline": "Before the high season starts in spring.",
+    "audience": "24 receptionists, 9 of them hired since April.",
+    "schedule": "Three shifts; a quiet hour mid-afternoon when the desk can spare someone.",
+    "languages": "Dutch, French and English at the desk.",
+    "data_available": [
+      "Upgrade revenue per month",
+      "Upgrade revenue per receptionist and shift (report exists, unused)"
+    ],
+    "data_not_available": [
+      "Guest feedback specifically about upgrade offers"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Property management system supplier",
+      "concern": "Moving the upgrade alert back onto the check-in screen is a configuration change.",
+      "if_ignored": "Every new hire keeps missing the upgrade options."
+    },
+    {
+      "who": "Revenue manager",
+      "concern": "Sets upgrade prices and which upgrades may be offered, and owns the report.",
+      "if_ignored": "Receptionists offer upgrades at the wrong price, or there's no way to measure."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Satisfaction with the training.",
+      "Number of receptionists trained.",
+      "Total hotel revenue, which moves with occupancy and season."
+    ],
+    "gold_plan": {
+      "baseline": "Upgrade revenue as a share of room revenue, per receptionist, before the session.",
+      "behaviour": "Receptionists check upgrade availability and offer it at check-in, observed by the shift lead for a few check-ins.",
+      "leading_indicators": "Number of upgrade offers made per shift.",
+      "business_metric": "Upgrade revenue share for the new hires, compared with the experienced team.",
+      "collection": "The existing per-receptionist report, monthly."
+    }
+  },
+  "concepts": {
+    "conventional": "A classroom upselling and sales techniques course for all 24 receptionists.",
+    "solid": "A short hands-on session at the desk for the nine new hires: where the upgrade options sit in the new system and two or three natural ways to offer an upgrade. Ask the supplier to bring the upgrade alert back to the check-in screen. Track the per-receptionist report.",
+    "next_level_examples": [
+      "Pair each new hire with an experienced colleague like Annick for a few check-ins, so they learn the friendly offer by watching it.",
+      "Put a one-page 'where to click and what to say' card next to every check-in screen until the system is reconfigured."
+    ],
+    "also_valid": [
+      "A short refresher for the whole team is fine if the main focus is the new hires and the system."
+    ],
+    "red_flags": [
+      "A hard-sell sales course.",
+      "Training everyone the same way without noticing it's the new hires.",
+      "Ignoring the system change."
+    ]
+  },
+  "defence_objections": [
+    "Ask the supplier to change the screen? They took six months to install it. I'm not sure I can face them.",
+    "Annick training the new ones? She's my best seller. If she's coaching, who's selling?"
+  ],
+  "question_you_didnt_ask": "Since when did upgrade revenue drop?",
+  "actor_notes": [
+    "Lien is open and generous: any reasonable question gets a full, friendly answer.",
+    "She hasn't connected the drop to the new system or to the new hires until the player asks; play the 'oh!' moment.",
+    "She is happy with almost any sensible plan that keeps the tone friendly."
+  ],
+  "flavour_lines": [
+    "The old system had a little star when an upgrade was free. We all miss the star.",
+    "We're a hotel, not a car showroom. Although our suites do have heated floors."
+  ]
+}

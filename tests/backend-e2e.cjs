@@ -11,6 +11,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   console.log('title:', await p.textContent('#runs-left'));
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  if (await p.isVisible('#w-coe')) await p.click('#w-coe .tb.close');
   await p.click('#btn-call');
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);

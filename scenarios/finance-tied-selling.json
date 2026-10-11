@@ -24,6 +24,11 @@
     "risk_appetite": 1,
     "risk_appetite_label": "Low"
   },
+  "frontline": {
+    "name": "Elif Yildiz",
+    "role": "Personal banker, branch in Mechelen",
+    "voice": "Quick, friendly, a bit cynical about head office. Talks about 'the numbers' and 'the screen'. Honest when not quoted."
+  },
   "opening_message": "Compliance is nagging me again, so I need an engaging refresher on credits for all 600 personal bankers. Consumer loans, mortgages, the whole thing. Make it fun, make it short, and make sure it doesn't cost me selling time in Q4.",
   "surface_ask": "An engaging credit refresher e-learning for all 600 personal bankers.",
   "gold": {
@@ -43,7 +48,13 @@
       "unlocks_when": "The player asks why compliance is 'nagging', what triggered the request, or whether there was an incident, audit or complaint.",
       "reveal_line": "Between us? A consumer magazine sent mystery shoppers. Seven out of ten branches said 'the rate is only with our insurance'. It's published next month. Compliance is... animated.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "10 branches visited. In 7, the banker said the advertised loan rate was only available with the bank's own insurance.",
+      "data_source": "Consumer magazine mystery shop, draft results shared with the bank"
     },
     {
       "id": "double_count",
@@ -51,7 +62,14 @@
       "unlocks_when": "The player asks how bankers are targeted or rewarded, or what pressure they are under.",
       "reveal_line": "Insurance with a loan counts double. It's a great incentive. Oh. You mean it's a great incentive.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:policy",
+        "frontline"
+      ],
+      "data_doc": "Loans count 1 point; bank insurance sold with a loan counts 2 points towards the branch bonus.",
+      "frontline_line": "Insurance with a loan counts double for the branch. My manager has a little chart. It's very motivating. For him.",
+      "data_source": "Branch target scheme 2026"
     },
     {
       "id": "pre_ticked",
@@ -59,7 +77,11 @@
       "unlocks_when": "The player asks about the tools or systems bankers use, or how a quote is presented to the customer.",
       "reveal_line": "The quote tool ticks the insurance by default. It saves clicks. You can untick it. On the third screen.",
       "weight": 2,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The quote screen ticks our insurance by default. First screen shows only the bundle price. To show the price without, you click through to screen three. Nobody has time for screen three."
     },
     {
       "id": "knowledge_gap",
@@ -67,7 +89,12 @@
       "unlocks_when": "The player asks what bankers actually know about the rules, or whether there's a baseline on knowledge.",
       "reveal_line": "Compliance did a poll. Most of my bankers think 'bundle' and 'tie' are the same thing. To be fair, so did I until Tuesday.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training"
+      ],
+      "data_doc": "'Can a customer take the loan with insurance from another insurer?' Correct: 31%. 'Explain the difference between a bundle and tied selling': correct 27%.",
+      "data_source": "Compliance pulse poll, 212 bankers"
     },
     {
       "id": "complaints",
@@ -75,7 +102,12 @@
       "unlocks_when": "The player asks about complaints, customer feedback or what the ombudsman sees.",
       "reveal_line": "Complaints to the ombudsman tripled. Mostly people who found cheaper insurance and were told they couldn't switch. Which, I'm told, they can.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Complaints about linked insurance. 2025: 38. 2026 to date: 117. Most frequent theme: 'not allowed to switch to another insurer'.",
+      "data_source": "Ombudsfin and internal complaints"
     },
     {
       "id": "cco_vs_network",
@@ -83,7 +115,10 @@
       "unlocks_when": "The player asks who else is involved, how compliance and the network get along, or why this wasn't fixed earlier.",
       "reveal_line": "Caroline from compliance wanted to change the targets last year. We... had a lively ExCo. I won.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
     }
   ],
   "volunteered_facts": [

@@ -27,11 +27,17 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `js/config.js` | Where the backend lives (empty = own keys only) and the donation link |
 | `js/gemini.js` | Gemini client with structured JSON output: direct with an own key, otherwise through the backend |
 | `js/cards.js` | Maps a scenario card file to the game's shape |
+| `js/coe.js` | The Center of Excellence folder on the desktop: intake flowchart, quality standard, good questions, measurement ladder |
+| `js/sound.js` | The Doors OS startup chime and a ding, synthesised with Web Audio (no audio files); mute in the start menu |
 | `js/prompts.js` | The roles: stakeholder (in character), Mieke the colleague (coaching, sees only what the player sees), reaction (boldness + objections), examiner (scorecard) |
 | `js/app.js` | The loop and the scoring |
 | `scenarios/*.json` | Scenario cards; `scenarios/index.json` lists the ones in play |
 | `api/index.php` | Backend: run cap, unlock codes, and a Gemini proxy that keeps the key on the server |
 | `api/schema.sql`, `api/new-code.sql`, `api/upgrade-1.sql` | Database tables, a template for creating an unlock code, and the one change for databases made before weeks were charged at the first scorecard |
+
+Every window has a desktop icon (on phones, use the start menu). A player's first week opens with two **starter cases** (cards with `"tier": 0`: an open stakeholder, one clear cause, 10 questions and extra patience) and opens the Center of Excellence folder on the flowchart; later weeks leave the starters out. Every finished request is kept in **My scores.txt** on the desktop (in this browser, key `intake-scores`).
+
+**Test mode:** add `?debug` to the address once (`?debug=0` turns it off again). An **Autofill** button appears in the tray: in the inbox or on the call it plays a scripted call that surfaces every hidden fact (no Gemini calls), on the case board or in memo mode it fills every step from the card's model answer, and in the defence round it fills the answers. The reaction and the examiner are still real Gemini calls.
 
 After the call you write up on the **case board**: five short steps (diagnose with evidence from the call and cause tags, is learning the lever, a four-rung measurement ladder, the concept, the top two blockers), each locked before the next, with Mieke's feedback after the diagnosis, the lever and the risks. The steps become a one-page memo for the stakeholder. Memo mode keeps the original long form.
 

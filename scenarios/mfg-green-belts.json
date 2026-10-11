@@ -23,6 +23,11 @@
     "risk_appetite": 2,
     "risk_appetite_label": "Medium"
   },
+  "frontline": {
+    "name": "Dariusz Nowak",
+    "role": "Night-shift team lead, line 3",
+    "voice": "Tired, honest, a bit ironic. Says what the plant manager won't. Switches to short sentences when annoyed."
+  },
   "opening_message": "Hi. Corporate wants OEE from 61 to 70 percent by next year. I want all 22 team leads through a Lean Six Sigma Green Belt. The provider quoted 4,800 a head and the budget is approved. Can you organise it before the summer shutdown? Concretely: dates, provider, done.",
   "surface_ask": "A Lean Six Sigma Green Belt certification for all 22 team leads.",
   "gold": {
@@ -42,7 +47,12 @@
       "unlocks_when": "The player asks where OEE losses come from, what data exists on downtime, or what the biggest losses are.",
       "reveal_line": "Honestly? Half of it is coded 'Other'. 'Other' is our most reliable machine. It stops every day.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Top reason codes by minutes: Other 48%, Changeover 17%, Jam/corrugator 12%, Waiting for material 9%, Maintenance 8%, Quality hold 6%.",
+      "data_source": "MES downtime report, last 8 weeks"
     },
     {
       "id": "firefighting",
@@ -50,7 +60,12 @@
       "unlocks_when": "The player asks what a team lead's day looks like, how they spend their time, or whether anyone observed them.",
       "reveal_line": "They run around. Forklift missing, someone sick, wrong board grade. If you find one sitting down, take a photo.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "Lean projects? I spend my shift finding forklifts and people. If someone's sick, I'm on the machine myself."
     },
     {
       "id": "handover",
@@ -58,7 +73,11 @@
       "unlocks_when": "The player asks about handovers, communication between shifts, or why problems recur.",
       "reveal_line": "Handover? The night guy shouts something over the corrugator and goes home. Then day shift discovers the same jam at nine.",
       "weight": 2,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Handover is me shouting over the corrugator at six in the morning. Day shift finds the same jam at nine. Every week."
     },
     {
       "id": "yellow_belts",
@@ -66,7 +85,13 @@
       "unlocks_when": "The player asks what was tried before or whether anyone already has Lean training.",
       "reveal_line": "Three of them did Yellow Belt last year. Nice certificates. The projects died in the drawer. No time.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Lean Yellow Belt completed by 3 team leads. Linked improvement projects: 3 opened, 0 closed, status 'on hold - no capacity'.",
+      "data_source": "Training records, 2024"
     },
     {
       "id": "audience_profile",
@@ -74,7 +99,13 @@
       "unlocks_when": "The player asks about the team leads' background, experience, language or how they learn best.",
       "reveal_line": "They're operators who got promoted. Excellent on a machine. Give them a 60-page workbook and you've lost them.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "22 team leads, all promoted internally from operator. Average tenure 14 years. Language preference on file: Dutch 18, Polish 4.",
+      "data_source": "Org chart, production"
     },
     {
       "id": "sister_plant",
@@ -82,7 +113,12 @@
       "unlocks_when": "The player asks what corporate or other plants already offer, or whether a standard exists.",
       "reveal_line": "Ghent has their boards and their little meetings. Corporate keeps sending me the folder. I don't need posters to run a plant.",
       "weight": 3,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Ghent has those boards and a ten-minute meeting at shift start. My cousin works there. He says it works. Don't tell Marc I said so."
     }
   ],
   "volunteered_facts": [

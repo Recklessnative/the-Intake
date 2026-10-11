@@ -69,6 +69,20 @@ async function caseBoard(req) {
     if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
     if (req === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
     if (req === 0) {
+      // First request ever: a starter case, and the Center of Excellence opens on the flowchart.
+      const first = await p.evaluate(() => window.__intake.state.run);
+      if (first.card.difficulty !== 0 || first.questionsLeft !== 10 || first.patience !== 5) throw new Error('first request is not a starter: ' + first.card.id);
+      await visible('#w-coe');
+      if (!(await p.$('#coe-doc svg.flow'))) throw new Error('flowchart missing');
+      if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/coe.png' });
+      await p.click('#coe-files button:has-text("quality standard")');
+      if (!(await p.textContent('#coe-doc')).includes('Measurement')) throw new Error('standard did not open');
+      await p.click('#w-coe .tb.close');
+      if (!MOBILE) {
+        await p.click('.desk-icon[data-app="w-call"]');
+        if (!(await p.textContent('#toast')).includes('No call yet')) throw new Error('phone icon before the call should explain');
+        await p.click('.desk-icon[data-app="w-coe"]'); await visible('#w-coe'); await p.click('#w-coe .tb.close');
+      }
       await p.click('#mail-rows tr:has-text("cake?")');
       if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
       await p.click('[data-mail="delete"]');
@@ -133,6 +147,29 @@ async function caseBoard(req) {
   await p.waitForSelector('#s-end.active');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
+  if (await p.evaluate(() => window.__intake.state.cards.filter(c => c.difficulty === 0).length) !== 2) throw new Error('first week should open with two starters');
+  // Week 2 in test mode: Autofill plays a whole request; no starters, and the scores file keeps both weeks.
+  await p.goto('http://localhost:8765/?debug=1');
+  p.once('dialog', d => d.accept());
+  await p.click('#btn-start');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  if (await p.evaluate(() => window.__intake.state.cards.some(c => c.difficulty === 0))) throw new Error('starters in a second week');
+  if (await p.isVisible('#w-coe')) throw new Error('the CoE folder should only open by itself in the first week');
+  await p.click('#btn-debug');                       // inbox -> scripted call -> case board
+  await p.waitForSelector('#w-write.open');
+  if (await p.evaluate(() => window.__intake.state.run.revealed.size) < 3) throw new Error('autofill call revealed too little');
+  await p.click('#btn-debug');                       // fills every step, lands on the memo
+  if (!(await p.isVisible('.bstep[data-step="memo"]'))) throw new Error('autofill did not reach the memo');
+  await p.click('#board-next');
+  await p.waitForSelector('#p-defence.active, #p-score.active');
+  if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
+  await p.waitForSelector('#p-score.active');
+  console.log('autofill request', await p.textContent('#score-total'));
+  if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-scores"]'); } else await p.click('.desk-icon[data-app="w-scores"]');
+  await visible('#w-scores');
+  const txt = await p.textContent('#scores');
+  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 4') || !txt.includes('[starter]')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   console.log('errors', errs);
   await b.close(); srv.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });
