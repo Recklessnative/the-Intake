@@ -64,8 +64,8 @@
   // ---------- scenarios ----------
   async function loadCards() {
     if (state.pool.length) return;
-    const index = await (await fetch('scenarios/index.json')).json();
-    const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json').then(r => r.json())))).map(Cards.normalise);
+    const index = await (await fetch('scenarios/index.json', { cache: 'no-cache' })).json();
+    const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.normalise);
     state.pool = cards;
   }
   // A week: up to RUN_LENGTH cards, mixed sectors, easiest first.

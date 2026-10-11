@@ -5,7 +5,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   const b = await chromium.launch(); const p = await b.newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   p.on('dialog', d => d.accept());
-  await p.route('**/js/config.js', r => r.fulfill({ contentType: 'text/javascript', body: "window.INTAKE_CONFIG = { api: 'api/index.php', donateUrl: 'https://example.test/coffee' };" }));
+  await p.route('**/js/config.js*', r => r.fulfill({ contentType: 'text/javascript', body: "window.INTAKE_CONFIG = { api: 'api/index.php', donateUrl: 'https://example.test/coffee' };" }));
   await p.goto('http://127.0.0.1:8793/');
   await p.waitForFunction(() => /free weeks? left/.test(document.getElementById('runs-left').textContent));
   console.log('title:', await p.textContent('#runs-left'));
