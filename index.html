@@ -175,6 +175,11 @@
         </form>
       </div>
 
+      <!-- A quick intake: one skill, a few minutes -->
+      <div class="win" id="w-quick" data-title="Quick intake" data-icon="⚡">
+        <div id="quick" class="quick" aria-live="polite"></div>
+      </div>
+
       <!-- Follow-up after the first call: data, the coffee machine, a callback -->
       <div class="win" id="w-leads" data-title="Follow-up" data-icon="🔎">
         <div class="leads">
@@ -275,7 +280,7 @@
           <section class="bstep" data-step="concept">
             <h3>The concept</h3>
             <label>The big idea<input id="b-idea" maxlength="220" autocomplete="off" placeholder="One sentence a manager would repeat"></label>
-            <p class="hint">Format, up to 3</p>
+            <p class="hint" id="formats-hint">Format, up to 3</p>
             <div id="formats" class="chips">
               <button type="button" data-format="Practice or simulation">Practice or simulation</button>
               <button type="button" data-format="Coaching">Coaching</button>
@@ -312,6 +317,15 @@
             <button type="button" id="btn-memo-mode" class="ghost">Prefer one long form? (memo mode)</button>
           </div>
         </div>
+
+        <form id="memo4-form" class="write memo4" hidden>
+          <p class="muted">No case board this week: one page, four headings, in your own words. About 600 characters is plenty. <button type="button" id="btn-memo4-board" class="ghost">I want the case board back</button></p>
+          <label>Need: what is really going on, and is learning the lever?<textarea name="need" rows="4" maxlength="900"></textarea></label>
+          <label>Measure: how will we know it worked?<textarea name="measure" rows="3" maxlength="700"></textarea></label>
+          <label>Concept: what will you do, and what not?<textarea name="concept" rows="4" maxlength="900"></textarea></label>
+          <label>Risks: who could block it, and what you do about them<textarea name="risks" rows="3" maxlength="700"></textarea></label>
+          <div class="row"><button type="submit" class="primary">Send it to them</button> <span id="memo4-count" class="muted"></span></div>
+        </form>
 
         <form id="write-form" class="write" hidden>
           <p class="muted">Memo mode: write it all in your own words. The headings say what to cover, not what to write. <button type="button" id="btn-board-mode" class="ghost">Back to the case board</button></p>
@@ -423,6 +437,7 @@
 <script src="js/cards.js?v=dev"></script>
 <script src="js/prompts.js?v=dev"></script>
 <script src="js/coe.js?v=dev"></script>
+<script src="js/quick.js?v=dev"></script>
 <script src="js/sound.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>

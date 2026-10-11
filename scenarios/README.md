@@ -57,3 +57,7 @@ Tier 0 cards are starters for a player's first intake: a friendly stakeholder, o
 - Facts marked `critical` should weigh most in the diagnosis score; missing all critical facts caps diagnosis low even with a plausible guess.
 - Every card is built so the `surface_ask` is wrong or incomplete. A player who simply delivers it should land around "Order Taker".
 - All organisations and people are fictional, set in a Belgian context (works councils, the prevention advisor, Flemish language legislation, sector agreements), which gives the dependencies teeth.
+
+## Quick intakes (`quick/`)
+
+Twelve 2-to-4-minute mini-cards in `quick/<id>.json`, listed in `quick/index.json` and kept out of the main index. There are three of each kind: `one-question` (type the first question you'd ask), `triage` (train / dont_train / need_more_info), `measure` (fill the four rungs for a diagnosed case) and `flaw` (find the one wrong line in a colleague's draft; one draft is clean, `flaw_index: -1`). Common fields: `id`, `schema_version`, `kind`, `sector`, `tier`, `from`, `subject`, `mail`, `snippets[3]`, `debrief`; kind-specific fields as agreed with the game thread.

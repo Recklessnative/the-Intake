@@ -1,0 +1,36 @@
+{
+  "id": "quick-tr-ecommerce-returns",
+  "schema_version": 1,
+  "kind": "triage",
+  "sector": "E-commerce",
+  "tier": 2,
+  "from": {
+    "name": "Noor Jacobs",
+    "role": "Head of Customer Service",
+    "org": "Stoffel, an online fashion retailer"
+  },
+  "subject": "Returns are up, can CS help?",
+  "mail": "Our return rate went from 24% to 31% this year. I'd like to train our customer service team to persuade customers to keep their items, maybe with an exchange offer. The CFO wants it fixed by Q1.",
+  "snippets": [
+    "35 customer service agents handle return requests by chat and email.",
+    "Most returns are registered online without contacting customer service.",
+    "Marketing introduced 'free returns, always' in spring."
+  ],
+  "answer": "need_more_info",
+  "why": "Nobody yet knows why returns rose or whether customer service even sees most of them, so the first step is to look at return reasons and channels before deciding anything.",
+  "hidden_facts": [
+    {
+      "id": "reason_other",
+      "fact": "70% of returns are registered with the reason 'other', so the data can't yet say whether it's sizing, quality or free returns.",
+      "unlocks_when": "Shown in the debrief.",
+      "reveal_line": "Return reason? 'Other'. Seventy percent of the time. Customers are very mysterious."
+    },
+    {
+      "id": "no_contact",
+      "fact": "Only about 1 in 8 returns goes through customer service at all; the rest are registered online.",
+      "unlocks_when": "Shown in the debrief.",
+      "reveal_line": "Most customers never talk to us. They click 'return', print a label and that's it."
+    }
+  ],
+  "debrief": "This one can't be called yet, and that is the right answer. Returns could rise because of free returns, sizing or quality, and customer service only touches one return in eight. Asking for usable return reasons first saves a training aimed at the wrong channel."
+}

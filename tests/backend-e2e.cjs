@@ -12,6 +12,12 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   if (await p.isVisible('#w-coe')) await p.click('#w-coe .tb.close');
+  // The week opens with a quick one-question intake, graded through the proxy.
+  await p.click('#btn-call');
+  await p.fill('#quick textarea', 'What changed recently?'); await p.click('#quick-send');
+  await p.waitForSelector('.quick-score');
+  console.log('quick intake through the proxy:', await p.textContent('.quick-score'));
+  await p.click('#quick-next');
   await p.click('#btn-call');
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);

@@ -75,5 +75,25 @@
     };
   }
 
-  window.Cards = { normalise };
+  // A quick intake (scenarios/quick/): a 2-to-4-minute mini-card that trains one skill.
+  // It gets the fields the desk needs (mail, case file) next to its own.
+  function quick(raw) {
+    const f = raw.from || {};
+    return {
+      id: raw.id, quick: true, kind: raw.kind, sector: raw.sector,
+      difficulty: raw.tier == null ? 1 : raw.tier,
+      stakeholder: { name: f.name, role: f.role || '', org: f.org || '' },
+      subject: raw.subject, surfaceAsk: raw.mail,
+      briefing: { headline: 'What you already know', points: list(raw.snippets) },
+      hiddenFacts: list(raw.hidden_facts).map(h => ({ id: h.id, fact: h.fact, unlockedBy: h.unlocks_when, revealLine: h.reveal_line, foundAt: ['call'] })),
+      debrief: raw.debrief || '',
+      bestQuestion: raw.best_question || '', weakPatterns: list(raw.weak_patterns),
+      answer: raw.answer || '', why: raw.why || '',
+      diagnosis: raw.diagnosis || '', gold: raw.gold || {}, traps: list(raw.traps), dataAvailable: list(raw.data_available),
+      draftTitle: raw.draft_title || '', draft: list(raw.draft), flawIndex: raw.flaw_index == null ? -1 : raw.flaw_index,
+      flawWhy: raw.flaw_why || '', fix: raw.fix || ''
+    };
+  }
+
+  window.Cards = { normalise, quick };
 })();

@@ -14,7 +14,6 @@
   const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
   const placeOf = where => PLACE[where.replace(/^data:/, '')] || where;
   const MIEKE_ASKS = 3;
-  const RUN_LENGTH = 3;
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
   const DIMENSIONS = [
     ['diagnosis', 'Need diagnosis', 25],
@@ -32,7 +31,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], cards: [], index: 0, results: [], run: null, charged: false, weekId: '' };
+  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1 };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -77,20 +76,52 @@
     const index = await (await fetch('scenarios/index.json', { cache: 'no-cache' })).json();
     const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.normalise);
     state.pool = cards;
+    try {
+      const qi = await (await fetch('scenarios/quick/index.json', { cache: 'no-cache' })).json();
+      state.quickPool = (await Promise.all(qi.map(id => fetch('scenarios/quick/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.quick);
+    } catch (e) { state.quickPool = []; /* no quick intakes: weeks are full cases only */ }
   }
-  // A week: up to RUN_LENGTH cards, mixed sectors, easiest first. Your first week opens with
-  // up to two starter cases; after that the starters are retired.
-  function pickWeek() {
-    const shuffled = state.pool.slice().sort(() => Math.random() - 0.5);
-    const starters = shuffled.filter(c => c.difficulty === 0);
-    const pool = shuffled.filter(c => c.difficulty !== 0);
-    const week = scoreHistory().weeks.some(w => w.requests.length) ? [] : starters.slice(0, 2);
-    for (const c of pool) if (week.length < RUN_LENGTH && !week.some(w => w.sector === c.sector)) week.push(c);
-    for (const c of pool) if (week.length < RUN_LENGTH && !week.includes(c)) week.push(c);
-    return week.sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1));
+  // The shape of a week changes from week to week. Each slot is [day, what]: 'q' is a quick
+  // intake ('q:<kind>' for one kind), a number is a full case of that tier (0 = starter).
+  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const SHAPES = [
+    [[0, 'q'], [0, 'q'], [1, 3], [2, 'q'], [2, 2]],
+    [[0, 2], [1, 'q'], [1, 'q'], [1, 'q'], [2, 3]],
+    [[0, 'q'], [0, 2], [1, 'q'], [2, 'q'], [2, 3]]
+  ];
+  function shapeFor(n) {
+    if (n === 1) return [[0, 'q:one-question'], [0, 0], [1, 'q:triage'], [1, 0], [2, 1]];
+    if (n === 2) return [[0, 'q'], [0, 'q'], [1, 1], [2, 'q'], [2, 2]];
+    return SHAPES[(n - 3) % SHAPES.length];
   }
+  function weekNumber() {
+    return scoreHistory().weeks.filter(w => w.requests.length && w.id !== state.weekId).length + 1;
+  }
+  // Fill the shape: unplayed cards first, no sector twice, quick kinds mixed. Starters and
+  // tier-2 quick intakes wait until after the first week.
+  function pickWeek(n) {
+    const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
+    const fresh = list => list.slice().sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
+    const cards = [], days = [];
+    shapeFor(n).forEach(([day, what]) => {
+      let card;
+      if (String(what).startsWith('q')) {
+        const kind = what.split(':')[1];
+        const pool = fresh(state.quickPool.filter(c => !cards.includes(c) && (!kind || c.kind === kind) && (n > 1 || c.difficulty <= 1)));
+        card = pool.find(c => !cards.some(x => x.quick && x.kind === c.kind)) || pool[0];
+      } else {
+        const full = fresh(state.pool.filter(c => !cards.includes(c) && (what === 0 ? c.difficulty === 0 : c.difficulty !== 0)));
+        const near = full.slice().sort((a, b) => Math.abs(a.difficulty - what) - Math.abs(b.difficulty - what));
+        card = near.find(c => c.difficulty === what && !cards.some(x => x.sector === c.sector)) || near.find(c => c.difficulty === what) || near[0];
+      }
+      if (card) { cards.push(card); days.push(day); }
+    });
+    return { cards, days };
+  }
+  const dayOf = i => DAYS[state.days[i] || 0];
+  const isQuick = card => !!(card && card.quick);
 
-  // ---------- title / settings ----------
+    // ---------- title / settings ----------
   $('btn-settings').onclick = () => openSettings();
   $('btn-back-title').onclick = () => show('s-title');
   function openSettings() {
@@ -161,11 +192,14 @@
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
     if (!(await claimRun())) return;
     dropSave();
-    state.cards = pickWeek();
+    state.weekId = 'w' + Date.now();
+    state.weekNo = weekNumber();
+    const week = pickWeek(state.weekNo);
+    state.cards = week.cards;
+    state.days = week.days;
     state.index = 0;
     state.results = [];
     state.charged = false;
-    state.weekId = 'w' + Date.now();
     state.run = null;
     cubicle();
   };
@@ -217,7 +251,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -234,11 +268,13 @@
     const s = readSave();
     if (!s) { resumeButton(); return; }
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios.'); return; }
-    const cards = s.cards.map(id => state.pool.find(c => c.id === id));
+    const cards = s.cards.map(id => state.pool.concat(state.quickPool).find(c => c.id === id));
     if (cards.some(c => !c)) { dropSave(); resumeButton(); toast('That week used a scenario that no longer exists. Start a new one.'); return; }
     if (s.runId) Gemini.runId = s.runId;
     else if (!(await claimRun())) return;
     state.cards = cards;
+    state.days = s.days || cards.map(() => 0);
+    state.weekNo = s.weekNo || 1;
     state.index = s.index;
     state.results = s.results || [];
     state.charged = !!s.charged;
@@ -263,17 +299,19 @@
     state.run = {
       card, trust: 100, questionsLeft: questionsFor(card), patience: card.difficulty === 0 ? STARTER.patience : card.patience || 3,
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
-      miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57,
+      miekeLeft: MIEKE_ASKS, clock: prev && state.index && state.days[state.index] === state.days[state.index - 1] ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
       phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null,
       leg: 'call', legLeft: touchpoints(card) ? TOUCH.call : questionsFor(card), calledBack: false,
-      corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: []
+      corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: [],
+      answer: {}, result: null
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
     // Your very first request: the Center of Excellence folder opens on the flowchart.
     if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) openApp('w-coe');
     if (state.index) Sound.ding();
+    if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
     save();
   }
 
@@ -300,10 +338,11 @@
     selectMail(state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
-    Desktop.open('w-mieke', Desktop.floating['w-mieke']);
-    Desktop.minimise('w-mieke');
+    if (!isQuick(card)) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
-    step('Request ' + (state.index + 1) + ' of ' + state.cards.length);
+    step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length + (isQuick(card) ? ' · quick one' : ''));
+    $('btn-call').textContent = isQuick(card) ? '⚡ Handle it (a few minutes)' : '☎ Call them back';
+    if (isQuick(card)) { if (r.phase !== 'inbox') quickDesk(); return; }
     if (r.phase !== 'inbox') callWindow();
     renderLeads();
     if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
@@ -414,6 +453,11 @@
   $('btn-call').onclick = () => {
     if (!state.run.readMail.current) selectMail(state.run.mails.find(m => m.current));
     const r = state.run;
+    if (isQuick(r.card)) {
+      if (r.phase === 'inbox') { r.phase = 'quick'; tick(2); save(); }
+      quickDesk();
+      return;
+    }
     if (r.phase === 'inbox') {
       r.phase = 'call';
       $('chat-log').innerHTML = '';
@@ -700,6 +744,47 @@
       : `Q${i + 1} [${SRC[t.src] || 'Call'}${t.src === 'frontline' && fl ? ', to ' + fl.name + ', ' + fl.role : ''}]: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n');
   }
 
+  // ---------- quick intakes ----------
+  function quickDesk() {
+    phase('quick');
+    renderQuick();
+    Desktop.layout('quick', 'w-quick');
+  }
+  function renderQuick() {
+    const r = state.run;
+    Desktop.title('w-quick', 'Quick intake · ' + r.card.stakeholder.name, 'Quick intake');
+    if (r.result) {
+      Quick.debrief($('quick'), r.card, r.answer, r.result);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'primary';
+      b.id = 'quick-next';
+      b.textContent = state.index + 1 < state.cards.length ? 'Next request' : 'End the week';
+      b.onclick = () => $('btn-next').onclick();
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.appendChild(b);
+      $('quick').appendChild(row);
+      return;
+    }
+    Quick.form($('quick'), r.card, r.answer, saveSoon, sendQuick);
+  }
+  async function sendQuick(a, why) {
+    if (!a) { toast(why, 'info'); return; }
+    const r = state.run;
+    let res;
+    try { res = await Quick.grade(r.card, a); } catch (e) { toast(e.message); renderQuick(); return; }
+    if (r !== state.run || r.result) return;
+    r.result = res;
+    r.phase = 'score';
+    tick(3);
+    state.results.push({ id: r.card.id, total: res.total, quick: true });
+    recordScore(r, res.total, {}, { questionNotAsked: '', verdict: '' });
+    save();
+    if (!state.charged && Gemini.runId) { state.charged = true; save(); Gemini.backend('played', { runId: Gemini.runId }).catch(() => {}); }
+    renderQuick();
+  }
+
   // ---------- Mieke, the colleague two cubicles over ----------
   function miekeSays(text, who, replay) {
     if (!replay) state.run.mieke.push({ who: who || 'them', text });
@@ -722,7 +807,7 @@
     miekeLeft();
     miekeSays(question, 'you');
     const ph = $('desktop').dataset.phase;
-    const draft = ph !== 'write' ? null : r.board && r.board.mode === 'board' ? boardWriteup() : Object.fromEntries(new FormData($('write-form')).entries());
+    const draft = ph !== 'write' ? null : r.board && r.board.mode === 'board' ? boardWriteup() : r.board && r.board.mode === 'memo4' ? Object.assign({ kind: 'memo4' }, r.board.memo4) : Object.fromEntries(new FormData($('write-form')).entries());
     const material = [
       'Where they are: ' + ({ inbox: 'they have read the request and not called yet', call: r.leg === 'callback' ? 'they called the stakeholder back with what they found' : 'they are in the middle of the intake call', investigate: 'the first call is over; they can request data, chat with ' + (r.card.frontline ? r.card.frontline.name + ' (' + r.card.frontline.role + ')' : 'someone') + ' at the coffee machine, or call back once', write: 'the call is over and they are writing the concept' }[ph] || ph),
       'Questions left for this request: ' + r.questionsLeft,
@@ -773,7 +858,9 @@
     const decoys = DECOYS.filter(d => !deps.some(x => x.toLowerCase().includes(d.split(' ')[0].toLowerCase()))).sort(() => Math.random() - 0.5).slice(0, 3);
     const tiles = deps.map(who => ({ who, real: true })).concat(decoys.map(who => ({ who, real: false }))).sort(() => Math.random() - 0.5);
     return {
-      mode: 'board', step: 'diagnose', locked: false, feedback: '',
+      // Help fades: week 1 the full board, week 2 chips on the diagnosis only, then a blank memo.
+      mode: state.weekNo >= 3 ? 'memo4' : 'board', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
+      step: 'diagnose', locked: false, feedback: '',
       evidence: [], tags: [], problem: '', lever: '', leverWhy: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
       idea: '', formats: [], why: '', not: '', tiles, risks: [], flag: ''
@@ -793,7 +880,16 @@
   function renderBoard() {
     const r = state.run, b = board();
     $('board').hidden = b.mode !== 'board';
-    $('write-form').hidden = b.mode === 'board';
+    $('write-form').hidden = b.mode !== 'memo';
+    $('memo4-form').hidden = b.mode !== 'memo4';
+    $('board').classList.toggle('fade2', (b.fade || 1) >= 2);
+    if (b.mode === 'memo4') {
+      const f = $('memo4-form').elements;
+      ['need', 'measure', 'concept', 'risks'].forEach(k => { f[k].value = (b.memo4 || {})[k] || ''; });
+      memo4Count();
+      Desktop.title('w-write', 'One-pager - ' + r.card.stakeholder.name, 'One-pager');
+      return;
+    }
     Desktop.title('w-write', b.mode === 'board' ? 'Case board - ' + r.card.stakeholder.name : 'Concept - WordPad', b.mode === 'board' ? 'Case board' : 'Concept');
     const at = STEPS.indexOf(b.step);
     document.querySelectorAll('#board-steps li').forEach((li, i) => { li.className = i < at || (i === at && b.locked) ? 'done' : i === at ? 'now' : ''; });
@@ -925,7 +1021,7 @@
     }
     if (step === 'lever' && (!b.lever || b.leverWhy.trim().length < 5)) return 'Choose an answer and say why in one line.';
     if (step === 'measure' && RUNGS.filter(([k]) => b.rungs[k].text.trim()).length < 2) return 'Fill in at least two rungs of the ladder.';
-    if (step === 'concept' && (b.idea.trim().length < 15 || !b.formats.length)) return 'Write the big idea and pick at least one format.';
+    if (step === 'concept' && (b.idea.trim().length < 15 || (!b.formats.length && (b.fade || 1) < 2))) return (b.fade || 1) < 2 ? 'Write the big idea and pick at least one format.' : 'Write the big idea in one sentence.';
     if (step === 'risks' && (b.risks.length < 2 || b.risks.some(x => x.mitigation.trim().length < 5))) return 'Pick two blockers and say how you handle each.';
     return '';
   }
@@ -941,6 +1037,8 @@
       if (extra.length) parts.push(listText(extra.map(t => TAG_NAMES[t])) + (extra.length > 1 ? ' don\'t' : ' doesn\'t') + ' look like the driver here.');
       const lost = r.card.hiddenFacts.filter(f => f.critical && !r.revealed.has(f.id)).length;
       if (lost) parts.push(lost === 1 ? 'And one important thing never came up in your call.' : 'And ' + lost + ' important things never came up in your call.');
+      // In the first week Mieke also shows her own version, once yours is locked in.
+      if ((b.fade || 1) === 1 && r.card.needStatement) parts.push('My version: "' + r.card.needStatement + '"');
       return 'Mieke: ' + parts.map(cap).join(' ');
     }
     if (step === 'lever') {
@@ -1006,6 +1104,7 @@
   }
 
   function writeupText(w) {
+    if (w.kind === 'memo4') return ['NEED', w.need, 'MEASUREMENT', w.measure, 'CONCEPT', w.concept, 'RISKS AND DEPENDENCIES', w.risks].join('\n');
     if (w.kind === 'board') {
       return [
         'NEED',
@@ -1033,6 +1132,20 @@
       'Flagged as risky strat: ' + (w.flag || '(not flagged)')
     ].join('\n');
   }
+
+  // The blank one-pager (week 3 on).
+  function memo4Count() {
+    const n = Object.values(board().memo4 || {}).join('').length;
+    $('memo4-count').textContent = n + ' characters' + (n > 900 ? '. They will skim it.' : '');
+  }
+  $('memo4-form').addEventListener('input', e => { const b = board(); b.memo4 = b.memo4 || {}; b.memo4[e.target.name] = e.target.value; memo4Count(); saveSoon(); });
+  $('memo4-form').onsubmit = ev => {
+    ev.preventDefault();
+    const m = board().memo4 || {};
+    if (!(m.need || '').trim() || !(m.concept || '').trim()) { toast('At least write the need and the concept.'); return; }
+    submitWriteup(Object.assign({ kind: 'memo4' }, m));
+  };
+  $('btn-memo4-board').onclick = () => { board().mode = 'board'; renderBoard(); save(); };
 
   $('write-form').onsubmit = ev => {
     ev.preventDefault();
@@ -1206,11 +1319,14 @@
   };
 
   function endRun() {
-    const avg = Math.round(state.results.reduce((a, r) => a + r.total, 0) / state.results.length);
+    // A full case counts twice as much as a quick one.
+    const wt = x => (x.quick ? 1 : 2);
+    const avg = Math.round(state.results.reduce((a, x) => a + wt(x) * x.total, 0) / (state.results.reduce((a, x) => a + wt(x), 0) || 1));
     const title = TITLES.find(([max]) => avg < max)[1];
     $('end-title').textContent = title;
     $('end-score').textContent = avg + ' / 100';
-    $('end-note').textContent = 'Average over ' + state.results.length + ' requests.';
+    const q = state.results.filter(x => x.quick).length;
+    $('end-note').textContent = 'Week ' + state.weekNo + '. Average over ' + state.results.length + ' requests' + (q ? ' (' + q + ' quick ones, which count half)' : '') + '.';
     recordWeek(avg, title);
     show('s-end');
   }
@@ -1236,7 +1352,7 @@
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
-      starter: r.card.difficulty === 0, total, pts, question: g.questionNotAsked, verdict: g.verdict
+      starter: r.card.difficulty === 0, quick: isQuick(r.card) ? r.card.kind : undefined, total, pts, question: g.questionNotAsked, verdict: g.verdict
     });
     keepScores(h);
   }
@@ -1261,8 +1377,8 @@
       head.textContent = '=== Week of ' + fmt(w.started) + (w.done ? ' · ' + w.title + ' · average ' + w.avg + '/100' : ' · in progress') + ' ===';
       box.appendChild(head);
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
-        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
-        para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
+        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (x.quick ? ' [quick: ' + Quick.KINDS[x.quick].label.toLowerCase() + ']' : '') + ': ' + x.total + '/100');
+        if (!x.quick) para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
         if (x.question) para('   The question you didn\'t ask: ' + x.question);
         if (x.verdict) para('   Their verdict: ' + x.verdict);
       });
@@ -1273,6 +1389,10 @@
   function openApp(id) {
     const r = state.run;
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
+    if (r && isQuick(r.card) && ['w-call', 'w-write', 'w-leads'].includes(id)) { toast('This one is a quick intake. Handle it from Doors Mail.', 'info'); return; }
+    if (id === 'w-mieke' && r && isQuick(r.card)) { toast('Mieke: "It\'s a quick one. Trust your gut, I\'ll see you at the debrief."', 'info'); return; }
+    if (id === 'w-quick' && (!r || !isQuick(r.card) || r.phase === 'inbox')) { toast('No quick intake open. They arrive in Doors Mail.', 'info'); return; }
+    if (id === 'w-quick') { quickDesk(); return; }
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
     if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call' || r.phase === 'investigate')) { toast('The case board opens when you are done asking questions.', 'info'); return; }
     if (id === 'w-leads' && (!r || !touchpoints(r.card))) { toast(r && r.card.difficulty === 0 ? 'Starter cases are all on the call. Follow-up opens on the next ones.' : 'Nothing to follow up yet.', 'info'); return; }
@@ -1309,6 +1429,18 @@
       return;
     }
     if (r.phase === 'inbox') $('btn-call').onclick();
+    // A quick intake: fill in the card's own answer; you still press Send.
+    if (isQuick(card)) {
+      if (r.phase !== 'quick') return;
+      const a = r.answer;
+      if (card.kind === 'one-question') a.q = card.bestQuestion;
+      if (card.kind === 'triage') { a.pick = card.answer; a.why = '(test) ' + card.why; }
+      if (card.kind === 'measure') { a.baseline = card.gold.baseline; a.behaviour = card.gold.behaviour; a.metric = card.gold.business_metric; a.collection = card.gold.collection; }
+      if (card.kind === 'flaw') { a.line = card.flawIndex; a.fix = card.fix || '(test) A better line.'; }
+      renderQuick();
+      save();
+      return;
+    }
     if (r.phase === 'call') {
       card.hiddenFacts.filter(f => f.foundAt.includes('call') && !r.revealed.has(f.id)).slice(0, Math.min(r.questionsLeft, r.legLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'Tell me more.'), a = f.revealLine || f.fact;
@@ -1331,7 +1463,7 @@
       card.hiddenFacts.filter(f => f.foundAt.includes('frontline') && !r.revealed.has(f.id)).slice(0, Math.min(r.corridorLeft, r.questionsLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'What is it really like?'), a = f.frontlineLine || f.fact;
         r.corridor.push({ who: 'you', text: qText }, { who: 'them', text: a });
-        r.corridorTurns.push({ role: 'user', text: 'The learning professional asks:  + qText + ' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
+        r.corridorTurns.push({ role: 'user', text: 'The learning professional asks: """' + qText + '"""' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
         r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id], src: 'frontline' });
         r.revealed.add(f.id);
         r.corridorLeft--;
@@ -1345,6 +1477,13 @@
     if (r.phase !== 'write') return;
     const b = board(), plan = card.measurementPlan || {}, gold = card.goldAnswer || {};
     const want = String(card.learningIsTheAnswer || '').toLowerCase();
+    if (b.mode === 'memo4') {
+      b.memo4 = { need: card.needStatement || card.realProblem || '(test)', measure: Object.values(plan).filter(v => typeof v === 'string').join(' ') || '(test)',
+        concept: (gold.concept || '(test)').split(' | ')[0], risks: (card.dependencies || []).map(d => d.who + ': ' + d.concern).join('\n') || '(test)' };
+      renderBoard();
+      save();
+      return;
+    }
     if (b.mode === 'memo') {
       const f = $('write-form').elements;
       const fill = { gap: card.needStatement || card.realProblem, who: card.constraints.audience, cause: card.rootCause, lever: (LEVER_NAMES[want] || 'Partly') + '.',

@@ -1,0 +1,32 @@
+{
+  "id": "quick-fl-feedback-ranking",
+  "schema_version": 1,
+  "kind": "flaw",
+  "sector": "Logistics",
+  "tier": 2,
+  "from": {
+    "name": "Jens Wuyts",
+    "role": "Junior learning designer, your team",
+    "org": "Your L&D team"
+  },
+  "subject": "Draft: measurement plan for the team lead feedback programme",
+  "mail": "Hi! Here's my draft measurement plan for the feedback conversations programme for team leads at the distribution centre. Could you check it before it goes to the site director?",
+  "snippets": [
+    "Programme: monthly one-to-ones and feedback skills for 22 team leads.",
+    "Goal: lower short-term absence and turnover.",
+    "The site has a works council and a DPO."
+  ],
+  "draft_title": "Measurement plan: feedback conversations for team leads",
+  "draft": [
+    "Baseline: short-term absence and voluntary turnover per team over the last 12 months, from HR.",
+    "Behaviour: team leads hold a monthly one-to-one with each team member, logged in the HR system.",
+    "Every quarter, a sample of team members answers three questions on whether their team lead gives them useful feedback.",
+    "Business metric: short-term absence and turnover in teams whose lead has been through the programme, compared with teams still waiting.",
+    "To keep it sharp, we rank team leads individually on their team's absence and share the ranking in the monthly management meeting.",
+    "Collection: monthly HR export and the quarterly pulse, reviewed after six months."
+  ],
+  "flaw_index": 4,
+  "flaw_why": "Ranking named team leads on their team's absence turns the measurement into a blame tool, is unreliable for small teams, and uses employee data in a way the works council and DPO would need to approve.",
+  "fix": "Compare groups (trained versus waiting) instead of individuals, and agree the use of the data with the works council and DPO before starting.",
+  "debrief": "Most of this plan is solid: a baseline, a behaviour, a comparison group. The ranking line is the kind of 'sharpening' that kills trust and, in Belgium, starts a works council discussion. Group comparisons answer the same question without naming anyone."
+}

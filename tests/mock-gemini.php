@@ -1,5 +1,5 @@
 <?php
-// Stand-in for Gemini used by tests: answers each of the game's three roles with valid JSON.
+// Stand-in for Gemini used by tests: answers each of the game's roles with valid JSON.
 $in = json_decode(file_get_contents('php://input'), true);
 $sys = $in['systemInstruction']['parts'][0]['text'] ?? '';
 if (strpos($sys, 'You are the examiner') === 0) {
@@ -8,6 +8,8 @@ if (strpos($sys, 'You are the examiner') === 0) {
           'defenceOutcome' => 'none', 'questionNotAsked' => 'What changed?', 'verdict' => 'Fine.'];
 } elseif (strpos($sys, 'rate the concept') !== false) {
   $out = ['boldness' => 0, 'boldnessReason' => 'x', 'objections' => ['a', 'b', 'c'], 'acceptReply' => 'ok'];
+} elseif (strpos($sys, 'exactly ONE question') !== false) {
+  $out = ['reply' => 'Since June.', 'revealed' => [], 'score' => 3, 'note' => 'Good.'];
 } else {
   $out = ['reply' => 'Nights, mostly.', 'revealed' => [], 'quality' => 'good'];
 }
