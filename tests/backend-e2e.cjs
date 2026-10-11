@@ -15,6 +15,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);
   await p.click('#btn-hangup');
+  await p.click('#btn-memo-mode');
   for (const n of ['gap', 'idea']) await p.fill(`#write-form [name=${n}]`, 'x');
   await p.click('#write-form button[type=submit]');
   await p.waitForSelector('#p-score.active');

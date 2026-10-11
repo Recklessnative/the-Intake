@@ -177,9 +177,94 @@
       </div>
 
       <!-- Write-up -->
-      <div class="win" id="w-write" data-title="Concept - WordPad" data-icon="📄">
-        <p class="muted">Write it in your own words. No menus, no checklists. The headings say what to cover, not what to write. Your call, notes and case file stay open beside this.</p>
-        <form id="write-form" class="write">
+      <div class="win" id="w-write" data-title="Case board" data-icon="📌">
+        <!-- The case board: five short steps built on evidence from the call. -->
+        <div id="board" class="board">
+          <ol id="board-steps" class="board-steps">
+            <li data-step="diagnose">Diagnose</li><li data-step="lever">Lever</li><li data-step="measure">Measure</li><li data-step="concept">Concept</li><li data-step="risks">Risks</li><li data-step="memo">Send</li>
+          </ol>
+          <div id="board-sofar" class="board-sofar"></div>
+
+          <section class="bstep" data-step="diagnose">
+            <h3>What is really going on?</h3>
+            <p class="hint">Tap the 1 to 3 things they said that prove it.</p>
+            <div id="ev-diagnose" class="ev-pool"></div>
+            <p class="hint">What kind of cause is it? Pick 1 to 3.</p>
+            <div id="tags" class="chips">
+              <button type="button" data-tag="skill">Skill or knowledge</button>
+              <button type="button" data-tag="process">Process or workflow</button>
+              <button type="button" data-tag="system">Tools and systems</button>
+              <button type="button" data-tag="incentive">Incentives and targets</button>
+              <button type="button" data-tag="expectations">Expectations and culture</button>
+              <button type="button" data-tag="environment">Work environment</button>
+            </div>
+            <label>The real problem is…<input id="b-problem" maxlength="220" autocomplete="off" placeholder="One sentence: who does what, and why"></label>
+          </section>
+
+          <section class="bstep" data-step="lever">
+            <h3>Is learning the lever?</h3>
+            <div id="lever" class="chips big">
+              <button type="button" data-lever="yes">Learning fixes this</button>
+              <button type="button" data-lever="partly">Partly</button>
+              <button type="button" data-lever="no">Not a learning problem</button>
+            </div>
+            <label>Because…<input id="b-lever-why" maxlength="160" autocomplete="off" placeholder="One line"></label>
+          </section>
+
+          <section class="bstep" data-step="measure">
+            <h3>How will you know it worked?</h3>
+            <p class="hint">One line per rung. Attach something they said where it backs you up.</p>
+            <div class="ladder">
+              <label>Baseline: where are we now?<input data-rung="baseline" maxlength="160" autocomplete="off"></label><select data-rung-ev="baseline" aria-label="Evidence for the baseline"></select>
+              <label>Behaviour: what will people do differently?<input data-rung="behaviour" maxlength="160" autocomplete="off"></label><select data-rung-ev="behaviour" aria-label="Evidence for the behaviour"></select>
+              <label>Business metric: what moves for the business?<input data-rung="metric" maxlength="160" autocomplete="off"></label><select data-rung-ev="metric" aria-label="Evidence for the business metric"></select>
+              <label>Collection: how, when, with what data?<input data-rung="collect" maxlength="160" autocomplete="off"></label><select data-rung-ev="collect" aria-label="Evidence for the collection"></select>
+            </div>
+          </section>
+
+          <section class="bstep" data-step="concept">
+            <h3>The concept</h3>
+            <label>The big idea<input id="b-idea" maxlength="220" autocomplete="off" placeholder="One sentence a manager would repeat"></label>
+            <p class="hint">Format, up to 3</p>
+            <div id="formats" class="chips">
+              <button type="button" data-format="Practice or simulation">Practice or simulation</button>
+              <button type="button" data-format="Coaching">Coaching</button>
+              <button type="button" data-format="Job aid">Job aid</button>
+              <button type="button" data-format="Peer learning">Peer learning</button>
+              <button type="button" data-format="On-the-job huddle">On-the-job huddle</button>
+              <button type="button" data-format="Manager routine">Manager routine</button>
+              <button type="button" data-format="Workshop">Workshop</button>
+              <button type="button" data-format="E-learning">E-learning</button>
+              <button type="button" data-format="Process or tool change">Process or tool change</button>
+              <button type="button" data-format="Incentive or policy change">Incentive or policy change</button>
+              <button type="button" data-format="Communication">Communication</button>
+            </div>
+            <label><span id="b-why-label">Why it fixes the cause</span><input id="b-why" maxlength="200" autocomplete="off"></label>
+            <label>It is not…<input id="b-not" maxlength="160" autocomplete="off" placeholder="What you are deliberately not doing"></label>
+          </section>
+
+          <section class="bstep" data-step="risks">
+            <h3>Who or what could block this?</h3>
+            <p class="hint">Pick the 2 that matter most, most dangerous first, and say how you'll handle each.</p>
+            <div id="tiles" class="chips"></div>
+            <div id="mitigations"></div>
+          </section>
+
+          <section class="bstep" data-step="memo">
+            <h3>Your one-pager</h3>
+            <div id="memo" class="memo"></div>
+            <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<input id="b-flag" maxlength="200" autocomplete="off"></label>
+          </section>
+
+          <div id="board-feedback" class="feedback" hidden></div>
+          <div class="row">
+            <button type="button" id="board-next" class="primary">Lock it in</button>
+            <button type="button" id="btn-memo-mode" class="ghost">Prefer one long form? (memo mode)</button>
+          </div>
+        </div>
+
+        <form id="write-form" class="write" hidden>
+          <p class="muted">Memo mode: write it all in your own words. The headings say what to cover, not what to write. <button type="button" id="btn-board-mode" class="ghost">Back to the case board</button></p>
           <h3>1. The need</h3>
           <label>The performance gap: what people do now versus what they should do<textarea name="gap" rows="2" maxlength="700"></textarea></label>
           <label>Who has the gap<textarea name="who" rows="1" maxlength="400"></textarea></label>

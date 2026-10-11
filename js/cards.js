@@ -25,6 +25,7 @@
       subject: (raw.surface_ask || 'Request: can you help?').replace(/\.$/, ''),
       realProblem: g.real_problem,
       rootCause: list(g.root_cause_types).join(', '),
+      rootCauseTypes: list(g.root_cause_types),
       learningIsTheAnswer: g.is_training_the_lever,
       needStatement: g.need_statement,
       hiddenFacts: list(raw.hidden_facts).map(f => ({
