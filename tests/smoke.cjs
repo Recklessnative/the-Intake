@@ -37,6 +37,29 @@ async function caseBoard(req) {
   if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
   await next();
 }
+// A quick intake from the inbox: refuse an empty answer, resume mid-way, grade, debrief.
+async function quickOne(n) {
+  const kind = await p.evaluate(() => window.__intake.state.run.card.kind);
+  if (!(await p.textContent('#btn-call')).includes('Handle it')) throw new Error('quick mail has no Handle it button');
+  await p.click('#btn-call');
+  await visible('#w-quick');
+  await p.click('#quick-send');
+  if (!(await p.isVisible('#quick-send')) || await p.$('.quick-score')) throw new Error('empty quick answer was sent');
+  if (kind === 'one-question') await p.fill('#quick textarea', 'Since when are the schedules late, and what changed then?');
+  else if (kind === 'triage') { await p.click('#quick .chips [data-v="dont_train"]'); await p.fill('#quick input', 'The tool is the problem, not the people.'); }
+  else throw new Error('unexpected quick kind in week 1: ' + kind);
+  if (n === 2) {
+    await p.waitForTimeout(700);
+    await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
+    await visible('#w-quick');
+    if (await p.getAttribute('#quick .chips [data-v="dont_train"]', 'aria-pressed') !== 'true') throw new Error('quick answer not restored');
+  }
+  await p.click('#quick-send');
+  await p.waitForSelector('.quick-score');
+  if (n === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/quick.png' });
+  console.log('quick', n + 1, kind, await p.textContent('.quick-score'));
+  await p.click('#quick-next');
+}
 // The follow-up after a first call: a data request, the coffee machine, one callback.
 async function followUp() {
   await p.waitForSelector('#w-leads.open');
@@ -73,7 +96,7 @@ async function followUp() {
   visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
-  let calls = 0, corridor = 0, callbacks = 0;
+  let calls = 0, corridor = 0, callbacks = 0, quickCalls = 0;
   await p.route('https://generativelanguage.googleapis.com/**', async route => {
     calls++;
     const body = JSON.parse(route.request().postData());
@@ -83,6 +106,8 @@ async function followUp() {
     if (!route.request().url().includes('gemini-3.5-flash-lite')) throw new Error('wrong model ' + route.request().url());
     let out;
     if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
+    else if (sys.includes('measurement exercise')) { quickCalls++; const r = { score: 3, note: 'Specific.' }; out = { baseline: r, behaviour: r, metric: r, collection: r }; }
+    else if (sys.includes('exactly ONE question')) { quickCalls++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Since June, now that you ask.', revealed: facts.slice(0, 1), score: 3, note: 'Good: you asked what changed.' }; }
     else if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good' }; }
@@ -93,16 +118,19 @@ async function followUp() {
   await p.click('#btn-start');                      // no key -> settings
   await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
   await p.click('#btn-start');
-  for (let req = 0; req < 3; req++) {
-    if (req === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
-    if (req === 0) { while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit'); }
+  let req = -1;
+  for (let n = 0; n < 5; n++) {
+    if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
+    if (n === 0) { while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit'); }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
-    if (req === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
-    if (req === 0) {
-      // First request ever: a starter case, and the Center of Excellence opens on the flowchart.
-      const first = await p.evaluate(() => window.__intake.state.run);
-      if (first.card.difficulty !== 0 || first.questionsLeft !== 10 || first.patience !== 5) throw new Error('first request is not a starter: ' + first.card.id);
+    if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
+    if (n === 0) {
+      // First request ever: a quick one-question intake, and the Center of Excellence opens on the flowchart.
+      const first = await p.evaluate(() => window.__intake.state);
+      if (!first.run.card.quick || first.run.card.kind !== 'one-question') throw new Error('first request is not a quick one-question: ' + first.run.card.id);
+      const shape = first.cards.map(c => c.quick ? 'q:' + c.kind : c.difficulty).join(' ');
+      if (shape !== 'q:one-question 0 q:triage 0 1' || first.days.join('') !== '00112') throw new Error('week 1 shape wrong: ' + shape + ' / ' + first.days);
       await visible('#w-coe');
       if (!(await p.$('#coe-doc svg.flow'))) throw new Error('flowchart missing');
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/coe.png' });
@@ -111,7 +139,7 @@ async function followUp() {
       await p.click('#w-coe .tb.close');
       if (!MOBILE) {
         await p.click('.desk-icon[data-app="w-call"]');
-        if (!(await p.textContent('#toast')).includes('No call yet')) throw new Error('phone icon before the call should explain');
+        if (!(await p.textContent('#toast')).includes('quick intake')) throw new Error('phone icon before the call should explain');
         await p.click('.desk-icon[data-app="w-coe"]'); await visible('#w-coe'); await p.click('#w-coe .tb.close');
       }
       await p.click('#mail-rows tr:has-text("cake?")');
@@ -121,6 +149,12 @@ async function followUp() {
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
     }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
+    if (await p.evaluate(() => window.__intake.state.run.card.quick)) { await quickOne(n); continue; }
+    req++;
+    if (req === 0) {
+      const r = await p.evaluate(() => window.__intake.state.run);
+      if (r.card.difficulty !== 0 || r.questionsLeft !== 10 || r.patience !== 5) throw new Error('first full case is not a starter: ' + r.card.id);
+    }
     await p.click('#btn-call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
@@ -172,13 +206,28 @@ async function followUp() {
     if (req === 0) {
       // Reload on the scorecard: it comes back without counting the request twice.
       await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#p-score.active');
-      if (await p.evaluate(() => window.__intake.state.results.length) !== 1) throw new Error('scorecard counted twice after resume');
+      if (await p.evaluate(() => window.__intake.state.results.length !== window.__intake.state.index + 1)) throw new Error('scorecard counted twice after resume');
     }
     await p.click('#btn-next');
   }
   await p.waitForSelector('#s-end.active');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
+  if (quickCalls !== 1) throw new Error('expected one Gemini call for the quick intakes, got ' + quickCalls);
+  // Every quick kind grades and draws its form and debrief.
+  const kinds = await p.evaluate(async () => {
+    const out = {};
+    for (const c of window.__intake.state.quickPool) {
+      const a = { q: 'What changed?', pick: 'train', why: 'Because.', baseline: 'b', behaviour: 'c', line: 0, fix: 'A much better line here.' };
+      const box = document.createElement('div');
+      Quick.form(box, c, a, () => {}, () => {});
+      const res = await Quick.grade(c, a);
+      Quick.debrief(box, c, a, res);
+      out[c.kind] = (out[c.kind] || []).concat(res.total);
+    }
+    return out;
+  });
+  if (Object.keys(kinds).length !== 4 || kinds.measure.some(t => t !== 75)) throw new Error('quick kinds: ' + JSON.stringify(kinds));
   if (corridor !== 1 || callbacks !== 1) throw new Error('coffee machine or callback prompt missing: ' + corridor + ' ' + callbacks);
   // The stakeholder never knows what only the floor or the data knows.
   const leaks = await p.evaluate(() => window.__intake.state.pool.flatMap(c => { const sys = Prompts.stakeholder(c).system; return c.hiddenFacts.filter(f => !f.foundAt.includes('call') && sys.includes('[' + f.id + ']')).map(f => c.id + ':' + f.id); }));
@@ -191,12 +240,23 @@ async function followUp() {
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   if (await p.evaluate(() => window.__intake.state.cards.some(c => c.difficulty === 0))) throw new Error('starters in a second week');
   if (await p.isVisible('#w-coe')) throw new Error('the CoE folder should only open by itself in the first week');
+  // Week 2: two quick ones first, autofilled; then a full case with the help faded.
+  const w2 = await p.evaluate(() => ({ no: window.__intake.state.weekNo, shape: window.__intake.state.cards.map(c => c.quick ? 'q' : c.difficulty).join(' ') }));
+  if (w2.no !== 2 || w2.shape !== 'q q 1 q 2') throw new Error('week 2 shape wrong: ' + JSON.stringify(w2));
+  for (let i = 0; i < 2; i++) {
+    await p.click('#btn-debug'); await visible('#w-quick');
+    await p.click('#btn-debug'); await p.click('#quick-send');
+    await p.waitForSelector('.quick-score');
+    console.log('autofill quick', await p.evaluate(() => window.__intake.state.run.card.kind), await p.textContent('.quick-score'));
+    await p.click('#quick-next');
+  }
   await p.click('#btn-debug');                       // inbox -> scripted call -> follow-up
   await p.waitForSelector('#w-leads.open');
   await p.click('#btn-debug');                       // data requests and the coffee machine, scripted
   if (!(await p.$$eval('#data-docs .data-doc', l => l.length))) throw new Error('autofill asked for no data');
   await p.click('#btn-leads-done');
   await p.waitForSelector('#w-write.open');
+  if (!(await p.$('#board.fade2')) || await p.isVisible('#formats') || await p.isVisible('[data-rung-ev="baseline"]')) throw new Error('week 2 board still shows the measure and concept chips');
   if (await p.evaluate(() => window.__intake.state.run.revealed.size) < 3) throw new Error('autofill call revealed too little');
   await p.click('#btn-debug');                       // fills every step, lands on the memo
   if (!(await p.isVisible('.bstep[data-step="memo"]'))) throw new Error('autofill did not reach the memo');
@@ -205,10 +265,24 @@ async function followUp() {
   if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
   await p.waitForSelector('#p-score.active');
   console.log('autofill request', await p.textContent('#score-total'));
+  // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
+  await p.click('#btn-next');
+  await p.click('#btn-debug'); await p.click('#btn-debug'); await p.click('#btn-debug'); await p.click('#quick-send'); await p.waitForSelector('.quick-score'); await p.click('#quick-next');
+  await p.evaluate(() => { window.__intake.state.weekNo = 3; });
+  await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
+  await p.waitForSelector('#memo4-form:not([hidden])');
+  if (await p.isVisible('#board')) throw new Error('board shown in week 3');
+  await p.click('#btn-debug');
+  if (!(await p.inputValue('#memo4-form [name=need]'))) throw new Error('memo autofill empty');
+  await p.click('#memo4-form button[type=submit]');
+  await p.waitForSelector('#p-defence.active, #p-score.active');
+  if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
+  await p.waitForSelector('#p-score.active');
+  console.log('memo request', await p.textContent('#score-total'));
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-scores"]'); } else await p.click('.desk-icon[data-app="w-scores"]');
   await visible('#w-scores');
   const txt = await p.textContent('#scores');
-  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 4') || !txt.includes('[starter]')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
+  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 10') || !txt.includes('[starter]') || !txt.includes('[quick: triage]')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   console.log('errors', errs);
   await b.close(); srv.close();

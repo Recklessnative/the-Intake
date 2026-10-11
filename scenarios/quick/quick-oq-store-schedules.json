@@ -1,0 +1,40 @@
+{
+  "id": "quick-oq-store-schedules",
+  "schema_version": 1,
+  "kind": "one-question",
+  "sector": "Retail",
+  "tier": 1,
+  "from": {
+    "name": "Sven Hermans",
+    "role": "Regional Manager",
+    "org": "Bouwmarkt Noord, a DIY chain with 18 stores"
+  },
+  "subject": "Time management course for store managers?",
+  "mail": "Hi, my store managers are always behind on their admin, and staff schedules keep getting published late. I think they need a time management course. Could you find a good provider? Bonus points if it fits in one afternoon.",
+  "snippets": [
+    "18 stores, each with one store manager.",
+    "Company policy: staff schedules are published 7 days in advance.",
+    "Head office survey: store managers say they 'feel overloaded'."
+  ],
+  "hidden_facts": [
+    {
+      "id": "since_june",
+      "fact": "Schedules started going out late in June, when a new scheduling tool went live. Building a week's schedule now takes about three hours instead of 45 minutes.",
+      "unlocks_when": "The player asks since when, or what changed recently.",
+      "reveal_line": "Since when? Summer, I'd say. June. Ah. That's when we got the new planning tool. It's very powerful. It takes three hours to make one schedule."
+    },
+    {
+      "id": "big_stores",
+      "fact": "Only 5 of the 18 managers publish late, and all 5 run stores with more than 40 staff.",
+      "unlocks_when": "The player asks who exactly is late, or whether it's all managers.",
+      "reveal_line": "Not all of them, no. Five. The big stores, now that I look at the list. Over forty people each."
+    }
+  ],
+  "best_question": "Since when have schedules been late, and what changed around that time?",
+  "weak_patterns": [
+    "Asking how long the course should be, or online versus classroom.",
+    "Asking which time management method they prefer.",
+    "Asking for the budget before understanding the problem."
+  ],
+  "debrief": "'Always behind' usually started somewhere. A strong intake asks since when and who exactly, which here points at a scheduling tool that triples the work in the five biggest stores. Fix or train on the tool; nobody needs a time management course."
+}
