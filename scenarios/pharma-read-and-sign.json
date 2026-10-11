@@ -5,12 +5,15 @@
   "tier": 1,
   "tier_label": "Real skill gap, open stakeholder",
   "title": "Read, Sign, Repeat",
-  "briefing": [
-    "Sterile injectables plant, regulated under Good Manufacturing Practice (GMP). Every task an operator performs must be covered by a documented, effective training.",
-    "'Read and sign' means an operator reads the procedure (SOP) and signs that they understood it. It is cheap and auditable; whether it works is another question.",
-    "Deviations are recorded quality events. Each one needs an investigation and a corrective and preventive action (CAPA), and repeated deviations draw inspectors' attention.",
-    "The Belgian medicines agency (FAMHP) inspects the site; Quality Assurance (QA) must approve anything that counts as GMP training."
-  ],
+  "briefing": {
+    "headline": "GMP training in pharma: what you should know before the call",
+    "points": [
+      "Sterile injectables plant, regulated under Good Manufacturing Practice (GMP). Every task an operator performs must be covered by a documented, effective training.",
+      "'Read and sign' means an operator reads the procedure (SOP) and signs that they understood it. It is cheap and auditable; whether it works is another question.",
+      "Deviations are recorded quality events. Each one needs an investigation and a corrective and preventive action (CAPA), and repeated deviations draw inspectors' attention.",
+      "The Belgian medicines agency (FAMHP) inspects the site; Quality Assurance (QA) must approve anything that counts as GMP training."
+    ]
+  },
   "stakeholder": {
     "name": "Dr. Nathalie Dubois",
     "role": "Site Quality Director",
@@ -24,7 +27,10 @@
   "surface_ask": "Read-and-sign retraining on 23 SOPs plus a quiz for all 140 cleanroom operators.",
   "gold": {
     "real_problem": "The deviations come almost entirely from the new isolator line, from operators who joined in the last eight months. They were qualified by read-and-sign only, because the experienced trainer who did hands-on coaching left and was never replaced. The intervention SOP was rewritten into a 41-page document, and the glove-port technique can't be learned from paper.",
-    "root_cause_types": ["skill", "process"],
+    "root_cause_types": [
+      "skill",
+      "process"
+    ],
     "is_training_the_lever": "yes",
     "need_statement": "New operators on the isolator line lack the hands-on skill for aseptic interventions. They need practical training and observed qualification on a mock-up or during line downtime, and the SOP needs a usable one-page visual. Re-reading 23 SOPs for all 140 operators adds paperwork without adding skill."
   },

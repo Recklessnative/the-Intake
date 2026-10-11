@@ -5,12 +5,15 @@
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Catch Them If You Can",
-  "briefing": [
-    "A Flemish university college (hogeschool) with professional bachelor programmes; lecturers both teach and assess.",
-    "Generative AI tools can write passable essays, reports and code. AI-detection tools exist but produce false positives, notably on non-native writers.",
-    "Assessment rules (exam regulations) are set at institution level and changed through formal governance once a year.",
-    "Accusing a student of fraud triggers a formal procedure with appeal rights."
-  ],
+  "briefing": {
+    "headline": "AI and assessment in higher education: what you should know before the call",
+    "points": [
+      "A Flemish university college (hogeschool) with professional bachelor programmes; lecturers both teach and assess.",
+      "Generative AI tools can write passable essays, reports and code. AI-detection tools are on the market; how reliable they are is debated.",
+      "Assessment rules (exam regulations) are set at institution level and changed through formal governance once a year.",
+      "Accusing a student of fraud triggers a formal procedure with appeal rights."
+    ]
+  },
   "stakeholder": {
     "name": "Prof. Ilse Verbruggen",
     "role": "Vice-Dean of Education",
@@ -24,7 +27,11 @@
   "surface_ask": "AI-detection training for 600 lecturers.",
   "gold": {
     "real_problem": "Most assessments are take-home written assignments that AI can now complete, so detection is a losing game. The detection tool the college bought flags non-native writers disproportionately, and most fraud cases are dismissed on appeal. Lecturers want to redesign assessments but the exam regulations require written take-home work in many courses and don't allow oral checks without a formal change.",
-    "root_cause_types": ["process", "expectations", "skill"],
+    "root_cause_types": [
+      "process",
+      "expectations",
+      "skill"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "The problem is assessment design and policy, not detection skill. The exam regulations and AI policy need updating so lecturers can use oral checks, in-class work and AI-inclusive assignments; lecturers then need support redesigning their own assessments. Detection training would increase false accusations."
   },

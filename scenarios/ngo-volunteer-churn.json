@@ -5,12 +5,15 @@
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
   "title": "Three Months on the Phone Line",
-  "briefing": [
-    "A national NGO that supports isolated older people, run by 40 paid staff and about 900 volunteers.",
-    "Volunteers are not employees: they can leave any day, so motivation and meaning matter more than contracts.",
-    "Volunteers working with vulnerable people need a background check (an extract from the criminal record), which takes time.",
-    "Many NGOs depend on a founder or long-standing board members whose original design still shapes how the organisation works."
-  ],
+  "briefing": {
+    "headline": "Volunteer organisations: what you should know before the call",
+    "points": [
+      "A national NGO that supports isolated older people, run by 40 paid staff and about 900 volunteers.",
+      "Volunteers are not employees: they can leave any day, so motivation and meaning matter more than contracts.",
+      "Volunteers working with vulnerable people need a background check (an extract from the criminal record), which takes time.",
+      "Many NGOs depend on a founder or long-standing board members whose original design still shapes how the organisation works."
+    ]
+  },
   "stakeholder": {
     "name": "Hanne Claes",
     "role": "Head of Volunteering",
@@ -24,7 +27,11 @@
   "surface_ask": "A leadership course for 35 volunteer coordinators.",
   "gold": {
     "real_problem": "Most volunteers leave in their first three months. Every new volunteer must first do three months on the phone line, a rule set by the founder, although most signed up to visit people. The background check plus intake takes six weeks before they can start at all. Coordinators are mostly volunteers themselves with no time for follow-up. The leaving happens before any coordinator relationship forms.",
-    "root_cause_types": ["process", "expectations", "skill"],
+    "root_cause_types": [
+      "process",
+      "expectations",
+      "skill"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "Volunteers leave because the first weeks don't match why they signed up: a long wait and an obligatory phone-line period. Changing the onboarding route is the main lever; coordinators need light, practical support on welcoming and recognising new volunteers rather than a leadership course."
   },

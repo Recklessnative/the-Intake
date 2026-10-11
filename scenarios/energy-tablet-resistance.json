@@ -5,12 +5,15 @@
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
   "title": "Digital Natives, Analogue Basements",
-  "briefing": [
-    "Regional electricity and gas grid operator: field technicians install and repair meters, cabins and connections, often in basements and rural sites.",
-    "A new work order app on tablets replaced paper forms six months ago as part of a large digital transformation programme.",
-    "Field work is safety-critical: gas and high-voltage jobs follow strict permit and lockout procedures owned by the safety department.",
-    "Technicians are heavily unionised; changes to working methods are discussed with union delegates."
-  ],
+  "briefing": {
+    "headline": "Field work at a grid operator: what you should know before the call",
+    "points": [
+      "Regional electricity and gas grid operator: field technicians install and repair meters, cabins and connections across the region.",
+      "A new work order app on tablets replaced paper forms six months ago as part of a large digital transformation programme.",
+      "Field work is safety-critical: gas and high-voltage jobs follow strict permit and lockout procedures owned by the safety department.",
+      "Technicians are heavily unionised; changes to working methods are discussed with union delegates."
+    ]
+  },
   "stakeholder": {
     "name": "Thomas Lemmens",
     "role": "Director of Digital Transformation",
@@ -24,7 +27,10 @@
   "surface_ask": "A digital skills and mindset bootcamp for 320 field technicians.",
   "gold": {
     "real_problem": "The technicians can use the app; it doesn't fit their work. It needs a connection that isn't available in basements and rural cabins, so jobs can't be closed on site, and the safety department still requires the paper permit form because the app's version wasn't validated. Technicians do double work and fall back on paper. Their resistance is rational, and IT chose the app without field input.",
-    "root_cause_types": ["system", "process"],
+    "root_cause_types": [
+      "system",
+      "process"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "Adoption is blocked by offline use and a duplicate safety form, not by digital skills. Fixing the app's offline mode and getting the digital permit validated are the levers; learning can help through field champions and short how-tos for the workarounds."
   },

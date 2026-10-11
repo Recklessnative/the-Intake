@@ -5,12 +5,15 @@
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Bring Me a Navy SEAL",
-  "briefing": [
-    "B2B SaaS company selling analytics subscriptions to mid-sized and large companies.",
-    "Account executives are paid a base salary plus commission against a quota; commission plans are set by sales leadership and finance.",
-    "Enterprise deals often stall in procurement, where buyers compare price and contract terms.",
-    "In Germany, tools that monitor employees (such as call recordings) need works council co-determination."
-  ],
+  "briefing": {
+    "headline": "B2B SaaS sales teams: what you should know before the call",
+    "points": [
+      "B2B SaaS company selling analytics subscriptions to mid-sized and large companies.",
+      "Account executives are paid a base salary plus commission against a quota; commission plans are set by sales leadership and finance.",
+      "Deals move through stages (discovery, proposal, procurement, signature), and the CRM records each stage.",
+      "In Germany, tools that monitor employees (such as call recordings) need works council co-determination."
+    ]
+  },
   "stakeholder": {
     "name": "Jasper Wouters",
     "role": "VP Sales EMEA",

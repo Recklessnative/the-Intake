@@ -5,12 +5,15 @@
   "tier": 1,
   "tier_label": "Real skill gap, open stakeholder",
   "title": "Safety Refresher, But They Have No Time",
-  "briefing": [
-    "Grocery distribution centre running 24/5; reach trucks lift pallets to height in narrow aisles.",
-    "Belgian employers must have a prevention advisor, a legally required safety role who owns the risk analysis.",
-    "Agency workers are employed by a temp agency; the contract decides who pays for their training time.",
-    "Near-miss reports are voluntary; more reports can mean a better safety culture, not a worse site."
-  ],
+  "briefing": {
+    "headline": "Warehouse safety in Belgium: what you should know before the call",
+    "points": [
+      "Grocery distribution centre running 24/5; reach trucks lift pallets to height in narrow aisles.",
+      "Belgian employers must have a prevention advisor, a legally required safety role who owns the risk analysis.",
+      "Agency workers are employed by a temp agency; the contract decides who pays for their training time.",
+      "Near-miss reports are voluntary; more reports can mean a better safety culture, not a worse site."
+    ]
+  },
   "stakeholder": {
     "name": "Sofie Van den Broeck",
     "role": "Site Operations Manager",

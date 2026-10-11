@@ -5,13 +5,16 @@
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
   "title": "An Engaging Refresher on Credits",
-  "briefing": [
-    "Belgian retail bank, about 600 personal bankers in 180 branches selling consumer loans and mortgages.",
-    "Banks may offer a loan bundled with their own insurance at a discount, as long as the customer can take each product separately and the discount is transparent. Making the loan conditional on the bank's own insurance is tied selling ('koppelverkoop') and is not allowed.",
-    "For credit-linked insurance such as debt balance and fire insurance, the customer is free to pick another insurer; the lender may only require that the cover meets its conditions.",
-    "The FSMA supervises conduct of business; Ombudsfin handles customer complaints; consumer organisations run mystery shopping in branches.",
-    "The legal framing in this card is simplified for play. Check with compliance or legal before using it as real guidance."
-  ],
+  "briefing": {
+    "headline": "Consumer credit and insurance in Belgium: what you should know before the call",
+    "points": [
+      "Belgian retail bank, about 600 personal bankers in 180 branches selling consumer loans and mortgages.",
+      "Banks may offer a loan bundled with their own insurance at a discount, as long as the customer can take each product separately and the discount is transparent. Making the loan conditional on the bank's own insurance is tied selling ('koppelverkoop') and is not allowed.",
+      "For credit-linked insurance such as debt balance and fire insurance, the customer is free to pick another insurer; the lender may only require that the cover meets its conditions.",
+      "The FSMA supervises conduct of business; Ombudsfin handles customer complaints; consumer organisations run mystery shopping in branches.",
+      "The legal framing in this card is simplified for play. Check with compliance or legal before using it as real guidance."
+    ]
+  },
   "stakeholder": {
     "name": "Bart Verhaegen",
     "role": "Head of Retail Network",
@@ -25,7 +28,11 @@
   "surface_ask": "An engaging credit refresher e-learning for all 600 personal bankers.",
   "gold": {
     "real_problem": "Bankers routinely tell customers that the loan or its rate is only available with the bank's own debt balance and home insurance, which turns a legal bundle into illegal tied selling. A consumer organisation's mystery shop caught it in 7 of 10 branches. Branch targets count insurance cross-sell double, the quote tool pre-ticks the insurance, and bankers have never been taught the difference between bundling and tying.",
-    "root_cause_types": ["incentive", "system", "skill"],
+    "root_cause_types": [
+      "incentive",
+      "system",
+      "skill"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "Personal bankers need to present the insurance as a genuine, optional bundle with a transparent discount and respect the customer's free choice of insurer. That requires fixing the double-counting target and the pre-ticked quote tool, and practising the conversation itself; a general credit refresher will not change it."
   },

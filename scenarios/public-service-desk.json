@@ -5,12 +5,15 @@
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Something With a Smile",
-  "briefing": [
-    "A Flemish city's citizen service desk handles ID cards, passports, driving licences and civil registry.",
-    "Many cities moved to appointment-only service after the pandemic, usually with online booking.",
-    "Flemish language legislation limits official communication by local government in languages other than Dutch.",
-    "Aldermen (schepenen) are elected politicians who own policy areas; the civil service implements."
-  ],
+  "briefing": {
+    "headline": "Local government service desks in Flanders: what you should know before the call",
+    "points": [
+      "A Flemish city's citizen service desk handles ID cards, passports, driving licences and civil registry.",
+      "Many cities moved to appointment-only service after the pandemic, usually with online booking.",
+      "Flemish language legislation limits official communication by local government in languages other than Dutch.",
+      "Aldermen (schepenen) are elected politicians who own policy areas; the civil service implements."
+    ]
+  },
   "stakeholder": {
     "name": "Kristof Jacobs",
     "role": "Head of Citizen Services",

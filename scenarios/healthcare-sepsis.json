@@ -5,12 +5,15 @@
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
   "title": "The Fifteenth Mandatory E-Learning",
-  "briefing": [
-    "General hospital on three sites; nurses work 24/7 shifts and doctors report to a separate medical hierarchy.",
-    "Sepsis is time-critical: early recognition and antibiotics within the first hour matter most.",
-    "An early warning score turns vital signs into a number that should trigger escalation to a doctor.",
-    "Hospital accreditation surveyors review patient files and practice, not just training records."
-  ],
+  "briefing": {
+    "headline": "Sepsis and escalation in hospitals: what you should know before the call",
+    "points": [
+      "General hospital on three sites; nurses work 24/7 shifts and doctors report to a separate medical hierarchy.",
+      "Sepsis is time-critical: early recognition and antibiotics within the first hour matter most.",
+      "An early warning score turns vital signs into a number that should trigger escalation to a doctor.",
+      "Hospital accreditation surveyors review patient files and practice, not just training records."
+    ]
+  },
   "stakeholder": {
     "name": "Annelies Maes",
     "role": "Director of Nursing",

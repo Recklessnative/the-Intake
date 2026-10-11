@@ -29,7 +29,7 @@ Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open st
 | `stakeholder.name/role/org/voice` | Actor | Who they are and how they talk. |
 | `stakeholder.patience` | Game | Weak or leading questions tolerated before they get curt (1 to 5). |
 | `stakeholder.risk_appetite` | Game | 0 to 3. A concept whose judged boldness exceeds this triggers the defence round, one objection per point of gap. |
-| `briefing[]` | Game | 3 to 5 neutral context bullets the player reads before the call: the sector, the rules that make it sensitive, who the usual players are. No spoilers; it never contains a hidden fact. A hard mode can hide it. |
+| `briefing.headline`, `briefing.points[]` | Game | A one-line headline plus 3 to 5 neutral context bullets the player reads before the call: the sector, the rules that make it sensitive, who the usual players are. No spoilers; it never contains a hidden fact. A hard mode can hide it. |
 | `opening_message` | Game | The ping. With the briefing, the only thing the player sees before asking. |
 | `surface_ask` | Judge | The solution in disguise, in one line. |
 | `gold.real_problem`, `gold.root_cause_types`, `gold.is_training_the_lever`, `gold.need_statement` | Judge | The answer key for diagnosis. `root_cause_types` uses: skill, will, system, process, expectations, incentive, environment. `is_training_the_lever` is yes, partly or no. |

@@ -5,12 +5,15 @@
   "tier": 1,
   "tier_label": "Real skill gap, open stakeholder",
   "title": "Twenty-Two Green Belts",
-  "briefing": [
-    "Corrugated cardboard plant running six production lines on three shifts.",
-    "OEE (overall equipment effectiveness) combines availability, speed and quality into one percentage; world class is often quoted around 85%.",
-    "Lean Six Sigma belts are certifications: a Green Belt typically means several days of classroom statistics plus an improvement project.",
-    "Belgian plants have a works council, and training rules and pay scales are partly set in sector collective agreements."
-  ],
+  "briefing": {
+    "headline": "Running a factory floor: what you should know before the call",
+    "points": [
+      "Corrugated cardboard plant running six production lines on three shifts.",
+      "OEE (overall equipment effectiveness) combines availability, speed and quality into one percentage; world class is often quoted around 85%.",
+      "Lean Six Sigma belts are certifications: a Green Belt typically means several days of classroom statistics plus an improvement project.",
+      "Belgian plants have a works council, and training rules and pay scales are partly set in sector collective agreements."
+    ]
+  },
   "stakeholder": {
     "name": "Marc Peeters",
     "role": "Plant Manager",
