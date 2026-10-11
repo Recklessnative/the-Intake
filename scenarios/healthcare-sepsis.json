@@ -23,6 +23,11 @@
     "risk_appetite": 1,
     "risk_appetite_label": "Low"
   },
+  "frontline": {
+    "name": "Jonas Willaert",
+    "role": "Night nurse on ward 4B, six years in",
+    "voice": "Calm, dry, protective of colleagues. Talks frankly once it's clear nothing goes back to management with his name on it."
+  },
   "opening_message": "The new sepsis protocol goes live in six weeks. I need an e-learning for all 900 nurses, with a test, 100% completion. Accreditation surveyors come in spring. Can you build it? I have exactly four minutes.",
   "surface_ask": "A sepsis protocol e-learning with a test for all 900 nurses, 100% completion.",
   "gold": {
@@ -42,7 +47,13 @@
       "unlocks_when": "The player asks how well nurses already know the protocol, about a baseline, or about pilot results.",
       "reveal_line": "We piloted the protocol on 3C. They scored 88% on the quiz. They know it. That's sort of the problem, isn't it.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Sepsis protocol knowledge quiz, 42 nurses, average score 88%.",
+      "data_source": "Pilot results, ward 3C"
     },
     {
       "id": "night_delay",
@@ -50,7 +61,12 @@
       "unlocks_when": "The player asks what the audit found, where delays happen, or for data on time to treatment.",
       "reveal_line": "The quality team's audit... daytime, 31 minutes to review. Nights, 94. Same nurses, same protocol.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Median time from first abnormal early warning score to doctor review. Day (8-20h): 31 min. Night (20-8h): 94 min.",
+      "data_source": "Quality department sepsis audit, 60 files"
     },
     {
       "id": "fear_of_calling",
@@ -58,7 +74,11 @@
       "unlocks_when": "The player asks what gets in the way of escalating, what nurses say about calling a doctor, or what happens when a nurse picks up the phone at night.",
       "reveal_line": "Off the record? There are two seniors on the night rota. You call them at three for a borderline score, you hear about it for a week. So people wait. Off the record.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "You want to know why we wait? Two of the seniors on the night rota. You call at three for a borderline score and you hear about it for a week. So you measure again in half an hour. And again."
     },
     {
       "id": "paper_ews",
@@ -66,7 +86,14 @@
       "unlocks_when": "The player asks how the early warning score is recorded, about systems or alerts, or about differences between wards.",
       "reveal_line": "4B and 5A are still on paper. IT says Q2. IT has said Q2 for two years.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "data:process"
+      ],
+      "data_doc": "Electronic early warning module live on 14 wards. Wards 4B and 5A: paper charts, go-live postponed to Q2.",
+      "frontline_line": "On 4B we still score on paper. No alert, nothing. If you're busy, the chart just sits there.",
+      "data_source": "IT project status"
     },
     {
       "id": "doctors_excluded",
@@ -74,7 +101,13 @@
       "unlocks_when": "The player asks who else is involved, whether it's only nurses, or who is on the other end of the escalation call.",
       "reveal_line": "Doctors? They're under the CMO. This is a nursing project. I can't exactly send them an e-learning. Well. I could. They wouldn't open it.",
       "weight": 2,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:org",
+        "call"
+      ],
+      "data_doc": "Nursing staff report to the Director of Nursing; medical staff, including the on-call rota, report to the Chief Medical Officer. Sepsis training plan owner: Nursing. Medical staff: not listed.",
+      "data_source": "Org chart"
     },
     {
       "id": "accreditation_wants",
@@ -82,7 +115,13 @@
       "unlocks_when": "The player asks what the accreditation surveyors will actually look at or what evidence they want.",
       "reveal_line": "They'll pull files. Time to antibiotics, was the bundle followed. They'll ask about training too, but they look at the files.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "Surveyors review a sample of patient files for bundle compliance and time to antibiotics; training records are checked as supporting evidence.",
+      "data_source": "Accreditation standard, sepsis"
     }
   ],
   "volunteered_facts": [

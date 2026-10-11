@@ -23,6 +23,11 @@
     "risk_appetite": 1,
     "risk_appetite_label": "Low"
   },
+  "frontline": {
+    "name": "Sarah Aerts",
+    "role": "Lecturer in business management, ten years in",
+    "voice": "Sharp, funny, overworked. Has opinions about committees. Cares about students, including the ones who cheat."
+  },
   "opening_message": "Our lecturers need training on AI. Specifically, how to detect when students use ChatGPT to write their assignments. Fraud cases are exploding and the exam board is drowning. Could we have something for all 600 lecturers before the second semester?",
   "surface_ask": "AI-detection training for 600 lecturers.",
   "gold": {
@@ -42,7 +47,12 @@
       "unlocks_when": "The player asks how fraud cases end, what the exam board sees, or whether detection actually holds up.",
       "reveal_line": "We had 212 cases. 61% didn't survive. 'The tool says 87% AI' turns out not to be evidence. Who knew. Well, the lawyers knew.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "212 suspected AI fraud cases. Upheld: 83. Dismissed or overturned on appeal: 129 (61%).",
+      "data_source": "Exam board report, academic year to date"
     },
     {
       "id": "false_positives",
@@ -50,7 +60,14 @@
       "unlocks_when": "The player asks who gets flagged, about fairness, or about the detection tool's reliability.",
       "reveal_line": "The student council sent us an analysis. Students who write in Dutch as a second language get flagged three times as often. That is not a sentence I wanted to read.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi",
+        "frontline"
+      ],
+      "data_doc": "Flag rate, students writing in Dutch as a first language 9%; as a second language 27%.",
+      "frontline_line": "The tool flagged three of my best students last term. All three learned Dutch as adults. They write carefully, so they write 'like a machine'. Think about that.",
+      "data_source": "Student council analysis of detection reports"
     },
     {
       "id": "take_home",
@@ -58,7 +75,13 @@
       "unlocks_when": "The player asks how students are assessed, what kind of assignments are affected, or about assessment design.",
       "reveal_line": "Most of our assessment is take-home writing. Reports, reflections, essays. It was efficient. It was.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:process",
+        "call"
+      ],
+      "data_doc": "Assessment types across 640 course units. Take-home written assignment as main assessment: 70%. In-class or oral: 22%. Other: 8%.",
+      "data_source": "Course sheets audit"
     },
     {
       "id": "regulations",
@@ -66,7 +89,13 @@
       "unlocks_when": "The player asks what stops lecturers from changing assessments, or about the rules and regulations.",
       "reveal_line": "Lecturers can't just add an oral check. It has to be in the course sheet, approved a year ahead. The regulations are... thorough.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:policy",
+        "call"
+      ],
+      "data_doc": "Assessment form must be stated in the course sheet, approved by the education council before the start of the academic year. Art. 41: oral follow-up only if foreseen in the course sheet.",
+      "data_source": "Exam regulations, art. 34"
     },
     {
       "id": "lecturers_want",
@@ -74,7 +103,11 @@
       "unlocks_when": "The player asks what lecturers themselves want or how they feel about it.",
       "reveal_line": "The survey was clear. They don't want to be detectives. They want time and help to change their assignments. And maybe a holiday.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Detection training? I didn't become a lecturer to be a detective. Give me two afternoons to redesign my assignments and I'll fix my own course."
     },
     {
       "id": "pioneers",
@@ -82,7 +115,12 @@
       "unlocks_when": "The player asks whether anyone is already doing it differently, or about good practice inside the college.",
       "reveal_line": "Nursing and IT have a few pioneers. In-class writing, oral defences, assignments where AI use is part of the task. Hardly any cases. Hardly any noise either.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "Nursing and IT already changed their assessments. In-class writing, oral defences, AI allowed but you show your prompts. They barely have cases. Nobody asked them to present it."
     }
   ],
   "volunteered_facts": [

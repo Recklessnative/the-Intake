@@ -3,6 +3,9 @@
 (function () {
   const $ = id => document.getElementById(id);
   const QUESTIONS = 8;
+  // Starter cases (tier 0) are gentler: more questions, more patience.
+  const STARTER = { questions: 10, patience: 5 };
+  const questionsFor = card => card.difficulty === 0 ? STARTER.questions : QUESTIONS;
   const MIEKE_ASKS = 3;
   const RUN_LENGTH = 3;
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
@@ -22,7 +25,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], cards: [], index: 0, results: [], run: null, charged: false };
+  const state = { pool: [], cards: [], index: 0, results: [], run: null, charged: false, weekId: '' };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -68,10 +71,13 @@
     const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.normalise);
     state.pool = cards;
   }
-  // A week: up to RUN_LENGTH cards, mixed sectors, easiest first.
+  // A week: up to RUN_LENGTH cards, mixed sectors, easiest first. Your first week opens with
+  // up to two starter cases; after that the starters are retired.
   function pickWeek() {
-    const pool = state.pool.slice().sort(() => Math.random() - 0.5);
-    const week = [];
+    const shuffled = state.pool.slice().sort(() => Math.random() - 0.5);
+    const starters = shuffled.filter(c => c.difficulty === 0);
+    const pool = shuffled.filter(c => c.difficulty !== 0);
+    const week = scoreHistory().weeks.some(w => w.requests.length) ? [] : starters.slice(0, 2);
     for (const c of pool) if (week.length < RUN_LENGTH && !week.some(w => w.sector === c.sector)) week.push(c);
     for (const c of pool) if (week.length < RUN_LENGTH && !week.includes(c)) week.push(c);
     return week.sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1));
@@ -152,6 +158,7 @@
     state.index = 0;
     state.results = [];
     state.charged = false;
+    state.weekId = 'w' + Date.now();
     state.run = null;
     cubicle();
   };
@@ -179,6 +186,7 @@
     $('btn-sit').onclick = () => {
       if (i < CUBICLE.length - 1) { next(); return; }
       clearTimeout(cubicle.t);
+      Sound.chime();
       startRequest();
     };
   }
@@ -202,7 +210,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), index: state.index, results: state.results, charged: state.charged, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -227,12 +235,14 @@
     state.index = s.index;
     state.results = s.results || [];
     state.charged = !!s.charged;
+    state.weekId = s.weekId || 'w' + s.at;
     const r = Object.assign({}, s.run);
     r.card = cards[s.index];
     r.revealed = new Set(r.revealed || []);
     r.mails = [];
     r.selected = null;
     state.run = r;
+    Sound.chime();
     openRequest();
   };
 
@@ -241,7 +251,7 @@
     const card = state.cards[state.index];
     const prev = state.run;
     state.run = {
-      card, trust: 100, questionsLeft: QUESTIONS, patience: card.patience || 3,
+      card, trust: 100, questionsLeft: questionsFor(card), patience: card.difficulty === 0 ? STARTER.patience : card.patience || 3,
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
       miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
@@ -249,6 +259,9 @@
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
+    // Your very first request: the Center of Excellence folder opens on the flowchart.
+    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) openApp('w-coe');
+    if (state.index) Sound.ding();
     save();
   }
 
@@ -296,6 +309,8 @@
       body: 'Your mailbox has reached 98% of its limit. Please delete or archive items.\n\nTip: the attachment "Learning Styles Revisited FINAL v7.ppt" (41 MB) is a good place to start.' },
     { from: 'Office of the CEO', subject: 'FW: FW: RE: our learning culture', ago: 27,
       body: 'Team,\n\nRead an article on the plane. We should be more like Netflix. Thoughts?\n\nSent from my BlackBerry' },
+    { from: 'Center of Excellence', subject: 'New here? Start with the folder on your desktop', ago: 60,
+      body: 'Welcome to the learning team!\n\nBefore your first intake, open the "Center of Excellence" folder on your desktop. It has our intake flowchart, the quality standard every intake is reviewed against, a list of good intake questions and the measurement ladder.\n\nPlease ignore the learning styles policy. We are working on it.\n\nThe CoE team' },
     { from: 'Mieke', subject: 'cake?', ago: 16,
       body: 'There is cake in the kitchen. Nobody knows whose birthday it is. Don\'t ask, just eat.\n\nAlso: if a request lands on your desk and you want a second opinion, I\'m two cubicles over.\n\nM.' },
     { from: 'Gamified Microlearning Solutions', subject: 'Re: quick question!!', ago: 9,
@@ -331,7 +346,7 @@
     });
     const unread = r.mails.filter(m => !m.read).length;
     $('mail-unread').textContent = unread ? '(' + unread + ')' : '';
-    Desktop.title('w-inbox', 'Inbox' + (unread ? ' (' + unread + ' unread)' : '') + ' - KimMail', 'Inbox');
+    Desktop.title('w-inbox', 'Inbox' + (unread ? ' (' + unread + ' unread)' : '') + ' - Doors Mail', 'Inbox');
   }
   function selectMail(m) {
     const r = state.run;
@@ -949,6 +964,7 @@
     const { pts, bonus, total } = points(g, replay);
     if (!replay) {
       state.results.push({ id: r.card.id, total });
+      recordScore(r, total, pts, g);
       r.phase = 'score';
       r.grade = g;
       save();
@@ -1018,8 +1034,148 @@
     $('end-title').textContent = title;
     $('end-score').textContent = avg + ' / 100';
     $('end-note').textContent = 'Average over ' + state.results.length + ' requests.';
+    recordWeek(avg, title);
     show('s-end');
   }
+
+  // ---------- my scores: every finished request, kept in this browser ----------
+  const SCORES_KEY = 'intake-scores';
+  function scoreHistory() {
+    let h = null;
+    try { h = JSON.parse(window.localStorage.getItem(SCORES_KEY) || 'null'); } catch (e) { /* storage blocked */ }
+    return h && Array.isArray(h.weeks) ? h : { v: 1, weeks: [] };
+  }
+  function keepScores(h) {
+    try { window.localStorage.setItem(SCORES_KEY, JSON.stringify(h)); } catch (e) { /* storage full or blocked */ }
+    renderScores();
+  }
+  function thisWeek(h) {
+    let w = h.weeks.find(x => x.id === state.weekId);
+    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [] }; h.weeks.push(w); }
+    return w;
+  }
+  function recordScore(r, total, pts, g) {
+    const h = scoreHistory(), w = thisWeek(h), s = r.card.stakeholder;
+    w.requests = w.requests.filter(x => x.index !== state.index);
+    w.requests.push({
+      index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
+      starter: r.card.difficulty === 0, total, pts, question: g.questionNotAsked, verdict: g.verdict
+    });
+    keepScores(h);
+  }
+  function recordWeek(avg, title) {
+    const h = scoreHistory(), w = thisWeek(h);
+    Object.assign(w, { done: true, avg, title });
+    keepScores(h);
+  }
+  function renderScores() {
+    const box = $('scores'), h = scoreHistory();
+    box.innerHTML = '';
+    const para = (t, cls) => { const p = document.createElement('p'); p.textContent = t; if (cls) p.className = cls; box.appendChild(p); };
+    para('MY SCORES.TXT');
+    para('Kept in this browser only. Nobody else can see it, including your manager.', 'muted');
+    const all = h.weeks.flatMap(w => w.requests);
+    if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
+    const best = all.reduce((a, b) => (b.total > a.total ? b : a));
+    para('\nRequests handled: ' + all.length + ' · average ' + Math.round(all.reduce((a, b) => a + b.total, 0) / all.length) + '/100 · best ' + best.total + '/100 (' + best.who + ')');
+    const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
+      const head = document.createElement('h3');
+      head.textContent = '=== Week of ' + fmt(w.started) + (w.done ? ' · ' + w.title + ' · average ' + w.avg + '/100' : ' · in progress') + ' ===';
+      box.appendChild(head);
+      w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
+        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
+        para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
+        if (x.question) para('   The question you didn\'t ask: ' + x.question);
+        if (x.verdict) para('   Their verdict: ' + x.verdict);
+      });
+    });
+  }
+
+  // ---------- desktop icons and apps ----------
+  function openApp(id) {
+    const r = state.run;
+    if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
+    if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
+    if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call')) { toast('The case board opens when the call is over.', 'info'); return; }
+    if (id === 'w-scores') renderScores();
+    if (id === 'w-coe' && !$('coe-doc').innerHTML) Coe.render($('coe-files'), $('coe-doc'), 'flow');
+    Desktop.open(id, Desktop.floating[id]);
+  }
+  document.querySelectorAll('.desk-icon').forEach(b => { b.onclick = () => openApp(b.dataset.app); });
+  Coe.render($('coe-files'), $('coe-doc'), 'flow');
+  renderScores();
+
+  const soundLabel = () => { $('btn-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off'; };
+  $('btn-sound').onclick = () => { Sound.toggle(); soundLabel(); if (Sound.on) Sound.ding(); };
+  soundLabel();
+
+  // ---------- test mode: ?debug in the address bar shows an Autofill button ----------
+  // It fills in the current step from the card's own answers, so a whole request can be
+  // played in a few clicks. The call is scripted (no Gemini); the reaction and examiner are real.
+  (function () {
+    const q = new URLSearchParams(window.location.search);
+    try {
+      if (q.has('debug')) window.localStorage.setItem('intake-debug', q.get('debug') === '0' ? '0' : '1');
+      $('btn-debug').hidden = window.localStorage.getItem('intake-debug') !== '1';
+    } catch (e) { $('btn-debug').hidden = !q.has('debug') || q.get('debug') === '0'; }
+  })();
+  $('btn-debug').onclick = () => {
+    const r = state.run;
+    if (!r) return;
+    const card = r.card;
+    if ($('w-dialog').classList.contains('open') && $('p-defence').classList.contains('active')) {
+      $('defence-form').querySelectorAll('textarea').forEach(t => { t.value = '(test) Fair point. We pilot it with one team first, measure against the baseline, and only scale if it works.'; });
+      return;
+    }
+    if (r.phase === 'inbox') $('btn-call').onclick();
+    if (r.phase === 'call') {
+      card.hiddenFacts.slice(0, r.questionsLeft).forEach(f => {
+        const qText = '(test) ' + (f.unlockedBy || 'Tell me more.'), a = f.revealLine || f.fact;
+        addMsg('you', qText);
+        addMsg('them', a);
+        r.turns.push({ role: 'user', text: 'The learning professional asks: """' + qText + '"""' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
+        r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id] });
+        r.revealed.add(f.id);
+        r.questionsLeft--;
+      });
+      meters();
+      toWriteup();
+      return;
+    }
+    if (r.phase !== 'write') return;
+    const b = board(), plan = card.measurementPlan || {}, gold = card.goldAnswer || {};
+    const want = String(card.learningIsTheAnswer || '').toLowerCase();
+    if (b.mode === 'memo') {
+      const f = $('write-form').elements;
+      const fill = { gap: card.needStatement || card.realProblem, who: card.constraints.audience, cause: card.rootCause, lever: (LEVER_NAMES[want] || 'Partly') + '.',
+        baseline: plan.baseline, behaviour: plan.behaviour, metric: plan.business_metric, collect: plan.collection,
+        idea: (gold.concept || '').split(' | ')[0], format: 'Practice on the job, with a manager routine.', why: '(test) It targets the causes above.',
+        not: 'Not a generic course.', risks: (card.dependencies || []).map(d => d.who + ': ' + d.concern).join('\n') };
+      Object.entries(fill).forEach(([k, v]) => { if (f[k]) f[k].value = v || '(test)'; });
+      save();
+      return;
+    }
+    const pool = evidencePool();
+    const critical = new Set(card.hiddenFacts.filter(f => f.critical).map(f => f.id));
+    b.evidence = pool.filter(x => x.facts.some(id => critical.has(id))).map(x => x.id).slice(0, 3);
+    if (!b.evidence.length) b.evidence = [pool[pool.length - 1].id];
+    b.tags = (card.rootCauseTypes || []).filter(t => TAG_NAMES[t]).slice(0, 3);
+    if (!b.tags.length) b.tags = ['skill'];
+    b.problem = card.needStatement || card.realProblem || '(test) The real problem.';
+    b.lever = LEVER_NAMES[want] ? want : 'partly';
+    b.leverWhy = '(test) Because of the causes we found.';
+    const ev = pool.length > 1 ? pool[1].id : '';
+    b.rungs = { baseline: { text: plan.baseline || '(test)', ev }, behaviour: { text: plan.behaviour || '(test)', ev: '' }, metric: { text: plan.business_metric || '(test)', ev: '' }, collect: { text: plan.collection || '(test)', ev: '' } };
+    b.idea = (gold.concept || '(test) A focused practice programme.').split(' | ')[0];
+    b.formats = ['Practice or simulation', 'Manager routine'];
+    b.why = '(test) It tackles ' + listText(b.tags.map(t => TAG_NAMES[t])) + '.';
+    b.not = 'Not a generic course for everyone.';
+    b.risks = b.tiles.filter(t => t.real).slice(0, 2).map(t => ({ who: t.who, mitigation: '(test) ' + (((card.dependencies || []).find(d => d.who === t.who) || {}).concern || 'Involve them early.') }));
+    b.step = 'memo'; b.locked = false; b.feedback = '';
+    renderBoard();
+    save();
+  };
 
   runsLeft();
   resumeButton();

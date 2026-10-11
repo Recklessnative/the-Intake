@@ -23,6 +23,11 @@
     "risk_appetite": 2,
     "risk_appetite_label": "Medium"
   },
+  "frontline": {
+    "name": "Kevin Maes",
+    "role": "Field technician, rural route, twelve years in",
+    "voice": "Laconic, practical, allergic to buzzwords. Not against technology, against nonsense. Respects anyone who has stood in a cabin in the rain."
+  },
   "opening_message": "Our field technicians are resisting the new work order app. Adoption is stuck at 55%. I'd like a digital skills bootcamp for all 320 of them, something with a 'digital mindset' angle. The board reviews the programme in March.",
   "surface_ask": "A digital skills and mindset bootcamp for 320 field technicians.",
   "gold": {
@@ -41,7 +46,12 @@
       "unlocks_when": "The player asks where technicians work, what happens when they use the app on site, or about connectivity.",
       "reveal_line": "There's a small connectivity challenge. In basements. And cabins. And, well, the countryside. About 40% of jobs. Offline mode is on the roadmap.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "The app wants signal to close a job. I'm in a basement or a cabin in a field half the day. So I write it on paper and type it in at night. Or I don't."
     },
     {
       "id": "double_paper",
@@ -49,7 +59,14 @@
       "unlocks_when": "The player asks what technicians still do on paper, about safety procedures, or why they fall back on old methods.",
       "reveal_line": "Safety still wants the paper permit. The digital one is 'under review'. Since June. So yes, technically they fill in both.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "data:policy"
+      ],
+      "data_doc": "Paper permit mandatory. Digital permit status: under review since June.",
+      "frontline_line": "Safety still wants the paper permit. So I fill in the app and the paper. Same thing twice. Then they say we 'resist'.",
+      "data_source": "Safety procedure SP-07, work permits for gas and high-voltage jobs"
     },
     {
       "id": "skills_fine",
@@ -57,7 +74,12 @@
       "unlocks_when": "The player asks who uses the app and who doesn't, or whether the non-users differ from users.",
       "reveal_line": "Interesting, actually. The users are fast. The non-users are mostly the rural and city-basement teams. I'd assumed it was the older guys.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Users (55%) complete forms in 3.1 min on average (pilot group: 3.0). Non-users by route type: rural 48%, city basement 31%, other 21%.",
+      "data_source": "App usage report"
     },
     {
       "id": "no_field_input",
@@ -65,7 +87,12 @@
       "unlocks_when": "The player asks how the app was chosen, who was involved, or whether technicians were consulted.",
       "reveal_line": "We had a very thorough selection. IT, procurement, my office, the supplier. Technicians? They were... represented. By their managers. Some of them.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Nobody asked us anything. One day there was a tablet on the depot table and a PowerPoint."
     },
     {
       "id": "union_delegate",
@@ -73,7 +100,11 @@
       "unlocks_when": "The player asks who the informal leaders are, how teams cope, or who technicians listen to.",
       "reveal_line": "Marleen. Senior technician, union delegate. She made her own system with paper and a WhatsApp group. It works annoyingly well.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Ask Marleen. She made a system with paper and a WhatsApp group. Half the depot uses it. It works better than the app, to be honest."
     },
     {
       "id": "board_kpi",
@@ -81,7 +112,13 @@
       "unlocks_when": "The player asks how success is measured, what the board will look at, or what's at stake for him.",
       "reveal_line": "The board KPI is adoption. 90% by March. It's... also in my objectives.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "Board KPI 'App adoption rate': target 90% by March. Current: 55%.",
+      "data_source": "Transformation programme dashboard"
     }
   ],
   "volunteered_facts": [

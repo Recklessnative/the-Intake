@@ -23,6 +23,11 @@
     "risk_appetite": 2,
     "risk_appetite_label": "Medium"
   },
+  "frontline": {
+    "name": "Ionut Popescu",
+    "role": "Agency reach-truck driver, week four on nights",
+    "voice": "Polite, careful, worried about his contract. Speaks simple Dutch mixed with English. Opens up when he feels safe."
+  },
   "opening_message": "We need a safety refresher for everyone. Three near-misses with reach trucks last month, one guy nearly lost a foot. Problem is they have no time. Can it be 15 minutes? On their phones maybe? The insurer is breathing down my neck.",
   "surface_ask": "A 15-minute mobile safety refresher for all 220 staff.",
   "gold": {
@@ -42,7 +47,13 @@
       "unlocks_when": "The player asks when or where incidents happen, or asks for the incident data.",
       "reveal_line": "Now that you ask, most of them are nights. Between two and four. The ghost hours.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "11 reports. By hour: 22-02h: 2, 02-04h: 7, 04-06h: 2. Day shift: 0.",
+      "data_source": "Near-miss log, last quarter"
     },
     {
       "id": "agency_newcomers",
@@ -50,7 +61,12 @@
       "unlocks_when": "The player asks who was involved, how experienced they were, or whether it's everyone or a specific group.",
       "reveal_line": "Mostly agency. New ones. Nine out of eleven, if I'm honest. The old hands could drive these aisles blindfolded. Please don't quote me on blindfolded.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "9 of 11 near-misses involved agency drivers, 8 of them in their first 6 weeks on site.",
+      "data_source": "Near-miss log joined with HR"
     },
     {
       "id": "video_induction",
@@ -58,7 +74,14 @@
       "unlocks_when": "The player asks how new or agency staff are onboarded or how they learn the site.",
       "reveal_line": "They watch the induction video. It's a good video. It has dramatic music. Then they get a truck.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "data:training"
+      ],
+      "data_doc": "20-minute safety video, check of reach-truck certificate (paper). Site-specific practical: not included.",
+      "frontline_line": "First day I watched a video. Twenty minutes. Then they gave me a truck. These aisles are much narrower than at my last site.",
+      "data_source": "Induction procedure, agency staff"
     },
     {
       "id": "no_supervisor",
@@ -66,7 +89,11 @@
       "unlocks_when": "The player asks about supervision, who is on the floor at night, or who new people can ask for help.",
       "reveal_line": "After one o'clock Dirk covers both halls. He walks about eleven kilometres a night. He's very fit and very absent.",
       "weight": 2,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "After one o'clock there is nobody. Dirk is in the other hall. If something is strange, you just... continue."
     },
     {
       "id": "night_bonus",
@@ -74,7 +101,14 @@
       "unlocks_when": "The player asks what changed recently, how people are rewarded, or what targets the night shift has.",
       "reveal_line": "We did introduce a per-case bonus on nights, four months ago. Pick rate went up beautifully. Oh. Yes. Near-misses also went up. Hm.",
       "weight": 3,
-      "critical": true
+      "critical": true,
+      "found_at": [
+        "data:policy",
+        "frontline"
+      ],
+      "data_doc": "Bonus of 0.04 euro per case picked above 120 cases/hour.",
+      "frontline_line": "Everybody drives fast after two. The bonus is per case. Rent is not cheap.",
+      "data_source": "Night shift pay policy, effective four months ago"
     },
     {
       "id": "day_staff_trained",
@@ -82,7 +116,13 @@
       "unlocks_when": "The player asks whether everyone needs it or who has already been trained.",
       "reveal_line": "Day shift had a refresher in April. Practical, with the trainer from the truck dealer. They're fine.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Practical reach-truck refresher, April, delivered by truck dealer. Attendees: 74 permanent day staff. Agency and night staff: 0.",
+      "data_source": "Training records"
     },
     {
       "id": "phones_banned",
@@ -90,7 +130,12 @@
       "unlocks_when": "The player asks how or where people would access a mobile module, or about devices and connectivity.",
       "reveal_line": "On their phones... ah. Phones are banned on the floor. Safety rule. My rule, actually.",
       "weight": 1,
-      "critical": false
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Phones? No, phones are in the locker. Strict rule. You get sent home."
     }
   ],
   "volunteered_facts": [

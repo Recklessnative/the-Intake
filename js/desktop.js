@@ -6,14 +6,15 @@
   const wide = () => window.matchMedia('(min-width: 900px)').matches;
 
   // Where windows go per phase, in percent of the desktop: [left, top, width, height].
+  // The left 8% stays free for the desktop icons.
   const LAYOUTS = {
-    inbox: { 'w-inbox': [2, 3, 62, 90], 'w-case': [66, 3, 32, 54], 'w-notes': [66, 60, 32, 33] },
-    call: { 'w-call': [2, 3, 55, 92], 'w-case': [59, 3, 39, 46], 'w-notes': [59, 51, 39, 44] },
-    write: { 'w-write': [2, 2, 54, 94], 'w-call': [58, 2, 40, 50], 'w-notes': [58, 54, 40, 23], 'w-case': [58, 79, 40, 17] },
-    defence: { 'w-dialog': [2, 2, 54, 94], 'w-call': [58, 2, 40, 50], 'w-notes': [58, 54, 40, 23], 'w-case': [58, 79, 40, 17] },
+    inbox: { 'w-inbox': [8, 3, 57, 90], 'w-case': [67, 3, 31, 54], 'w-notes': [67, 60, 31, 33] },
+    call: { 'w-call': [8, 3, 50, 92], 'w-case': [60, 3, 38, 46], 'w-notes': [60, 51, 38, 44] },
+    write: { 'w-write': [8, 2, 49, 94], 'w-call': [59, 2, 39, 50], 'w-notes': [59, 54, 39, 23], 'w-case': [59, 79, 39, 17] },
+    defence: { 'w-dialog': [8, 2, 49, 94], 'w-call': [59, 2, 39, 50], 'w-notes': [59, 54, 39, 23], 'w-case': [59, 79, 39, 17] },
     dialog: { 'w-dialog': [14, 4, 72, 90] }
   };
-  const FLOATING = { 'w-mieke': [56, 6, 38, 66] };
+  const FLOATING = { 'w-mieke': [56, 6, 38, 66], 'w-coe': [12, 4, 66, 88], 'w-scores': [24, 8, 52, 80] };
 
   let z = 10;
   let current = null;
@@ -105,7 +106,7 @@
     if (!current) return;
     const keep = Object.keys(LAYOUTS[current]);
     keep.forEach(id => { const w = $(id); w.classList.remove('max', 'minimised'); place(w, LAYOUTS[current][id]); });
-    if ($('w-mieke').classList.contains('open') && !$('w-mieke').classList.contains('minimised')) place($('w-mieke'), FLOATING['w-mieke']);
+    Object.keys(FLOATING).forEach(id => { const w = $(id); if (w.classList.contains('open') && !w.classList.contains('minimised')) place(w, FLOATING[id]); });
     keep.forEach(id => focus(id));
   }
 

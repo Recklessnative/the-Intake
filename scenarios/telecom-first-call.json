@@ -1,0 +1,151 @@
+{
+  "id": "telecom-first-call",
+  "schema_version": 1,
+  "sector": "Telecom customer service",
+  "tier": 0,
+  "tier_label": "Starter: open stakeholder, clear gap",
+  "title": "Please Hold, I'll Ask My Supervisor",
+  "briefing": {
+    "headline": "Contact centres: what you should know before the call",
+    "points": [
+      "Agents answer customer calls about billing, contracts and technical problems.",
+      "First-call resolution means the customer's problem is solved in the first call, without a transfer or callback.",
+      "Agents often have limits on what they may decide themselves, such as giving a small credit on a bill.",
+      "Contact centres track almost everything per agent: call time, transfers, resolution and call reasons."
+    ]
+  },
+  "stakeholder": {
+    "name": "Ines Dumont",
+    "role": "Contact Centre Manager",
+    "org": "Telvio, a telecom provider with a 120-agent contact centre in Charleroi",
+    "voice": "Energetic, warm, very data-literate. Talks in contact-centre jargon but happily explains it. Answers questions fully and with numbers.",
+    "patience": 5,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Mehdi Benali",
+    "role": "Customer service agent, two months in",
+    "voice": "Polite, keen, a bit nervous about making mistakes. Speaks French and Dutch."
+  },
+  "opening_message": "Hello! Our first-call resolution has slipped and my supervisors are drowning in transfers. I think the new agents need more product training. We have a lot of products. Can you help?",
+  "surface_ask": "More product training for new agents.",
+  "gold": {
+    "real_problem": "New agents transfer billing complaints to a supervisor because they don't know they may give a goodwill credit of up to 25 euro themselves. The credit limit used to be on the quick-reference card but disappeared when the policies moved to a new knowledge base in March. Product knowledge is not the gap.",
+    "root_cause_types": ["skill", "process"],
+    "is_training_the_lever": "partly",
+    "need_statement": "New agents need to know and feel confident using their authority to give small goodwill credits on billing complaints. Restoring the limit to the quick-reference card and practising those calls fixes it; more product training does not."
+  },
+  "hidden_facts": [
+    {
+      "id": "new_agents_billing",
+      "fact": "Most transfers come from agents in their first three months, and most of those are billing complaints, not product questions.",
+      "unlocks_when": "The player asks who exactly transfers calls, or what kind of calls get transferred.",
+      "reveal_line": "Who? The agents in their first three months, mostly. And when I look at the call reasons... it's billing complaints. Not products at all. Huh.",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "credit_limit",
+      "fact": "Agents may give a goodwill credit of up to 25 euro without asking anyone, but most new agents don't know this and transfer the call to a supervisor instead.",
+      "unlocks_when": "The player asks what new agents do now with a billing complaint, or what they are allowed to decide themselves.",
+      "reveal_line": "What do they do? They put the customer on hold and call a supervisor. For a 10-euro credit they could give themselves! Up to 25 euro, no questions asked. Apparently nobody told them.",
+      "weight": 3,
+      "critical": true,
+      "found_at": ["call"]
+    },
+    {
+      "id": "since_march",
+      "fact": "Transfers started rising in March, when the policies moved to a new knowledge base and the credit limit dropped off the quick-reference card.",
+      "unlocks_when": "The player asks since when first-call resolution has slipped, or what changed.",
+      "reveal_line": "It started in March. That's when we moved everything into the new knowledge base. The old quick-reference card had the credit limit on it. The new one... doesn't, I think.",
+      "weight": 2,
+      "critical": false,
+      "found_at": ["call"]
+    },
+    {
+      "id": "fcr_tracked",
+      "fact": "The telephony system tracks first-call resolution and transfers per agent and per call reason.",
+      "unlocks_when": "The player asks how first-call resolution is measured or what data is available.",
+      "reveal_line": "We measure everything. First-call resolution, transfers, per agent, per call reason. I have dashboards for my dashboards.",
+      "weight": 1,
+      "critical": false,
+      "found_at": ["call"]
+    }
+  ],
+  "volunteered_facts": [
+    "First-call resolution has slipped.",
+    "Supervisors are overloaded with transfers."
+  ],
+  "constraints": {
+    "budget": "About 5,000 euro.",
+    "deadline": "Before the end-of-year peak in billing calls.",
+    "audience": "120 agents, about 25 of them in their first three months.",
+    "schedule": "Agents can be taken off the phones for short sessions in quiet hours.",
+    "languages": "French and Dutch.",
+    "data_available": [
+      "First-call resolution and transfers per agent and call reason",
+      "Call recordings used for quality checks"
+    ],
+    "data_not_available": [
+      "Any record of how often agents check the knowledge base"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Team supervisors",
+      "concern": "Need time to coach new agents on billing calls, and must stop simply taking over the call.",
+      "if_ignored": "Supervisors keep solving the calls themselves and agents never learn."
+    },
+    {
+      "who": "Knowledge base owner",
+      "concern": "Owns the quick-reference card and the policy pages.",
+      "if_ignored": "The next group of new agents won't find the credit limit either."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Product quiz scores.",
+      "Training completion.",
+      "Overall first-call resolution for all 120 agents, which hides the new-agent pattern."
+    ],
+    "gold_plan": {
+      "baseline": "Transfers on billing complaints and first-call resolution for agents in their first three months.",
+      "behaviour": "New agents give goodwill credits within their limit instead of transferring, checked in a sample of recorded calls.",
+      "leading_indicators": "Goodwill credits given by new agents; supervisor transfer requests per day.",
+      "business_metric": "First-call resolution on billing complaints, and supervisor workload.",
+      "collection": "The telephony dashboard, per agent tenure group and call reason, weekly."
+    }
+  },
+  "concepts": {
+    "conventional": "More product training for new agents.",
+    "solid": "Put the 25-euro credit limit back on the quick-reference card, and run a short practice session for new agents on handling billing complaints with that authority, using real call recordings. Supervisors coach the next few billing calls instead of taking them over.",
+    "next_level_examples": [
+      "Add the goodwill credit to onboarding as a 'you're allowed to' moment, so new agents start with confidence instead of permission-seeking.",
+      "Let supervisors answer transfer requests with a question ('what would you do?') rather than taking the call, for the first month."
+    ],
+    "also_valid": [
+      "A short refresher on billing products is fine alongside, if the credit authority is the focus."
+    ],
+    "red_flags": [
+      "More product training as the main answer.",
+      "Training all 120 agents without seeing it's the new ones.",
+      "Leaving the quick-reference card as it is."
+    ]
+  },
+  "defence_objections": [
+    "Let new agents hand out credits on their own? Finance will imagine a river of free money.",
+    "Supervisors coaching instead of taking calls? The queue will explode while they ask 'what would you do?'"
+  ],
+  "question_you_didnt_ask": "What kind of calls get transferred?",
+  "actor_notes": [
+    "Ines is open and loves data: any question about numbers gets a full answer.",
+    "She assumes it's product knowledge until the player asks which calls are transferred; play the 'huh' moment.",
+    "She's happy with practical, quick fixes and doesn't need convincing for sensible ideas."
+  ],
+  "flavour_lines": [
+    "I have dashboards for my dashboards.",
+    "Our hold music is Vivaldi. Customers hear a lot of Vivaldi."
+  ]
+}

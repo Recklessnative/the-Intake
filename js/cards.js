@@ -14,7 +14,7 @@
       id: raw.id,
       sector: raw.sector,
       title: raw.title,
-      difficulty: raw.tier || 1,
+      difficulty: raw.tier == null ? 1 : raw.tier,
       stakeholder: {
         name: s.name,
         role: s.role,
@@ -52,6 +52,7 @@
         concept: [k.solid].concat(list(k.next_level_examples)).filter(Boolean).join(' | '),
         risks: list(raw.dependencies).map(d => `${d.who} (${d.if_ignored})`)
       },
+      measurementPlan: m,
       measurementTraps: list((raw.measurement || {}).traps),
       calibration: {
         strong: list(k.next_level_examples)[0] ? `${k.solid} Plus: ${list(k.next_level_examples)[0]}` : k.solid,

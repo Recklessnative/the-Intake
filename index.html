@@ -67,20 +67,33 @@
     </div>
     <div class="boot-center">
       <div class="boot-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-      <p class="boot-name">KimOS <em>office</em></p>
+      <p class="boot-name">Doors <em>OS</em></p>
       <div class="boot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
       <p id="cubicle-line" class="boot-line" aria-live="polite"></p>
       <button id="btn-sit" class="boot-btn">Go on</button>
     </div>
-    <p class="boot-foot">Copyright © KimCorp. All rights reserved, especially the ones you didn't ask for.</p>
+    <p class="boot-foot">Copyright © Doors Corp. All rights reserved, especially the ones you didn't ask for.</p>
   </section>
 
   <!-- Desk: the desktop, with windows -->
   <section id="s-desk" class="screen">
     <div id="desktop" class="desktop">
+      <!-- Desktop icons: every window can be opened from here (on wide screens; the start menu on phones). -->
+      <nav id="desk-icons" class="desk-icons" aria-label="Desktop">
+        <button type="button" class="desk-icon" data-app="w-coe"><span class="di">🗂</span>Center of Excellence</button>
+        <button type="button" class="desk-icon" data-app="w-inbox"><span class="di">✉</span>Doors Mail</button>
+        <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
+        <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
+        <button type="button" class="desk-icon" data-app="w-call"><span class="di">☎</span>Phone</button>
+        <button type="button" class="desk-icon" data-app="w-write"><span class="di">📌</span>Case board</button>
+        <button type="button" class="desk-icon" data-app="w-mieke"><span class="di">☕</span>Mieke</button>
+        <button type="button" class="desk-icon" data-app="w-scores"><span class="di">🏆</span>My scores.txt</button>
+        <button type="button" class="desk-icon" data-app="bin"><span class="di">🗑</span>Recycle Bin</button>
+      </nav>
+
 
       <!-- Inbox: an early-2000s mail client -->
-      <div class="win" id="w-inbox" data-title="Inbox - KimMail" data-icon="✉">
+      <div class="win" id="w-inbox" data-title="Inbox - Doors Mail" data-icon="✉">
         <div class="mail-toolbar" role="toolbar" aria-label="Mail">
           <button type="button" data-mail="new"><span>✉</span>Create Mail</button>
           <button type="button" data-mail="reply"><span>↩</span>Reply</button>
@@ -286,6 +299,22 @@
         </form>
       </div>
 
+      <!-- The learning team's Center of Excellence: reference documents, readable any time. -->
+      <div class="win" id="w-coe" data-title="Center of Excellence" data-icon="🗂">
+        <div class="explorer">
+          <nav class="ex-files" aria-label="Documents">
+            <div class="mail-pane-head">L&amp;D Center of Excellence</div>
+            <ul id="coe-files"></ul>
+          </nav>
+          <article id="coe-doc" class="ex-doc" tabindex="0"></article>
+        </div>
+      </div>
+
+      <!-- Every request you finished, kept in this browser. -->
+      <div class="win" id="w-scores" data-title="My scores.txt - Notepad" data-icon="🏆">
+        <div id="scores" class="scores"></div>
+      </div>
+
       <!-- Dialog: defence, waiting, scorecard -->
       <div class="win" id="w-dialog" data-title="THE INTAKE" data-icon="★">
         <div id="p-defence" class="pane">
@@ -318,6 +347,9 @@
         <button data-open="w-notes">📝 My notes</button>
         <button data-open="w-case">📁 Case file</button>
         <button data-open="w-mieke">☕ Ask Mieke</button>
+        <button data-open="w-coe">🗂 Center of Excellence</button>
+        <button data-open="w-scores">🏆 My scores</button>
+        <button id="btn-sound">🔊 Sound: on</button>
         <button id="btn-tidy">▦ Tidy the windows</button>
         <button id="btn-logoff" class="logoff">⏻ Log off (quit this week)</button>
       </div>
@@ -327,6 +359,7 @@
       <button id="btn-startmenu" class="start-btn">start</button>
       <div id="task-buttons" class="task-buttons"></div>
       <div class="tray">
+        <button type="button" id="btn-debug" class="debug" hidden title="Test mode: fill in this step for me">🐞 Autofill</button>
         <span id="os-step"></span>
         <span id="os-trust"></span>
         <span id="os-clock">08:57</span>
@@ -340,7 +373,7 @@
       <h2 id="end-title"></h2>
       <p id="end-score" class="score-total"></p>
       <p id="end-note"></p>
-      <p class="fine">The board room, hard mode and shareable scores arrive in the next version.</p>
+      <p class="fine">Every request is kept in <b>My scores</b> on the desktop. The board room, hard mode and shareable scores arrive in the next version.</p>
       <button id="btn-again" class="primary">Another week</button>
     </div>
   </section>
@@ -352,6 +385,8 @@
 <script src="js/desktop.js?v=dev"></script>
 <script src="js/cards.js?v=dev"></script>
 <script src="js/prompts.js?v=dev"></script>
+<script src="js/coe.js?v=dev"></script>
+<script src="js/sound.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
 </html>
