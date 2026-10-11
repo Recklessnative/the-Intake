@@ -1,7 +1,9 @@
-// THE INTAKE v0.1: cubicle -> inbox -> intake call -> write-up -> reaction/defence -> scorecard.
+// THE INTAKE: cubicle -> inbox -> intake call -> write-up -> reaction/defence -> scorecard,
+// played on a desktop with the case file, notes and a colleague open beside the call.
 (function () {
   const $ = id => document.getElementById(id);
   const QUESTIONS = 8;
+  const MIEKE_ASKS = 3;
   const RUN_LENGTH = 3;
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
   const DIMENSIONS = [
@@ -25,10 +27,21 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     window.scrollTo(0, 0);
   }
-  function pane(id, step) {
+  function step(text) { $('os-step').textContent = text; }
+  function phase(name) { $('desktop').dataset.phase = name; }
+  // Defence, waiting and the scorecard share one dialog window.
+  function pane(id, stepText) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
-    document.querySelector('.laptop').classList.toggle('wide', id === 'p-write');
-    if (step) $('os-step').textContent = step;
+    Desktop.title('w-dialog', { 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard' }[id], 'THE INTAKE');
+    Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
+    if (stepText) step(stepText);
+  }
+  // The office clock moves as you work.
+  function tick(minutes) {
+    const r = state.run;
+    r.clock += minutes;
+    const h = Math.floor(r.clock / 60) % 24, m = r.clock % 60;
+    $('os-clock').textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
   }
   function toast(msg) {
     const t = $('toast');
@@ -39,6 +52,10 @@
   }
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
+  $('btn-logoff').onclick = () => {
+    $('start-menu').hidden = true;
+    if (window.confirm('Log off and abandon this week? It still counts as a played week.')) { Desktop.reset(); show('s-title'); runsLeft(); }
+  };
 
   // ---------- scenarios ----------
   async function loadCards() {
@@ -151,17 +168,34 @@
   // ---------- one request ----------
   function startRequest() {
     const card = state.cards[state.index];
+    const prev = state.run;
     state.run = {
       card, trust: 100, questionsLeft: QUESTIONS, patience: card.patience || 3,
-      turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: []
+      turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
+      miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57
     };
     show('s-desk');
     trust();
+    tick(0);
     $('mail-from').textContent = card.stakeholder.name;
-    $('mail-role').textContent = card.stakeholder.role;
+    $('mail-role').textContent = '(' + card.stakeholder.role + ')';
     $('mail-body').textContent = card.surfaceAsk;
+    $('notes').value = '';
+    $('chat-log').innerHTML = '';
+    $('w-call').classList.remove('ended');
+    $('write-form').reset();
+    $('mieke-log').innerHTML = '';
+    miekeSays('Morning. Shout if you want a second pair of eyes.');
+    miekeLeft();
     briefing(card.briefing);
-    pane('p-inbox', 'Request ' + (state.index + 1) + ' of ' + state.cards.length + ' · Inbox');
+    Desktop.reset();
+    Desktop.title('w-inbox', 'Inbox - 1 unread from ' + card.stakeholder.name, 'Inbox');
+    phase('inbox');
+    Desktop.layout('inbox', 'w-inbox');
+    Desktop.open('w-mieke', Desktop.floating['w-mieke']);
+    Desktop.minimise('w-mieke');
+    Desktop.focus('w-inbox');
+    step('Request ' + (state.index + 1) + ' of ' + state.cards.length);
   }
 
   // Pre-call context a well-prepared professional would look up first (never the diagnosis).
@@ -170,8 +204,7 @@
     const ul = $('briefing-points');
     ul.innerHTML = '';
     box.querySelectorAll('p').forEach(p => p.remove());
-    box.hidden = !b;
-    if (!b) return;
+    if (!b) { $('briefing-head').textContent = 'No case file for this one. Ask.'; return; }
     $('briefing-head').textContent = b.headline;
     if (b.text) { const p = document.createElement('p'); p.textContent = b.text; box.appendChild(p); }
     b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
@@ -186,7 +219,10 @@
     addMsg('them', r.card.surfaceAsk);
     meters();
     $('chat-input').value = '';
-    pane('p-chat', 'Request ' + (state.index + 1) + ' · Intake call');
+    Desktop.title('w-call', 'On a call with ' + r.card.stakeholder.name, 'Call');
+    phase('call');
+    Desktop.layout('call', 'w-call');
+    tick(3);
     $('chat-input').focus();
   };
 
@@ -194,8 +230,26 @@
     const d = document.createElement('div');
     d.className = 'msg ' + who;
     d.textContent = text;
+    if (who === 'them') {
+      const pin = document.createElement('button');
+      pin.type = 'button';
+      pin.className = 'pin';
+      pin.title = 'Pin this to my notes';
+      pin.setAttribute('aria-label', 'Pin this to my notes');
+      pin.textContent = '📌';
+      pin.onclick = () => pinNote(text, pin);
+      d.appendChild(pin);
+    }
     $('chat-log').appendChild(d);
     $('chat-log').scrollTop = $('chat-log').scrollHeight;
+  }
+  function pinNote(text, btn) {
+    const n = $('notes');
+    const who = state.run.card.stakeholder.name.split(' ')[0];
+    n.value = (n.value.trim() ? n.value.replace(/\s+$/, '') + '\n' : '') + '- ' + who + ': "' + text + '"\n';
+    btn.classList.add('done');
+    const w = $('w-notes');
+    if (!w.classList.contains('open') || w.classList.contains('minimised')) Desktop.open('w-notes');
   }
   function meters() {
     const r = state.run;
@@ -225,6 +279,7 @@
       (out.revealed || []).forEach(id => { if (r.card.hiddenFacts.some(f => f.id === id)) r.revealed.add(id); });
       r.transcript.push({ q, a: out.reply, quality: out.quality });
       r.questionsLeft--;
+      tick(4);
       if (out.quality === 'weak') { r.patience--; r.trust -= 10; }
       meters();
       if (r.patience <= 0) {
@@ -242,40 +297,75 @@
     }
   };
   $('btn-hangup').onclick = () => toWriteup();
+  // Enter sends, Shift+Enter makes a new line.
+  $('chat-input').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); $('chat-form').requestSubmit(); }
+  });
 
+  // The call stays open (read-only) beside the write-up, with the notes and case file.
   function toWriteup() {
-    $('write-form').reset();
-    notes();
-    pane('p-write', 'Request ' + (state.index + 1) + ' · Write-up');
+    const r = state.run;
+    if (!r.transcript.length) addMsg('sys', 'You hung up without asking anything. Bold.');
+    $('w-call').classList.add('ended');
+    Desktop.title('w-call', 'Call with ' + r.card.stakeholder.name + ' (ended)', 'Call');
+    phase('write');
+    Desktop.layout('write', 'w-write');
+    tick(10);
   }
 
-  // The call transcript (and case file) beside the write-up, so nobody has to remember the call.
-  function notes() {
-    const r = state.run;
-    $('notes-who').textContent = 'Your call with ' + r.card.stakeholder.name;
-    const log = $('notes-log');
-    log.innerHTML = '';
-    if (!r.transcript.length) {
-      const p = document.createElement('p'); p.className = 'muted'; p.textContent = 'You did not ask anything. Bold.'; log.appendChild(p);
-    }
-    const ask = document.createElement('p'); ask.className = 'note them'; ask.textContent = r.card.surfaceAsk; log.appendChild(ask);
-    r.transcript.forEach(t => {
-      const q = document.createElement('p'); q.className = 'note you'; q.textContent = t.q;
-      const a = document.createElement('p'); a.className = 'note them'; a.textContent = t.a;
-      log.append(q, a);
-    });
-    const b = r.card.briefing;
-    const cf = $('notes-case');
-    cf.innerHTML = '';
-    if (b) {
-      const h = document.createElement('h4'); h.textContent = b.headline; cf.appendChild(h);
-      if (b.text) { const p = document.createElement('p'); p.textContent = b.text; cf.appendChild(p); }
-      const ul = document.createElement('ul');
-      b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-      cf.appendChild(ul);
-    }
-    $('write-notes').open = window.matchMedia('(min-width: 900px)').matches;
+  // ---------- Mieke, the colleague two cubicles over ----------
+  function miekeSays(text, who) {
+    const d = document.createElement('div');
+    d.className = 'msg ' + (who || 'them');
+    d.textContent = text;
+    $('mieke-log').appendChild(d);
+    $('mieke-log').scrollTop = $('mieke-log').scrollHeight;
   }
+  function miekeLeft() {
+    const n = state.run.miekeLeft;
+    $('mieke-left').textContent = n ? 'She has time for ' + n + (n === 1 ? ' more question' : ' more questions') + ' on this request.' : 'She is back on her own deadline.';
+    document.querySelectorAll('#w-mieke .quick button, #mieke-form button').forEach(b => { b.disabled = !n; });
+  }
+  async function askMieke(question) {
+    const r = state.run;
+    question = (question || '').trim();
+    if (!question || r.miekeLeft <= 0) return;
+    r.miekeLeft--;
+    miekeLeft();
+    miekeSays(question, 'you');
+    const ph = $('desktop').dataset.phase;
+    const draft = ph === 'write' ? Object.fromEntries(new FormData($('write-form')).entries()) : null;
+    const material = [
+      'Where they are: ' + ({ inbox: 'they have read the request and not called yet', call: 'they are in the middle of the intake call', write: 'the call is over and they are writing the concept' }[ph] || ph),
+      'Questions left in the call: ' + r.questionsLeft,
+      '',
+      'The request: "' + r.card.surfaceAsk + '"',
+      'Case file: ' + (r.card.briefing ? r.card.briefing.points.join(' | ') : 'none'),
+      '',
+      'The call so far:',
+      r.transcript.map((t, i) => `Q${i + 1}: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n') || '(no questions yet)',
+      '',
+      'Their notes: """' + ($('notes').value.trim() || '(empty)') + '"""',
+      draft ? '\nTheir draft write-up:\n"""\n' + writeupText(draft) + '\n"""' : '',
+      '',
+      'Their question to you: """' + question + '"""'
+    ].join('\n');
+    const p = Prompts.colleague(r.card);
+    document.querySelectorAll('#w-mieke button:not(.tb)').forEach(b => { b.disabled = true; });
+    try {
+      const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: material }] });
+      miekeSays(out.reply);
+      tick(2);
+    } catch (e) {
+      r.miekeLeft++;
+      toast(e.message);
+    } finally {
+      miekeLeft();
+    }
+  }
+  document.querySelectorAll('#w-mieke .quick button').forEach(b => { b.onclick = () => askMieke(b.dataset.ask); });
+  $('mieke-form').onsubmit = ev => { ev.preventDefault(); const v = $('mieke-input').value; $('mieke-input').value = ''; askMieke(v); };
+  document.querySelectorAll('.btn-mieke').forEach(b => { b.onclick = () => Desktop.open('w-mieke', Desktop.floating['w-mieke']); });
 
   function writeupText(w) {
     return [
@@ -300,7 +390,7 @@
         system: p.system, schema: p.schema,
         turns: [{ role: 'user', text: 'The write-up, quoted as data:\n"""\n' + writeupText(w) + '\n"""' }]
       });
-    } catch (e) { toast(e.message); pane('p-write'); return; }
+    } catch (e) { toast(e.message); phase('write'); Desktop.layout('write', 'w-write'); return; }
     const gap = Math.max(0, Math.min(3, (r.reaction.boldness | 0) - (r.card.riskAppetite | 0)));
     if (gap > 0) defence(r.reaction.objections.slice(0, gap)); else judge();
   };
