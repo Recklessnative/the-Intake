@@ -995,7 +995,7 @@
     return scoreHistory().weeks.filter(w => w.done).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
   }
   Retro.setLevel(wallpaperLevel());
-  $('btn-wait-snake').onclick = () => { Retro.phone.view = 'snake'; openApp('w-phone'); Retro.renderPhone(); };
+  $('btn-wait-snake').onclick = () => Retro.showPhone('snake');
 
   // ---------- the case board ----------
   // Five short steps built on what the stakeholder actually said. Each step locks before the
@@ -1832,7 +1832,9 @@
     if (id === 'w-scores') renderScores();
     if (id === 'w-coe' && !$('coe-doc').innerHTML) Coe.render($('coe-files'), $('coe-doc'), 'flow');
     if (id === 'w-display') Retro.renderDisplay();
-    if (id === 'w-phone' && !$('w-phone').classList.contains('open')) Retro.renderPhone();
+    if (id === 'w-phone') { if (Retro.phoneOpen()) Retro.hidePhone(); else Retro.showPhone(); return; }
+    // On a small screen the phone fills the middle, so opening anything else puts it back in your pocket.
+    if (!Desktop.wide()) Retro.hidePhone();
     Desktop.open(id, Desktop.floating[id]);
   }
   document.querySelectorAll('.desk-icon').forEach(b => { b.onclick = () => openApp(b.dataset.app); });

@@ -428,21 +428,6 @@
         </div>
       </div>
 
-      <!-- The brick phone: texts from people who are not in the building, and Snake -->
-      <div class="win" id="w-phone" data-title="My mobile" data-icon="📱">
-        <div class="brick">
-          <div class="brick-top"><span class="brick-ear"></span><span id="phone-unread" class="brick-env" hidden></span></div>
-          <div id="phone-screen" class="brick-screen" aria-live="polite"></div>
-          <div class="brick-brand">BRIKKO 2000</div>
-          <div id="phone-keys" class="brick-keys">
-            <button type="button" data-k="back" class="bk-soft">C</button><button type="button" data-k="ok" class="bk-soft">OK</button>
-            <button type="button" data-k="1">1</button><button type="button" data-k="2">2 ▲</button><button type="button" data-k="3">3</button>
-            <button type="button" data-k="4">◀ 4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6 ▶</button>
-            <button type="button" data-k="7">7</button><button type="button" data-k="8">8 ▼</button><button type="button" data-k="9">9</button>
-          </div>
-        </div>
-      </div>
-
       <!-- Display properties: wallpapers you unlock with your titles -->
       <div class="win" id="w-display" data-title="Display Properties" data-icon="🖼">
         <p class="fine">Desktop background. New ones unlock when you finish a week with a better title.</p>
@@ -467,6 +452,22 @@
       </div>
     </div>
 
+    <!-- The brick phone: not a window, a phone on your desk. Texts from people outside the office, and Snake. -->
+    <div id="phone" class="handset" hidden role="dialog" aria-label="My mobile phone">
+      <span class="brick-antenna" aria-hidden="true"></span>
+      <button type="button" id="phone-away" class="phone-away" title="Put the phone away" aria-label="Put the phone away">✕</button>
+      <div class="brick">
+        <div class="brick-top"><span class="brick-ear"></span><span id="phone-unread" class="brick-env" hidden></span></div>
+        <div id="phone-screen" class="brick-screen" aria-live="polite"></div>
+        <div class="brick-brand">BRIKKO 2000</div>
+        <div id="phone-keys" class="brick-keys">
+          <button type="button" data-k="back" class="bk-soft">C</button><button type="button" data-k="ok" class="bk-soft bk-ok">OK</button><button type="button" data-k="away" class="bk-soft bk-red" aria-label="Put the phone away">⏻</button>
+          <button type="button" data-k="1">1</button><button type="button" data-k="2">2 ▲</button><button type="button" data-k="3">3</button>
+          <button type="button" data-k="4">◀ 4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6 ▶</button>
+          <button type="button" data-k="7">7</button><button type="button" data-k="8">8 ▼</button><button type="button" data-k="9">9</button>
+        </div>
+      </div>
+    </div>
     <div id="im-pop" class="im-pop" hidden role="status"><div class="im-pop-bar">💬 Doors Messenger</div><b class="im-from"></b><p class="im-text"></p><span class="fine">Click to open</span></div>
     <div id="staply" class="staply" hidden role="dialog" aria-label="Staply, your office assistant">
       <div class="st-balloon"><p class="st-text"></p><div class="st-actions"><button type="button" data-st="yes">Yes please!</button><button type="button" data-st="no">No</button><button type="button" data-st="off" class="link">Don't show me this again</button></div></div>

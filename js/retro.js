@@ -139,8 +139,7 @@
       if (s.dead) { g.fillStyle = '#9fb84a'; g.fillRect(14, 16, 56, 16); g.fillStyle = '#1e2a0e'; g.font = '8px monospace'; g.fillText('GAME OVER ' + s.score, 16, 27); }
     };
     const tick = () => {
-      const w = $('w-phone');
-      if (s.dead || !w.classList.contains('open') || w.classList.contains('minimised')) return;
+      if (s.dead || $('phone').hidden) return;
       s.dir = s.next;
       const head = [(s.body[0][0] + s.dir[0] + W) % W, (s.body[0][1] + s.dir[1] + H) % H];
       if (s.body.some(([x, y]) => x === head[0] && y === head[1])) {
@@ -157,7 +156,36 @@
     draw();
   }
   function stopSnake() { if (phone.snake) { clearInterval(phone.snake.timer); phone.snake = null; } }
+  // The phone sits on top of the desk, not in a window. Drag it around by its body.
+  const phoneOpen = () => !$('phone').hidden;
+  function showPhone(view) {
+    const el = $('phone');
+    if (view) phone.view = view;
+    if (el.hidden || view) renderPhone();
+    el.hidden = false;
+    el.classList.remove('pickup');
+    void el.offsetWidth;
+    el.classList.add('pickup');
+  }
+  function hidePhone() { $('phone').hidden = true; stopSnake(); phone.view = 'menu'; }
+  function dragPhone(el) {
+    el.addEventListener('pointerdown', e => {
+      if (e.target.closest('button') || !window.matchMedia('(min-width: 900px)').matches) return;
+      const r = el.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+      el.setPointerCapture(e.pointerId);
+      el.classList.add('held');
+      const move = ev => {
+        el.style.left = Math.max(-r.width / 2, Math.min(window.innerWidth - r.width / 2, ev.clientX - dx)) + 'px';
+        el.style.top = Math.max(0, Math.min(window.innerHeight - 80, ev.clientY - dy)) + 'px';
+        el.style.right = 'auto'; el.style.bottom = 'auto';
+      };
+      const up = () => { el.classList.remove('held'); el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); };
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+    });
+  }
   function key(k) {
+    if (k === 'away') { hidePhone(); return; }
     if (k === 'back') { phone.view = 'menu'; renderPhone(); return; }
     if (phone.view === 'menu') { if (k === '1') { phone.view = 'snake'; renderPhone(); } if (k === '2') { phone.view = 'texts'; renderPhone(); } return; }
     if (!phone.snake) return;
@@ -214,15 +242,17 @@
     box.querySelector('[data-st="no"]').onclick = () => { box.hidden = true; };
     box.querySelector('[data-st="off"]').onclick = () => { setStaply(false); toastFn('Staply is off. Turn him back on from the start menu, if you miss him.', 'info'); if (opts.onStaplyChange) opts.onStaplyChange(); };
     document.querySelectorAll('#phone-keys [data-k]').forEach(b => { b.onclick = () => key(b.dataset.k); });
+    $('phone-away').onclick = hidePhone;
+    dragPhone($('phone'));
     document.addEventListener('keydown', ev => {
-      const w = $('w-phone');
-      if (!w || !w.classList.contains('open') || w.classList.contains('minimised') || !w.classList.contains('focused')) return;
-      if (/^(INPUT|TEXTAREA)$/.test(ev.target.tagName)) return;
+      if (!phoneOpen() || !$('s-desk').classList.contains('active')) return;
+      // Only when you are on the phone (or nowhere in particular), so Enter still works in the windows.
+      if (ev.target !== document.body && !ev.target.closest('#phone')) return;
       const k = { ArrowUp: '2', ArrowDown: '8', ArrowLeft: '4', ArrowRight: '6', Enter: 'ok', Escape: 'back' }[ev.key] || (/^[1-9]$/.test(ev.key) ? ev.key : '');
       if (k) { ev.preventDefault(); key(k); }
     });
     renderPhone();
   }
 
-  window.Retro = { WALLPAPERS, setLevel, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, staply, staplyOn, setStaply, init, resetStaply: () => seen.clear() };
+  window.Retro = { WALLPAPERS, setLevel, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, showPhone, hidePhone, phoneOpen, staply, staplyOn, setStaply, init, resetStaply: () => seen.clear() };
 })();
