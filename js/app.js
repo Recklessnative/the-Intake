@@ -34,7 +34,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null };
+  const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null, academy: null };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Quick'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
@@ -83,45 +83,33 @@
     const index = await (await fetch('scenarios/index.json', { cache: 'no-cache' })).json();
     const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.normalise);
     state.pool = cards;
-    try {
-      const qi = await (await fetch('scenarios/quick/index.json', { cache: 'no-cache' })).json();
-      state.quickPool = (await Promise.all(qi.map(id => fetch('scenarios/quick/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.quick);
-    } catch (e) { state.quickPool = []; /* no quick intakes: weeks are full cases only */ }
   }
-  // The shape of a week changes from week to week. Each slot is [day, what]: 'q' is a quick
-  // intake ('q:<kind>' for one kind), a number is a full case of that tier (0 = starter).
+  // The shape of a week changes from week to week. Each slot is [day, tier] (0 = starter);
+  // Friday is the board room. Each normal week also assigns one CoE Academy module.
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const SHAPES = [
-    [[0, 'q'], [0, 'q'], [1, 3], [2, 'q'], [2, 2]],
-    [[0, 2], [1, 'q'], [1, 'q'], [1, 'q'], [2, 3]],
-    [[0, 'q'], [0, 2], [1, 'q'], [2, 'q'], [2, 3]]
+    [[0, 2], [1, 2], [3, 3]],
+    [[0, 1], [1, 2], [2, 2], [3, 3]],
+    [[0, 2], [2, 3], [3, 3]]
   ];
   function shapeFor(n) {
-    if (n === 1) return [[0, 'q:one-question'], [0, 0], [1, 'q:triage'], [1, 0], [2, 1]];
-    if (n === 2) return [[0, 'q'], [0, 'q'], [1, 1], [2, 'q'], [2, 2]];
+    if (n === 1) return [[0, 0], [1, 0], [3, 1]];
+    if (n === 2) return [[0, 1], [2, 1], [3, 2]];
     return SHAPES[(n - 3) % SHAPES.length];
   }
   function weekNumber() {
     return scoreHistory().weeks.filter(w => w.requests.length && w.id !== state.weekId).length + 1;
   }
-  // Fill the shape: unplayed cards first, no sector twice, quick kinds mixed. Starters and
-  // tier-2 quick intakes wait until after the first week.
+  // Fill the shape: unplayed cards first, no sector twice.
   function pickWeek(n) {
     if (state.hard) return pickHardWeek();
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const fresh = list => list.slice().sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const cards = [], days = [];
     shapeFor(n).forEach(([day, what]) => {
-      let card;
-      if (String(what).startsWith('q')) {
-        const kind = what.split(':')[1];
-        const pool = fresh(state.quickPool.filter(c => !cards.includes(c) && (!kind || c.kind === kind) && (n > 1 || c.difficulty <= 1)));
-        card = pool.find(c => !cards.some(x => x.quick && x.kind === c.kind)) || pool[0];
-      } else {
-        const full = fresh(state.pool.filter(c => !cards.includes(c) && (what === 0 ? c.difficulty === 0 : c.difficulty !== 0)));
-        const near = full.slice().sort((a, b) => Math.abs(a.difficulty - what) - Math.abs(b.difficulty - what));
-        card = near.find(c => c.difficulty === what && !cards.some(x => x.sector === c.sector)) || near.find(c => c.difficulty === what) || near[0];
-      }
+      const full = fresh(state.pool.filter(c => !cards.includes(c) && (what === 0 ? c.difficulty === 0 : c.difficulty !== 0)));
+      const near = full.slice().sort((a, b) => Math.abs(a.difficulty - what) - Math.abs(b.difficulty - what));
+      const card = near.find(c => c.difficulty === what && !cards.some(x => x.sector === c.sector)) || near.find(c => c.difficulty === what) || near[0];
       if (card) { cards.push(card); days.push(day); }
     });
     return { cards, days };
@@ -139,7 +127,6 @@
     return { cards, days: cards.map((c, i) => i) };
   }
   const dayOf = i => DAYS[state.days[i] || 0];
-  const isQuick = card => !!(card && card.quick);
 
     // ---------- title / settings ----------
   $('btn-settings').onclick = () => openSettings();
@@ -228,6 +215,7 @@
     state.results = [];
     state.charged = false;
     state.board = null;
+    state.academy = state.hard ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
     state.run = null;
     cubicle();
   }
@@ -279,7 +267,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -296,7 +284,7 @@
     const s = readSave();
     if (!s) { resumeButton(); return; }
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios.'); return; }
-    const cards = s.cards.map(id => state.pool.concat(state.quickPool).find(c => c.id === id));
+    const cards = s.cards.map(id => state.pool.find(c => c.id === id));
     if (cards.some(c => !c)) { dropSave(); resumeButton(); toast('That week used a scenario that no longer exists. Start a new one.'); return; }
     if (s.runId) Gemini.runId = s.runId;
     else if (!(await claimRun())) return;
@@ -305,6 +293,7 @@
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
     state.board = s.board || null;
+    state.academy = s.academy || null;
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
     state.results = s.results || [];
@@ -335,13 +324,12 @@
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
       phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null,
       leg: 'call', legLeft: touchpoints(card) ? budget().call : questionsFor(card), calledBack: false,
-      corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: [],
-      answer: {}, result: null
+      corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: []
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
     // Your very first request: the Center of Excellence folder opens on the flowchart.
-    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) openApp('w-coe');
+    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) { openApp('w-coe'); if (state.academy) Desktop.focus('w-academy'); }
     if (state.index) Sound.ding();
     if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
     save();
@@ -363,7 +351,7 @@
     $('mieke-log').innerHTML = '';
     r.mieke.forEach(m => miekeSays(m.text, m.who, true));
     miekeLeft();
-    briefing(state.hard && !isQuick(card) ? null : card.briefing);
+    briefing(state.hard ? null : card.briefing);
     if (state.hard) $('briefing-head').textContent = 'Hard mode: no case file. Ask.';
     Desktop.reset();
     mailbox();
@@ -371,11 +359,11 @@
     selectMail(state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
-    if (!isQuick(card) && !state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
+    if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
-    step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length + (isQuick(card) ? ' · quick one' : ''));
-    $('btn-call').textContent = isQuick(card) ? '⚡ Handle it (a few minutes)' : '☎ Call them back';
-    if (isQuick(card)) { if (r.phase !== 'inbox') quickDesk(); return; }
+    step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
+    // Monday morning: this week's CoE Academy module waits on top, until you start it.
+    if (state.academy && !state.academy.started && state.index === 0 && r.phase === 'inbox') openAcademy();
     if (r.phase !== 'inbox') callWindow();
     renderLeads();
     if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
@@ -476,21 +464,28 @@
     const box = $('briefing');
     const ul = $('briefing-points');
     ul.innerHTML = '';
-    box.querySelectorAll('p').forEach(p => p.remove());
+    box.querySelectorAll('p, .coe-tips').forEach(p => p.remove());
     if (!b) { $('briefing-head').textContent = 'No case file for this one. Ask.'; return; }
     $('briefing-head').textContent = b.headline;
     if (b.text) { const p = document.createElement('p'); p.textContent = b.text; box.appendChild(p); }
     b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    const tips = academyTips();
+    if (tips.length) {
+      const d = document.createElement('div');
+      d.className = 'coe-tips';
+      const h = document.createElement('b');
+      h.textContent = 'CoE Academy tips this week';
+      d.appendChild(h);
+      const u = document.createElement('ul');
+      tips.forEach(t => { const li = document.createElement('li'); li.textContent = t; u.appendChild(li); });
+      d.appendChild(u);
+      box.appendChild(d);
+    }
   }
 
   $('btn-call').onclick = () => {
     if (!state.run.readMail.current) selectMail(state.run.mails.find(m => m.current));
     const r = state.run;
-    if (isQuick(r.card)) {
-      if (r.phase === 'inbox') { r.phase = 'quick'; tick(2); save(); }
-      quickDesk();
-      return;
-    }
     if (r.phase === 'inbox') {
       r.phase = 'call';
       $('chat-log').innerHTML = '';
@@ -777,45 +772,22 @@
       : `Q${i + 1} [${SRC[t.src] || 'Call'}${t.src === 'frontline' && fl ? ', to ' + fl.name + ', ' + fl.role : ''}]: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n');
   }
 
-  // ---------- quick intakes ----------
-  function quickDesk() {
-    phase('quick');
-    renderQuick();
-    Desktop.layout('quick', 'w-quick');
+  // ---------- CoE Academy: this week's e-learning module ----------
+  function openAcademy() {
+    const A = state.academy;
+    if (!A) { toast(state.hard ? 'Hard mode. No e-learning this week. You know what to do.' : 'No module assigned yet. Clock in first.', 'info'); return; }
+    Academy.render($('academy'), Academy.MODULES.find(m => m.id === A.id), A, save, (right, of) => {
+      if (right == null) { Desktop.minimise('w-academy'); return; }
+      A.right = right; A.of = of;
+      recordAcademy();
+      if (state.run) briefing(state.hard ? null : state.run.card.briefing);
+    });
+    Desktop.open('w-academy', Desktop.floating['w-academy']);
+    Desktop.focus('w-academy');
   }
-  function renderQuick() {
-    const r = state.run;
-    Desktop.title('w-quick', 'Quick intake · ' + r.card.stakeholder.name, 'Quick intake');
-    if (r.result) {
-      Quick.debrief($('quick'), r.card, r.answer, r.result);
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'primary';
-      b.id = 'quick-next';
-      b.textContent = nextLabel();
-      b.onclick = () => $('btn-next').onclick();
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.appendChild(b);
-      $('quick').appendChild(row);
-      return;
-    }
-    Quick.form($('quick'), r.card, r.answer, saveSoon, sendQuick);
-  }
-  async function sendQuick(a, why) {
-    if (!a) { toast(why, 'info'); return; }
-    const r = state.run;
-    let res;
-    try { res = await Quick.grade(r.card, a); } catch (e) { toast(e.message); renderQuick(); return; }
-    if (r !== state.run || r.result) return;
-    r.result = res;
-    r.phase = 'score';
-    tick(3);
-    state.results.push({ id: r.card.id, total: res.total, quick: true });
-    recordScore(r, res.total, {}, { questionNotAsked: '', verdict: '' });
-    save();
-    if (!state.charged && Gemini.runId) { state.charged = true; save(); Gemini.backend('played', { runId: Gemini.runId }).catch(() => {}); }
-    renderQuick();
+  function academyTips() {
+    const A = state.academy;
+    return A && A.done ? Academy.MODULES.find(m => m.id === A.id).tips : [];
   }
 
   // ---------- Mieke, the colleague two cubicles over ----------
@@ -1384,9 +1356,7 @@
   }
 
   function endRun() {
-    // A full case counts twice as much as a quick one.
-    const wt = x => (x.quick ? 1 : 2);
-    const avg = Math.round(state.results.reduce((a, x) => a + wt(x) * x.total, 0) / (state.results.reduce((a, x) => a + wt(x), 0) || 1));
+    const avg = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));
     // The board is the week's headline: your title weighs the board as much as the requests.
     const br = state.board && state.board.result;
     const score = br ? Math.round((avg + br.points.total) / 2) : avg;
@@ -1395,8 +1365,7 @@
     $('end-score').textContent = score + ' / 100';
     $('end-board').hidden = !br;
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
-    const q = state.results.filter(x => x.quick).length;
-    $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (q ? ' (' + q + ' quick ones, which count half)' : '') + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
+    $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
     recordWeek(score, title, br ? { decision: br.decision, total: br.points.total } : null);
     shareCard(score, title);
     show('s-end');
@@ -1425,7 +1394,7 @@
   const boardCard = () => state.pool.find(c => c.id === state.board.pick);
 
   function toBoard() {
-    const full = state.results.filter(x => !x.quick);
+    const full = state.results;
     if (!full.length) { dropSave(); endRun(); return; }
     state.board = state.board || { stage: 'pick', pick: '', slide: {}, members: [], answers: [], result: null };
     save();
@@ -1440,7 +1409,7 @@
     if (B.stage === 'pick') {
       box.appendChild(el('h2', null, 'Which concept do you take to the board?'));
       box.appendChild(el('p', 'muted', 'One slide, three board members, one shot. Pick the concept you can defend best, not necessarily your highest score.'));
-      state.results.filter(x => !x.quick).forEach(x => {
+      state.results.forEach(x => {
         const card = state.pool.find(c => c.id === x.id);
         const b = button(card.stakeholder.name + ': ' + card.subject + ' (' + x.total + '/100)', () => {
           B.pick = x.id;
@@ -1544,7 +1513,7 @@
   // ---------- the share card: a specific brag beats a number ----------
   const GAME_URL = 'https://recklessnative.github.io/the-Intake/';
   function shareData(avg, title) {
-    const full = state.results.filter(x => !x.quick);
+    const full = state.results;
     const found = full.reduce((a, x) => a + (x.found || 0), 0), of = full.reduce((a, x) => a + (x.of || 0), 0);
     const best = full.filter(x => x.line).sort((a, b) => b.total - a.total)[0];
     const def = full.map(x => x.defence).filter(Boolean);
@@ -1640,8 +1609,13 @@
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
-      starter: r.card.difficulty === 0, quick: isQuick(r.card) ? r.card.kind : undefined, total, pts, question: g.questionNotAsked, verdict: g.verdict
+      starter: r.card.difficulty === 0, total, pts, question: g.questionNotAsked, verdict: g.verdict
     });
+    keepScores(h);
+  }
+  function recordAcademy() {
+    const h = scoreHistory(), w = thisWeek(h), A = state.academy;
+    w.academy = { title: Academy.MODULES.find(m => m.id === A.id).title, right: A.right, of: A.of };
     keepScores(h);
   }
   function recordWeek(avg, title, board) {
@@ -1664,9 +1638,10 @@
       const head = document.createElement('h3');
       head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
       box.appendChild(head);
+      if (w.academy && w.academy.of) para('CoE Academy: ' + w.academy.title + ' · ' + w.academy.right + ' of ' + w.academy.of + ' right', 'muted');
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
-        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (x.quick ? ' [quick: ' + Quick.KINDS[x.quick].label.toLowerCase() + ']' : '') + ': ' + x.total + '/100');
-        if (!x.quick) para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
+        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
+        para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
         if (x.question) para('   The question you didn\'t ask: ' + x.question);
         if (x.verdict) para('   Their verdict: ' + x.verdict);
       });
@@ -1677,11 +1652,8 @@
   function openApp(id) {
     const r = state.run;
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
-    if (r && isQuick(r.card) && ['w-call', 'w-write', 'w-leads'].includes(id)) { toast('This one is a quick intake. Handle it from Doors Mail.', 'info'); return; }
     if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
-    if (id === 'w-mieke' && r && isQuick(r.card)) { toast('Mieke: "It\'s a quick one. Trust your gut, I\'ll see you at the debrief."', 'info'); return; }
-    if (id === 'w-quick' && (!r || !isQuick(r.card) || r.phase === 'inbox')) { toast('No quick intake open. They arrive in Doors Mail.', 'info'); return; }
-    if (id === 'w-quick') { quickDesk(); return; }
+    if (id === 'w-academy') { openAcademy(); return; }
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
     if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call' || r.phase === 'investigate')) { toast('The case board opens when you are done asking questions.', 'info'); return; }
     if (id === 'w-leads' && (!r || !touchpoints(r.card))) { toast(r && r.card.difficulty === 0 ? 'Starter cases are all on the call. Follow-up opens on the next ones.' : 'Nothing to follow up yet.', 'info'); return; }
@@ -1692,6 +1664,7 @@
     Desktop.open(id, Desktop.floating[id]);
   }
   document.querySelectorAll('.desk-icon').forEach(b => { b.onclick = () => openApp(b.dataset.app); });
+  document.querySelectorAll('#start-menu [data-open]').forEach(b => { b.onclick = () => { $('start-menu').hidden = true; openApp(b.dataset.open); }; });
   Coe.render($('coe-files'), $('coe-doc'), 'flow');
   renderScores();
 
@@ -1713,6 +1686,14 @@
     const r = state.run;
     if (!r) return;
     const card = r.card;
+    // The CoE module: answer the current question right.
+    const A = state.academy;
+    if (A && !A.done && $('w-academy').classList.contains('open') && !$('w-academy').classList.contains('minimised')) {
+      if (!A.started) A.started = true;
+      else if (A.picks[A.at] == null) A.picks[A.at] = Academy.MODULES.find(m => m.id === A.id).questions[A.at].options.findIndex(o => o.ok);
+      openAcademy();
+      return;
+    }
     if (state.board && $('p-board').classList.contains('active')) {
       const B = state.board;
       if (B.stage === 'pick') { $('boardroom').querySelector('.board-pick').click(); return; }
@@ -1725,18 +1706,6 @@
       return;
     }
     if (r.phase === 'inbox') $('btn-call').onclick();
-    // A quick intake: fill in the card's own answer; you still press Send.
-    if (isQuick(card)) {
-      if (r.phase !== 'quick') return;
-      const a = r.answer;
-      if (card.kind === 'one-question') a.q = card.bestQuestion;
-      if (card.kind === 'triage') { a.pick = card.answer; a.why = '(test) ' + card.why; }
-      if (card.kind === 'measure') { a.baseline = card.gold.baseline; a.behaviour = card.gold.behaviour; a.metric = card.gold.business_metric; a.collection = card.gold.collection; }
-      if (card.kind === 'flaw') { a.line = card.flawIndex; a.fix = card.fix || '(test) A better line.'; }
-      renderQuick();
-      save();
-      return;
-    }
     if (r.phase === 'call') {
       card.hiddenFacts.filter(f => f.foundAt.includes('call') && !r.revealed.has(f.id)).slice(0, Math.min(r.questionsLeft, r.legLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'Tell me more.'), a = f.revealLine || f.fact;

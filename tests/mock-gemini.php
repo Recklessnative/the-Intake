@@ -8,8 +8,6 @@ if (strpos($sys, 'You are the examiner') === 0) {
           'defenceOutcome' => 'none', 'questionNotAsked' => 'What changed?', 'verdict' => 'Fine.'];
 } elseif (strpos($sys, 'rate the concept') !== false) {
   $out = ['boldness' => 0, 'boldnessReason' => 'x', 'objections' => ['a', 'b', 'c'], 'acceptReply' => 'ok'];
-} elseif (strpos($sys, 'exactly ONE question') !== false) {
-  $out = ['reply' => 'Since June.', 'revealed' => [], 'score' => 3, 'note' => 'Good.'];
 } elseif (strpos($sys, 'the executive board of') !== false) {
   $out = ['members' => [['role' => 'CFO', 'preempted' => false, 'line' => 'Who pays?'], ['role' => 'CHRO', 'preempted' => true, 'line' => 'Fine.'], ['role' => 'COO', 'preempted' => true, 'line' => 'Fine.']]];
 } elseif (strpos($sys, 'chair of the board') !== false) {

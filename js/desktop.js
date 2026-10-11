@@ -10,13 +10,12 @@
   const LAYOUTS = {
     inbox: { 'w-inbox': [8, 3, 57, 90], 'w-case': [67, 3, 31, 54], 'w-notes': [67, 60, 31, 33] },
     call: { 'w-call': [8, 3, 50, 92], 'w-case': [60, 3, 38, 46], 'w-notes': [60, 51, 38, 44] },
-    quick: { 'w-quick': [8, 3, 57, 90], 'w-case': [67, 3, 31, 54], 'w-notes': [67, 60, 31, 33] },
     investigate: { 'w-leads': [8, 3, 50, 92], 'w-call': [60, 3, 38, 50], 'w-notes': [60, 55, 38, 40] },
     write: { 'w-write': [8, 2, 49, 94], 'w-call': [59, 2, 39, 50], 'w-notes': [59, 54, 39, 23], 'w-case': [59, 79, 39, 17] },
     defence: { 'w-dialog': [8, 2, 49, 94], 'w-call': [59, 2, 39, 50], 'w-notes': [59, 54, 39, 23], 'w-case': [59, 79, 39, 17] },
     dialog: { 'w-dialog': [14, 4, 72, 90] }
   };
-  const FLOATING = { 'w-mieke': [56, 6, 38, 66], 'w-coe': [12, 4, 66, 88], 'w-scores': [24, 8, 52, 80] };
+  const FLOATING = { 'w-mieke': [56, 6, 38, 66], 'w-coe': [12, 4, 66, 88], 'w-scores': [24, 8, 52, 80], 'w-academy': [18, 5, 56, 86] };
 
   let z = 10;
   let current = null;

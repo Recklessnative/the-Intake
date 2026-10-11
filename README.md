@@ -27,7 +27,7 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `js/config.js` | Where the backend lives (empty = own keys only) and the donation link |
 | `js/gemini.js` | Gemini client with structured JSON output: direct with an own key, otherwise through the backend |
 | `js/cards.js` | Maps a scenario card file to the game's shape |
-| `js/quick.js` | Quick intakes: the four kinds, their forms, scoring and debriefs |
+| `js/academy.js` | CoE Academy: six e-learning modules (four questions with feedback, then tips for your cases) |
 | `js/coe.js` | The Center of Excellence folder on the desktop: intake flowchart, quality standard, good questions, measurement ladder |
 | `js/sound.js` | The Doors OS startup chime and a ding, synthesised with Web Audio (no audio files); mute in the start menu |
 | `js/prompts.js` | The roles: stakeholder (in character), Mieke the colleague (coaching, sees only what the player sees), reaction (boldness + objections), examiner (scorecard) |
@@ -40,9 +40,9 @@ Every window has a desktop icon (on phones, use the start menu). A player's firs
 
 Every case beyond the starters has **touchpoints**: 10 questions for the whole request. The first call takes at most 5. After it, the **Follow-up** window offers data requests (1 question each, answered from the card's `data_doc` text, no Gemini), up to 2 questions to the card's `frontline` person at the coffee machine, and one **callback** (up to 3 questions, fresh patience) once you have found something. Each hidden fact's `found_at` decides where it can turn up; the stakeholder only knows the facts tagged `call`. The scorecard says where a missed fact could have been found. Starter cases keep a single 10-question call.
 
-A **week** is five requests over Monday to Wednesday, and its shape changes from week to week. Week 1: a one-question quick intake and a starter on Monday, a triage quick intake and a starter on Tuesday, a tier-1 case on Wednesday. Week 2: two quick intakes, a tier-1 case, one quick intake and a tier-2 case. From week 3 the game rotates through three shapes with tier-2 and tier-3 cases. Unplayed cards come first.
+A **week** is three or four full cases from Monday to Thursday, plus the board room on Friday, and its shape changes from week to week. Week 1: two starters and a tier-1 case. Week 2: two tier-1 cases and a tier-2 case. From week 3 the game rotates through three shapes with tier-2 and tier-3 cases. Unplayed cards come first.
 
-**Quick intakes** (`scenarios/quick/`, logic in `js/quick.js`) take a few minutes each: *one question* (1 Gemini call), *triage* (scored in code), *measure this* (1 Gemini call) and *spot the flaw* (scored in code). Each ends with a debrief. In the week's average a quick intake counts half as much as a full case.
+**CoE Academy** (`js/academy.js`): each normal week assigns one of six modules, which waits on top of the desk on Monday morning: *Ask before you make*, *Is training the answer?*, *How will you know?*, *Who can say no*, *Read the proposal like a reviewer* and *One slide for the board*. Each module has four multiple-choice questions with instant feedback, then three things to look out for in your cases. Those tips are pinned to every case file that week. Modules are scored in code with no Gemini call. They never count toward the week's score, but My scores.txt keeps the result. Hard mode has no module.
 
 **The help fades**: in week 1 the case board has every chip, and Mieke shows her own diagnosis once you lock yours in. In week 2 only the diagnosis keeps its chips; measure and concept are your own one-liners. From week 3 you write a blank one-pager under four headings (the board is still one click away).
 
