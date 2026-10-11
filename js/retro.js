@@ -58,7 +58,7 @@
 
   // ---------- Doors Messenger: pop-ups and nudges ----------
   let toastFn = () => {};
-  function im(from, text, onOpen) {
+  function im(from, text, onOpen, sound) {
     const box = $('im-pop');
     box.querySelector('.im-from').textContent = from + ' says:';
     box.querySelector('.im-text').textContent = text;
@@ -66,7 +66,7 @@
     box.classList.remove('in');
     void box.offsetWidth;
     box.classList.add('in');
-    if (window.Sound && Sound.im) Sound.im();
+    if (window.Sound && Sound[sound || 'im']) Sound[sound || 'im']();
     box.onclick = () => { box.hidden = true; if (onOpen) onOpen(); };
     clearTimeout(im.t);
     im.t = setTimeout(() => { box.hidden = true; }, 8000);
@@ -90,6 +90,8 @@
     store.set('intake-texts', JSON.stringify(texts));
     const n = $('phone-unread');
     if (n) { n.textContent = '✉ ' + texts.length; n.hidden = false; }
+    const t = $('tray-sms');
+    if (t) { t.textContent = String((+t.textContent || 0) + 1); t.hidden = false; }
     if (window.Sound && Sound.sms) Sound.sms();
     if (phone.view === 'texts') renderPhone();
   }
@@ -112,11 +114,31 @@
       });
       line('Hi-score ' + store.get('intake-snake', '0'), 'ph-foot');
     } else if (phone.view === 'texts') {
-      line('Messages', 'ph-title');
+      // One text per screen, newest first. 2 / 8 (or the arrows) to page through them.
+      phone.msg = Math.max(0, Math.min(texts.length - 1, phone.msg || 0));
+      line('Messages' + (texts.length ? ' ' + (phone.msg + 1) + '/' + texts.length : ''), 'ph-title');
       if (!texts.length) line('No messages.', 'ph-foot');
-      texts.slice(0, 6).forEach(m => { line(m.from + ':', 'ph-from'); line(m.text, 'ph-msg'); });
+      else {
+        const m = texts[phone.msg];
+        line(m.from + ':', 'ph-from');
+        line(m.text, 'ph-msg');
+        const nav = document.createElement('div');
+        nav.className = 'ph-nav';
+        [['2', '▲ newer', phone.msg > 0], ['8', '▼ older', phone.msg < texts.length - 1]].forEach(([k, t, on]) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'ph-item';
+          b.textContent = t;
+          b.disabled = !on;
+          b.onclick = () => key(k);
+          nav.appendChild(b);
+        });
+        scr.appendChild(nav);
+      }
       const n = $('phone-unread');
       if (n) n.hidden = true;
+      const t = $('tray-sms');
+      if (t) { t.hidden = true; t.textContent = ''; }
     } else {
       const c = document.createElement('canvas');
       c.width = 84; c.height = 48;
@@ -187,7 +209,12 @@
   function key(k) {
     if (k === 'away') { hidePhone(); return; }
     if (k === 'back') { phone.view = 'menu'; renderPhone(); return; }
-    if (phone.view === 'menu') { if (k === '1') { phone.view = 'snake'; renderPhone(); } if (k === '2') { phone.view = 'texts'; renderPhone(); } return; }
+    if (phone.view === 'menu') { if (k === '1') { phone.view = 'snake'; renderPhone(); } if (k === '2') { phone.view = 'texts'; phone.msg = 0; renderPhone(); } return; }
+    if (phone.view === 'texts') {
+      const step = { 2: -1, 4: -1, 8: 1, 6: 1 }[k];
+      if (step) { phone.msg = (phone.msg || 0) + step; renderPhone(); }
+      return;
+    }
     if (!phone.snake) return;
     const s = phone.snake.s;
     if (s.dead && (k === '5' || k === 'ok')) { renderPhone(); return; }

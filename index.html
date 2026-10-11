@@ -105,7 +105,7 @@
         <button type="button" class="desk-icon" data-app="w-write"><span class="di">📌</span>Case board</button>
         <button type="button" class="desk-icon" data-app="w-mieke"><span class="di">☕</span>Mieke</button>
         <button type="button" class="desk-icon" data-app="w-scores"><span class="di">🏆</span>My scores.txt</button>
-        <button type="button" class="desk-icon" data-app="w-phone"><span class="di">📱</span>My mobile</button>
+        <button type="button" class="desk-icon team-only" data-app="w-team"><span class="di">👥</span>My team</button>
         <button type="button" class="desk-icon" data-app="bin"><span class="di">🗑</span>Recycle Bin</button>
       </nav>
 
@@ -152,6 +152,9 @@
               <p id="mail-body" class="mail-body"></p>
               <div id="mail-academy" hidden>
                 <button type="button" id="btn-academy" class="primary">🎓 Open the module</button>
+              </div>
+              <div id="mail-team" hidden>
+                <button type="button" id="btn-team" class="primary">👥 Open the drafts</button>
               </div>
               <div id="mail-actions">
                 <button id="btn-call" class="primary">☎ Call them back</button>
@@ -393,6 +396,11 @@
         </div>
       </div>
 
+      <!-- Your team (after your promotion): three juniors, one draft each, one flaw each. -->
+      <div class="win" id="w-team" data-title="Team drafts - review before they go out" data-task="My team" data-icon="👥">
+        <div id="team" class="team"></div>
+      </div>
+
       <!-- Every request you finished, kept in this browser. -->
       <div class="win" id="w-scores" data-title="My scores.txt - Notepad" data-icon="🏆">
         <div id="scores" class="scores"></div>
@@ -443,6 +451,7 @@
         <button data-open="w-coe">🗂 Center of Excellence</button>
         <button data-open="w-academy">🎓 CoE Academy</button>
         <button data-open="w-scores">🏆 My scores</button>
+        <button data-open="w-team" class="team-only">👥 My team</button>
         <button data-open="w-phone">📱 My mobile</button>
         <button data-open="w-display">🖼 Display properties</button>
         <button id="btn-staply">📎 Staply: on</button>
@@ -478,6 +487,7 @@
       <button id="btn-startmenu" class="start-btn">start</button>
       <div id="task-buttons" class="task-buttons"></div>
       <div class="tray">
+        <button type="button" id="btn-phone" class="tray-phone" title="Your mobile (in your pocket)" aria-label="Your mobile">📱<span id="tray-sms" class="tray-badge" hidden></span></button>
         <button type="button" id="btn-debug" class="debug" hidden title="Test mode: fill in this step for me">🐞 Autofill</button>
         <span id="os-step"></span>
         <span id="os-trust"></span>
@@ -492,6 +502,7 @@
       <h2 id="end-title"></h2>
       <p id="end-score" class="score-total"></p>
       <p id="end-board" class="end-board" hidden></p>
+      <p id="end-team" class="end-board" hidden></p>
       <p id="end-note"></p>
       <div id="end-memo" class="end-memo" hidden>
         <p class="end-memo-head"><b>From:</b> Darren (CEO) · <b>Subject:</b> Friday</p>
@@ -523,6 +534,7 @@
 <script src="js/coe.js?v=dev"></script>
 <script src="js/academy.js?v=dev"></script>
 <script src="js/story.js?v=dev"></script>
+<script src="js/team.js?v=dev"></script>
 <script src="js/sound.js?v=dev"></script>
 <script src="js/retro.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>

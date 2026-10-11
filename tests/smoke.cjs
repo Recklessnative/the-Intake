@@ -51,6 +51,7 @@ async function retro() {
   await p.waitForSelector('#phone:not([hidden])');
   if (await p.$('#w-phone, #phone .titlebar')) throw new Error('the phone should not be a window');
   await p.click('#phone-keys [data-k="2"]');
+  if (!(await p.textContent('#phone-screen')).includes('Messages 1/1')) throw new Error('texts have no page counter');
   if (!(await p.textContent('#phone-screen')).includes('Mum')) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
   await p.click('#phone-keys [data-k="back"]'); await p.click('#phone-keys [data-k="1"]');
   if (!(await p.$('#phone-screen canvas.ph-snake'))) throw new Error('Snake did not start');
@@ -144,6 +145,7 @@ async function followUp() {
     if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
     else if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.' }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?' }, { role: 'COO', preempted: false, line: 'Who covers the shifts?' }] }; }
+    else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
     else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good' }; }
@@ -173,6 +175,10 @@ async function followUp() {
     const inbox = await p.textContent('#mail-rows');
     if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
     if (n === 2 && !(await p.textContent('#os-step')).includes('Thursday 6 Sep 2007')) throw new Error('game date wrong: ' + await p.textContent('#os-step'));
+    if (n === 2) {
+      const order = await p.evaluate(() => window.__intake.state.run.mails.map(m => m.day * 1440 + m.at));
+      if (order.some((v, i) => i && v > order[i - 1]) || !(await p.textContent('#mail-rows tr >> nth=0')).includes('Today') || !(await p.textContent('#mail-rows')).includes('Mon ')) throw new Error('inbox not sorted by day: ' + order);
+    }
     if (n === 0) {
       // First request ever: the CoE Academy module on top, the Center of Excellence open on the flowchart.
       const first = await p.evaluate(() => window.__intake.state);
@@ -358,6 +364,34 @@ async function followUp() {
   const txt = await p.textContent('#scores');
   if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 5') || !txt.includes('[starter]') || !txt.includes('CoE Academy: Ask before you make · 3 of 4 right') || !txt.includes('board: pilot 80/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
+  // The team: after a promotion, two own requests and three junior drafts with one flaw each.
+  if (!(await p.$('#scores .charts svg')) || !(await p.textContent('#scores .weak-spot')).includes('weak spot')) throw new Error('score charts missing');
+  await p.goto('http://localhost:8765/?debug=1&promote=1');
+  if (!(await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).promoted))) throw new Error('?promote=1 did not promote');
+  p.once('dialog', d => d.accept().catch(() => {}));
+  await p.click('#btn-start');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const tw = await p.evaluate(() => ({ n: window.__intake.state.cards.length, team: window.__intake.state.team && window.__intake.state.team.drafts.map(d => d.junior + ':' + d.flaw + ':' + d.lines.length), clash: window.__intake.state.team && window.__intake.state.team.drafts.some(d => window.__intake.state.cards.some(c => c.id === d.card)) }));
+  if (tw.n !== 2 || !tw.team || tw.team.length !== 3 || tw.clash) throw new Error('team week wrong: ' + JSON.stringify(tw));
+  if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
+  await p.click('#mail-rows tr:has-text("drafts for your review")');
+  await p.click('#btn-team');
+  await visible('#w-team');
+  await p.click('#btn-team-send');
+  if (!(await p.textContent('#toast')).includes('line with the problem')) throw new Error('team send without a pick should explain');
+  await p.click('#btn-debug');                       // picks the flaw and writes a note
+  await p.click('#btn-team-send');
+  await p.waitForSelector('.team-result');
+  const tr = await p.textContent('.team-result');
+  if (!tr.includes('10 / 10') || !tr.includes('You found the flaw') || !tr.includes('I will fix it')) throw new Error('team grade wrong: ' + tr);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/team.png' });
+  await p.click('.team-tab >> nth=1');
+  await p.click('.team-draft li >> nth=0');
+  await p.fill('#team-note', 'Looks fine to me, send it out please and well done.');
+  await p.click('#btn-team-send');
+  await p.waitForSelector('.team-result');
+  const h3 = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.slice(-1)[0].team);
+  if (!h3 || h3.reviewed !== 2 || h3.of !== 30) throw new Error('team score not recorded: ' + JSON.stringify(h3));
   // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
   await p.goto('http://localhost:8765/?debug=1');
   p.on('dialog', d => d.accept().catch(() => {}));
