@@ -293,7 +293,7 @@
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
     state.board = s.board || null;
-    state.academy = s.academy || null;
+    state.academy = s.academy || (s.hard ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
     state.results = s.results || [];
@@ -399,6 +399,13 @@
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
     }));
+    // This week's CoE Academy module arrives first thing Monday.
+    if (state.academy) {
+      const m = Academy.MODULES.find(x => x.id === state.academy.id);
+      const subject = 'Assigned to you: ' + m.title + ' (' + m.minutes + ' min)';
+      mails.push({ from: 'CoE Academy', subject, academy: true, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
+        body: 'Good morning,\n\nThis week\'s module: "' + m.title + '". ' + m.intro + '\n\nFour questions, then what to look out for in your cases this week. No avatars, no "click to reveal", and it does not count toward anything.\n\nThe CoE team' });
+    }
     mails.push({ from: r.card.stakeholder.name, subject: r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, at: r.clock - 2, body: r.card.surfaceAsk });
     mails.sort((a, b) => b.at - a.at);
     r.mails = mails;
@@ -433,6 +440,8 @@
     $('mail-body').textContent = m.body;
     $('mail-attach').hidden = !m.current;
     $('mail-actions').hidden = !m.current;
+    $('mail-academy').hidden = !m.academy;
+    if (m.academy) $('btn-academy').textContent = state.academy.done ? '🎓 See the tips again' : state.academy.started ? '🎓 Carry on with the module' : '🎓 Open the module';
     renderMail();
   }
   function contacts() {
@@ -785,6 +794,7 @@
     Desktop.open('w-academy', Desktop.floating['w-academy']);
     Desktop.focus('w-academy');
   }
+  $('btn-academy').onclick = () => openAcademy();
   function academyTips() {
     const A = state.academy;
     return A && A.done ? Academy.MODULES.find(m => m.id === A.id).tips : [];
