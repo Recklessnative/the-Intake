@@ -58,6 +58,10 @@ async function academy() {
   if (!(await p.textContent('#briefing')).includes('CoE Academy tips')) throw new Error('tips not pinned to the case file');
   await p.click('#ac-close');
   if (await p.isVisible('#w-academy')) throw new Error('Back to work did not close the module');
+  await visible('#w-inbox');
+  await p.click('#mail-rows tr:has-text("CoE Academy")');
+  if ((await p.textContent('#btn-academy')) !== '🎓 See the tips again') throw new Error('academy mail button wrong');
+  await p.click('#btn-academy'); await visible('#w-academy'); await p.click('#ac-close');
 }
 // The follow-up after a first call: a data request, the coffee machine, one callback.
 async function followUp() {
