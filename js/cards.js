@@ -58,6 +58,9 @@
       },
       alsoValid: list(k.also_valid),
       redFlags: list(k.red_flags),
+      briefing: typeof raw.briefing === 'string'
+        ? { headline: 'Before you call', points: [], text: raw.briefing }
+        : raw.briefing ? { headline: raw.briefing.headline || 'Before you call', points: list(raw.briefing.points) } : null,
       questionHint: raw.question_you_didnt_ask,
       actorNotes: list(raw.actor_notes),
       flavourLines: list(raw.flavour_lines)

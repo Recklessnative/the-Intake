@@ -108,7 +108,21 @@
     $('mail-from').textContent = card.stakeholder.name;
     $('mail-role').textContent = card.stakeholder.role;
     $('mail-body').textContent = card.surfaceAsk;
+    briefing(card.briefing);
     pane('p-inbox', 'Request ' + (state.index + 1) + ' of ' + state.cards.length + ' · Inbox');
+  }
+
+  // Pre-call context a well-prepared professional would look up first (never the diagnosis).
+  function briefing(b) {
+    const box = $('briefing');
+    const ul = $('briefing-points');
+    ul.innerHTML = '';
+    box.querySelectorAll('p').forEach(p => p.remove());
+    box.hidden = !b;
+    if (!b) return;
+    $('briefing-head').textContent = b.headline;
+    if (b.text) { const p = document.createElement('p'); p.textContent = b.text; box.appendChild(p); }
+    b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
   }
 
   $('btn-call').onclick = () => {
