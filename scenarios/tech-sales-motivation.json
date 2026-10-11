@@ -1,0 +1,169 @@
+{
+  "id": "tech-sales-motivation",
+  "schema_version": 1,
+  "sector": "Tech / SaaS",
+  "tier": 3,
+  "tier_label": "Mostly not a training problem",
+  "title": "Bring Me a Navy SEAL",
+  "stakeholder": {
+    "name": "Jasper Wouters",
+    "role": "VP Sales EMEA",
+    "org": "Klarvue, a B2B analytics SaaS scale-up with 60 account executives in four countries",
+    "voice": "High energy, talks in quarters and quotas, uses sports metaphors. Likes bold ideas and quick decisions. Gets bored by process questions but respects anyone who brings pipeline data.",
+    "patience": 3,
+    "risk_appetite": 3,
+    "risk_appetite_label": "High"
+  },
+  "opening_message": "Team's flat. Q3 bookings down 18%. I want a motivation workshop. Big energy, external speaker, maybe one of those ex-Navy SEAL guys. Off-site in November, budget's fine. Make it happen.",
+  "surface_ask": "A motivational off-site with an external speaker for 60 account executives.",
+  "gold": {
+    "real_problem": "A new commission plan in January pays accelerators on multi-year deals but claws back commission on deals discounted over 20%, so reps chase multi-year deals with heavy discounts and lose the commission. A new 'Pro' pricing tier launched without enablement and stalls at procurement. The drop is concentrated in reps hired in the last year, who got a two-day bootcamp and no coaching.",
+    "root_cause_types": ["incentive", "skill", "process"],
+    "is_training_the_lever": "partly",
+    "need_statement": "Motivation is not the gap. Newer reps can't sell the Pro tier through procurement and get no deal coaching, and the commission plan punishes the discounts it encourages. Enablement for new reps on Pro, a coaching rhythm for managers, and a data case on the clawback are the levers."
+  },
+  "hidden_facts": [
+    {
+      "id": "comp_plan",
+      "fact": "The commission plan changed in January: accelerators on multi-year deals, but commission is clawed back on deals discounted more than 20%.",
+      "unlocks_when": "The player asks what changed this year, how reps are paid, or about incentives.",
+      "reveal_line": "New comp plan in January. Multi-year accelerators, which is great, and a clawback over 20% discount, which is... a finance idea.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "new_hire_drop",
+      "fact": "The top 15 reps are on target. The 25 reps hired in the last 12 months average 52% of quota.",
+      "unlocks_when": "The player asks whether the drop is across the whole team, who is behind, or asks to segment the numbers.",
+      "reveal_line": "Is it everyone? Let me pull it up... no. My top fifteen are fine. The new ones, last twelve months, sit at about half of quota. Huh.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "pro_tier_stall",
+      "fact": "Deals on the new Pro tier stall at procurement: win rate 14% versus 31% on the Classic tier.",
+      "unlocks_when": "The player asks where in the pipeline deals are lost, about win rates, or about products and pricing.",
+      "reveal_line": "Pro is the future. Pro wins 14% of the time. Classic wins 31. The future is taking its time.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "no_coaching",
+      "fact": "New hires get a two-day bootcamp and are then on their own. Frontline managers carry their own quota and do almost no deal coaching.",
+      "unlocks_when": "The player asks about onboarding, ramp-up, or how managers coach their reps.",
+      "reveal_line": "Two-day bootcamp, then they're on the field. Managers have their own number to hit, so coaching is... aspirational.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "last_offsite",
+      "fact": "Last year's off-site had a motivational speaker who climbed Everest. Event satisfaction was very high; Q1 bookings afterwards fell 9%.",
+      "unlocks_when": "The player asks what was tried before or what happened after previous events.",
+      "reveal_line": "Last year we had a guy who climbed Everest. Incredible talk. Standing ovation. Q1 went down 9%. Maybe it was the mountain.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "cfo_owns_comp",
+      "fact": "The CRO and CFO designed the commission plan. Jasper argued against the clawback and lost.",
+      "unlocks_when": "The player asks who owns the commission plan, or whether it can change.",
+      "reveal_line": "The CFO and the CRO built it. I said the clawback would bite. I lost that meeting. I don't lose many meetings.",
+      "weight": 1,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "Q3 bookings are down 18%.",
+    "60,000 euro is approved for a November off-site."
+  ],
+  "constraints": {
+    "budget": "60,000 euro approved for the off-site.",
+    "deadline": "Off-site booked for mid-November; Q4 is the biggest quarter.",
+    "audience": "60 account executives and 8 frontline managers in Belgium, the Netherlands, Germany and France.",
+    "schedule": "Reps resist anything that takes them off deals in Q4.",
+    "languages": "English as the working language.",
+    "data_available": [
+      "CRM pipeline by stage, win rates, discount levels",
+      "Quota attainment per rep and cohort",
+      "Recorded sales calls in a conversation intelligence tool"
+    ],
+    "data_not_available": [
+      "Any agreed basis for using call recordings for coaching in the German entity"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "CRO and CFO",
+      "concern": "Own the commission plan; changing the clawback is their call.",
+      "if_ignored": "Training teaches reps to sell Pro while the plan punishes them for it."
+    },
+    {
+      "who": "RevOps",
+      "concern": "Owns the pipeline data and dashboards needed to measure anything.",
+      "if_ignored": "No baseline and no cohort comparison."
+    },
+    {
+      "who": "Product marketing",
+      "concern": "Owns the Pro tier positioning and procurement-ready material.",
+      "if_ignored": "Reps keep improvising the value story."
+    },
+    {
+      "who": "Frontline managers",
+      "concern": "Carry their own quota; coaching competes with their own deals.",
+      "if_ignored": "The coaching rhythm dies by week three."
+    },
+    {
+      "who": "DPO and German works council",
+      "concern": "Using recorded calls to coach or assess reps is employee monitoring and needs co-determination in Germany.",
+      "if_ignored": "The coaching programme becomes a legal problem in one country."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Off-site satisfaction or 'energy' scores.",
+      "Total bookings, which are confounded by seasonality and the commission plan.",
+      "Activity metrics like calls and emails, which are easy to game."
+    ],
+    "gold_plan": {
+      "baseline": "Win rate and stage conversion on Pro deals for the newer cohort, plus discount distribution, from the CRM.",
+      "behaviour": "Multi-threading and a procurement-ready value case in Pro deals, checked in manager deal reviews.",
+      "leading_indicators": "Stage conversion at procurement for Pro deals; share of deals with a documented value case.",
+      "business_metric": "Pro win rate, time for new hires to reach 70% of quota, and average discount.",
+      "collection": "CRM cohort reports from RevOps monthly; call recordings only with consent and works council agreement."
+    }
+  },
+  "concepts": {
+    "conventional": "A motivational off-site with a famous speaker.",
+    "solid": "Turn the off-site into a deal clinic on the Pro tier: value selling for procurement, live reviews of stalled deals, and a weekly deal-coaching rhythm for managers afterwards. Bring the clawback data to the CRO and CFO.",
+    "next_level_examples": [
+      "Kill the keynote: a 'deal hackathon' where top reps work on the new hires' real stalled Pro deals, with legal and procurement experts in the room.",
+      "Build a commission simulator so reps see their real take-home on a discounted multi-year deal, and put the same numbers in front of the CFO.",
+      "Spend the speaker fee on protecting managers' coaching time, for example a quota relief for managers tied to coaching hours."
+    ],
+    "also_valid": [
+      "Keeping a social element at the off-site is fine as long as the substance is enablement and coaching, not motivation."
+    ],
+    "red_flags": [
+      "A motivational speaker as the answer.",
+      "Treating the drop as an attitude problem.",
+      "Using call recordings without consent.",
+      "Ignoring the commission plan."
+    ]
+  },
+  "defence_objections": [
+    "Cancel the speaker? I promised the team a party. I'll be the man who cancels parties.",
+    "My top reps coaching new hires at the off-site? They're my closers. Their time is literally money.",
+    "Telling the CFO his clawback is costing deals, with my name on the slide?"
+  ],
+  "question_you_didnt_ask": "Who exactly is behind on quota?",
+  "actor_notes": [
+    "Jasper has high risk appetite: bold concepts excite him and rarely trigger a defence round. The challenge in this card is diagnosis, not boldness.",
+    "He genuinely believes it's a motivation problem until the player gets him to segment the numbers; play the 'huh' moment of realisation.",
+    "He loses patience with abstract process questions but rewards any request for pipeline or cohort data.",
+    "He is happy to blame finance for the clawback; a good player keeps him from turning the whole thing into a fight with the CFO."
+  ],
+  "flavour_lines": [
+    "Last year's speaker climbed Everest. Q1 went down 9%. Maybe it was the mountain.",
+    "We're not a sales team, we're a family. A family with quotas."
+  ]
+}

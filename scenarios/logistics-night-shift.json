@@ -1,0 +1,179 @@
+{
+  "id": "logistics-night-shift",
+  "schema_version": 1,
+  "sector": "Retail logistics",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "Safety Refresher, But They Have No Time",
+  "stakeholder": {
+    "name": "Sofie Van den Broeck",
+    "role": "Site Operations Manager",
+    "org": "Nordmart distribution centre, a grocery retailer's warehouse with 220 staff, about 40% agency workers on nights",
+    "voice": "Fast, practical, slightly stressed. Talks in pallets and pick rates. Apologises for interrupting while interrupting. Allergic to anything that takes people off the floor.",
+    "patience": 3,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "opening_message": "We need a safety refresher for everyone. Three near-misses with reach trucks last month, one guy nearly lost a foot. Problem is they have no time. Can it be 15 minutes? On their phones maybe? The insurer is breathing down my neck.",
+  "surface_ask": "A 15-minute mobile safety refresher for all 220 staff.",
+  "gold": {
+    "real_problem": "Near-misses cluster on the night shift between 2:00 and 4:00 and mostly involve agency reach-truck drivers in their first six weeks. They get a 20-minute video induction with no practical on this site's narrow aisles, there is no supervisor on the floor after 1:00, and a per-case night bonus introduced four months ago rewards rushing.",
+    "root_cause_types": ["skill", "environment", "incentive"],
+    "is_training_the_lever": "partly",
+    "need_statement": "New agency drivers need a site-specific practical sign-off and supervised first nights before driving solo; the night supervision gap and the per-case bonus need fixing alongside it. A refresher for everyone misses the people at risk."
+  },
+  "hidden_facts": [
+    {
+      "id": "time_cluster",
+      "fact": "Near-misses cluster on the night shift between 2:00 and 4:00.",
+      "unlocks_when": "The player asks when or where incidents happen, or asks for the incident data.",
+      "reveal_line": "Now that you ask, most of them are nights. Between two and four. The ghost hours.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "agency_newcomers",
+      "fact": "9 of the 11 near-misses this quarter involved agency drivers in their first six weeks on site.",
+      "unlocks_when": "The player asks who was involved, how experienced they were, or whether it's everyone or a specific group.",
+      "reveal_line": "Mostly agency. New ones. Nine out of eleven, if I'm honest. The old hands could drive these aisles blindfolded. Please don't quote me on blindfolded.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "video_induction",
+      "fact": "Agency induction is a 20-minute video plus a paper check of their reach-truck licence. There is no practical on this site's narrow aisles.",
+      "unlocks_when": "The player asks how new or agency staff are onboarded or how they learn the site.",
+      "reveal_line": "They watch the induction video. It's a good video. It has dramatic music. Then they get a truck.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "no_supervisor",
+      "fact": "After 1:00 one shift lead covers two buildings, so the night floor is effectively unsupervised.",
+      "unlocks_when": "The player asks about supervision, who is on the floor at night, or who new people can ask for help.",
+      "reveal_line": "After one o'clock Dirk covers both halls. He walks about eleven kilometres a night. He's very fit and very absent.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "night_bonus",
+      "fact": "Four months ago a night bonus paid per case picked was introduced. Near-misses roughly doubled since.",
+      "unlocks_when": "The player asks what changed recently, how people are rewarded, or what targets the night shift has.",
+      "reveal_line": "We did introduce a per-case bonus on nights, four months ago. Pick rate went up beautifully. Oh. Yes. Near-misses also went up. Hm.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "day_staff_trained",
+      "fact": "Permanent day staff already did a practical refresher in spring and their near-miss rate is low.",
+      "unlocks_when": "The player asks whether everyone needs it or who has already been trained.",
+      "reveal_line": "Day shift had a refresher in April. Practical, with the trainer from the truck dealer. They're fine.",
+      "weight": 1,
+      "critical": false
+    },
+    {
+      "id": "phones_banned",
+      "fact": "Phones are banned on the warehouse floor for safety reasons; they stay in canteen lockers.",
+      "unlocks_when": "The player asks how or where people would access a mobile module, or about devices and connectivity.",
+      "reveal_line": "On their phones... ah. Phones are banned on the floor. Safety rule. My rule, actually.",
+      "weight": 1,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "Three near-misses with reach trucks last month, one serious.",
+    "The insurer is auditing safety measures in eight weeks."
+  ],
+  "constraints": {
+    "budget": "Around 15,000 euro from the site budget.",
+    "deadline": "Insurer audit in eight weeks.",
+    "audience": "220 staff; about 85 on nights, of whom roughly 35 are agency drivers who rotate often.",
+    "schedule": "Three shifts, 24/5. No slack time in the shift plan; any training time costs pick capacity.",
+    "languages": "Dutch and French on day shift; many agency workers on nights speak Romanian or Polish and limited Dutch.",
+    "data_available": [
+      "Near-miss and incident log with time, location and badge number",
+      "Pick rate per person per hour from the warehouse management system",
+      "Agency start dates",
+      "Impact sensors on 12 of the 30 reach trucks"
+    ],
+    "data_not_available": [
+      "Any record of what agency drivers can actually do on site",
+      "Near-miss reporting from agency staff is probably incomplete"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Temp agency",
+      "concern": "The contract decides who pays for paid training hours and supervised first shifts.",
+      "if_ignored": "Nobody pays for the practical, so it quietly doesn't happen."
+    },
+    {
+      "who": "Works council and union",
+      "concern": "Any change to the night bonus, and any use of truck impact sensors on individuals, needs consultation.",
+      "if_ignored": "A conflict that freezes everything, and sensor data that can't be used."
+    },
+    {
+      "who": "Prevention advisor (legally required safety role)",
+      "concern": "Owns the risk analysis and must sign off training and procedures.",
+      "if_ignored": "The insurer finds a plan the site's own safety role never saw."
+    },
+    {
+      "who": "Insurer",
+      "concern": "Wants documented evidence that risks are controlled.",
+      "if_ignored": "Premium goes up regardless of what was actually done."
+    },
+    {
+      "who": "Payroll / HR",
+      "concern": "The bonus formula lives in payroll and in a works council agreement.",
+      "if_ignored": "The incentive to rush stays in place."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Completion rate of the refresher.",
+      "Raw near-miss counts: small numbers, and better reporting after training can make them go up, which is a good sign, not a failure.",
+      "Using impact sensor data to rank or punish individuals."
+    ],
+    "gold_plan": {
+      "baseline": "Near-misses and incidents per 10,000 hours, split by shift, hour and tenure, over the last six months.",
+      "behaviour": "Share of new agency drivers with a site practical sign-off before their first solo night; short safety walk observations at night.",
+      "leading_indicators": "Impact sensor events per 1,000 driving hours, aggregated per shift with works council agreement.",
+      "business_metric": "Incident rate on nights for drivers in their first six weeks, and lost time injuries; pick rate kept within an agreed band.",
+      "collection": "Existing incident log, agency start dates joined to badges, monthly sensor summary, a one-page night safety walk checklist."
+    }
+  },
+  "concepts": {
+    "conventional": "A 15-minute mobile safety module for all 220 staff.",
+    "solid": "Target the people at risk: a site-specific practical sign-off for every new agency driver before nights, a buddy for their first shifts, five-minute toolbox talks at the start of each night shift in their own language, and a fix for the supervision gap after 1:00.",
+    "next_level_examples": [
+      "A 'first six weeks' route: no solo nights in week one, an experienced permanent driver as 'night captain' with a zero-incident bonus, and hotspot floor markings drawn from the near-miss map.",
+      "Rework the night bonus to be quality and safety adjusted, piloted with the works council, so the incentive stops paying for speed alone.",
+      "Make near-miss reporting a sign of good practice: celebrate reports at the toolbox talk so the data gets better before it gets smaller."
+    ],
+    "also_valid": [
+      "A short refresher for everyone is acceptable as a hygiene step if the main investment goes to new agency drivers on nights."
+    ],
+    "red_flags": [
+      "A mobile module, when phones are banned on the floor.",
+      "The same refresher for everyone.",
+      "Blaming agency workers as careless.",
+      "Using impact sensors to punish individuals without consultation."
+    ]
+  },
+  "defence_objections": [
+    "Changing the bonus? That's a works council fight that takes a year, and my pick rate tanks next week.",
+    "No solo nights for new drivers means I pay double agency hours. Who's paying, you?",
+    "A 'night captain' without a supervisor contract? The union will say we're making a supervisor on the cheap."
+  ],
+  "question_you_didnt_ask": "What changed four months ago?",
+  "actor_notes": [
+    "Sofie genuinely cares about her people and is relieved when someone takes the problem seriously.",
+    "She proposed phones herself and only realises the ban when the player asks about access. Play that moment of mild embarrassment.",
+    "She defends the bonus at first because pick rate made her look good to head office; she concedes when shown the timing.",
+    "If the player blames agency workers, she gets defensive on their behalf: 'they're thrown in at the deep end'."
+  ],
+  "flavour_lines": [
+    "We have a safety poster in nine languages. One of them might be Klingon. Nobody has checked.",
+    "Our record is 41 days without an incident. The sign goes up to 99. Optimistic."
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "id": "healthcare-sepsis",
+  "schema_version": 1,
+  "sector": "Healthcare",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "The Fifteenth Mandatory E-Learning",
+  "stakeholder": {
+    "name": "Annelies Maes",
+    "role": "Director of Nursing",
+    "org": "AZ Groenhove, a general hospital across three sites with about 900 nurses",
+    "voice": "Warm but rushed, speaks in clinical shorthand, always between two meetings. Fiercely protective of her nurses. Becomes careful and quiet when doctors come up.",
+    "patience": 2,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "opening_message": "The new sepsis protocol goes live in six weeks. I need an e-learning for all 900 nurses, with a test, 100% completion. Accreditation surveyors come in spring. Can you build it? I have exactly four minutes.",
+  "surface_ask": "A sepsis protocol e-learning with a test for all 900 nurses, 100% completion.",
+  "gold": {
+    "real_problem": "Nurses already know the protocol. The delay happens at escalation: at night, nurses spot deterioration but wait to call the on-call doctor, especially two senior doctors known to be dismissive. On two wards the early warning score is still on paper, so the automatic alert never fires. Doctors were left out of the plan entirely.",
+    "root_cause_types": ["environment", "system", "expectations"],
+    "is_training_the_lever": "partly",
+    "need_statement": "The gap is not protocol knowledge but timely escalation at night: nurses hesitate to call, some doctors discourage calls, and two wards lack the automatic alert. Any learning intervention has to include doctors and practise the escalation moment itself."
+  },
+  "hidden_facts": [
+    {
+      "id": "knowledge_ok",
+      "fact": "In the pilot ward, nurses averaged 88% on a protocol knowledge quiz.",
+      "unlocks_when": "The player asks how well nurses already know the protocol, about a baseline, or about pilot results.",
+      "reveal_line": "We piloted the protocol on 3C. They scored 88% on the quiz. They know it. That's sort of the problem, isn't it.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "night_delay",
+      "fact": "Audit: median time from the first abnormal early warning score to a doctor's review is 94 minutes at night versus 31 minutes during the day.",
+      "unlocks_when": "The player asks what the audit found, where delays happen, or for data on time to treatment.",
+      "reveal_line": "The quality team's audit... daytime, 31 minutes to review. Nights, 94. Same nurses, same protocol.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "fear_of_calling",
+      "fact": "Nurses report hesitating to call two particular on-call doctors who ask 'why are you bothering me with this'.",
+      "unlocks_when": "The player asks what gets in the way of escalating, what nurses say about calling a doctor, or what happens when a nurse picks up the phone at night.",
+      "reveal_line": "Off the record? There are two seniors on the night rota. You call them at three for a borderline score, you hear about it for a week. So people wait. Off the record.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "paper_ews",
+      "fact": "Wards 4B and 5A still record the early warning score on paper; the electronic module is delayed by IT until Q2, so no automatic alert fires there.",
+      "unlocks_when": "The player asks how the early warning score is recorded, about systems or alerts, or about differences between wards.",
+      "reveal_line": "4B and 5A are still on paper. IT says Q2. IT has said Q2 for two years.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "doctors_excluded",
+      "fact": "Doctors report to the Chief Medical Officer, not to Annelies. They were not included in the training plan.",
+      "unlocks_when": "The player asks who else is involved, whether it's only nurses, or who is on the other end of the escalation call.",
+      "reveal_line": "Doctors? They're under the CMO. This is a nursing project. I can't exactly send them an e-learning. Well. I could. They wouldn't open it.",
+      "weight": 2,
+      "critical": true
+    },
+    {
+      "id": "accreditation_wants",
+      "fact": "The accreditation surveyors will review patient files for protocol compliance, not training completion.",
+      "unlocks_when": "The player asks what the accreditation surveyors will actually look at or what evidence they want.",
+      "reveal_line": "They'll pull files. Time to antibiotics, was the bundle followed. They'll ask about training too, but they look at the files.",
+      "weight": 2,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "The protocol goes live in six weeks.",
+    "Nurses already have fourteen mandatory e-learnings this year."
+  ],
+  "constraints": {
+    "budget": "Modest; the hospital has an e-learning platform and an internal simulation lab that is underused.",
+    "deadline": "Go-live in six weeks; accreditation visit in five months.",
+    "audience": "About 900 nurses on three sites, 24/7 shifts; plus roughly 120 doctors on the on-call rota, outside her authority.",
+    "schedule": "Nurses cannot leave wards in groups; any face-to-face time must fit around shifts.",
+    "languages": "Dutch; one site partly French-speaking.",
+    "data_available": [
+      "Quarterly sepsis audit of 60 patient files by the quality department",
+      "Electronic early warning scores on most wards",
+      "Incident reports",
+      "Last year's patient safety culture survey"
+    ],
+    "data_not_available": [
+      "Electronic early warning data on wards 4B and 5A",
+      "Any data on individual doctors that could be used without a fight"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Chief Medical Officer",
+      "concern": "Owns the doctors. Any change to escalation behaviour needs his sponsorship.",
+      "if_ignored": "Half of the escalation conversation never changes."
+    },
+    {
+      "who": "DPO",
+      "concern": "Patient file data and any tracking of individual doctors' response times are sensitive.",
+      "if_ignored": "The measurement plan gets stopped, or becomes a blame tool."
+    },
+    {
+      "who": "IT / EHR team",
+      "concern": "Owns the delayed electronic early warning module for 4B and 5A.",
+      "if_ignored": "Two wards keep running without an alert."
+    },
+    {
+      "who": "Quality department",
+      "concern": "Owns the sepsis audit and could increase its frequency on pilot wards.",
+      "if_ignored": "No usable measurement within the accreditation timeline."
+    },
+    {
+      "who": "Risk manager",
+      "concern": "Anything involving simulation on live wards needs a safety plan.",
+      "if_ignored": "In-situ simulation gets cancelled the day before."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "E-learning completion and quiz scores; knowledge is already high.",
+      "Sepsis mortality: lagging, rare per ward and confounded.",
+      "Tracking named doctors' response times, which creates a DPO problem and a culture war."
+    ],
+    "gold_plan": {
+      "baseline": "Median time from first abnormal early warning score to doctor review, split by day and night, from the existing audit.",
+      "behaviour": "Escalation calls follow a structured format (such as SBAR) and happen within protocol time, checked in the file audit.",
+      "leading_indicators": "Pulse survey item 'I feel safe to escalate at night', before and after, on pilot wards.",
+      "business_metric": "Share of sepsis patients receiving antibiotics within one hour, on pilot wards versus others.",
+      "collection": "The quality team's audit run monthly on pilot wards instead of quarterly; anonymous pulse survey; no individual doctor data."
+    }
+  },
+  "concepts": {
+    "conventional": "A protocol e-learning plus quiz for all 900 nurses.",
+    "solid": "A lean protocol module to satisfy accreditation, plus short simulation-based escalation practice in mixed nurse and doctor teams on pilot wards, an interim paper trigger card for 4B and 5A, and pressure on IT for the electronic module.",
+    "next_level_examples": [
+      "Joint nurse and doctor in-situ simulations during real night shifts, co-sponsored by the CMO, practising the 3am phone call itself.",
+      "A 'call me, always' commitment signed by the CMO and on-call doctors, with a two-challenge rule that lets nurses call the rapid response team directly if the first call is brushed off.",
+      "Measure the doctors' side of the call as a team, not a name: response time per rota, shared with the medical staff as a quality metric."
+    ],
+    "also_valid": [
+      "Keeping a short e-learning for all nurses is fine if it is positioned as the accreditation baseline and the main effort goes to escalation practice."
+    ],
+    "red_flags": [
+      "E-learning only.",
+      "Framing it as nurses lacking knowledge or courage.",
+      "Naming and shaming the two doctors.",
+      "Mortality as the success metric."
+    ]
+  },
+  "defence_objections": [
+    "You want me to tell the CMO his doctors are the problem? I'd like to keep my job past Christmas.",
+    "In-situ simulation at night on a real ward, with real patients next door? Our risk manager will need to lie down.",
+    "The surveyors will ask for a training record. If I don't do the e-learning for everyone, what do I show them?"
+  ],
+  "question_you_didnt_ask": "What happens when a nurse picks up the phone at 3am?",
+  "actor_notes": [
+    "Annelies has low patience: vague or generic questions use up patience fast, and she checks her watch out loud.",
+    "She only reveals the fear-of-calling fact if the player asks about the escalation moment itself, and she frames it as 'off the record'.",
+    "She is protective of her nurses: if the player implies nurses are incompetent, trust drops sharply.",
+    "Her risk appetite is low; even a moderately bold concept triggers a defence round. A pilot on one or two wards is the de-risking move she responds to."
+  ],
+  "flavour_lines": [
+    "We have fourteen mandatory e-learnings. The fifteenth will surely be the one they read.",
+    "My nurses can spot a septic patient from the corridor. They just can't make a registrar pick up nicely."
+  ]
+}

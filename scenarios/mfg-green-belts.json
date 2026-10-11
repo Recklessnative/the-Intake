@@ -1,0 +1,171 @@
+{
+  "id": "mfg-green-belts",
+  "schema_version": 1,
+  "sector": "Manufacturing",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "Twenty-Two Green Belts",
+  "stakeholder": {
+    "name": "Marc Peeters",
+    "role": "Plant Manager",
+    "org": "Brabant Packaging NV, a corrugated cardboard plant with 380 staff on three shifts",
+    "voice": "Blunt engineer. Short sentences, likes numbers, says 'concretely' a lot. Respects people who have been on the shop floor. Loses patience with HR jargon such as 'competency framework' or 'learning journey'.",
+    "patience": 4,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "opening_message": "Hi. Corporate wants OEE from 61 to 70 percent by next year. I want all 22 team leads through a Lean Six Sigma Green Belt. The provider quoted 4,800 a head and the budget is approved. Can you organise it before the summer shutdown? Concretely: dates, provider, done.",
+  "surface_ask": "A Lean Six Sigma Green Belt certification for all 22 team leads.",
+  "gold": {
+    "real_problem": "Team leads lose most of their shift firefighting and have no daily management routine. Shift handovers are a two-minute shout at the machine, so the same problems repeat shift after shift, and half of all downtime is logged as 'Other', so nobody knows which stops to attack.",
+    "root_cause_types": ["skill", "process", "system"],
+    "is_training_the_lever": "partly",
+    "need_statement": "Team leads need to run a short structured shift start and handover, log stops properly and do simple root cause on the top stops of their line. That is a practised floor routine plus a fix to downtime coding, not a project-based statistics certificate."
+  },
+  "hidden_facts": [
+    {
+      "id": "other_code",
+      "fact": "48% of downtime minutes in the MES are coded 'Other'.",
+      "unlocks_when": "The player asks where OEE losses come from, what data exists on downtime, or what the biggest losses are.",
+      "reveal_line": "Honestly? Half of it is coded 'Other'. 'Other' is our most reliable machine. It stops every day.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "firefighting",
+      "fact": "Team leads spend roughly 70% of a shift firefighting: chasing forklifts, covering absences, hunting for missing pallets.",
+      "unlocks_when": "The player asks what a team lead's day looks like, how they spend their time, or whether anyone observed them.",
+      "reveal_line": "They run around. Forklift missing, someone sick, wrong board grade. If you find one sitting down, take a photo.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "handover",
+      "fact": "Shift handover is verbal, about two minutes, at the machine. Night shift problems routinely repeat on day shift.",
+      "unlocks_when": "The player asks about handovers, communication between shifts, or why problems recur.",
+      "reveal_line": "Handover? The night guy shouts something over the corrugator and goes home. Then day shift discovers the same jam at nine.",
+      "weight": 2,
+      "critical": true
+    },
+    {
+      "id": "yellow_belts",
+      "fact": "Three team leads completed a Yellow Belt in 2024. Every one of their improvement projects stalled within two months for lack of time and a sponsor.",
+      "unlocks_when": "The player asks what was tried before or whether anyone already has Lean training.",
+      "reveal_line": "Three of them did Yellow Belt last year. Nice certificates. The projects died in the drawer. No time.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "audience_profile",
+      "fact": "All team leads were promoted from operator, average 14 years on the floor. Several are far more comfortable speaking than writing, and four are more at home in Polish than in Dutch.",
+      "unlocks_when": "The player asks about the team leads' background, experience, language or how they learn best.",
+      "reveal_line": "They're operators who got promoted. Excellent on a machine. Give them a 60-page workbook and you've lost them.",
+      "weight": 1,
+      "critical": false
+    },
+    {
+      "id": "sister_plant",
+      "fact": "The corporate Lean office already has a daily management standard (tier boards, 10-minute shift starts) running at the sister plant in Ghent. Marc never rolled it out because he 'didn't want corporate posters on my walls'.",
+      "unlocks_when": "The player asks what corporate or other plants already offer, or whether a standard exists.",
+      "reveal_line": "Ghent has their boards and their little meetings. Corporate keeps sending me the folder. I don't need posters to run a plant.",
+      "weight": 3,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "OEE is 61% across 6 lines; corporate target is 70%.",
+    "Budget of about 105,000 euro is approved for the certification."
+  ],
+  "constraints": {
+    "budget": "About 105,000 euro approved, earmarked for 'team lead development'.",
+    "deadline": "Before the summer shutdown in July.",
+    "audience": "22 team leads across 6 lines and 3 shifts.",
+    "schedule": "Shifts run 6-14, 14-22, 22-6. A team lead cannot leave the floor for more than two hours at a time.",
+    "languages": "Dutch; four team leads prefer Polish.",
+    "data_available": [
+      "MES downtime log per line (poorly coded)",
+      "Daily OEE per line",
+      "Safety and quality incident logs",
+      "Absenteeism per shift"
+    ],
+    "data_not_available": [
+      "Any measure of individual team lead performance",
+      "Reliable reason codes for half of all stops"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Works council",
+      "concern": "Training outside shift hours counts as overtime under the plant agreement.",
+      "if_ignored": "Sessions get blocked or become expensive overtime."
+    },
+    {
+      "who": "HR and the sector collective agreement",
+      "concern": "A formal certification can trigger a pay-scale discussion for team leads.",
+      "if_ignored": "22 Green Belts arrive with 22 requests for a raise."
+    },
+    {
+      "who": "Corporate Lean office",
+      "concern": "Owns the daily management standard and is proud of it; feels ignored by this plant.",
+      "if_ignored": "No support, or a turf fight about whose method wins."
+    },
+    {
+      "who": "Hilde, maintenance manager",
+      "concern": "Believes production 'abuses the machines'. A large share of stops are maintenance-related.",
+      "if_ignored": "Root-cause work bounces between production and maintenance."
+    },
+    {
+      "who": "IT / MES administrator",
+      "concern": "Changing downtime reason codes needs an MES configuration change.",
+      "if_ignored": "'Other' stays the biggest machine."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Counting certificates earned.",
+      "Using plant-wide OEE alone: lagging, and confounded by orders, maintenance and raw material.",
+      "Satisfaction scores after a classroom week."
+    ],
+    "gold_plan": {
+      "baseline": "Share of downtime coded 'Other' and unplanned downtime minutes per line, measured over the last 8 weeks.",
+      "behaviour": "Shift start and handover held to the standard, checked with short layered audits by the plant manager and engineers.",
+      "leading_indicators": "Share of stops correctly coded; top three stops per line with a named owner and an action.",
+      "business_metric": "Unplanned downtime minutes and OEE on pilot lines compared with the other lines.",
+      "collection": "Weekly MES export, a one-page audit checklist on the floor, pilot lines versus comparison lines."
+    }
+  },
+  "concepts": {
+    "conventional": "Send all 22 team leads on the external Green Belt course.",
+    "solid": "A daily management programme on the floor: short sessions on running a shift start, handover and simple root cause, followed by coaching at the line. Fix the downtime codes with IT. Keep one or two Green Belts for process engineers who will actually do statistical projects.",
+    "next_level_examples": [
+      "Borrow, don't invent: pilot the Ghent daily management standard on two lines, with team leads visiting Ghent to see it run, then pilot team leads coach the next wave.",
+      "Move part of the certification budget to fixing MES coding and run an 'Other hunt' where lines compete to shrink the 'Other' share.",
+      "Green Belts only for the engineers, paired with team leads so each project has someone on the floor who owns it."
+    ],
+    "also_valid": [
+      "A smaller, practical Lean basics programme combined with a handover standard, if it is practised on the floor and measured on downtime."
+    ],
+    "red_flags": [
+      "Green Belt for all 22 as proposed.",
+      "Classroom-only delivery that pulls team leads off the floor for days.",
+      "Ignoring the 'Other' coding problem.",
+      "Measuring success by certificates."
+    ]
+  },
+  "defence_objections": [
+    "Corporate asked for Green Belts. If I go back with 'a board and some meetings', I look soft.",
+    "A pilot on two lines means twenty team leads wait. They'll feel passed over and tell me so at the coffee machine.",
+    "You want my team leads to go and learn from Ghent? Those people think we're cowboys."
+  ],
+  "question_you_didnt_ask": "What's actually inside 'Other'?",
+  "actor_notes": [
+    "Marc is open and cooperative: answer any reasonable question honestly, but only reveal a hidden fact when its unlock condition is met.",
+    "He warms up to anyone who asks to see the floor or the data. Proposals to 'go and watch a shift' earn trust.",
+    "If the player says Green Belt is wrong without evidence, he pushes back. If they show the 'Other' and handover facts, he concedes with a grunt.",
+    "He never volunteers the Ghent standard; it is a slight embarrassment."
+  ],
+  "flavour_lines": [
+    "We make boxes. Very good boxes. Slowly.",
+    "The last consultant left us a maturity model. It's laminated."
+  ]
+}

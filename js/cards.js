@@ -1,0 +1,68 @@
+// Turns a scenario card file (schema_version 1, as written for THE INTAKE)
+// into the shape the game and prompts use.
+(function () {
+  const list = v => (Array.isArray(v) ? v : v ? [v] : []);
+
+  function normalise(raw) {
+    if (!raw.schema_version) return raw; // already in game shape
+    const s = raw.stakeholder || {};
+    const g = raw.gold || {};
+    const c = raw.constraints || {};
+    const m = (raw.measurement || {}).gold_plan || {};
+    const k = raw.concepts || {};
+    return {
+      id: raw.id,
+      sector: raw.sector,
+      title: raw.title,
+      difficulty: raw.tier || 1,
+      stakeholder: {
+        name: s.name,
+        role: s.role,
+        org: s.org || '',
+        voice: s.voice || ''
+      },
+      surfaceAsk: raw.opening_message || raw.surface_ask,
+      realProblem: g.real_problem,
+      rootCause: list(g.root_cause_types).join(', '),
+      learningIsTheAnswer: g.is_training_the_lever,
+      needStatement: g.need_statement,
+      hiddenFacts: list(raw.hidden_facts).map(f => ({
+        id: f.id, fact: f.fact, unlockedBy: f.unlocks_when, revealLine: f.reveal_line,
+        weight: f.weight || 1, critical: !!f.critical
+      })),
+      volunteered: list(raw.volunteered_facts),
+      constraints: {
+        budget: c.budget,
+        deadline: c.deadline,
+        audience: [c.audience, c.schedule, c.languages].filter(Boolean).join(' '),
+        dataAvailable: list(c.data_available).join('; '),
+        dataMissing: list(c.data_not_available).join('; ')
+      },
+      politics: list(raw.dependencies).map(d => `${d.who}: ${d.concern}`),
+      dependencies: list(raw.dependencies),
+      patience: s.patience || 3,
+      riskAppetite: s.risk_appetite == null ? 1 : s.risk_appetite,
+      likelyObjections: list(raw.defence_objections),
+      goldAnswer: {
+        need: g.need_statement,
+        measurement: ['baseline', 'behaviour', 'leading_indicators', 'business_metric', 'collection']
+          .filter(x => m[x]).map(x => `${x.replace('_', ' ')}: ${m[x]}`).join(' | '),
+        concept: [k.solid].concat(list(k.next_level_examples)).filter(Boolean).join(' | '),
+        risks: list(raw.dependencies).map(d => `${d.who} (${d.if_ignored})`)
+      },
+      measurementTraps: list((raw.measurement || {}).traps),
+      calibration: {
+        strong: list(k.next_level_examples)[0] ? `${k.solid} Plus: ${list(k.next_level_examples)[0]}` : k.solid,
+        passable: [k.solid ? 'Targets the right group but without measurement baseline or dependencies.' : '', list(k.also_valid)[0] || ''].filter(Boolean).join(' '),
+        weak: k.conventional
+      },
+      alsoValid: list(k.also_valid),
+      redFlags: list(k.red_flags),
+      questionHint: raw.question_you_didnt_ask,
+      actorNotes: list(raw.actor_notes),
+      flavourLines: list(raw.flavour_lines)
+    };
+  }
+
+  window.Cards = { normalise };
+})();

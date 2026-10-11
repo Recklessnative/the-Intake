@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE INTAKE</title>
+<meta name="description" content="A test of your intake craftsmanship, but then funnier.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main id="app">
+
+  <!-- Title -->
+  <section id="s-title" class="screen active">
+    <div class="title-card">
+      <p class="eyebrow">An experiment by Yannick, learning strategist</p>
+      <h1>THE INTAKE</h1>
+      <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
+      <button id="btn-start" class="primary">Clock in</button>
+      <button id="btn-settings" class="ghost">Gemini key</button>
+    </div>
+  </section>
+
+  <!-- Settings / key -->
+  <section id="s-settings" class="screen">
+    <div class="panel narrow">
+      <h2>Bring your own Gemini key</h2>
+      <p>For now THE INTAKE runs on your own Gemini API key. You can get a free one at Google AI Studio. The key stays in this browser and is sent only to Google.</p>
+      <label>API key <input id="in-key" type="password" autocomplete="off" placeholder="AIza..."></label>
+      <label>Model <input id="in-model" type="text" spellcheck="false"></label>
+      <label class="check"><input id="in-remember" type="checkbox"> Remember the key in this browser</label>
+      <p class="fine">Please don't type real company data: on Google's free tier, prompts may be used to improve their models.</p>
+      <div class="row">
+        <button id="btn-save-key" class="primary">Save</button>
+        <button id="btn-back-title" class="ghost">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cubicle intro -->
+  <section id="s-cubicle" class="screen">
+    <div class="cubicle">
+      <div class="monitor"><div class="glow"></div></div>
+      <p id="cubicle-line" class="narration"></p>
+      <button id="btn-sit" class="primary">Sit down</button>
+    </div>
+  </section>
+
+  <!-- Desk: the laptop -->
+  <section id="s-desk" class="screen">
+    <div class="laptop">
+      <header class="os-bar">
+        <span class="os-name">KimOS</span>
+        <span id="os-step" class="os-step"></span>
+        <span id="os-trust" class="os-trust"></span>
+      </header>
+
+      <!-- Inbox -->
+      <div id="p-inbox" class="pane">
+        <div class="mail">
+          <div class="mail-head"><strong id="mail-from"></strong><span id="mail-role"></span></div>
+          <p id="mail-body" class="mail-body"></p>
+          <button id="btn-call" class="primary">Call them back</button>
+        </div>
+      </div>
+
+      <!-- Intake chat -->
+      <div id="p-chat" class="pane">
+        <div class="chat-head">
+          <div><strong id="chat-who"></strong> <span id="chat-role" class="muted"></span></div>
+          <div class="meters">
+            <span>Questions <b id="q-left"></b></span>
+            <span>Patience <b id="patience"></b></span>
+          </div>
+        </div>
+        <div id="chat-log" class="chat-log" aria-live="polite"></div>
+        <form id="chat-form" class="chat-form">
+          <textarea id="chat-input" rows="2" maxlength="400" placeholder="Ask your question..."></textarea>
+          <div class="row">
+            <button type="submit" class="primary">Ask</button>
+            <button type="button" id="btn-hangup" class="ghost">End the call</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Write-up -->
+      <div id="p-write" class="pane">
+        <p class="muted">Write it in your own words. No menus, no checklists. The headings say what to cover, not what to write.</p>
+        <form id="write-form" class="write">
+          <h3>1. The need</h3>
+          <label>The performance gap: what people do now versus what they should do<textarea name="gap" rows="2" maxlength="700"></textarea></label>
+          <label>Who has the gap<textarea name="who" rows="1" maxlength="400"></textarea></label>
+          <label>Likely root cause<textarea name="cause" rows="2" maxlength="600"></textarea></label>
+          <label>Is learning the right lever? Why, or why not?<textarea name="lever" rows="2" maxlength="600"></textarea></label>
+          <h3>2. Measurement</h3>
+          <label>Baseline<textarea name="baseline" rows="1" maxlength="500"></textarea></label>
+          <label>Behaviour you expect to change<textarea name="behaviour" rows="2" maxlength="500"></textarea></label>
+          <label>Business metric it should move<textarea name="metric" rows="1" maxlength="500"></textarea></label>
+          <label>How and when you'll collect it, with what data<textarea name="collect" rows="2" maxlength="600"></textarea></label>
+          <h3>3. Concept card</h3>
+          <label>The big idea<textarea name="idea" rows="2" maxlength="700"></textarea></label>
+          <label>Format and rhythm<textarea name="format" rows="2" maxlength="600"></textarea></label>
+          <label>Why it fixes the root cause<textarea name="why" rows="2" maxlength="600"></textarea></label>
+          <label>What it deliberately is not<textarea name="not" rows="1" maxlength="400"></textarea></label>
+          <label>Risks and dependencies, each with a mitigation<textarea name="risks" rows="3" maxlength="900"></textarea></label>
+          <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<textarea name="flag" rows="1" maxlength="400"></textarea></label>
+          <button type="submit" class="primary">Send it to them</button>
+        </form>
+      </div>
+
+      <!-- Defence -->
+      <div id="p-defence" class="pane">
+        <p id="defence-intro" class="narration small"></p>
+        <form id="defence-form" class="write"></form>
+      </div>
+
+      <!-- Waiting -->
+      <div id="p-wait" class="pane">
+        <p id="wait-line" class="narration small"></p>
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <!-- Scorecard -->
+      <div id="p-score" class="pane">
+        <h2 id="score-title"></h2>
+        <div id="score-total" class="score-total"></div>
+        <table class="score-table"><tbody id="score-rows"></tbody></table>
+        <div class="debrief">
+          <h3>The question you didn't ask</h3>
+          <p id="score-question"></p>
+          <h3>What you never found out</h3>
+          <ul id="score-missed"></ul>
+          <h3>Their verdict</h3>
+          <p id="score-verdict"></p>
+        </div>
+        <button id="btn-next" class="primary">Next request</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- End of run -->
+  <section id="s-end" class="screen">
+    <div class="panel narrow">
+      <p class="eyebrow">End of the week</p>
+      <h2 id="end-title"></h2>
+      <p id="end-score" class="score-total"></p>
+      <p id="end-note"></p>
+      <p class="fine">The board room, hard mode and shareable scores arrive in the next version.</p>
+      <button id="btn-again" class="primary">Another week</button>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status"></div>
+</main>
+<script src="js/gemini.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/prompts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
