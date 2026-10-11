@@ -53,7 +53,7 @@ label.check input { width: auto; }
 
 /* laptop */
 #s-desk.active { align-items: flex-start; }
-.laptop { width: 100%; max-width: 860px; background: var(--paper); color: var(--paper-ink); border-radius: 10px; overflow: hidden;
+.laptop { width: 100%; max-width: 860px; background: var(--paper); color: var(--paper-ink); border-radius: 10px; overflow: clip;
   border: 12px solid #34372f; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
 .os-bar { display: flex; gap: 16px; align-items: center; padding: 8px 14px; background: #34372f; color: var(--ink); font-size: 13px; }
 .os-name { font-weight: 700; }
@@ -81,6 +81,21 @@ label.check input { width: auto; }
 .chat-form textarea { margin: 0; }
 
 .write h3 { margin: 22px 0 4px; }
+.laptop { transition: max-width .2s; }
+.laptop.wide { max-width: 1180px; }
+.write-grid { display: flex; flex-direction: column-reverse; gap: 16px; }
+.notes { border: 1px solid #d6d0bd; border-radius: 8px; background: #fbf8ef; padding: 10px 14px; font-size: 14px; }
+.notes summary { cursor: pointer; font-weight: 600; }
+.notes-log { margin-top: 8px; }
+.note { margin: 6px 0; padding: 6px 10px; border-radius: 8px; white-space: pre-wrap; }
+.note.you { background: #2f4a3f; color: #eef6f0; margin-left: 24px; }
+.note.them { background: #e9e3d2; margin-right: 24px; }
+.notes-case h4 { margin: 14px 0 4px; font-size: 14px; }
+.notes-case ul { margin: 0; padding-left: 18px; }
+@media (min-width: 900px) {
+  .write-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
+  .notes { position: sticky; top: 12px; max-height: calc(100vh - 40px); overflow-y: auto; }
+}
 .write label { color: #3b3a33; }
 
 .spinner { width: 28px; height: 28px; margin: 20px auto; border: 3px solid #d6d0bd; border-top-color: #2f4a3f; border-radius: 50%; animation: spin 1s linear infinite; }
