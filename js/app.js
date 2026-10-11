@@ -1331,7 +1331,7 @@
       card.hiddenFacts.filter(f => f.foundAt.includes('frontline') && !r.revealed.has(f.id)).slice(0, Math.min(r.corridorLeft, r.questionsLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'What is it really like?'), a = f.frontlineLine || f.fact;
         r.corridor.push({ who: 'you', text: qText }, { who: 'them', text: a });
-        r.corridorTurns.push({ role: 'user', text: 'The learning professional asks:  + qText + ' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
+        r.corridorTurns.push({ role: 'user', text: 'The learning professional asks: """' + qText + '"""' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
         r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id], src: 'frontline' });
         r.revealed.add(f.id);
         r.corridorLeft--;
