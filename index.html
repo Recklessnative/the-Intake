@@ -82,6 +82,7 @@
       <!-- Desktop icons: every window can be opened from here (on wide screens; the start menu on phones). -->
       <nav id="desk-icons" class="desk-icons" aria-label="Desktop">
         <button type="button" class="desk-icon" data-app="w-coe"><span class="di">🗂</span>Center of Excellence</button>
+        <button type="button" class="desk-icon" data-app="w-academy"><span class="di">🎓</span>CoE Academy</button>
         <button type="button" class="desk-icon" data-app="w-inbox"><span class="di">✉</span>Doors Mail</button>
         <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
         <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
@@ -176,9 +177,9 @@
         </form>
       </div>
 
-      <!-- A quick intake: one skill, a few minutes -->
-      <div class="win" id="w-quick" data-title="Quick intake" data-icon="⚡">
-        <div id="quick" class="quick" aria-live="polite"></div>
+      <!-- CoE Academy: this week's e-learning module -->
+      <div class="win" id="w-academy" data-title="CoE Academy" data-icon="🎓">
+        <div id="academy" class="academy" aria-live="polite"></div>
       </div>
 
       <!-- Follow-up after the first call: data, the coffee machine, a callback -->
@@ -409,6 +410,7 @@
         <button data-open="w-case">📁 Case file</button>
         <button data-open="w-mieke">☕ Ask Mieke</button>
         <button data-open="w-coe">🗂 Center of Excellence</button>
+        <button data-open="w-academy">🎓 CoE Academy</button>
         <button data-open="w-scores">🏆 My scores</button>
         <button id="btn-sound">🔊 Sound: on</button>
         <button id="btn-tidy">▦ Tidy the windows</button>
@@ -459,7 +461,7 @@
 <script src="js/cards.js?v=dev"></script>
 <script src="js/prompts.js?v=dev"></script>
 <script src="js/coe.js?v=dev"></script>
-<script src="js/quick.js?v=dev"></script>
+<script src="js/academy.js?v=dev"></script>
 <script src="js/sound.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
