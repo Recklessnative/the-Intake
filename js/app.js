@@ -27,6 +27,7 @@
   }
   function pane(id, step) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
+    document.querySelector('.laptop').classList.toggle('wide', id === 'p-write');
     if (step) $('os-step').textContent = step;
   }
   function toast(msg) {
@@ -213,7 +214,10 @@
     addMsg('you', q);
     $('chat-input').value = '';
     r.turns.push({ role: 'user', text: 'The learning professional asks: """' + q + '"""' });
-    const p = Prompts.stakeholder(r.card);
+    // One aside per call, on the second answer, so the stakeholder sounds human without rambling.
+    const flavours = r.card.flavourLines || [];
+    const flavour = r.transcript.length === 1 && flavours.length ? flavours[Math.floor(Math.random() * flavours.length)] : '';
+    const p = Prompts.stakeholder(r.card, flavour);
     try {
       const out = await Gemini.json({ system: p.system, turns: r.turns, schema: p.schema });
       r.turns.push({ role: 'model', text: JSON.stringify(out) });
@@ -241,7 +245,36 @@
 
   function toWriteup() {
     $('write-form').reset();
+    notes();
     pane('p-write', 'Request ' + (state.index + 1) + ' · Write-up');
+  }
+
+  // The call transcript (and case file) beside the write-up, so nobody has to remember the call.
+  function notes() {
+    const r = state.run;
+    $('notes-who').textContent = 'Your call with ' + r.card.stakeholder.name;
+    const log = $('notes-log');
+    log.innerHTML = '';
+    if (!r.transcript.length) {
+      const p = document.createElement('p'); p.className = 'muted'; p.textContent = 'You did not ask anything. Bold.'; log.appendChild(p);
+    }
+    const ask = document.createElement('p'); ask.className = 'note them'; ask.textContent = r.card.surfaceAsk; log.appendChild(ask);
+    r.transcript.forEach(t => {
+      const q = document.createElement('p'); q.className = 'note you'; q.textContent = t.q;
+      const a = document.createElement('p'); a.className = 'note them'; a.textContent = t.a;
+      log.append(q, a);
+    });
+    const b = r.card.briefing;
+    const cf = $('notes-case');
+    cf.innerHTML = '';
+    if (b) {
+      const h = document.createElement('h4'); h.textContent = b.headline; cf.appendChild(h);
+      if (b.text) { const p = document.createElement('p'); p.textContent = b.text; cf.appendChild(p); }
+      const ul = document.createElement('ul');
+      b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      cf.appendChild(ul);
+    }
+    $('write-notes').open = window.matchMedia('(min-width: 900px)').matches;
   }
 
   function writeupText(w) {

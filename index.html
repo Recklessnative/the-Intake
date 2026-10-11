@@ -108,6 +108,7 @@
       <!-- Write-up -->
       <div id="p-write" class="pane">
         <p class="muted">Write it in your own words. No menus, no checklists. The headings say what to cover, not what to write.</p>
+        <div class="write-grid">
         <form id="write-form" class="write">
           <h3>1. The need</h3>
           <label>The performance gap: what people do now versus what they should do<textarea name="gap" rows="2" maxlength="700"></textarea></label>
@@ -128,6 +129,12 @@
           <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<textarea name="flag" rows="1" maxlength="400"></textarea></label>
           <button type="submit" class="primary">Send it to them</button>
         </form>
+        <details id="write-notes" class="notes">
+          <summary id="notes-who">Your call</summary>
+          <div id="notes-log" class="notes-log"></div>
+          <div id="notes-case" class="notes-case"></div>
+        </details>
+        </div>
       </div>
 
       <!-- Defence -->
