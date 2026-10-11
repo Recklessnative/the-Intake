@@ -366,8 +366,8 @@ async function followUp() {
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   // The team: after a promotion, two own requests and three junior drafts with one flaw each.
   if (!(await p.$('#scores .charts svg')) || !(await p.textContent('#scores .weak-spot')).includes('weak spot')) throw new Error('score charts missing');
-  await p.evaluate(() => { const h = JSON.parse(localStorage.getItem('intake-scores')); h.promoted = { week: 2, at: Date.now() }; localStorage.setItem('intake-scores', JSON.stringify(h)); });
-  await p.goto('http://localhost:8765/?debug=1');
+  await p.goto('http://localhost:8765/?debug=1&promote=1');
+  if (!(await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).promoted))) throw new Error('?promote=1 did not promote');
   p.once('dialog', d => d.accept().catch(() => {}));
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');

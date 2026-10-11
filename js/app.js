@@ -2006,6 +2006,17 @@
       $('btn-debug').hidden = window.localStorage.getItem('intake-debug') !== '1';
     } catch (e) { $('btn-debug').hidden = !q.has('debug') || q.get('debug') === '0'; }
   })();
+  // Test mode: ?promote=1 makes you team lead now, so the next week you start is a team week;
+  // ?promote=0 takes it back. Your scores stay as they are.
+  (function () {
+    const q = new URLSearchParams(window.location.search);
+    if (!q.has('promote')) return;
+    const h = scoreHistory();
+    if (q.get('promote') === '0') { delete h.promoted; keepScores(h); toast('Test mode: promotion taken back.', 'info'); return; }
+    h.promoted = { week: 0, at: Date.now(), test: true };
+    keepScores(h);
+    toast('Test mode: you are team lead. Start a new week to meet Bart, Priya and Jens.', 'info');
+  })();
   $('btn-debug').onclick = () => {
     const r = state.run;
     if (!r) return;
