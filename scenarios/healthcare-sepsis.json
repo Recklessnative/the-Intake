@@ -5,6 +5,15 @@
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
   "title": "The Fifteenth Mandatory E-Learning",
+  "briefing": {
+    "headline": "Sepsis and escalation in hospitals: what you should know before the call",
+    "points": [
+      "General hospital on three sites; nurses work 24/7 shifts and doctors report to a separate medical hierarchy.",
+      "Sepsis is time-critical: early recognition and antibiotics within the first hour matter most.",
+      "An early warning score turns vital signs into a number that should trigger escalation to a doctor.",
+      "Hospital accreditation surveyors review patient files and practice, not just training records."
+    ]
+  },
   "stakeholder": {
     "name": "Annelies Maes",
     "role": "Director of Nursing",
@@ -18,7 +27,11 @@
   "surface_ask": "A sepsis protocol e-learning with a test for all 900 nurses, 100% completion.",
   "gold": {
     "real_problem": "Nurses already know the protocol. The delay happens at escalation: at night, nurses spot deterioration but wait to call the on-call doctor, especially two senior doctors known to be dismissive. On two wards the early warning score is still on paper, so the automatic alert never fires. Doctors were left out of the plan entirely.",
-    "root_cause_types": ["environment", "system", "expectations"],
+    "root_cause_types": [
+      "environment",
+      "system",
+      "expectations"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "The gap is not protocol knowledge but timely escalation at night: nurses hesitate to call, some doctors discourage calls, and two wards lack the automatic alert. Any learning intervention has to include doctors and practise the escalation moment itself."
   },

@@ -2,7 +2,7 @@
 
 _A test of your intake craftsmanship, but then funnier._
 
-Each card is one stakeholder request, written as JSON so the game can load it directly. Gemini plays the stakeholder from the card, and a separate judge call grades the player against the `gold`, `hidden_facts`, `measurement` and `concepts` blocks. The player never sees anything except `opening_message` and what the stakeholder says in character.
+Each card is one stakeholder request, written as JSON so the game can load it directly. Gemini plays the stakeholder from the card, and a separate judge call grades the player against the `gold`, `hidden_facts`, `measurement` and `concepts` blocks. The player sees only the `briefing`, the `opening_message` and what the stakeholder says in character.
 
 ## The cards
 
@@ -11,11 +11,15 @@ Each card is one stakeholder request, written as JSON so the game can load it di
 | `mfg-green-belts` | Manufacturing | 1 | Marc Peeters, Plant Manager | Green Belt for all 22 team leads | No daily management routine; half of all downtime coded "Other" | Medium |
 | `logistics-night-shift` | Retail logistics | 1 | Sofie Van den Broeck, Site Ops Manager | 15-minute safety refresher on phones | New agency drivers, nights, no supervisor, per-case bonus; phones are banned | Medium |
 | `healthcare-sepsis` | Healthcare | 2 | Annelies Maes, Director of Nursing | Sepsis e-learning, 100% completion | Nurses know it; they hesitate to call two dismissive doctors at night | Low |
-| `finance-aml-finding` | Financial services | 2 | Caroline Lambrecht, Chief Compliance Officer | Refreshed "engaging" AML e-learning | Private banking overrides alerts under a speed bonus; no four-eyes check | Low |
+| `finance-tied-selling` | Financial services | 2 | Bart Verhaegen, Head of Retail Network | "Engaging" refresher on credits | Bankers present the bank's insurance as compulsory (tied selling) under a double-counting target | Low |
 | `public-service-desk` | Public sector | 3 | Kristof Jacobs, Head of Citizen Services | Friendliness training for counter staff | Appointment-only system turns people away by rule | Low |
 | `tech-sales-motivation` | Tech / SaaS | 3 | Jasper Wouters, VP Sales EMEA | Motivational off-site with a Navy SEAL | Commission clawback, unsupported new pricing tier, uncoached new hires | High |
+| `pharma-read-and-sign` | Pharma | 1 | Dr. Nathalie Dubois, Site Quality Director | Read-and-sign 23 SOPs for 140 operators | New hires on one isolator line, never trained hands-on since the trainer retired | Low |
+| `energy-tablet-resistance` | Energy and utilities | 2 | Thomas Lemmens, Director of Digital Transformation | "Digital mindset" bootcamp for technicians | App needs signal in basements; safety still demands the paper permit | Medium |
+| `ngo-volunteer-churn` | Non-profit | 2 | Hanne Claes, Head of Volunteering | Leadership course for volunteer coordinators | Six-week wait, then a compulsory phone-line period set by the founder | Medium |
+| `education-ai-cheating` | Higher education | 3 | Prof. Ilse Verbruggen, Vice-Dean of Education | AI-detection training for 600 lecturers | Take-home assessment, a biased detector and exam rules that block redesign | Low |
 
-Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open stakeholder with a real skill gap, tier 2 hides the root cause behind politics, and tier 3 is a problem where the best answer is mostly not training. A run draws one card per tier. The two v0.1 cards from the design doc are `tech-sales-motivation` (sales director) and `logistics-night-shift` (warehouse ops manager).
+Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open stakeholder with a real skill gap, tier 2 hides the root cause behind politics, and tier 3 is a problem where the best answer is mostly not training. A run draws one card per tier, from different sectors. The two v0.1 cards from the design doc are `tech-sales-motivation` (sales director) and `logistics-night-shift` (warehouse ops manager).
 
 ## Card schema (v1)
 
@@ -25,7 +29,8 @@ Tiers follow the run's difficulty ramp from the design doc: tier 1 is an open st
 | `stakeholder.name/role/org/voice` | Actor | Who they are and how they talk. |
 | `stakeholder.patience` | Game | Weak or leading questions tolerated before they get curt (1 to 5). |
 | `stakeholder.risk_appetite` | Game | 0 to 3. A concept whose judged boldness exceeds this triggers the defence round, one objection per point of gap. |
-| `opening_message` | Game | The ping. The only thing the player sees before asking. |
+| `briefing.headline`, `briefing.points[]` | Game | A one-line headline plus 3 to 5 neutral context bullets the player reads before the call: the sector, the rules that make it sensitive, who the usual players are. No spoilers; it never contains a hidden fact. A hard mode can hide it. |
+| `opening_message` | Game | The ping. With the briefing, the only thing the player sees before asking. |
 | `surface_ask` | Judge | The solution in disguise, in one line. |
 | `gold.real_problem`, `gold.root_cause_types`, `gold.is_training_the_lever`, `gold.need_statement` | Judge | The answer key for diagnosis. `root_cause_types` uses: skill, will, system, process, expectations, incentive, environment. `is_training_the_lever` is yes, partly or no. |
 | `hidden_facts[]` | Actor + game | Each has `id`, `fact`, `unlocks_when` (the kind of question that reveals it), `reveal_line` (in-voice), `weight` 1 to 3 and `critical`. The game flags a fact as surfaced when the actor reveals it. |

@@ -1,0 +1,186 @@
+{
+  "id": "finance-tied-selling",
+  "schema_version": 1,
+  "sector": "Financial services",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "An Engaging Refresher on Credits",
+  "briefing": {
+    "headline": "Consumer credit and insurance in Belgium: what you should know before the call",
+    "points": [
+      "Belgian retail bank, about 600 personal bankers in 180 branches selling consumer loans and mortgages.",
+      "Banks may offer a loan bundled with their own insurance at a discount, as long as the customer can take each product separately and the discount is transparent. Making the loan conditional on the bank's own insurance is tied selling ('koppelverkoop') and is not allowed.",
+      "For credit-linked insurance such as debt balance and fire insurance, the customer is free to pick another insurer; the lender may only require that the cover meets its conditions.",
+      "The FSMA supervises conduct of business; Ombudsfin handles customer complaints; consumer organisations run mystery shopping in branches.",
+      "The legal framing in this card is simplified for play. Check with compliance or legal before using it as real guidance."
+    ]
+  },
+  "stakeholder": {
+    "name": "Bart Verhaegen",
+    "role": "Head of Retail Network",
+    "org": "Meridia Bank, a mid-sized Belgian retail bank",
+    "voice": "Jovial, ex-branch manager, talks about 'my bankers' and 'the field'. Thinks compliance is a speed bump. Very proud of his cross-sell numbers. Says 'between us' before saying something he shouldn't.",
+    "patience": 3,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "opening_message": "Compliance is nagging me again, so I need an engaging refresher on credits for all 600 personal bankers. Consumer loans, mortgages, the whole thing. Make it fun, make it short, and make sure it doesn't cost me selling time in Q4.",
+  "surface_ask": "An engaging credit refresher e-learning for all 600 personal bankers.",
+  "gold": {
+    "real_problem": "Bankers routinely tell customers that the loan or its rate is only available with the bank's own debt balance and home insurance, which turns a legal bundle into illegal tied selling. A consumer organisation's mystery shop caught it in 7 of 10 branches. Branch targets count insurance cross-sell double, the quote tool pre-ticks the insurance, and bankers have never been taught the difference between bundling and tying.",
+    "root_cause_types": [
+      "incentive",
+      "system",
+      "skill"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Personal bankers need to present the insurance as a genuine, optional bundle with a transparent discount and respect the customer's free choice of insurer. That requires fixing the double-counting target and the pre-ticked quote tool, and practising the conversation itself; a general credit refresher will not change it."
+  },
+  "hidden_facts": [
+    {
+      "id": "mystery_shop",
+      "fact": "A consumer organisation's mystery shop found bankers in 7 of 10 branches saying the loan rate was only available with the bank's own insurance. The article comes out next month.",
+      "unlocks_when": "The player asks why compliance is 'nagging', what triggered the request, or whether there was an incident, audit or complaint.",
+      "reveal_line": "Between us? A consumer magazine sent mystery shoppers. Seven out of ten branches said 'the rate is only with our insurance'. It's published next month. Compliance is... animated.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "double_count",
+      "fact": "Branch targets count insurance sold with a loan double towards the branch bonus.",
+      "unlocks_when": "The player asks how bankers are targeted or rewarded, or what pressure they are under.",
+      "reveal_line": "Insurance with a loan counts double. It's a great incentive. Oh. You mean it's a great incentive.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "pre_ticked",
+      "fact": "The loan quote tool pre-ticks the bank's debt balance and fire insurance and shows only the bundled rate on the first screen.",
+      "unlocks_when": "The player asks about the tools or systems bankers use, or how a quote is presented to the customer.",
+      "reveal_line": "The quote tool ticks the insurance by default. It saves clicks. You can untick it. On the third screen.",
+      "weight": 2,
+      "critical": true
+    },
+    {
+      "id": "knowledge_gap",
+      "fact": "In a quick poll, fewer than a third of bankers could explain the difference between a legal bundle and illegal tied selling, or knew the customer may choose another insurer.",
+      "unlocks_when": "The player asks what bankers actually know about the rules, or whether there's a baseline on knowledge.",
+      "reveal_line": "Compliance did a poll. Most of my bankers think 'bundle' and 'tie' are the same thing. To be fair, so did I until Tuesday.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "complaints",
+      "fact": "Ombudsfin complaints about insurance linked to loans tripled this year; most come from customers who found a cheaper insurer later and were told they couldn't switch.",
+      "unlocks_when": "The player asks about complaints, customer feedback or what the ombudsman sees.",
+      "reveal_line": "Complaints to the ombudsman tripled. Mostly people who found cheaper insurance and were told they couldn't switch. Which, I'm told, they can.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "cco_vs_network",
+      "fact": "The Chief Compliance Officer wanted the targets changed last year; the retail network, Bart included, blocked it at the executive committee.",
+      "unlocks_when": "The player asks who else is involved, how compliance and the network get along, or why this wasn't fixed earlier.",
+      "reveal_line": "Caroline from compliance wanted to change the targets last year. We... had a lively ExCo. I won.",
+      "weight": 2,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "600 personal bankers in 180 branches.",
+    "Q4 is the busiest lending quarter; Bart doesn't want selling time lost."
+  ],
+  "constraints": {
+    "budget": "Covered by the network's training budget, about 40,000 euro.",
+    "deadline": "Before the magazine article next month, and before a likely FSMA follow-up.",
+    "audience": "600 personal bankers across 180 branches.",
+    "schedule": "Branch hours are full; at most 30 minutes a week of non-selling time per banker.",
+    "languages": "Dutch and French.",
+    "data_available": [
+      "Loan and insurance sales per branch and banker",
+      "Share of loans sold with the bank's insurance (attach rate)",
+      "Ombudsfin and internal complaints",
+      "The mystery-shop report",
+      "Quote tool logs, including whether the insurance was unticked"
+    ],
+    "data_not_available": [
+      "Any record of what bankers actually say to customers"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Chief Compliance Officer",
+      "concern": "Has been asking for the target change for a year; can be the strongest ally or an 'I told you so'.",
+      "if_ignored": "Compliance writes its own remediation and L&D becomes a delivery service."
+    },
+    {
+      "who": "HR rewards and the executive committee",
+      "concern": "Own the branch target and bonus formula.",
+      "if_ignored": "Training teaches free choice while the bonus pays for tying."
+    },
+    {
+      "who": "IT / quote tool owner",
+      "concern": "Changing the default tick and the first screen is a change request.",
+      "if_ignored": "The tool keeps steering every customer into the bundle."
+    },
+    {
+      "who": "DPO and works council",
+      "concern": "Using mystery-shop results or quote logs per banker is employee monitoring.",
+      "if_ignored": "Measurement per person gets blocked or turns into a blame tool."
+    },
+    {
+      "who": "Communications / PR",
+      "concern": "The magazine article is coming; the bank needs a credible story of what it's changing.",
+      "if_ignored": "The fix looks like a cover-up rather than a correction."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Completion of the refresher.",
+      "Quiz scores on credit products.",
+      "Attach rate going down treated as a failure: some drop is the point, as long as it's honest.",
+      "Assessing individual bankers on quote logs without works council agreement."
+    ],
+    "gold_plan": {
+      "baseline": "Mystery-shop result, complaints about linked insurance, attach rate and share of quotes where the insurance was unticked.",
+      "behaviour": "Bankers present the separate prices and the customer's free choice of insurer, checked by a repeat mystery shop and short peer observations.",
+      "leading_indicators": "Share of quotes showing the unbundled option first; the free-choice disclosure recorded in the file.",
+      "business_metric": "Complaints about linked insurance and repeat mystery-shop score; attach rate kept healthy on genuinely better offers.",
+      "collection": "Repeat mystery shop after three months, quote tool reports per branch, Ombudsfin complaint categories."
+    }
+  },
+  "concepts": {
+    "conventional": "A gamified credit refresher e-learning for all 600 bankers.",
+    "solid": "A short module on the bundling versus tying rule and free choice of insurer, plus a branch-level conversation practice in the weekly team huddle, paired with fixing the double-counting target and the pre-ticked quote tool. Measure with a repeat mystery shop.",
+    "next_level_examples": [
+      "Turn the mystery-shop transcripts (anonymised) into the training: bankers listen to real 'only with our insurance' moments and rewrite the conversation.",
+      "Make 'the honest bundle' a selling skill: show that a transparent discount still sells, and let top branches demonstrate it.",
+      "Co-sponsor with the Chief Compliance Officer and present the target change to ExCo as the bank's response before the article lands."
+    ],
+    "also_valid": [
+      "A short mandatory module for all bankers is fine as the documented baseline, if the main effort goes to the conversation, the target and the tool."
+    ],
+    "red_flags": [
+      "A general credit refresher.",
+      "Making it 'fun' without touching tying.",
+      "Ignoring the double-counting target.",
+      "Treating it as a few bad bankers rather than a system."
+    ]
+  },
+  "defence_objections": [
+    "Change the targets? My network will lose a third of its bonus and I'll lose my best bankers to the competition.",
+    "Use the mystery-shop recordings in training? The bank would be distributing evidence against itself.",
+    "Go to ExCo with compliance, after I beat them there last year? You want me to walk in and say 'Caroline was right'?"
+  ],
+  "question_you_didnt_ask": "What exactly is compliance nagging you about?",
+  "actor_notes": [
+    "Bart is likeable and genuinely doesn't see tying as serious; he thinks it's 'just good selling'.",
+    "He hides the mystery shop until asked what triggered the request, then reveals it with 'between us'.",
+    "His risk appetite is low because the risk is his own reputation and bonus. Framing changes as protecting his network from the article lowers resistance.",
+    "If the player lectures him on the law, trust drops; if they help him get ahead of the article, it rises."
+  ],
+  "flavour_lines": [
+    "Our bankers are customer-focused. Very focused. Some customers have never seen a competitor's price.",
+    "We don't tie anything. We just make the alternative very lonely."
+  ]
+}

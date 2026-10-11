@@ -5,6 +5,15 @@
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Something With a Smile",
+  "briefing": {
+    "headline": "Local government service desks in Flanders: what you should know before the call",
+    "points": [
+      "A Flemish city's citizen service desk handles ID cards, passports, driving licences and civil registry.",
+      "Many cities moved to appointment-only service after the pandemic, usually with online booking.",
+      "Flemish language legislation limits official communication by local government in languages other than Dutch.",
+      "Aldermen (schepenen) are elected politicians who own policy areas; the civil service implements."
+    ]
+  },
   "stakeholder": {
     "name": "Kristof Jacobs",
     "role": "Head of Citizen Services",
@@ -18,7 +27,11 @@
   "surface_ask": "A customer-friendliness training for 35 counter staff.",
   "gold": {
     "real_problem": "Complaints rose after the city moved to appointment-only service in February. The online booking site is Dutch-only and needs a digital ID app, letters don't mention that an appointment is required, and staff are forbidden to help walk-ins even when the desk is empty. Staff friendliness was rated highly before the change.",
-    "root_cause_types": ["process", "system", "expectations"],
+    "root_cause_types": [
+      "process",
+      "system",
+      "expectations"
+    ],
     "is_training_the_lever": "no",
     "need_statement": "Citizens who can't book online are being turned away by rule. The fix is access to the appointment system (a walk-in window, assisted booking, clearer letters) and staff discretion, not friendliness training. A short briefing for staff on any new rules is the only learning component."
   },

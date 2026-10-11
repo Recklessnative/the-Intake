@@ -1,0 +1,177 @@
+{
+  "id": "ngo-volunteer-churn",
+  "schema_version": 1,
+  "sector": "Non-profit",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "Three Months on the Phone Line",
+  "briefing": {
+    "headline": "Volunteer organisations: what you should know before the call",
+    "points": [
+      "A national NGO that supports isolated older people, run by 40 paid staff and about 900 volunteers.",
+      "Volunteers are not employees: they can leave any day, so motivation and meaning matter more than contracts.",
+      "Volunteers working with vulnerable people need a background check (an extract from the criminal record), which takes time.",
+      "Many NGOs depend on a founder or long-standing board members whose original design still shapes how the organisation works."
+    ]
+  },
+  "stakeholder": {
+    "name": "Hanne Claes",
+    "role": "Head of Volunteering",
+    "org": "Samen Ouder, an NGO against loneliness among older people",
+    "voice": "Warm, energetic, slightly overwhelmed; talks fast and laughs at her own chaos. Deeply loyal to the mission. Gets careful and loyal when the founder is mentioned.",
+    "patience": 4,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "opening_message": "We lose volunteers like a colander loses water. I think our 35 volunteer coordinators need a leadership course, how to motivate and keep people. We have a small grant, 6,000 euro. Can you help us before the winter campaign?",
+  "surface_ask": "A leadership course for 35 volunteer coordinators.",
+  "gold": {
+    "real_problem": "Most volunteers leave in their first three months. Every new volunteer must first do three months on the phone line, a rule set by the founder, although most signed up to visit people. The background check plus intake takes six weeks before they can start at all. Coordinators are mostly volunteers themselves with no time for follow-up. The leaving happens before any coordinator relationship forms.",
+    "root_cause_types": [
+      "process",
+      "expectations",
+      "skill"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Volunteers leave because the first weeks don't match why they signed up: a long wait and an obligatory phone-line period. Changing the onboarding route is the main lever; coordinators need light, practical support on welcoming and recognising new volunteers rather than a leadership course."
+  },
+  "hidden_facts": [
+    {
+      "id": "early_churn",
+      "fact": "68% of volunteers who leave do so within their first three months; long-standing volunteers stay for years.",
+      "unlocks_when": "The player asks when volunteers leave, or whether it's new or experienced volunteers.",
+      "reveal_line": "When? Mostly early. Two thirds go in the first three months. If they survive that, they stay forever. We have a volunteer who's been here since 1998. She's 91.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "phone_line_rule",
+      "fact": "Every new volunteer must first spend three months on the phone line, a rule set by the founder, although 80% signed up to make home visits.",
+      "unlocks_when": "The player asks what new volunteers do first, what they signed up for, or how onboarding works.",
+      "reveal_line": "Everyone starts on the phone line. Three months. It's how Jos wanted it, so people learn to listen first. Most of them signed up to visit someone. They want a person, not a headset.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "six_weeks",
+      "fact": "From sign-up to first shift takes on average six weeks, mostly waiting for the background check and an intake slot.",
+      "unlocks_when": "The player asks how long it takes to get started, or about the steps between sign-up and first activity.",
+      "reveal_line": "Sign-up to first shift? About six weeks. The criminal record extract, then an intake, and our intake team is... me, on Thursdays.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "exit_reasons",
+      "fact": "In exit messages, the most common reasons are 'not what I expected' and 'nobody contacted me'.",
+      "unlocks_when": "The player asks why volunteers say they leave, or whether there is exit feedback.",
+      "reveal_line": "The ones who bother to tell us say 'not what I expected' or 'nobody called me'. Ouch, both.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "coordinators_volunteers",
+      "fact": "28 of the 35 coordinators are volunteers themselves and give about four hours a week.",
+      "unlocks_when": "The player asks who the coordinators are, how much time they have, or what their role involves.",
+      "reveal_line": "Most coordinators are volunteers too. Four hours a week, on average. And now we want to send them on a leadership course. On a Saturday, I suppose.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "founder_board",
+      "fact": "Founder Jos Wuyts chairs the board and is proud of the phone-line rule; Hanne has never dared to question it.",
+      "unlocks_when": "The player asks who decides on the onboarding route, who else needs to agree, or whether the rule can change.",
+      "reveal_line": "Jos founded us in 1994. He chairs the board. The phone line is his... baby. I've never brought it up. You don't bring things up with Jos. You bring cake.",
+      "weight": 2,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "A grant of 6,000 euro is available for coordinator development.",
+    "The winter campaign starts in December, the busiest period."
+  ],
+  "constraints": {
+    "budget": "6,000 euro grant, earmarked for 'volunteer coordinator development'.",
+    "deadline": "Before the winter campaign in December.",
+    "audience": "35 coordinators (28 volunteers, 7 paid) and about 900 volunteers across Flanders.",
+    "schedule": "Coordinators are available mostly evenings and weekends.",
+    "languages": "Dutch.",
+    "data_available": [
+      "Volunteer database with sign-up, start and end dates",
+      "Exit messages (incomplete)",
+      "Phone line and visit activity logs"
+    ],
+    "data_not_available": [
+      "Any systematic exit interview or volunteer satisfaction data"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Founder and board chair Jos",
+      "concern": "Owns the phone-line rule emotionally and formally.",
+      "if_ignored": "The onboarding change is vetoed at the next board meeting."
+    },
+    {
+      "who": "Grant funder",
+      "concern": "The grant is earmarked for coordinator development.",
+      "if_ignored": "Spending it on onboarding redesign needs a conversation with the funder first."
+    },
+    {
+      "who": "Safeguarding lead",
+      "concern": "Home visits to vulnerable older people require the background check and some preparation.",
+      "if_ignored": "A faster start that cuts safeguarding corners."
+    },
+    {
+      "who": "Volunteer coordinators",
+      "concern": "Already stretched; any new task must save them time, not add to it.",
+      "if_ignored": "More coordinators quit than volunteers."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Coordinators' satisfaction with a course.",
+      "Total volunteer numbers, which depend on recruitment campaigns.",
+      "Counting sign-ups rather than people who become active."
+    ],
+    "gold_plan": {
+      "baseline": "Three-month retention of new volunteers and time from sign-up to first activity, from the database.",
+      "behaviour": "New volunteers contacted within a week of sign-up and placed in their preferred activity; coordinators doing a check-in call at four weeks.",
+      "leading_indicators": "Days from sign-up to first activity; share of new volunteers with a four-week check-in.",
+      "business_metric": "Share of new volunteers still active after three and six months; number of older people visited.",
+      "collection": "Volunteer database monthly, a two-question check-in log, a short exit form."
+    }
+  },
+  "concepts": {
+    "conventional": "A leadership and motivation course for 35 coordinators.",
+    "solid": "Redesign the first weeks: contact within a week, a short welcome while the background check runs, and a choice of first activity (phone line or a visit together with an experienced volunteer). Give coordinators a simple four-week check-in routine and a script. Talk to the funder about using part of the grant for this.",
+    "next_level_examples": [
+      "Turn the 91-year-old and other long-standing volunteers into 'buddies' who take each newcomer on their first visit.",
+      "Win Jos over by asking him to design the 'listening' part of the new onboarding, so his principle survives while the rule changes.",
+      "A 'waiting room' programme: during the six-week check, newcomers join a short online welcome and hear from the older people they'll visit."
+    ],
+    "also_valid": [
+      "A short practical session for coordinators on welcoming and recognising volunteers, as part of the onboarding redesign."
+    ],
+    "red_flags": [
+      "A leadership course as the answer.",
+      "Skipping the background check to go faster.",
+      "Confronting the founder head-on.",
+      "Adding work to already-stretched volunteer coordinators."
+    ]
+  },
+  "defence_objections": [
+    "You want me to tell Jos his phone line rule is why people leave? At his own board meeting?",
+    "Spend a coordinator development grant on onboarding? The funder could ask for the money back.",
+    "Newcomers on visits before they've learned to listen on the phone line? What if something goes wrong with a vulnerable person?"
+  ],
+  "question_you_didnt_ask": "What does a new volunteer do in their first three months?",
+  "actor_notes": [
+    "Hanne is open and chatty; she reveals most facts readily, except the founder dynamic, which she defends loyally until asked directly.",
+    "She doesn't see the phone-line rule as a problem until the player connects it to the exit reasons; play that realisation.",
+    "Medium risk appetite: she likes bold ideas but fears conflict with Jos; plans that honour the founder lower her resistance.",
+    "If the player suggests skipping background checks, trust drops sharply."
+  ],
+  "flavour_lines": [
+    "We lose volunteers like a colander loses water. Actually, a colander is more consistent.",
+    "Our recruitment campaign is excellent. It recruits people into a six-week waiting list."
+  ]
+}

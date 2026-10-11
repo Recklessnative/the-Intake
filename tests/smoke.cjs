@@ -26,6 +26,7 @@ const srv = http.createServer((q, s) => {
   await p.click('#btn-start');
   for (let req = 0; req < 3; req++) {
     if (req === 0) { for (let i = 0; i < 3; i++) await p.click('#btn-sit'); }
+    if (!(await p.isVisible('#briefing')) || !(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file missing on the inbox');
     await p.click('#btn-call');
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
     await p.click('#btn-hangup');

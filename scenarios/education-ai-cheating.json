@@ -1,0 +1,184 @@
+{
+  "id": "education-ai-cheating",
+  "schema_version": 1,
+  "sector": "Higher education",
+  "tier": 3,
+  "tier_label": "Mostly not a training problem",
+  "title": "Catch Them If You Can",
+  "briefing": {
+    "headline": "AI and assessment in higher education: what you should know before the call",
+    "points": [
+      "A Flemish university college (hogeschool) with professional bachelor programmes; lecturers both teach and assess.",
+      "Generative AI tools can write passable essays, reports and code. AI-detection tools are on the market; how reliable they are is debated.",
+      "Assessment rules (exam regulations) are set at institution level and changed through formal governance once a year.",
+      "Accusing a student of fraud triggers a formal procedure with appeal rights."
+    ]
+  },
+  "stakeholder": {
+    "name": "Prof. Ilse Verbruggen",
+    "role": "Vice-Dean of Education",
+    "org": "Hogeschool Scheldeland, 9,000 students, 600 lecturers",
+    "voice": "Thoughtful, academic, a little tired. Weighs her words, likes nuance, quotes a study occasionally. Protective of both lecturers and students. Allergic to hype in either direction.",
+    "patience": 4,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "opening_message": "Our lecturers need training on AI. Specifically, how to detect when students use ChatGPT to write their assignments. Fraud cases are exploding and the exam board is drowning. Could we have something for all 600 lecturers before the second semester?",
+  "surface_ask": "AI-detection training for 600 lecturers.",
+  "gold": {
+    "real_problem": "Most assessments are take-home written assignments that AI can now complete, so detection is a losing game. The detection tool the college bought flags non-native writers disproportionately, and most fraud cases are dismissed on appeal. Lecturers want to redesign assessments but the exam regulations require written take-home work in many courses and don't allow oral checks without a formal change.",
+    "root_cause_types": [
+      "process",
+      "expectations",
+      "skill"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "The problem is assessment design and policy, not detection skill. The exam regulations and AI policy need updating so lecturers can use oral checks, in-class work and AI-inclusive assignments; lecturers then need support redesigning their own assessments. Detection training would increase false accusations."
+  },
+  "hidden_facts": [
+    {
+      "id": "appeals",
+      "fact": "Of 212 AI fraud cases this year, 61% were dismissed or overturned on appeal for lack of evidence.",
+      "unlocks_when": "The player asks how fraud cases end, what the exam board sees, or whether detection actually holds up.",
+      "reveal_line": "We had 212 cases. 61% didn't survive. 'The tool says 87% AI' turns out not to be evidence. Who knew. Well, the lawyers knew.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "false_positives",
+      "fact": "Students writing in Dutch as a second language are flagged by the detection tool about three times as often as native speakers.",
+      "unlocks_when": "The player asks who gets flagged, about fairness, or about the detection tool's reliability.",
+      "reveal_line": "The student council sent us an analysis. Students who write in Dutch as a second language get flagged three times as often. That is not a sentence I wanted to read.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "take_home",
+      "fact": "About 70% of course assessments are take-home written assignments.",
+      "unlocks_when": "The player asks how students are assessed, what kind of assignments are affected, or about assessment design.",
+      "reveal_line": "Most of our assessment is take-home writing. Reports, reflections, essays. It was efficient. It was.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "regulations",
+      "fact": "The exam regulations require a written product for many courses and don't allow an oral follow-up conversation unless announced in the course sheet a year ahead.",
+      "unlocks_when": "The player asks what stops lecturers from changing assessments, or about the rules and regulations.",
+      "reveal_line": "Lecturers can't just add an oral check. It has to be in the course sheet, approved a year ahead. The regulations are... thorough.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "lecturers_want",
+      "fact": "A staff survey shows most lecturers want help redesigning assessments and feel detection 'turns them into police'.",
+      "unlocks_when": "The player asks what lecturers themselves want or how they feel about it.",
+      "reveal_line": "The survey was clear. They don't want to be detectives. They want time and help to change their assignments. And maybe a holiday.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "pioneers",
+      "fact": "A handful of lecturers in the nursing and IT programmes already redesigned assessments around in-class work and AI-inclusive tasks, with almost no fraud cases.",
+      "unlocks_when": "The player asks whether anyone is already doing it differently, or about good practice inside the college.",
+      "reveal_line": "Nursing and IT have a few pioneers. In-class writing, oral defences, assignments where AI use is part of the task. Hardly any cases. Hardly any noise either.",
+      "weight": 2,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "Fraud cases have 'exploded' and the exam board is overloaded.",
+    "Second semester starts in February."
+  ],
+  "constraints": {
+    "budget": "Professional development budget of about 30,000 euro; lecturer time is the scarce resource.",
+    "deadline": "Second semester in February; exam regulations can only change for next academic year.",
+    "audience": "600 lecturers across 22 programmes; many part-time with jobs in the field.",
+    "schedule": "Teaching loads are high; professional development happens in two 'education days' a year.",
+    "languages": "Dutch, some English-taught programmes.",
+    "data_available": [
+      "Fraud case files and appeal outcomes",
+      "Detection tool reports",
+      "Staff survey on AI",
+      "Student council analysis of flags",
+      "Course sheets with assessment types"
+    ],
+    "data_not_available": [
+      "Any reliable measure of how much AI students actually use"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Exam board and education council",
+      "concern": "Own the exam regulations; changes follow the annual governance cycle.",
+      "if_ignored": "Redesigned assessments are not allowed until the rules change."
+    },
+    {
+      "who": "Student council",
+      "concern": "Has evidence of unfair flagging and will escalate it.",
+      "if_ignored": "A discrimination story in the press."
+    },
+    {
+      "who": "Legal / ombudsperson",
+      "concern": "Fraud procedures and appeals; detection scores don't hold as evidence.",
+      "if_ignored": "More cases lost on appeal and more distrust."
+    },
+    {
+      "who": "DPO",
+      "concern": "Uploading student work to an external detection tool is a data processing question.",
+      "if_ignored": "The tool itself may become the scandal."
+    },
+    {
+      "who": "Programme heads",
+      "concern": "Own course sheets and workload.",
+      "if_ignored": "Redesign stays a hobby of pioneers."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Number of lecturers trained in detection.",
+      "Number of fraud cases detected: going up looks like success but means more unfair accusations.",
+      "Detection tool scores as a measure of anything."
+    ],
+    "gold_plan": {
+      "baseline": "Share of assessments vulnerable to AI (take-home, unsupervised), fraud cases and appeal outcomes, and flag rates by language background.",
+      "behaviour": "Lecturers redesign assessments: in-class components, oral checks, AI-inclusive tasks, recorded in course sheets.",
+      "leading_indicators": "Number of course sheets changed for next year; lecturers using a shared redesign toolkit.",
+      "business_metric": "Fraud cases and appeals, exam board workload, and student perception of fairness.",
+      "collection": "Course sheet audit, exam board statistics, student council survey."
+    }
+  },
+  "concepts": {
+    "conventional": "AI-detection training for all 600 lecturers.",
+    "solid": "Stop the detection approach, propose an AI and assessment policy change through the exam board for next year, and run assessment redesign clinics per programme with the pioneers, starting with the most vulnerable courses. Short term: guidance for lecturers on what to do when they suspect AI use, without relying on tool scores.",
+    "next_level_examples": [
+      "The pioneers become an 'assessment design studio': lecturers bring one assignment and leave with a redesigned version, co-designed with students.",
+      "Make AI-inclusive assessment the default: students submit the AI conversation alongside their work and are graded on judgement, not just the product.",
+      "Pause the detection tool licence and use the budget for lecturer redesign time, with the student council as co-sponsor."
+    ],
+    "also_valid": [
+      "A short session on AI literacy for lecturers is fine as part of redesign support, not as detection training."
+    ],
+    "red_flags": [
+      "Detection training as the main response.",
+      "Relying on detection tool scores as evidence.",
+      "Ignoring the bias against non-native writers.",
+      "Banning AI outright without changing assessment."
+    ]
+  },
+  "defence_objections": [
+    "Drop the detection tool? The exam board will say we've given up on academic integrity.",
+    "AI-inclusive assignments as the default? Half my colleagues will call it surrender and the other half will call it a fad.",
+    "Change the regulations? That's a year of committees, and I have an exam board drowning now."
+  ],
+  "question_you_didnt_ask": "How many of those fraud cases actually hold up?",
+  "actor_notes": [
+    "Ilse already doubts detection but asks for it because the exam board is overwhelmed; she is relieved when the player challenges the premise with evidence.",
+    "She values nuance: players who say 'AI is good, embrace it' without addressing integrity lose trust, as do players who treat students as cheaters.",
+    "Low risk appetite because of governance and academic culture; a phased plan (pilot programmes now, regulation change next year) lowers resistance.",
+    "She reveals the false-positive analysis with visible discomfort."
+  ],
+  "flavour_lines": [
+    "We spent two years teaching students to write like a textbook. Now the textbook writes like a student.",
+    "The detection tool is 98% accurate, according to the detection tool."
+  ]
+}
