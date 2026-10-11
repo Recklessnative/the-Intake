@@ -64,30 +64,35 @@
     </div>
   </section>
 
-  <!-- Desk: the laptop -->
+  <!-- Desk: the desktop, with windows -->
   <section id="s-desk" class="screen">
-    <div class="laptop">
-      <header class="os-bar">
-        <span class="os-name">KimOS</span>
-        <span id="os-step" class="os-step"></span>
-        <span id="os-trust" class="os-trust"></span>
-      </header>
+    <div id="desktop" class="desktop">
 
       <!-- Inbox -->
-      <div id="p-inbox" class="pane">
+      <div class="win" id="w-inbox" data-title="Inbox" data-icon="✉">
         <div class="mail">
-          <div class="mail-head"><strong id="mail-from"></strong><span id="mail-role"></span></div>
+          <div class="mail-head"><span class="muted">From:</span> <strong id="mail-from"></strong> <span id="mail-role"></span></div>
           <p id="mail-body" class="mail-body"></p>
-          <div id="briefing" class="briefing" hidden>
-            <h3 id="briefing-head"></h3>
-            <ul id="briefing-points"></ul>
-          </div>
           <button id="btn-call" class="primary">Call them back</button>
+          <p class="fine">Read the case file first. Jot whatever you like in your notes; nobody grades them.</p>
         </div>
       </div>
 
-      <!-- Intake chat -->
-      <div id="p-chat" class="pane">
+      <!-- Case file -->
+      <div class="win" id="w-case" data-title="Case file" data-icon="📁">
+        <div id="briefing" class="briefing">
+          <h3 id="briefing-head"></h3>
+          <ul id="briefing-points"></ul>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="win" id="w-notes" data-title="My notes - Notepad" data-icon="📝">
+        <textarea id="notes" class="notepad" spellcheck="false" placeholder="Your notes for this request. Pin a line from the call with 📌, or type here. Nobody grades this."></textarea>
+      </div>
+
+      <!-- Intake call -->
+      <div class="win" id="w-call" data-title="Call" data-icon="☎">
         <div class="chat-head">
           <div><strong id="chat-who"></strong> <span id="chat-role" class="muted"></span></div>
           <div class="meters">
@@ -97,18 +102,33 @@
         </div>
         <div id="chat-log" class="chat-log" aria-live="polite"></div>
         <form id="chat-form" class="chat-form">
-          <textarea id="chat-input" rows="2" maxlength="400" placeholder="Ask your question..."></textarea>
+          <textarea id="chat-input" rows="2" maxlength="400" placeholder="Ask your question... (Enter sends, Shift+Enter for a new line)"></textarea>
           <div class="row">
             <button type="submit" class="primary">Ask</button>
-            <button type="button" id="btn-hangup" class="ghost">End the call</button>
+            <button type="button" id="btn-hangup">End the call</button>
+            <button type="button" class="btn-mieke">Ask Mieke</button>
           </div>
         </form>
       </div>
 
+      <!-- Colleague -->
+      <div class="win" id="w-mieke" data-title="Mieke - senior learning consultant" data-icon="☕">
+        <p class="fine mieke-intro">Mieke sits two cubicles over and has heard "we need a course" a thousand times. She only knows what you tell her: the request, the case file, your call and your notes. <b id="mieke-left"></b></p>
+        <div id="mieke-log" class="chat-log mieke-log" aria-live="polite"></div>
+        <div class="row quick">
+          <button type="button" data-ask="What should I ask next?">What should I ask next?</button>
+          <button type="button" data-ask="What am I missing so far?">What am I missing?</button>
+          <button type="button" data-ask="Read my draft write-up. What is its weakest part?" class="only-write">Check my draft</button>
+        </div>
+        <form id="mieke-form" class="chat-form">
+          <input id="mieke-input" maxlength="300" placeholder="Or ask her something yourself" autocomplete="off">
+          <button type="submit">Ask</button>
+        </form>
+      </div>
+
       <!-- Write-up -->
-      <div id="p-write" class="pane">
-        <p class="muted">Write it in your own words. No menus, no checklists. The headings say what to cover, not what to write.</p>
-        <div class="write-grid">
+      <div class="win" id="w-write" data-title="Concept - WordPad" data-icon="📄">
+        <p class="muted">Write it in your own words. No menus, no checklists. The headings say what to cover, not what to write. Your call, notes and case file stay open beside this.</p>
         <form id="write-form" class="write">
           <h3>1. The need</h3>
           <label>The performance gap: what people do now versus what they should do<textarea name="gap" rows="2" maxlength="700"></textarea></label>
@@ -129,44 +149,55 @@
           <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<textarea name="flag" rows="1" maxlength="400"></textarea></label>
           <button type="submit" class="primary">Send it to them</button>
         </form>
-        <details id="write-notes" class="notes">
-          <summary id="notes-who">Your call</summary>
-          <div id="notes-log" class="notes-log"></div>
-          <div id="notes-case" class="notes-case"></div>
-        </details>
+      </div>
+
+      <!-- Dialog: defence, waiting, scorecard -->
+      <div class="win" id="w-dialog" data-title="THE INTAKE" data-icon="★">
+        <div id="p-defence" class="pane">
+          <p id="defence-intro" class="narration small"></p>
+          <form id="defence-form" class="write"></form>
+        </div>
+        <div id="p-wait" class="pane">
+          <p id="wait-line" class="narration small"></p>
+          <div class="progress" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div id="p-score" class="pane">
+          <h2 id="score-title"></h2>
+          <div id="score-total" class="score-total"></div>
+          <table class="score-table"><tbody id="score-rows"></tbody></table>
+          <div class="debrief">
+            <h3>The question you didn't ask</h3>
+            <p id="score-question"></p>
+            <h3>What you never found out</h3>
+            <ul id="score-missed"></ul>
+            <h3>Their verdict</h3>
+            <p id="score-verdict"></p>
+          </div>
+          <button id="btn-next" class="primary">Next request</button>
         </div>
       </div>
 
-      <!-- Defence -->
-      <div id="p-defence" class="pane">
-        <p id="defence-intro" class="narration small"></p>
-        <form id="defence-form" class="write"></form>
-      </div>
-
-      <!-- Waiting -->
-      <div id="p-wait" class="pane">
-        <p id="wait-line" class="narration small"></p>
-        <div class="spinner" aria-hidden="true"></div>
-      </div>
-
-      <!-- Scorecard -->
-      <div id="p-score" class="pane">
-        <h2 id="score-title"></h2>
-        <div id="score-total" class="score-total"></div>
-        <table class="score-table"><tbody id="score-rows"></tbody></table>
-        <div class="debrief">
-          <h3>The question you didn't ask</h3>
-          <p id="score-question"></p>
-          <h3>What you never found out</h3>
-          <ul id="score-missed"></ul>
-          <h3>Their verdict</h3>
-          <p id="score-verdict"></p>
-        </div>
-        <button id="btn-next" class="primary">Next request</button>
+      <!-- Start menu -->
+      <div id="start-menu" class="start-menu" hidden>
+        <div class="start-head">Learning professional</div>
+        <button data-open="w-notes">📝 My notes</button>
+        <button data-open="w-case">📁 Case file</button>
+        <button data-open="w-mieke">☕ Ask Mieke</button>
+        <button id="btn-tidy">▦ Tidy the windows</button>
+        <button id="btn-logoff" class="logoff">⏻ Log off (quit this week)</button>
       </div>
     </div>
-  </section>
 
+    <footer class="taskbar">
+      <button id="btn-startmenu" class="start-btn">start</button>
+      <div id="task-buttons" class="task-buttons"></div>
+      <div class="tray">
+        <span id="os-step"></span>
+        <span id="os-trust"></span>
+        <span id="os-clock">08:57</span>
+      </div>
+    </footer>
+  </section>
   <!-- End of run -->
   <section id="s-end" class="screen">
     <div class="panel narrow">
@@ -183,6 +214,7 @@
 </main>
 <script src="js/config.js"></script>
 <script src="js/gemini.js"></script>
+<script src="js/desktop.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/prompts.js"></script>
 <script src="js/app.js"></script>

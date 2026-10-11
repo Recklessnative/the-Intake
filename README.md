@@ -22,11 +22,12 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 
 | File | What it does |
 | --- | --- |
-| `index.html`, `styles.css` | Screens: title, key, cubicle, the KimOS laptop panes, end of week |
+| `index.html`, `styles.css` | Screens: title, key, cubicle, the office desktop and its windows, end of week |
+| `js/desktop.js` | The window manager: title bars, drag, minimise, the taskbar and start menu, and a layout per phase |
 | `js/config.js` | Where the backend lives (empty = own keys only) and the donation link |
 | `js/gemini.js` | Gemini client with structured JSON output: direct with an own key, otherwise through the backend |
 | `js/cards.js` | Maps a scenario card file to the game's shape |
-| `js/prompts.js` | The three roles: stakeholder (in character), reaction (boldness + objections), examiner (scorecard) |
+| `js/prompts.js` | The roles: stakeholder (in character), Mieke the colleague (coaching, sees only what the player sees), reaction (boldness + objections), examiner (scorecard) |
 | `js/app.js` | The loop and the scoring |
 | `scenarios/*.json` | Scenario cards; `scenarios/index.json` lists the ones in play |
 | `api/index.php` | Backend: run cap, unlock codes, and a Gemini proxy that keeps the key on the server |
@@ -54,6 +55,6 @@ The backend stores a salted hash of each IP address (never the IP itself), a ran
 
 ## Test
 
-- `node tests/smoke.cjs` plays a full three-request week on an own key, in headless Chromium with Gemini mocked (needs Playwright).
+- `node tests/smoke.cjs` plays a full three-request week on an own key, in headless Chromium with Gemini mocked (needs Playwright). `node tests/smoke.cjs . /tmp --mobile` does the same at phone width.
 - `bash tests/backend.sh` checks the backend against SQLite and a mock Gemini: cap, unlock codes, call limits, CORS (needs PHP with pdo_sqlite).
 - `bash tests/backend-e2e.sh` plays the game through the backend: claim a run, play, hit the cap, unlock.
