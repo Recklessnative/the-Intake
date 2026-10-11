@@ -4,6 +4,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
+  p.on('dialog', d => d.accept());
   await p.route('**/js/config.js', r => r.fulfill({ contentType: 'text/javascript', body: "window.INTAKE_CONFIG = { api: 'api/index.php', donateUrl: 'https://example.test/coffee' };" }));
   await p.goto('http://127.0.0.1:8793/');
   await p.waitForFunction(() => /free weeks? left/.test(document.getElementById('runs-left').textContent));
@@ -19,8 +20,17 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.waitForSelector('#p-score.active');
   console.log('scored through the proxy:', await p.textContent('#score-total'));
   await p.goto('http://127.0.0.1:8793/');
-  await p.click('#btn-start');               // second free run
+  await p.waitForFunction(() => /1 free week left/.test(document.getElementById('runs-left').textContent));
+  console.log('charged at the first scorecard:', await p.textContent('#runs-left'));
+  await p.click('#btn-start');               // second free run, not charged until played
   await p.waitForSelector('#s-cubicle.active');
+  const run2 = await p.evaluate(() => Gemini.runId);
+  await p.goto('http://127.0.0.1:8793/');
+  await p.click('#btn-start');               // abandoned before playing: the same week comes back
+  await p.waitForSelector('#s-cubicle.active');
+  if (await p.evaluate(() => Gemini.runId) !== run2) throw new Error('unplayed week was not handed back');
+  console.log('unplayed week handed back');
+  await p.evaluate(r => Gemini.backend('played', { runId: r }), run2);
   await p.goto('http://127.0.0.1:8793/');
   await p.click('#btn-start');               // capped
   await p.waitForSelector('#s-cap.active');

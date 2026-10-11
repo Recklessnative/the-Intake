@@ -31,7 +31,7 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `js/app.js` | The loop and the scoring |
 | `scenarios/*.json` | Scenario cards; `scenarios/index.json` lists the ones in play |
 | `api/index.php` | Backend: run cap, unlock codes, and a Gemini proxy that keeps the key on the server |
-| `api/schema.sql`, `api/new-code.sql` | Database tables, and a template for creating an unlock code |
+| `api/schema.sql`, `api/new-code.sql`, `api/upgrade-1.sql` | Database tables, a template for creating an unlock code, and the one change for databases made before weeks were charged at the first scorecard |
 
 Scoring per request, out of 100: need diagnosis 25 (half the examiner's score, half the weighted hidden facts you surfaced), measurement 20, concept fit 20, next level 15 (only counted when fit is at least 12), risks and dependencies 10, pitch and defence 10. A defence round triggers when the concept's boldness is above the stakeholder's risk appetite; a strong defence earns +5, a weak one halves next level, backing down zeroes it.
 
@@ -51,7 +51,9 @@ To let the GitHub Pages version use the same backend, set `api` in `js/config.js
 
 **Unlock codes:** edit and run `api/new-code.sql`. Each code grants a number of extra runs and can be redeemed by a set number of players. **Safety limits** in the config: `calls_per_run` stops a runaway run, and `daily_calls` closes the game for the day before the bill can surprise you.
 
-The backend stores a salted hash of each IP address (never the IP itself), a random browser token, and run counts. A run counts against both the browser token and the IP, with the IP allowed three times as many runs, so colleagues behind one office IP can still play.
+The backend stores a salted hash of each IP address (never the IP itself), a random browser token, and run counts. A week counts against the browser token only once it was played (its first scorecard, or `charge_after_calls` Gemini calls); starting a week again before that hands back the same week. Every week started also counts against the IP, which may start three times as many, so colleagues behind one office IP can still play.
+
+The game saves the week in the browser after every step, so players can close the tab and resume from the title screen.
 
 ## Test
 

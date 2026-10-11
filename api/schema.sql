@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS intake_runs (
   token       CHAR(32)     NOT NULL,
   ip_hash     CHAR(64)     NOT NULL,
   calls       INT          NOT NULL DEFAULT 0,    -- Gemini calls made in this run
+  counted     TINYINT      NOT NULL DEFAULT 0,    -- 1 once its first scorecard was shown
   started_at  INT UNSIGNED NOT NULL,
   INDEX (token),
   INDEX (ip_hash)

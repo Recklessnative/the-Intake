@@ -47,6 +47,15 @@ const srv = http.createServer((q, s) => {
     await p.click('#btn-call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
+    if (req === 1) {
+      // Close the tab mid-call and come back: the week resumes where it was.
+      await p.reload();
+      if (!(await p.isVisible('#btn-resume'))) throw new Error('no resume button after reload');
+      await p.click('#btn-resume');
+      await p.waitForSelector('#s-desk.active');
+      if (await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('call transcript not restored');
+      if (!MOBILE) await visible('#w-call');
+    }
     if (req === 0) {
       await p.click('#chat-log .msg.them .pin');
       if (!(await p.inputValue('#notes')).includes('Nights, mostly.') && !(await p.inputValue('#notes')).length) throw new Error('pin did not reach the notes');
@@ -76,6 +85,11 @@ const srv = http.createServer((q, s) => {
     await p.waitForSelector('#p-score.active');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + (MOBILE ? "/score-mobile.png" : "/score.png") });
+    if (req === 0) {
+      // Reload on the scorecard: it comes back without counting the request twice.
+      await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#p-score.active');
+      if (await p.evaluate(() => window.__intake.state.results.length) !== 1) throw new Error('scorecard counted twice after resume');
+    }
     await p.click('#btn-next');
   }
   await p.waitForSelector('#s-end.active');

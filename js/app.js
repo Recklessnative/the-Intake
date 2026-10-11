@@ -22,11 +22,12 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], cards: [], index: 0, results: [], run: null };
+  const state = { pool: [], cards: [], index: 0, results: [], run: null, charged: false };
 
   // ---------- screens and panes ----------
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    if (id === 's-title') resumeButton();
     window.scrollTo(0, 0);
   }
   function step(text) { $('os-step').textContent = text; }
@@ -57,7 +58,7 @@
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
     $('start-menu').hidden = true;
-    if (window.confirm('Log off and abandon this week? It still counts as a played week.')) { Desktop.reset(); show('s-title'); runsLeft(); }
+    if (window.confirm('Log off? Your week is saved in this browser; resume it from the title screen.')) { save(); Desktop.reset(); show('s-title'); runsLeft(); }
   };
 
   // ---------- scenarios ----------
@@ -143,11 +144,15 @@
   }
 
   $('btn-start').onclick = async () => {
+    if (readSave() && !window.confirm('Start a new week? Your saved week will be dropped.')) return;
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
     if (!(await claimRun())) return;
+    dropSave();
     state.cards = pickWeek();
     state.index = 0;
     state.results = [];
+    state.charged = false;
+    state.run = null;
     cubicle();
   };
   $('btn-again').onclick = () => $('btn-start').onclick();
@@ -178,6 +183,59 @@
     };
   }
 
+  // ---------- save and resume ----------
+  // The week is saved in this browser after every step, so a closed tab or a lunch break
+  // costs nothing. A week on the game server's key lives 6 hours there, so the save does too.
+  const SAVE_KEY = 'intake-week';
+  const SAVE_LIFE = { server: 5.5 * 3600e3, own: 7 * 24 * 3600e3 };
+  function readSave() {
+    let s = null;
+    try { s = JSON.parse(window.localStorage.getItem(SAVE_KEY) || 'null'); } catch (e) { return null; }
+    if (!s || s.v !== 1 || !s.run) return null;
+    if (Date.now() - s.at > (s.runId ? SAVE_LIFE.server : SAVE_LIFE.own)) { dropSave(); return null; }
+    return s;
+  }
+  function dropSave() { try { window.localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage blocked */ } }
+  function save() {
+    const r = state.run;
+    if (!r) return;
+    r.notes = $('notes').value;
+    r.draft = Object.fromEntries(new FormData($('write-form')).entries());
+    const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), index: state.index, results: state.results, charged: state.charged, run };
+    try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
+  }
+  function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
+  $('notes').addEventListener('input', saveSoon);
+  $('write-form').addEventListener('input', saveSoon);
+
+  function resumeButton() {
+    const s = readSave();
+    const b = $('btn-resume');
+    b.hidden = !s;
+    if (s) b.textContent = 'Resume your week (request ' + (s.index + 1) + ' of ' + s.cards.length + ')';
+  }
+  $('btn-resume').onclick = async () => {
+    const s = readSave();
+    if (!s) { resumeButton(); return; }
+    try { await loadCards(); } catch (e) { toast('Could not load the scenarios.'); return; }
+    const cards = s.cards.map(id => state.pool.find(c => c.id === id));
+    if (cards.some(c => !c)) { dropSave(); resumeButton(); toast('That week used a scenario that no longer exists. Start a new one.'); return; }
+    if (s.runId) Gemini.runId = s.runId;
+    else if (!(await claimRun())) return;
+    state.cards = cards;
+    state.index = s.index;
+    state.results = s.results || [];
+    state.charged = !!s.charged;
+    const r = Object.assign({}, s.run);
+    r.card = cards[s.index];
+    r.revealed = new Set(r.revealed || []);
+    r.mails = [];
+    r.selected = null;
+    state.run = r;
+    openRequest();
+  };
+
   // ---------- one request ----------
   function startRequest() {
     const card = state.cards[state.index];
@@ -186,17 +244,29 @@
       card, trust: 100, questionsLeft: QUESTIONS, patience: card.patience || 3,
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
       miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57,
-      readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null
+      readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
+      phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null
     };
+    state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
+    openRequest();
+    save();
+  }
+
+  // Draw the desk for the current request, at whatever step it is (also after a resume).
+  function openRequest() {
+    const r = state.run;
+    const card = r.card;
     show('s-desk');
     trust();
     tick(0);
-    $('notes').value = '';
+    $('notes').value = r.notes || '';
     $('chat-log').innerHTML = '';
+    r.chat.forEach(m => addMsg(m.who, m.text, true));
     $('w-call').classList.remove('ended');
     $('write-form').reset();
+    Object.entries(r.draft || {}).forEach(([k, v]) => { const el = $('write-form').elements[k]; if (el) el.value = v; });
     $('mieke-log').innerHTML = '';
-    miekeSays('Morning. Shout if you want a second pair of eyes.');
+    r.mieke.forEach(m => miekeSays(m.text, m.who, true));
     miekeLeft();
     briefing(card.briefing);
     Desktop.reset();
@@ -209,6 +279,10 @@
     Desktop.minimise('w-mieke');
     Desktop.focus('w-inbox');
     step('Request ' + (state.index + 1) + ' of ' + state.cards.length);
+    if (r.phase !== 'inbox') callWindow();
+    if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
+    if (r.phase === 'write' || r.phase === 'score') writeDesk();
+    if (r.phase === 'score' && r.grade) scorecard(r.grade, true);
   }
 
   // ---------- the mailbox ----------
@@ -311,21 +385,31 @@
   $('btn-call').onclick = () => {
     if (!state.run.readMail.current) selectMail(state.run.mails.find(m => m.current));
     const r = state.run;
+    if (r.phase === 'inbox') {
+      r.phase = 'call';
+      $('chat-log').innerHTML = '';
+      r.chat = [];
+      addMsg('sys', 'You call ' + r.card.stakeholder.name + '. They pick up on the fourth ring.');
+      addMsg('them', r.card.surfaceAsk);
+      tick(3);
+      save();
+    }
+    callWindow();
+    phase('call');
+    Desktop.layout('call', 'w-call');
+    $('chat-input').focus();
+  };
+  function callWindow() {
+    const r = state.run;
     $('chat-who').textContent = r.card.stakeholder.name;
     $('chat-role').textContent = r.card.stakeholder.role;
-    $('chat-log').innerHTML = '';
-    addMsg('sys', 'You call ' + r.card.stakeholder.name + '. They pick up on the fourth ring.');
-    addMsg('them', r.card.surfaceAsk);
     meters();
     $('chat-input').value = '';
     Desktop.title('w-call', 'On a call with ' + r.card.stakeholder.name, 'Call');
-    phase('call');
-    Desktop.layout('call', 'w-call');
-    tick(3);
-    $('chat-input').focus();
-  };
+  }
 
-  function addMsg(who, text) {
+  function addMsg(who, text, replay) {
+    if (!replay) state.run.chat.push({ who, text });
     const d = document.createElement('div');
     d.className = 'msg ' + who;
     d.textContent = text;
@@ -381,6 +465,7 @@
       tick(4);
       if (out.quality === 'weak') { r.patience--; r.trust -= 10; }
       meters();
+      save();
       if (r.patience <= 0) {
         addMsg('sys', r.card.stakeholder.name + ' has another meeting. Suddenly. The call is over.');
         setTimeout(toWriteup, 1800);
@@ -404,16 +489,24 @@
   // The call stays open (read-only) beside the write-up, with the notes and case file.
   function toWriteup() {
     const r = state.run;
+    if (r.phase !== 'call') return;
     if (!r.transcript.length) addMsg('sys', 'You hung up without asking anything. Bold.');
+    r.phase = 'write';
+    tick(10);
+    writeDesk();
+    save();
+  }
+  function writeDesk() {
+    const r = state.run;
     $('w-call').classList.add('ended');
     Desktop.title('w-call', 'Call with ' + r.card.stakeholder.name + ' (ended)', 'Call');
     phase('write');
     Desktop.layout('write', 'w-write');
-    tick(10);
   }
 
   // ---------- Mieke, the colleague two cubicles over ----------
-  function miekeSays(text, who) {
+  function miekeSays(text, who, replay) {
+    if (!replay) state.run.mieke.push({ who: who || 'them', text });
     const d = document.createElement('div');
     d.className = 'msg ' + (who || 'them');
     d.textContent = text;
@@ -455,6 +548,7 @@
       const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: material }] });
       miekeSays(out.reply);
       tick(2);
+      save();
     } catch (e) {
       r.miekeLeft++;
       toast(e.message);
@@ -545,7 +639,7 @@
 
   function clamp4(n) { return Math.max(0, Math.min(4, Number(n) || 0)); }
 
-  function points(g) {
+  function points(g, replay) {
     const r = state.run;
     const weight = f => f.weight || 1;
     const total = r.card.hiddenFacts.reduce((a, f) => a + weight(f), 0) || 1;
@@ -560,7 +654,7 @@
     let bonus = 0;
     if (r.defence.length) {
       if (g.defenceOutcome === 'strong') bonus = 5;
-      else if (g.defenceOutcome === 'weak') { pts.nextLevel /= 2; r.trust -= 15; }
+      else if (g.defenceOutcome === 'weak') { pts.nextLevel /= 2; if (!replay) r.trust -= 15; }
       else if (g.defenceOutcome === 'retreat') pts.nextLevel = 0;
     }
     Object.keys(pts).forEach(k => { pts[k] = Math.round(pts[k]); });
@@ -568,10 +662,17 @@
     return { pts, bonus, total: sum };
   }
 
-  function scorecard(g) {
+  function scorecard(g, replay) {
     const r = state.run;
-    const { pts, bonus, total } = points(g);
-    state.results.push({ id: r.card.id, total });
+    const { pts, bonus, total } = points(g, replay);
+    if (!replay) {
+      state.results.push({ id: r.card.id, total });
+      r.phase = 'score';
+      r.grade = g;
+      save();
+      // The week counts as played from its first scorecard, not from "Clock in".
+      if (!state.charged && Gemini.runId) { state.charged = true; save(); Gemini.backend('played', { runId: Gemini.runId }).catch(() => {}); }
+    }
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
     const rows = $('score-rows');
@@ -618,7 +719,7 @@
 
   $('btn-next').onclick = () => {
     state.index++;
-    if (state.index < state.cards.length) startRequest(); else endRun();
+    if (state.index < state.cards.length) startRequest(); else { dropSave(); endRun(); }
   };
 
   function endRun() {
@@ -631,6 +732,7 @@
   }
 
   runsLeft();
+  resumeButton();
 
   // test hook
   window.__intake = { state, points };

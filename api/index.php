@@ -1,6 +1,6 @@
 <?php
 // THE INTAKE backend: run cap, unlock codes and a Gemini proxy that keeps the key on the server.
-// One file, no framework, PHP 7.4+ with PDO. Called as index.php?action=status|start|unlock|gemini.
+// One file, no framework, PHP 7.4+ with PDO. Called as index.php?action=status|start|played|unlock|gemini.
 
 declare(strict_types=1);
 
@@ -69,13 +69,18 @@ function player(?string $token): array {
     return $row;
 }
 
-// Runs left: the player's own count against free + bonus, and the IP's count against a
-// looser limit (an office shares one IP), so clearing the browser alone doesn't reset it.
+// A week only counts once it was played: its first scorecard was shown (counted = 1), or it
+// used enough Gemini calls that it clearly was. Abandoning a week in the first minutes is free.
+function chargeAfter(): int { return (int)(config()['charge_after_calls'] ?? 15); }
+
+// Runs left: the player's own count against free + bonus, and the IP's count (every week
+// started, played or not) against a looser limit (an office shares one IP), so clearing the
+// browser alone doesn't reset it.
 function runsLeft(array $p): int {
     $c = config();
     $free = (int)$c['free_runs'];
     $bonus = (int)$p['bonus_runs'];
-    $byToken = (int)one('SELECT COUNT(*) FROM intake_runs WHERE token = ?', [$p['token']]);
+    $byToken = (int)one('SELECT COUNT(*) FROM intake_runs WHERE token = ? AND (counted = 1 OR calls >= ?)', [$p['token'], chargeAfter()]);
     $byIp = (int)one('SELECT COUNT(*) FROM intake_runs WHERE ip_hash = ?', [ipHash()]);
     $left = $free + $bonus - $byToken;
     if ($bonus === 0) $left = min($left, $free * 3 - $byIp);
@@ -112,10 +117,23 @@ try {
     if ($action === 'start') {
         $p = player($in['token'] ?? null);
         $left = runsLeft($p);
+        // A week this browser started but never played on stays its week: hand it back.
+        $open = one('SELECT id FROM intake_runs WHERE token = ? AND counted = 0 AND calls < ? AND started_at > ? ORDER BY started_at DESC LIMIT 1',
+            [$p['token'], chargeAfter(), time() - 6 * 3600]);
+        if ($open) ok(['token' => $p['token'], 'runId' => $open, 'runsLeft' => $left]);
         if ($left <= 0) fail(402, 'No free runs left.', ['token' => $p['token'], 'runsLeft' => 0, 'capped' => true]);
         $run = newId();
-        q('INSERT INTO intake_runs (id, token, ip_hash, calls, started_at) VALUES (?, ?, ?, 0, ?)', [$run, $p['token'], ipHash(), time()]);
-        ok(['token' => $p['token'], 'runId' => $run, 'runsLeft' => $left - 1]);
+        q('INSERT INTO intake_runs (id, token, ip_hash, calls, counted, started_at) VALUES (?, ?, ?, 0, 0, ?)', [$run, $p['token'], ipHash(), time()]);
+        ok(['token' => $p['token'], 'runId' => $run, 'runsLeft' => $left]);
+    }
+
+    // The week's first scorecard was shown: from now on it counts as played.
+    if ($action === 'played') {
+        $p = player($in['token'] ?? null);
+        $runId = $in['runId'] ?? '';
+        if (!validToken($runId)) fail(400, 'Missing run.');
+        q('UPDATE intake_runs SET counted = 1 WHERE id = ? AND token = ?', [$runId, $p['token']]);
+        ok(['token' => $p['token'], 'runsLeft' => runsLeft($p)]);
     }
 
     if ($action === 'unlock') {

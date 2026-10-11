@@ -17,6 +17,8 @@ return [
     'free_runs'      => 3,
     // Gemini calls one run may make (a full week is about 15 to 45).
     'calls_per_run'  => 60,
+    // A week counts as played at its first scorecard, or once it used this many calls.
+    'charge_after_calls' => 15,
     // Hard stop for the whole site per day, whatever happens.
     'daily_calls'    => 3000,
     // Largest answer the game may request, in tokens (thinking tokens count too).
