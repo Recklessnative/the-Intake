@@ -33,7 +33,9 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `api/index.php` | Backend: run cap, unlock codes, and a Gemini proxy that keeps the key on the server |
 | `api/schema.sql`, `api/new-code.sql`, `api/upgrade-1.sql` | Database tables, a template for creating an unlock code, and the one change for databases made before weeks were charged at the first scorecard |
 
-Scoring per request, out of 100: need diagnosis 25 (half the examiner's score, half the weighted hidden facts you surfaced), measurement 20, concept fit 20, next level 15 (only counted when fit is at least 12), risks and dependencies 10, pitch and defence 10. A defence round triggers when the concept's boldness is above the stakeholder's risk appetite; a strong defence earns +5, a weak one halves next level, backing down zeroes it.
+After the call you write up on the **case board**: five short steps (diagnose with evidence from the call and cause tags, is learning the lever, a four-rung measurement ladder, the concept, the top two blockers), each locked before the next, with Mieke's feedback after the diagnosis, the lever and the risks. The steps become a one-page memo for the stakeholder. Memo mode keeps the original long form.
+
+Scoring per request, out of 100: need diagnosis 25 (on the case board: examiner 8, hidden facts surfaced 7, cause tags 4, key evidence cited 3, lever 3; in memo mode half the examiner's score, half the weighted hidden facts you surfaced), measurement 20, concept fit 20, next level 15 (only counted when fit is at least 12), risks and dependencies 10 (on the case board, 4 of them for picking real blockers), pitch and defence 10. A defence round triggers when the concept's boldness is above the stakeholder's risk appetite; a strong defence earns +5, a weak one halves next level, backing down zeroes it.
 
 ## Deploying
 
