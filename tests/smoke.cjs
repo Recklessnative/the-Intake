@@ -213,6 +213,8 @@ async function followUp() {
   await p.waitForSelector('#s-end.active');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
+  if (!(await p.$('#share-img canvas')) || await p.isVisible('#btn-linkedin') || !(await p.textContent('#share-text')).includes('hidden facts')) throw new Error('share card wrong on a normal week');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });
   if (quickCalls !== 1) throw new Error('expected one Gemini call for the quick intakes, got ' + quickCalls);
   // Every quick kind grades and draws its form and debrief.
   const kinds = await p.evaluate(async () => {
@@ -284,6 +286,33 @@ async function followUp() {
   const txt = await p.textContent('#scores');
   if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 10') || !txt.includes('[starter]') || !txt.includes('[quick: triage]')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
+  // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
+  await p.goto('http://localhost:8765/?debug=1');
+  p.on('dialog', d => d.accept().catch(() => {}));
+  await p.click('#btn-hard');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const hs = await p.evaluate(() => ({ hard: window.__intake.state.hard, tiers: window.__intake.state.cards.map(c => c.difficulty), q: window.__intake.state.run.questionsLeft, brief: document.getElementById('briefing-points').children.length }));
+  if (!hs.hard || hs.tiers.length !== 3 || hs.tiers.some(t => t < 2) || hs.q !== 6 || hs.brief) throw new Error('hard week wrong: ' + JSON.stringify(hs));
+  if (!MOBILE && await p.isVisible('.desk-icon[data-app="w-mieke"]')) throw new Error('Mieke on the desk in hard mode');
+  for (let i = 0; i < 3; i++) {
+    await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open');
+    await p.click('#btn-debug'); await p.click('#btn-leads-done');
+    await p.waitForSelector('#hard-form:not([hidden])');
+    await p.click('#hard-form button[type=submit]');
+    if (await p.isVisible('#p-score.active') || await p.isVisible('#p-defence.active')) throw new Error('empty memo was sent');
+    await p.click('#btn-debug');
+    if (!(await p.textContent('#hard-count')).match(/^\d+ \/ 150/)) throw new Error('word count missing');
+    await p.click('#hard-form button[type=submit]');
+    await p.waitForSelector('#p-defence.active, #p-score.active', { timeout: 8000 }).catch(async e => { throw new Error('hard memo not sent: ' + await p.textContent('#toast') + ' | ' + await p.textContent('#hard-count') + ' ' + JSON.stringify(errs)); });
+    if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
+    await p.waitForSelector('#p-score.active');
+    console.log('hard request', i + 1, await p.textContent('#score-total'));
+    await p.click('#btn-next');
+  }
+  await p.waitForSelector('#s-end.active');
+  if (!(await p.isVisible('#btn-linkedin')) || !(await p.isVisible('#share-badge'))) throw new Error('hard week has no LinkedIn card');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-hard.png', fullPage: true });
+  console.log('share text:', await p.textContent('#share-text'));
   console.log('errors', errs);
   await b.close(); srv.close();
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

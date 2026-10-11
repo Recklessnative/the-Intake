@@ -18,6 +18,7 @@
       <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
       <button id="btn-resume" class="primary" hidden></button>
       <button id="btn-start" class="primary">Clock in</button>
+      <button id="btn-hard" class="ghost">Hard mode</button>
       <button id="btn-settings" class="ghost">Gemini key</button>
       <p id="runs-left" class="fine"></p>
     </div>
@@ -318,6 +319,12 @@
           </div>
         </div>
 
+        <form id="hard-form" class="write hard-memo" hidden>
+          <p class="muted"><b>Hard mode.</b> <span id="hard-to"></span> One memo, at most 150 words: the need, how you will know, what you will do, and who could block it.</p>
+          <textarea id="hard-memo" rows="12" maxlength="1600" aria-label="Your memo"></textarea>
+          <div class="row"><button type="submit" class="primary">Send it to them</button> <span id="hard-count" class="muted"></span></div>
+        </form>
+
         <form id="memo4-form" class="write memo4" hidden>
           <p class="muted">No case board this week: one page, four headings, in your own words. About 600 characters is plenty. <button type="button" id="btn-memo4-board" class="ghost">I want the case board back</button></p>
           <label>Need: what is really going on, and is learning the lever?<textarea name="need" rows="4" maxlength="900"></textarea></label>
@@ -424,7 +431,18 @@
       <h2 id="end-title"></h2>
       <p id="end-score" class="score-total"></p>
       <p id="end-note"></p>
-      <p class="fine">Every request is kept in <b>My scores</b> on the desktop. The board room, hard mode and shareable scores arrive in the next version.</p>
+      <div class="share">
+        <p class="eyebrow">Your share card <span id="share-badge" class="badge" hidden>HARD MODE</span></p>
+        <div id="share-img" class="share-img"></div>
+        <p id="share-text" class="share-text"></p>
+        <div class="row">
+          <button id="btn-linkedin" class="primary" hidden>Post on LinkedIn</button>
+          <button id="btn-copy-share" class="ghost">Copy the text</button>
+          <button id="btn-save-share" class="ghost">Save the picture</button>
+        </div>
+        <p id="share-hint" class="fine"></p>
+      </div>
+      <p class="fine">Every request is kept in <b>My scores</b> on the desktop. The board room arrives in the next version.</p>
       <button id="btn-again" class="primary">Another week</button>
     </div>
   </section>

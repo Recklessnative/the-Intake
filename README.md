@@ -46,6 +46,8 @@ A **week** is five requests over Monday to Wednesday, and its shape changes from
 
 **The help fades**: in week 1 the case board has every chip, and Mieke shows her own diagnosis once you lock yours in. In week 2 only the diagnosis keeps its chips; measure and concept are your own one-liners. From week 3 you write a blank one-pager under four headings (the board is still one click away).
 
+**Hard mode** (a button on the title screen): three tier-2 and tier-3 cases, 6 questions each (4 on the first call), no case file, no Mieke, and one memo of at most 150 words instead of the board. The week ends with a **share card**: your title, the hidden facts you found, how the defence rounds went and your best line, as a picture (1200 x 627) and as text. Only a hard-mode week gets the HARD MODE badge and the LinkedIn button.
+
 **Test mode:** add `?debug` to the address once (`?debug=0` turns it off again). An **Autofill** button appears in the tray: in the inbox or on the call it plays a scripted call that surfaces every hidden fact (no Gemini calls), on the case board or in memo mode it fills every step from the card's model answer, and in the defence round it fills the answers. The reaction and the examiner are still real Gemini calls.
 
 After the call you write up on the **case board**: five short steps (diagnose with evidence from the call and cause tags, is learning the lever, a four-rung measurement ladder, the concept, the top two blockers), each locked before the next, with Mieke's feedback after the diagnosis, the lever and the risks. The steps become a one-page memo for the stakeholder. Memo mode keeps the original long form.
