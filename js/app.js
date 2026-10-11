@@ -5,10 +5,13 @@
   const QUESTIONS = 8;
   // Starter cases (tier 0) are gentler: more questions, more patience.
   const STARTER = { questions: 10, patience: 5 };
-  const questionsFor = card => card.difficulty === 0 ? STARTER.questions : touchpoints(card) ? TOUCH.total : QUESTIONS;
+  const questionsFor = card => card.difficulty === 0 ? STARTER.questions : touchpoints(card) ? budget().total : QUESTIONS;
   // Beyond the starters, one budget of questions is spread over the first call, data
   // requests, the coffee machine and one callback.
   const TOUCH = { total: 10, call: 5, corridor: 2, callback: 3 };
+  // Hard mode: fewer questions, no case file, no Mieke, a 150-word memo.
+  const HARD = { total: 6, call: 4, corridor: 2, callback: 2, words: 150 };
+  const budget = () => (state.hard ? HARD : TOUCH);
   const touchpoints = card => card.difficulty !== 0 && card.hiddenFacts.some(f => f.foundAt.some(x => x !== 'call'));
   const DATA_KINDS = { kpi: 'KPIs and reports', org: 'Org chart and roles', process: 'Process and systems', policy: 'Policies and targets', training: 'Past training' };
   const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
@@ -31,7 +34,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1 };
+  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -104,6 +107,7 @@
   // Fill the shape: unplayed cards first, no sector twice, quick kinds mixed. Starters and
   // tier-2 quick intakes wait until after the first week.
   function pickWeek(n) {
+    if (state.hard) return pickHardWeek();
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const fresh = list => list.slice().sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const cards = [], days = [];
@@ -121,6 +125,18 @@
       if (card) { cards.push(card); days.push(day); }
     });
     return { cards, days };
+  }
+  // Hard mode: three full cases, the hardest there are, one a day.
+  function pickHardWeek() {
+    const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
+    const pool = state.pool.filter(c => c.difficulty >= 2).sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
+    const cards = [];
+    [2, 3, 3].forEach(t => {
+      const c = pool.find(x => x.difficulty === t && !cards.includes(x) && !cards.some(y => y.sector === x.sector)) || pool.find(x => !cards.includes(x));
+      if (c) cards.push(c);
+    });
+    cards.sort((a, b) => a.difficulty - b.difficulty);
+    return { cards, days: cards.map((c, i) => i) };
   }
   const dayOf = i => DAYS[state.days[i] || 0];
   const isQuick = card => !!(card && card.quick);
@@ -191,11 +207,18 @@
     return true;
   }
 
-  $('btn-start').onclick = async () => {
+  $('btn-start').onclick = () => startWeek(false);
+  $('btn-hard').onclick = () => {
+    if (!window.confirm('Hard mode: three tough cases, 6 questions each, no case file, no Mieke, and a memo of at most 150 words. Only a hard-mode week can be posted to LinkedIn. Clock in?')) return;
+    startWeek(true);
+  };
+  async function startWeek(hard) {
     if (readSave() && !window.confirm('Start a new week? Your saved week will be dropped.')) return;
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
     if (!(await claimRun())) return;
     dropSave();
+    state.hard = !!hard;
+    document.body.classList.toggle('hard', state.hard);
     state.weekId = 'w' + Date.now();
     state.weekNo = weekNumber();
     const week = pickWeek(state.weekNo);
@@ -206,8 +229,8 @@
     state.charged = false;
     state.run = null;
     cubicle();
-  };
-  $('btn-again').onclick = () => $('btn-start').onclick();
+  }
+  $('btn-again').onclick = () => startWeek(state.hard);
 
   // The boot screen: the intro lines appear while the progress bar runs; they move on by
   // themselves, or faster with the button. Logging on opens the desktop.
@@ -255,7 +278,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -279,6 +302,8 @@
     state.cards = cards;
     state.days = s.days || cards.map(() => 0);
     state.weekNo = s.weekNo || 1;
+    state.hard = !!s.hard;
+    document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
     state.results = s.results || [];
     state.charged = !!s.charged;
@@ -287,7 +312,7 @@
     r.card = cards[s.index];
     r.revealed = new Set(r.revealed || []);
     // Saves from before the follow-up existed.
-    Object.entries({ leg: 'call', legLeft: r.questionsLeft, calledBack: false, corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: [] })
+    Object.entries({ leg: 'call', legLeft: r.questionsLeft, calledBack: false, corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: [] })
       .forEach(([k, v]) => { if (r[k] == null) r[k] = v; });
     r.mails = [];
     r.selected = null;
@@ -306,8 +331,8 @@
       miekeLeft: MIEKE_ASKS, clock: prev && state.index && state.days[state.index] === state.days[state.index - 1] ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
       phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null,
-      leg: 'call', legLeft: touchpoints(card) ? TOUCH.call : questionsFor(card), calledBack: false,
-      corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: [],
+      leg: 'call', legLeft: touchpoints(card) ? budget().call : questionsFor(card), calledBack: false,
+      corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: [],
       answer: {}, result: null
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
@@ -335,14 +360,15 @@
     $('mieke-log').innerHTML = '';
     r.mieke.forEach(m => miekeSays(m.text, m.who, true));
     miekeLeft();
-    briefing(card.briefing);
+    briefing(state.hard && !isQuick(card) ? null : card.briefing);
+    if (state.hard) $('briefing-head').textContent = 'Hard mode: no case file. Ask.';
     Desktop.reset();
     mailbox();
     contacts();
     selectMail(state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
-    if (!isQuick(card)) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
+    if (!isQuick(card) && !state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
     step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length + (isQuick(card) ? ' · quick one' : ''));
     $('btn-call').textContent = isQuick(card) ? '⚡ Handle it (a few minutes)' : '☎ Call them back';
@@ -660,7 +686,7 @@
     const found = r.data.length || r.corridor.length;
     $('btn-callback').disabled = !on || r.calledBack || !found || n <= 0;
     $('callback-note').textContent = r.calledBack ? 'You already called back once today.'
-      : found ? 'Bring what you found. Up to ' + Math.min(TOUCH.callback, n) + ' questions, and they start with fresh patience.'
+      : found ? 'Bring what you found. Up to ' + Math.min(budget().callback, n) + ' questions, and they start with fresh patience.'
       : 'Find something first, in the data or at the coffee machine. Then you have a reason to call back.';
     Desktop.title('w-leads', 'Follow-up · ' + n + ' left', 'Follow-up');
     meters();
@@ -724,7 +750,7 @@
     if (r.phase !== 'investigate' || r.calledBack || r.questionsLeft <= 0) return;
     r.calledBack = true;
     r.leg = 'callback';
-    r.legLeft = TOUCH.callback;
+    r.legLeft = budget().callback;
     r.patience = r.card.patience || 3;
     r.phase = 'call';
     $('w-call').classList.remove('ended');
@@ -863,7 +889,7 @@
     const tiles = deps.map(who => ({ who, real: true })).concat(decoys.map(who => ({ who, real: false }))).sort(() => Math.random() - 0.5);
     return {
       // Help fades: week 1 the full board, week 2 chips on the diagnosis only, then a blank memo.
-      mode: state.weekNo >= 3 ? 'memo4' : 'board', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
+      mode: state.hard ? 'hard' : state.weekNo >= 3 ? 'memo4' : 'board', hardMemo: '', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
       step: 'diagnose', locked: false, feedback: '',
       evidence: [], tags: [], problem: '', lever: '', leverWhy: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
@@ -886,6 +912,14 @@
     $('board').hidden = b.mode !== 'board';
     $('write-form').hidden = b.mode !== 'memo';
     $('memo4-form').hidden = b.mode !== 'memo4';
+    $('hard-form').hidden = b.mode !== 'hard';
+    if (b.mode === 'hard') {
+      $('hard-memo').value = b.hardMemo || '';
+      $('hard-to').textContent = 'To ' + r.card.stakeholder.name + ', ' + r.card.stakeholder.role + '. Write it in their language.';
+      hardCount();
+      Desktop.title('w-write', 'Memo - ' + r.card.stakeholder.name, 'Memo');
+      return;
+    }
     $('board').classList.toggle('fade2', (b.fade || 1) >= 2);
     if (b.mode === 'memo4') {
       const f = $('memo4-form').elements;
@@ -1108,6 +1142,7 @@
   }
 
   function writeupText(w) {
+    if (w.kind === 'hard') return 'ONE MEMO, AT MOST 150 WORDS, WRITTEN TO THE STAKEHOLDER (hard mode: grade need, measurement, concept, risks and pitch from this memo alone; brevity is the brief, not a flaw):\n' + w.memo;
     if (w.kind === 'memo4') return ['NEED', w.need, 'MEASUREMENT', w.measure, 'CONCEPT', w.concept, 'RISKS AND DEPENDENCIES', w.risks].join('\n');
     if (w.kind === 'board') {
       return [
@@ -1136,6 +1171,22 @@
       'Flagged as risky strat: ' + (w.flag || '(not flagged)')
     ].join('\n');
   }
+
+  // Hard mode: one memo, 150 words at most.
+  const words = t => (t.trim().match(/\S+/g) || []).length;
+  function hardCount() {
+    const n = words(board().hardMemo || '');
+    $('hard-count').textContent = n + ' / ' + HARD.words + ' words' + (n > HARD.words ? '. Cut ' + (n - HARD.words) + '.' : '');
+    $('hard-count').classList.toggle('over', n > HARD.words);
+  }
+  $('hard-memo').addEventListener('input', () => { board().hardMemo = $('hard-memo').value; hardCount(); saveSoon(); });
+  $('hard-form').onsubmit = ev => {
+    ev.preventDefault();
+    const t = board().hardMemo || '';
+    if (words(t) < 20) { toast('Twenty words at least. They asked for a plan, not a haiku.'); return; }
+    if (words(t) > HARD.words) { toast('Over ' + HARD.words + ' words. They will not read past the fold.'); return; }
+    submitWriteup({ kind: 'hard', memo: t });
+  };
 
   // The blank one-pager (week 3 on).
   function memo4Count() {
@@ -1255,7 +1306,7 @@
     const r = state.run;
     const { pts, bonus, total } = points(g, replay);
     if (!replay) {
-      state.results.push({ id: r.card.id, total });
+      state.results.push({ id: r.card.id, total, found: r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '' });
       recordScore(r, total, pts, g);
       r.phase = 'score';
       r.grade = g;
@@ -1322,6 +1373,13 @@
     if (state.index < state.cards.length) startRequest(); else { dropSave(); endRun(); }
   };
 
+  // The sentence from a write-up most worth quoting on a share card.
+  function bestLine(w) {
+    if (!w) return '';
+    const first = t => (String(t || '').trim().match(/^[^.!?]+[.!?]?/) || [''])[0].trim();
+    return short(first(w.kind === 'board' ? w.problem : w.kind === 'memo4' ? w.need : w.kind === 'hard' ? w.memo : w.gap), 160);
+  }
+
   function endRun() {
     // A full case counts twice as much as a quick one.
     const wt = x => (x.quick ? 1 : 2);
@@ -1332,8 +1390,83 @@
     const q = state.results.filter(x => x.quick).length;
     $('end-note').textContent = 'Week ' + state.weekNo + '. Average over ' + state.results.length + ' requests' + (q ? ' (' + q + ' quick ones, which count half)' : '') + '.';
     recordWeek(avg, title);
+    shareCard(avg, title);
     show('s-end');
   }
+
+  // ---------- the share card: a specific brag beats a number ----------
+  const GAME_URL = 'https://recklessnative.github.io/the-Intake/';
+  function shareData(avg, title) {
+    const full = state.results.filter(x => !x.quick);
+    const found = full.reduce((a, x) => a + (x.found || 0), 0), of = full.reduce((a, x) => a + (x.of || 0), 0);
+    const best = full.filter(x => x.line).sort((a, b) => b.total - a.total)[0];
+    const def = full.map(x => x.defence).filter(Boolean);
+    const defence = !def.length ? 'Nobody pushed back on my concepts.'
+      : def.includes('retreat') ? 'I backed down once in the defence round. Never again.'
+      : def.every(d => d === 'strong') ? 'Held my ground in every defence round.' : 'Survived the defence round, mostly.';
+    return { avg, title, hard: state.hard, found, of, line: best ? best.line : '', defence };
+  }
+  function shareText(d) {
+    return 'I just finished a ' + (d.hard ? 'HARD MODE ' : '') + 'week of THE INTAKE as a ' + d.title + ' (' + d.avg + '/100). ' +
+      (d.of ? 'I found ' + d.found + ' of ' + d.of + ' hidden facts. ' : '') + d.defence +
+      (d.line ? '\nMy best line: "' + d.line + '"' : '') + '\nThink you ask better questions? ' + GAME_URL;
+  }
+  // 1200 x 627, the size LinkedIn shows a picture at.
+  function shareImage(d) {
+    const c = document.createElement('canvas');
+    c.width = 1200; c.height = 627;
+    const g = c.getContext('2d');
+    g.fillStyle = '#1a3e8c'; g.fillRect(0, 0, 1200, 627);
+    g.fillStyle = '#ece9d8'; g.fillRect(40, 40, 1120, 547);
+    g.fillStyle = '#1a3e8c'; g.fillRect(40, 40, 1120, 56);
+    g.fillStyle = '#fff'; g.font = 'bold 28px sans-serif'; g.fillText('THE INTAKE', 64, 78);
+    if (d.hard) { g.fillStyle = '#c0392b'; g.fillRect(900, 50, 236, 38); g.fillStyle = '#fff'; g.font = 'bold 22px sans-serif'; g.fillText('HARD MODE', 954, 77); }
+    g.fillStyle = '#222'; g.font = 'bold 64px sans-serif'; g.fillText(d.title, 72, 190);
+    g.font = 'bold 40px sans-serif'; g.fillStyle = '#1a3e8c'; g.fillText(d.avg + ' / 100', 72, 250);
+    g.fillStyle = '#333'; g.font = '30px sans-serif';
+    let y = 320;
+    if (d.of) { g.fillText('Found ' + d.found + ' of ' + d.of + ' hidden facts.', 72, y); y += 46; }
+    g.fillText(d.defence, 72, y); y += 60;
+    if (d.line) {
+      g.font = 'italic 28px serif'; g.fillStyle = '#222';
+      const lines = [], ws = ('"' + d.line + '"').split(' ');
+      let cur = '';
+      ws.forEach(w => { if (g.measureText(cur + ' ' + w).width > 1040) { lines.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; });
+      lines.push(cur);
+      lines.slice(0, 3).forEach(l => { g.fillText(l, 72, y); y += 38; });
+    }
+    g.fillStyle = '#555'; g.font = '22px sans-serif'; g.fillText('An intake game by Yannick Willems · ' + GAME_URL.replace('https://', ''), 72, 560);
+    return c;
+  }
+  function shareCard(avg, title) {
+    const d = shareData(avg, title);
+    state.share = d;
+    $('share-text').textContent = shareText(d);
+    $('share-badge').hidden = !d.hard;
+    $('btn-linkedin').hidden = !d.hard;
+    $('share-hint').textContent = d.hard ? 'Copy the text, then paste it into your LinkedIn post with the picture.' : 'Only a hard-mode week can be posted to LinkedIn. This one is for you (and maybe your team).';
+    const img = $('share-img');
+    img.innerHTML = '';
+    const c = shareImage(d);
+    c.setAttribute('role', 'img');
+    c.setAttribute('aria-label', 'Share card: ' + title + ', ' + avg + ' out of 100');
+    img.appendChild(c);
+  }
+  async function copyShare() {
+    try { await navigator.clipboard.writeText(shareText(state.share)); toast('Copied. Paste it wherever you brag.', 'info'); return true; } catch (e) { toast('Could not copy. Select the text and copy it yourself.'); return false; }
+  }
+  $('btn-copy-share').onclick = copyShare;
+  $('btn-save-share').onclick = () => {
+    const a = document.createElement('a');
+    a.download = 'the-intake-' + state.share.title.toLowerCase().replace(/\W+/g, '-') + '.png';
+    a.href = $('share-img').querySelector('canvas').toDataURL('image/png');
+    a.click();
+  };
+  $('btn-linkedin').onclick = async () => {
+    await copyShare();
+    window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(GAME_URL), '_blank', 'noopener');
+  };
+
 
   // ---------- my scores: every finished request, kept in this browser ----------
   const SCORES_KEY = 'intake-scores';
@@ -1348,7 +1481,7 @@
   }
   function thisWeek(h) {
     let w = h.weeks.find(x => x.id === state.weekId);
-    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [] }; h.weeks.push(w); }
+    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined }; h.weeks.push(w); }
     return w;
   }
   function recordScore(r, total, pts, g) {
@@ -1378,7 +1511,7 @@
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
       const head = document.createElement('h3');
-      head.textContent = '=== Week of ' + fmt(w.started) + (w.done ? ' · ' + w.title + ' · average ' + w.avg + '/100' : ' · in progress') + ' ===';
+      head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · average ' + w.avg + '/100' : ' · in progress') + ' ===';
       box.appendChild(head);
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
         para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (x.quick ? ' [quick: ' + Quick.KINDS[x.quick].label.toLowerCase() + ']' : '') + ': ' + x.total + '/100');
@@ -1394,6 +1527,7 @@
     const r = state.run;
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
     if (r && isQuick(r.card) && ['w-call', 'w-write', 'w-leads'].includes(id)) { toast('This one is a quick intake. Handle it from Doors Mail.', 'info'); return; }
+    if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
     if (id === 'w-mieke' && r && isQuick(r.card)) { toast('Mieke: "It\'s a quick one. Trust your gut, I\'ll see you at the debrief."', 'info'); return; }
     if (id === 'w-quick' && (!r || !isQuick(r.card) || r.phase === 'inbox')) { toast('No quick intake open. They arrive in Doors Mail.', 'info'); return; }
     if (id === 'w-quick') { quickDesk(); return; }
@@ -1481,6 +1615,13 @@
     if (r.phase !== 'write') return;
     const b = board(), plan = card.measurementPlan || {}, gold = card.goldAnswer || {};
     const want = String(card.learningIsTheAnswer || '').toLowerCase();
+    if (b.mode === 'hard') {
+      const t = [card.needStatement || card.realProblem, 'We measure ' + (plan.behaviour || 'the behaviour') + ' against ' + (plan.baseline || 'last quarter') + '.', (gold.concept || '').split(' | ')[0], 'Risk: ' + (((card.dependencies || [])[0] || {}).who || 'the budget owner') + '. We involve them first.'].join(' ');
+      b.hardMemo = t.split(/\s+/).slice(0, HARD.words).join(' ');
+      renderBoard();
+      save();
+      return;
+    }
     if (b.mode === 'memo4') {
       b.memo4 = { need: card.needStatement || card.realProblem || '(test)', measure: Object.values(plan).filter(v => typeof v === 'string').join(' ') || '(test)',
         concept: (gold.concept || '(test)').split(' | ')[0], risks: (card.dependencies || []).map(d => d.who + ': ' + d.concern).join('\n') || '(test)' };
