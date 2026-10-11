@@ -41,9 +41,12 @@ async function caseBoard(req) {
 async function academy() {
   await visible('#w-academy');
   if (!(await p.textContent('#academy')).includes('Ask before you make')) throw new Error('week 1 module is not "Ask before you make"');
-  await p.click('#academy button.primary');                  // Start
+  if (!(await p.$('#academy .ac-hero')) || await p.$$eval('.ac-obj li', l => l.length) !== 3) throw new Error('academy welcome slide incomplete');
+  await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + (MOBILE ? '/academy-mobile.png' : '/academy-welcome.png') });
+  await p.click('#academy .ac-btn.go');                       // Start
   await p.click('.ac-opt >> nth=0');                         // wrong on purpose
   if (!(await p.$('.ac-opt.wrong')) || !(await p.$('.ac-opt.right .ac-why'))) throw new Error('no feedback after a wrong answer');
+  if (await p.isDisabled('#ac-next')) throw new Error('Next stays off after answering');
   await p.waitForTimeout(700);
   await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-academy"]'); } else { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); }
