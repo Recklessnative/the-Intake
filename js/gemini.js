@@ -1,7 +1,9 @@
 // Thin Gemini client. With the player's own key it calls Google directly;
 // otherwise it goes through the PHP backend (api/index.php), which holds the key and the run cap.
 (function () {
-  const DEFAULT_MODEL = 'gemini-2.5-flash-lite';
+  const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+  // Retired models a browser may still remember; fall back to the default instead.
+  const RETIRED = /^gemini-(1|2)\./;
   const BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
   function store(kind) {
@@ -39,7 +41,7 @@
     },
 
     get key() { return read('intake-key'); },
-    get model() { return read('intake-model') || DEFAULT_MODEL; },
+    get model() { const m = read('intake-model'); return m && !RETIRED.test(m) ? m : DEFAULT_MODEL; },
     defaultModel: DEFAULT_MODEL,
     forget() {
       for (const kind of ['session', 'local']) {
@@ -57,17 +59,18 @@
     },
 
     // Ask for JSON matching `schema`. `turns` is [{role:'user'|'model', text}].
-    async json({ system, turns, schema, temperature = 0.7, maxTokens = 800 }) {
+    // No temperature: Gemini 3.5+ ignores it (and later models reject it); determinism comes from the prompts.
+    // maxTokens covers thinking tokens too, so it is generous.
+    async json({ system, turns, schema, maxTokens = 2000 }) {
       const key = this.key;
       if (!key && !(this.hasBackend && this.runId)) throw new Error('No Gemini key set. Add one under "Gemini key" on the title screen.');
       const body = {
         systemInstruction: { parts: [{ text: system }] },
         contents: turns.map(t => ({ role: t.role, parts: [{ text: t.text }] })),
         generationConfig: {
-          temperature,
           maxOutputTokens: maxTokens,
           responseMimeType: 'application/json',
-          responseSchema: schema
+          responseJsonSchema: schema
         }
       };
       let lastErr;
@@ -86,7 +89,7 @@
           }
           data = await res.json();
         } else {
-          const r = await post(withAction(api(), 'gemini'), { runId: this.runId, model: read('intake-model') || undefined, request: body });
+          const r = await post(withAction(api(), 'gemini'), { runId: this.runId, model: this.model, request: body });
           if (!r.ok) {
             const e = r.data.error;
             throw new Error(typeof e === 'string' ? e : (e && e.message) || 'The game server could not reach Gemini (' + r.status + ').');

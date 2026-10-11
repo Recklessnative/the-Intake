@@ -16,11 +16,11 @@ cat > "$T/mock/index.php" <<'PHP'
 $in = json_decode(file_get_contents('php://input'), true);
 header('Content-Type: application/json');
 echo json_encode(['candidates' => [['content' => ['parts' => [['text' => json_encode([
-  'key' => $_SERVER['HTTP_X_GOOG_API_KEY'] ?? '', 'path' => $_SERVER['REQUEST_URI'], 'max' => $in['generationConfig']['maxOutputTokens'], 'sys' => isset($in['systemInstruction'])
+  'key' => $_SERVER['HTTP_X_GOOG_API_KEY'] ?? '', 'path' => $_SERVER['REQUEST_URI'], 'max' => $in['generationConfig']['maxOutputTokens'], 'sys' => isset($in['systemInstruction']), 'temp' => isset($in['generationConfig']['temperature'])
 ])]]]]]]);
 PHP
 cat > "$T/config.php" <<PHP
-<?php return ['gemini_key'=>'SERVER-KEY','models'=>['gemini-2.5-flash-lite'],'db_dsn'=>'sqlite:$T/db.sqlite','db_user'=>null,'db_pass'=>null,
+<?php return ['gemini_key'=>'SERVER-KEY','models'=>['gemini-3.5-flash-lite'],'db_dsn'=>'sqlite:$T/db.sqlite','db_user'=>null,'db_pass'=>null,
 'free_runs'=>2,'calls_per_run'=>3,'daily_calls'=>100,'max_output'=>1500,'ip_salt'=>'salt','allowed_origins'=>['https://example.test'],
 'gemini_base'=>'http://127.0.0.1:8792/models/'];
 PHP
@@ -36,10 +36,11 @@ r=$(call status '{}'); check "status gives a token and 2 runs" "$r" '"runsLeft":
 TOKEN=$(echo "$r" | sed -E 's/.*"token":"([a-f0-9]{32})".*/\1/')
 r=$(call start "{\"token\":\"$TOKEN\"}"); check "first run starts" "$r" '"runsLeft":1'
 RUN=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
-REQ='{"contents":[{"role":"user","parts":[{"text":"hi"}]}],"systemInstruction":{"parts":[{"text":"s"}]},"generationConfig":{"maxOutputTokens":99999}}'
+REQ='{"contents":[{"role":"user","parts":[{"text":"hi"}]}],"systemInstruction":{"parts":[{"text":"s"}]},"generationConfig":{"maxOutputTokens":99999,"temperature":0}}'
 r=$(call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}"); check "proxy uses the server key" "$r" 'SERVER-KEY'
 check "proxy caps output tokens" "$r" '\"max\":1500'
 check "proxy keeps the system prompt" "$r" '\"sys\":true'
+check "proxy strips temperature" "$r" '\"temp\":false'
 call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}" >/dev/null; call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}" >/dev/null
 r=$(call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}"); check "per-run call limit" "$r" ' 429'
 r=$(call gemini "{\"runId\":\"$(printf 'a%.0s' {1..32})\",\"request\":$REQ}"); check "unknown run refused" "$r" ' 403'

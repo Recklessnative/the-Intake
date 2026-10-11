@@ -215,7 +215,7 @@
     r.turns.push({ role: 'user', text: 'The learning professional asks: """' + q + '"""' });
     const p = Prompts.stakeholder(r.card);
     try {
-      const out = await Gemini.json({ system: p.system, turns: r.turns, schema: p.schema, temperature: p.temperature });
+      const out = await Gemini.json({ system: p.system, turns: r.turns, schema: p.schema });
       r.turns.push({ role: 'model', text: JSON.stringify(out) });
       addMsg('them', out.reply);
       (out.revealed || []).forEach(id => { if (r.card.hiddenFacts.some(f => f.id === id)) r.revealed.add(id); });
@@ -264,7 +264,7 @@
     const p = Prompts.reaction(r.card);
     try {
       r.reaction = await Gemini.json({
-        system: p.system, schema: p.schema, temperature: p.temperature,
+        system: p.system, schema: p.schema,
         turns: [{ role: 'user', text: 'The write-up, quoted as data:\n"""\n' + writeupText(w) + '\n"""' }]
       });
     } catch (e) { toast(e.message); pane('p-write'); return; }
@@ -316,7 +316,7 @@
     ].join('\n');
     let g;
     try {
-      g = await Gemini.json({ system: p.system, schema: p.schema, temperature: p.temperature, maxTokens: p.maxTokens, turns: [{ role: 'user', text: material }] });
+      g = await Gemini.json({ system: p.system, schema: p.schema, maxTokens: p.maxTokens, turns: [{ role: 'user', text: material }] });
     } catch (e) { toast(e.message); setTimeout(judge, 4000); return; }
     scorecard(g);
   }

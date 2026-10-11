@@ -6,7 +6,7 @@ return [
     // Gemini key from Google AI Studio. Billing is on this key.
     'gemini_key'     => 'PASTE-YOUR-KEY-HERE',
     // Models the game may ask for. The first one is the default.
-    'models'         => ['gemini-2.5-flash-lite', 'gemini-2.5-flash'],
+    'models'         => ['gemini-3.5-flash-lite', 'gemini-3.6-flash'],
 
     // Database (shared hosting MySQL).
     'db_dsn'         => 'mysql:host=localhost;dbname=YOUR_DB;charset=utf8mb4',
@@ -19,8 +19,8 @@ return [
     'calls_per_run'  => 60,
     // Hard stop for the whole site per day, whatever happens.
     'daily_calls'    => 3000,
-    // Largest answer the game may request, in tokens.
-    'max_output'     => 1500,
+    // Largest answer the game may request, in tokens (thinking tokens count too).
+    'max_output'     => 4000,
 
     // Long random string, used to hash IP addresses. Change it once, then leave it.
     'ip_salt'        => 'CHANGE-ME-TO-SOMETHING-LONG-AND-RANDOM',
