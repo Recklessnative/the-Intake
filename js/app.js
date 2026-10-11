@@ -5,7 +5,14 @@
   const QUESTIONS = 8;
   // Starter cases (tier 0) are gentler: more questions, more patience.
   const STARTER = { questions: 10, patience: 5 };
-  const questionsFor = card => card.difficulty === 0 ? STARTER.questions : QUESTIONS;
+  const questionsFor = card => card.difficulty === 0 ? STARTER.questions : touchpoints(card) ? TOUCH.total : QUESTIONS;
+  // Beyond the starters, one budget of questions is spread over the first call, data
+  // requests, the coffee machine and one callback.
+  const TOUCH = { total: 10, call: 5, corridor: 2, callback: 3 };
+  const touchpoints = card => card.difficulty !== 0 && card.hiddenFacts.some(f => f.foundAt.some(x => x !== 'call'));
+  const DATA_KINDS = { kpi: 'KPIs and reports', org: 'Org chart and roles', process: 'Process and systems', policy: 'Policies and targets', training: 'Past training' };
+  const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
+  const placeOf = where => PLACE[where.replace(/^data:/, '')] || where;
   const MIEKE_ASKS = 3;
   const RUN_LENGTH = 3;
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
@@ -239,6 +246,9 @@
     const r = Object.assign({}, s.run);
     r.card = cards[s.index];
     r.revealed = new Set(r.revealed || []);
+    // Saves from before the follow-up existed.
+    Object.entries({ leg: 'call', legLeft: r.questionsLeft, calledBack: false, corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: [] })
+      .forEach(([k, v]) => { if (r[k] == null) r[k] = v; });
     r.mails = [];
     r.selected = null;
     state.run = r;
@@ -255,7 +265,9 @@
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
       miekeLeft: MIEKE_ASKS, clock: prev && state.index ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
-      phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null
+      phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null,
+      leg: 'call', legLeft: touchpoints(card) ? TOUCH.call : questionsFor(card), calledBack: false,
+      corridor: [], corridorTurns: [], corridorLeft: TOUCH.corridor, data: [], docs: []
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
@@ -293,7 +305,9 @@
     Desktop.focus('w-inbox');
     step('Request ' + (state.index + 1) + ' of ' + state.cards.length);
     if (r.phase !== 'inbox') callWindow();
+    renderLeads();
     if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
+    if (r.phase === 'investigate') investigateDesk();
     if (r.phase === 'write' || r.phase === 'score') writeDesk();
     if (r.phase === 'score' && r.grade) scorecard(r.grade, true);
   }
@@ -425,6 +439,10 @@
 
   function addMsg(who, text, replay) {
     if (!replay) state.run.chat.push({ who, text });
+    bubble($('chat-log'), who, text, state.run.card.stakeholder.name);
+  }
+  // One chat bubble; what the other person says gets a pin for the notes.
+  function bubble(log, who, text, name) {
     const d = document.createElement('div');
     d.className = 'msg ' + who;
     d.textContent = text;
@@ -435,19 +453,19 @@
       pin.title = 'Pin this to my notes';
       pin.setAttribute('aria-label', 'Pin this to my notes');
       pin.textContent = '📌';
-      pin.onclick = () => pinNote(text, pin);
+      pin.onclick = () => pinNote(text, pin, name);
       if ((state.run.pins || []).includes(text)) pin.classList.add('done');
       d.appendChild(pin);
     }
-    $('chat-log').appendChild(d);
-    $('chat-log').scrollTop = $('chat-log').scrollHeight;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
   }
-  function pinNote(text, btn) {
+  function pinNote(text, btn, name) {
     const r = state.run;
     r.pins = r.pins || [];
     if (!r.pins.includes(text)) r.pins.push(text);
     const n = $('notes');
-    const who = state.run.card.stakeholder.name.split(' ')[0];
+    const who = name.split(' ')[0];
     n.value = (n.value.trim() ? n.value.replace(/\s+$/, '') + '\n' : '') + '- ' + who + ': "' + text + '"\n';
     btn.classList.add('done');
     const w = $('w-notes');
@@ -455,7 +473,7 @@
   }
   function meters() {
     const r = state.run;
-    $('q-left').textContent = r.questionsLeft;
+    $('q-left').textContent = touchpoints(r.card) && r.phase === 'call' ? Math.min(r.legLeft, r.questionsLeft) + ' on this call (' + r.questionsLeft + ' in total)' : r.questionsLeft;
     $('patience').textContent = '●'.repeat(Math.max(0, r.patience)) || '0';
     trust();
   }
@@ -464,7 +482,7 @@
     ev.preventDefault();
     const r = state.run;
     const q = $('chat-input').value.trim();
-    if (!q || r.questionsLeft <= 0 || r.patience <= 0) return;
+    if (!q || r.phase !== 'call' || r.questionsLeft <= 0 || r.legLeft <= 0 || r.patience <= 0) return;
     const btn = ev.submitter || $('chat-form').querySelector('button[type=submit]');
     btn.disabled = true;
     addMsg('you', q);
@@ -473,25 +491,30 @@
     // One aside per call, on the second answer, so the stakeholder sounds human without rambling.
     const flavours = r.card.flavourLines || [];
     const flavour = r.transcript.length === 1 && flavours.length ? flavours[Math.floor(Math.random() * flavours.length)] : '';
-    const p = Prompts.stakeholder(r.card, flavour);
+    const p = Prompts.stakeholder(r.card, flavour, r.leg === 'callback');
     try {
       const out = await Gemini.json({ system: p.system, turns: r.turns, schema: p.schema });
       r.turns.push({ role: 'model', text: JSON.stringify(out) });
       addMsg('them', out.reply);
-      const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id));
+      const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('call')));
       facts.forEach(id => r.revealed.add(id));
-      r.transcript.push({ q, a: out.reply, quality: out.quality, facts });
+      r.transcript.push({ q, a: out.reply, quality: out.quality, facts, src: r.leg });
       r.questionsLeft--;
+      r.legLeft--;
       tick(4);
       if (out.quality === 'weak') { r.patience--; r.trust -= 10; }
       meters();
       save();
+      const more = touchpoints(r.card) && r.questionsLeft > 0;
       if (r.patience <= 0) {
         addMsg('sys', r.card.stakeholder.name + ' has another meeting. Suddenly. The call is over.');
-        setTimeout(toWriteup, 1800);
+        setTimeout(afterCall, 1800);
       } else if (r.questionsLeft <= 0) {
         addMsg('sys', 'That was your last question. Time to write it up.');
-        setTimeout(toWriteup, 1800);
+        setTimeout(afterCall, 1800);
+      } else if (r.legLeft <= 0) {
+        addMsg('sys', r.leg === 'callback' ? 'That is all the time they had for the callback.' : 'That is the time they had. You can still dig: ask for data, catch someone at the coffee machine' + (more && !r.calledBack ? ', or call back later.' : '.'));
+        setTimeout(afterCall, 1800);
       }
     } catch (e) {
       r.turns.pop();
@@ -500,16 +523,22 @@
       btn.disabled = false;
     }
   };
-  $('btn-hangup').onclick = () => toWriteup();
+  $('btn-hangup').onclick = () => afterCall();
   // Enter sends, Shift+Enter makes a new line.
   $('chat-input').addEventListener('keydown', ev => {
     if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); $('chat-form').requestSubmit(); }
   });
 
   // The call stays open (read-only) beside the write-up, with the notes and case file.
-  function toWriteup() {
+  // After a call: follow-up if this case has more to find and questions are left, else the board.
+  function afterCall() {
     const r = state.run;
     if (r.phase !== 'call') return;
+    if (touchpoints(r.card) && r.questionsLeft > 0) toInvestigate(); else toWriteup();
+  }
+  function toWriteup() {
+    const r = state.run;
+    if (r.phase !== 'call' && r.phase !== 'investigate') return;
     if (!r.transcript.length) addMsg('sys', 'You hung up without asking anything. Bold.');
     r.phase = 'write';
     r.board = newBoard(r);
@@ -525,6 +554,150 @@
     if (!r.board) r.board = newBoard(r);
     renderBoard();
     Desktop.layout('write', 'w-write');
+  }
+
+  // ---------- follow-up: data requests, the coffee machine, one callback ----------
+  function toInvestigate() {
+    const r = state.run;
+    if (!r.transcript.length) addMsg('sys', 'You hung up without asking anything. Bold.');
+    r.phase = 'investigate';
+    tick(5);
+    investigateDesk();
+    save();
+  }
+  function investigateDesk() {
+    const r = state.run;
+    $('w-call').classList.add('ended');
+    Desktop.title('w-call', 'Call with ' + r.card.stakeholder.name + ' (ended)', 'Call');
+    phase('investigate');
+    renderLeads();
+    Desktop.layout('investigate', 'w-leads');
+  }
+  function renderLeads() {
+    const r = state.run, card = r.card, on = r.phase === 'investigate', fl = card.frontline;
+    const n = r.questionsLeft;
+    $('leads-left').textContent = n + (n === 1 ? ' question' : ' questions') + ' left.';
+    document.querySelectorAll('#data-buttons button').forEach(b => {
+      const asked = r.data.includes(b.dataset.kind);
+      b.classList.toggle('asked', asked);
+      b.disabled = !on || asked || n <= 0;
+    });
+    const docs = $('data-docs');
+    docs.innerHTML = '';
+    r.docs.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'data-doc' + (d.text ? '' : ' empty');
+      const h = document.createElement('h4');
+      h.textContent = d.source;
+      div.append(h, document.createTextNode(d.text || 'Nothing on file. Someone promises to "look into it".'));
+      if (d.text) {
+        const pin = document.createElement('button');
+        pin.type = 'button'; pin.className = 'pin'; pin.textContent = '📌';
+        pin.title = 'Pin this to my notes'; pin.setAttribute('aria-label', 'Pin this to my notes');
+        if ((r.pins || []).includes(d.text)) pin.classList.add('done');
+        pin.onclick = () => pinNote(d.text, pin, d.source);
+        div.appendChild(pin);
+      }
+      docs.appendChild(div);
+    });
+    $('corridor-who').textContent = fl ? fl.name + ', ' + fl.role.charAt(0).toLowerCase() + fl.role.slice(1) + ', is waiting for the one coffee machine that works.' : 'Nobody around.';
+    const log = $('corridor-log');
+    log.innerHTML = '';
+    r.corridor.forEach(m => bubble(log, m.who, m.text, fl ? fl.name : ''));
+    const canAsk = !!(on && fl && r.corridorLeft > 0 && n > 0);
+    $('corridor-input').disabled = !canAsk;
+    $('corridor-form').querySelector('button[type=submit]').disabled = !canAsk;
+    $('corridor-left').textContent = !fl ? '' : r.corridorLeft ? 'They have time for ' + r.corridorLeft + (r.corridorLeft === 1 ? ' question.' : ' questions.') : 'Their coffee is ready. They are gone.';
+    $('btn-callback').textContent = '☎ Call ' + card.stakeholder.name.split(' ')[0] + ' back';
+    const found = r.data.length || r.corridor.length;
+    $('btn-callback').disabled = !on || r.calledBack || !found || n <= 0;
+    $('callback-note').textContent = r.calledBack ? 'You already called back once today.'
+      : found ? 'Bring what you found. Up to ' + Math.min(TOUCH.callback, n) + ' questions, and they start with fresh patience.'
+      : 'Find something first, in the data or at the coffee machine. Then you have a reason to call back.';
+    Desktop.title('w-leads', 'Follow-up · ' + n + ' left', 'Follow-up');
+    meters();
+  }
+
+  document.querySelectorAll('#data-buttons button').forEach(b => { b.onclick = () => requestData(b.dataset.kind); });
+  // A data request is answered from the card itself, no Gemini: every fact filed under that kind.
+  function requestData(kind) {
+    const r = state.run;
+    if (r.phase !== 'investigate' || r.data.includes(kind) || r.questionsLeft <= 0) return;
+    r.data.push(kind);
+    r.questionsLeft--;
+    const facts = r.card.hiddenFacts.filter(f => f.foundAt.includes('data:' + kind) && f.dataDoc);
+    if (!facts.length) r.docs.push({ kind, source: DATA_KINDS[kind], text: '' });
+    facts.forEach(f => {
+      r.docs.push({ kind, source: f.dataSource || DATA_KINDS[kind], text: f.dataDoc });
+      r.revealed.add(f.id);
+      r.transcript.push({ q: 'Data request: ' + DATA_KINDS[kind], a: (f.dataSource ? f.dataSource + ': ' : '') + f.dataDoc, quality: 'good', facts: [f.id], src: 'data' });
+    });
+    tick(15);
+    renderLeads();
+    save();
+  }
+
+  $('corridor-form').onsubmit = async ev => {
+    ev.preventDefault();
+    const r = state.run, fl = r.card.frontline;
+    const q = $('corridor-input').value.trim();
+    if (!q || !fl || r.phase !== 'investigate' || r.corridorLeft <= 0 || r.questionsLeft <= 0) return;
+    $('corridor-form').querySelector('button[type=submit]').disabled = true;
+    r.corridor.push({ who: 'you', text: q });
+    bubble($('corridor-log'), 'you', q, fl.name);
+    $('corridor-input').value = '';
+    r.corridorTurns.push({ role: 'user', text: 'The learning professional asks: """' + q + '"""' });
+    const p = Prompts.frontline(r.card);
+    try {
+      const out = await Gemini.json({ system: p.system, turns: r.corridorTurns, schema: p.schema });
+      r.corridorTurns.push({ role: 'model', text: JSON.stringify(out) });
+      r.corridor.push({ who: 'them', text: out.reply });
+      const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('frontline')));
+      facts.forEach(id => r.revealed.add(id));
+      r.transcript.push({ q, a: out.reply, quality: out.quality, facts, src: 'frontline' });
+      r.corridorLeft--;
+      r.questionsLeft--;
+      tick(5);
+      save();
+    } catch (e) {
+      r.corridorTurns.pop();
+      r.corridor.pop();
+      $('corridor-input').value = q;
+      toast(e.message);
+    }
+    renderLeads();
+  };
+  $('corridor-input').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); $('corridor-form').requestSubmit(); }
+  });
+
+  $('btn-callback').onclick = () => {
+    const r = state.run;
+    if (r.phase !== 'investigate' || r.calledBack || r.questionsLeft <= 0) return;
+    r.calledBack = true;
+    r.leg = 'callback';
+    r.legLeft = TOUCH.callback;
+    r.patience = r.card.patience || 3;
+    r.phase = 'call';
+    $('w-call').classList.remove('ended');
+    addMsg('sys', 'You call ' + r.card.stakeholder.name + ' back. "Back already? Go on, I have a few minutes."');
+    tick(30);
+    callWindow();
+    renderLeads();
+    phase('call');
+    Desktop.layout('call', 'w-call');
+    $('chat-input').focus();
+    save();
+  };
+  $('btn-leads-done').onclick = () => toWriteup();
+
+  // Everything the player found, labelled by where it came from (for Mieke and the examiner).
+  const SRC = { call: 'Call', callback: 'Callback', frontline: 'Coffee machine', data: 'Data' };
+  function transcriptText() {
+    const fl = state.run.card.frontline;
+    return state.run.transcript.map((t, i) => t.src === 'data'
+      ? `D${i + 1} [Data] ${t.q}\n${t.a}`
+      : `Q${i + 1} [${SRC[t.src] || 'Call'}${t.src === 'frontline' && fl ? ', to ' + fl.name + ', ' + fl.role : ''}]: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n');
   }
 
   // ---------- Mieke, the colleague two cubicles over ----------
@@ -551,14 +724,14 @@
     const ph = $('desktop').dataset.phase;
     const draft = ph !== 'write' ? null : r.board && r.board.mode === 'board' ? boardWriteup() : Object.fromEntries(new FormData($('write-form')).entries());
     const material = [
-      'Where they are: ' + ({ inbox: 'they have read the request and not called yet', call: 'they are in the middle of the intake call', write: 'the call is over and they are writing the concept' }[ph] || ph),
-      'Questions left in the call: ' + r.questionsLeft,
+      'Where they are: ' + ({ inbox: 'they have read the request and not called yet', call: r.leg === 'callback' ? 'they called the stakeholder back with what they found' : 'they are in the middle of the intake call', investigate: 'the first call is over; they can request data, chat with ' + (r.card.frontline ? r.card.frontline.name + ' (' + r.card.frontline.role + ')' : 'someone') + ' at the coffee machine, or call back once', write: 'the call is over and they are writing the concept' }[ph] || ph),
+      'Questions left for this request: ' + r.questionsLeft,
       '',
       'The request: "' + r.card.surfaceAsk + '"',
       'Case file: ' + (r.card.briefing ? r.card.briefing.points.join(' | ') : 'none'),
       '',
-      'The call so far:',
-      r.transcript.map((t, i) => `Q${i + 1}: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n') || '(no questions yet)',
+      'What they found so far (call, data, coffee machine):',
+      transcriptText() || '(no questions yet)',
       '',
       'Their notes: """' + ($('notes').value.trim() || '(empty)') + '"""',
       draft ? '\nTheir draft write-up:\n"""\n' + writeupText(draft) + '\n"""' : '',
@@ -610,7 +783,9 @@
   // What the player can cite: the opening request and every answer they got.
   function evidencePool() {
     const r = state.run;
-    return [{ id: 'ask', text: r.card.surfaceAsk, facts: [] }].concat(r.transcript.map((t, i) => ({ id: 'a' + i, text: t.a, facts: t.facts || [], pinned: (r.pins || []).includes(t.a) })));
+    const fl = r.card.frontline;
+    const label = t => t.src === 'data' ? '📊 ' : t.src === 'frontline' ? '☕ ' + (fl ? fl.name.split(' ')[0] + ': ' : '') : t.src === 'callback' ? '☎ ' : '';
+    return [{ id: 'ask', text: r.card.surfaceAsk, facts: [] }].concat(r.transcript.map((t, i) => ({ id: 'a' + i, text: t.a, label: label(t), facts: t.facts || [], pinned: (r.pins || []).some(p => t.a.endsWith(p)) })));
   }
   const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
   const short = (t, n) => t.length > n ? t.slice(0, n - 1).trim() + '…' : t;
@@ -640,7 +815,7 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'ev-card';
-      btn.textContent = (item.pinned ? '📌 ' : '') + '"' + short(item.text, 150) + '"';
+      btn.textContent = (item.pinned ? '📌 ' : '') + (item.label || '') + '"' + short(item.text, 150) + '"';
       btn.title = item.text;
       btn.setAttribute('aria-pressed', b.evidence.includes(item.id));
       btn.disabled = b.locked && b.step === 'diagnose';
@@ -915,8 +1090,8 @@
     wait('The examiner is reading the transcript. The examiner has read a lot of transcripts.');
     const p = Prompts.judge(r.card);
     const material = [
-      'INTAKE TRANSCRIPT (player questions and stakeholder answers):',
-      r.transcript.map((t, i) => `Q${i + 1}: """${t.q}"""\nA${i + 1}: ${t.a}`).join('\n') || '(the player asked no questions)',
+      'INTAKE TRANSCRIPT (player questions with the answers, from the call, a callback, the coffee machine with a front-line employee, and data requests; each data request cost one question):',
+      transcriptText() || '(the player asked no questions)',
       'Hidden facts the player surfaced: ' + ([...r.revealed].join(', ') || 'none'),
       '',
       'WRITE-UP:', '"""', writeupText(r.writeup), '"""',
@@ -1014,7 +1189,9 @@
     const missed = $('score-missed');
     missed.innerHTML = '';
     r.card.hiddenFacts.filter(f => !r.revealed.has(f.id)).forEach(f => {
-      const li = document.createElement('li'); li.textContent = f.fact; missed.appendChild(li);
+      const li = document.createElement('li');
+      li.textContent = f.fact + (touchpoints(r.card) ? ' (Findable ' + listText(f.foundAt.map(placeOf)).replace(/ and /g, ' or ') + '.)' : '');
+      missed.appendChild(li);
     });
     if (!missed.children.length) { const li = document.createElement('li'); li.textContent = 'Nothing. You found it all.'; missed.appendChild(li); }
     $('score-verdict').textContent = g.verdict;
@@ -1097,7 +1274,10 @@
     const r = state.run;
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
-    if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call')) { toast('The case board opens when the call is over.', 'info'); return; }
+    if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call' || r.phase === 'investigate')) { toast('The case board opens when you are done asking questions.', 'info'); return; }
+    if (id === 'w-leads' && (!r || !touchpoints(r.card))) { toast(r && r.card.difficulty === 0 ? 'Starter cases are all on the call. Follow-up opens on the next ones.' : 'Nothing to follow up yet.', 'info'); return; }
+    if (id === 'w-leads' && (r.phase === 'inbox' || (r.phase === 'call' && !r.calledBack))) { toast('Follow-up opens after your first call: data, the coffee machine, a callback.', 'info'); return; }
+    if (id === 'w-leads') renderLeads();
     if (id === 'w-scores') renderScores();
     if (id === 'w-coe' && !$('coe-doc').innerHTML) Coe.render($('coe-files'), $('coe-doc'), 'flow');
     Desktop.open(id, Desktop.floating[id]);
@@ -1130,17 +1310,36 @@
     }
     if (r.phase === 'inbox') $('btn-call').onclick();
     if (r.phase === 'call') {
-      card.hiddenFacts.slice(0, r.questionsLeft).forEach(f => {
+      card.hiddenFacts.filter(f => f.foundAt.includes('call') && !r.revealed.has(f.id)).slice(0, Math.min(r.questionsLeft, r.legLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'Tell me more.'), a = f.revealLine || f.fact;
         addMsg('you', qText);
         addMsg('them', a);
         r.turns.push({ role: 'user', text: 'The learning professional asks: """' + qText + '"""' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
-        r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id] });
+        r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id], src: r.leg });
         r.revealed.add(f.id);
         r.questionsLeft--;
+        r.legLeft--;
       });
       meters();
-      toWriteup();
+      afterCall();
+      return;
+    }
+    // Follow-up: every data kind that holds something, then the coffee machine, scripted.
+    if (r.phase === 'investigate') {
+      Object.keys(DATA_KINDS).filter(k => card.hiddenFacts.some(f => f.foundAt.includes('data:' + k) && !r.revealed.has(f.id))).forEach(requestData);
+      const fl = card.frontline;
+      card.hiddenFacts.filter(f => f.foundAt.includes('frontline') && !r.revealed.has(f.id)).slice(0, Math.min(r.corridorLeft, r.questionsLeft)).forEach(f => {
+        const qText = '(test) ' + (f.unlockedBy || 'What is it really like?'), a = f.frontlineLine || f.fact;
+        r.corridor.push({ who: 'you', text: qText }, { who: 'them', text: a });
+        r.corridorTurns.push({ role: 'user', text: 'The learning professional asks:  + qText + ' }, { role: 'model', text: JSON.stringify({ reply: a, revealed: [f.id], quality: 'good' }) });
+        r.transcript.push({ q: qText, a, quality: 'good', facts: [f.id], src: 'frontline' });
+        r.revealed.add(f.id);
+        r.corridorLeft--;
+        r.questionsLeft--;
+      });
+      if (!fl) r.corridorLeft = 0;
+      renderLeads();
+      save();
       return;
     }
     if (r.phase !== 'write') return;

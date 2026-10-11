@@ -30,8 +30,12 @@
       needStatement: g.need_statement,
       hiddenFacts: list(raw.hidden_facts).map(f => ({
         id: f.id, fact: f.fact, unlockedBy: f.unlocks_when, revealLine: f.reveal_line,
-        weight: f.weight || 1, critical: !!f.critical
+        weight: f.weight || 1, critical: !!f.critical,
+        // Where it can be found: 'call', 'frontline' or 'data:<kind>'. Untagged facts are on the call.
+        foundAt: list(f.found_at).length ? list(f.found_at) : ['call'],
+        dataDoc: f.data_doc || '', dataSource: f.data_source || '', frontlineLine: f.frontline_line || ''
       })),
+      frontline: raw.frontline && raw.frontline.name ? { name: raw.frontline.name, role: raw.frontline.role || '', voice: raw.frontline.voice || '' } : null,
       volunteered: list(raw.volunteered_facts),
       constraints: {
         budget: c.budget,

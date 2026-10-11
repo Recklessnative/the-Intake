@@ -316,6 +316,20 @@ label.check input { width: auto; }
 .tray .debug { min-height: 0; height: 24px; padding: 0 8px; font-size: 12px; color: #fff; background: #b5432a; border: 1px solid #fff; }
 
 /* ---------- narrow screens: one window at a time, the taskbar switches ---------- */
+/* Follow-up window */
+.leads { flex: 1; overflow-y: auto; padding: 4px 2px; }
+.leads section { border-top: 1px solid #c8d3e4; padding: 8px 0; }
+.leads h3 { margin: 0 0 6px; font-size: 14px; }
+.leads-budget { margin: 0 0 8px; }
+.data-buttons { flex-wrap: wrap; gap: 6px; }
+.data-buttons button.asked { opacity: .55; }
+.data-docs { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.data-doc { background: #fffdf3; border: 1px solid #d9cf9e; border-radius: 3px; padding: 6px 30px 6px 10px; position: relative; font-family: "Courier New", monospace; font-size: 12.5px; white-space: pre-wrap; }
+.data-doc h4 { margin: 0 0 3px; font-family: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+.data-doc.empty { background: transparent; border-style: dashed; color: var(--muted); }
+.corridor-log { min-height: 60px; max-height: 220px; flex: none; }
+.leads-done { border-top: 1px solid #c8d3e4; padding-top: 8px; }
+
 @media (max-width: 899px) {
   .desktop { height: auto; min-height: calc(100vh - 36px); padding: 6px 6px 42px; overflow: visible; }
   .win { position: static; width: auto !important; height: calc(100vh - 54px) !important; resize: none; min-width: 0; }

@@ -85,6 +85,7 @@
         <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
         <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
         <button type="button" class="desk-icon" data-app="w-call"><span class="di">☎</span>Phone</button>
+        <button type="button" class="desk-icon" data-app="w-leads"><span class="di">🔎</span>Follow-up</button>
         <button type="button" class="desk-icon" data-app="w-write"><span class="di">📌</span>Case board</button>
         <button type="button" class="desk-icon" data-app="w-mieke"><span class="di">☕</span>Mieke</button>
         <button type="button" class="desk-icon" data-app="w-scores"><span class="di">🏆</span>My scores.txt</button>
@@ -172,6 +173,42 @@
             <button type="button" class="btn-mieke">Ask Mieke</button>
           </div>
         </form>
+      </div>
+
+      <!-- Follow-up after the first call: data, the coffee machine, a callback -->
+      <div class="win" id="w-leads" data-title="Follow-up" data-icon="🔎">
+        <div class="leads">
+          <p class="leads-budget"><b id="leads-left"></b> One data request costs 1 question, so does a question at the coffee machine. A callback gives you up to 3 more with the stakeholder.</p>
+          <section>
+            <h3>Ask for data</h3>
+            <div class="row data-buttons" id="data-buttons">
+              <button type="button" data-kind="kpi">📊 KPIs and reports</button>
+              <button type="button" data-kind="org">👥 Org chart and roles</button>
+              <button type="button" data-kind="process">⚙ Process and systems</button>
+              <button type="button" data-kind="policy">📜 Policies and targets</button>
+              <button type="button" data-kind="training">🎓 Past training</button>
+            </div>
+            <div id="data-docs" class="data-docs" aria-live="polite"></div>
+          </section>
+          <section>
+            <h3>By the coffee machine</h3>
+            <p class="muted" id="corridor-who"></p>
+            <div id="corridor-log" class="chat-log corridor-log" aria-live="polite"></div>
+            <form id="corridor-form" class="chat-form">
+              <textarea id="corridor-input" rows="2" maxlength="300" placeholder="Ask them something... (Enter sends)"></textarea>
+              <div class="row"><button type="submit" class="primary">Ask</button> <span class="muted" id="corridor-left"></span></div>
+            </form>
+          </section>
+          <section>
+            <h3>Call back</h3>
+            <p class="muted" id="callback-note"></p>
+            <button type="button" id="btn-callback">☎ Call back</button>
+          </section>
+          <div class="row leads-done">
+            <button type="button" class="primary" id="btn-leads-done">Done: to the case board</button>
+            <button type="button" class="btn-mieke">Ask Mieke</button>
+          </div>
+        </div>
       </div>
 
       <!-- Colleague -->

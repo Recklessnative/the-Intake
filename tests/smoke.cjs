@@ -37,13 +37,43 @@ async function caseBoard(req) {
   if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
   await next();
 }
+// The follow-up after a first call: a data request, the coffee machine, one callback.
+async function followUp() {
+  await p.waitForSelector('#w-leads.open');
+  await visible('#w-leads');
+  const r0 = await p.evaluate(() => { const r = window.__intake.state.run; return { left: r.questionsLeft, phase: r.phase }; });
+  if (r0.phase !== 'investigate' || r0.left !== 8) throw new Error('follow-up budget wrong: ' + JSON.stringify(r0));
+  if (!(await p.isDisabled('#btn-callback'))) throw new Error('callback open before finding anything');
+  if (!MOBILE) { await p.click('.desk-icon[data-app="w-write"]'); if (!(await p.textContent('#toast')).includes('done asking')) throw new Error('case board should wait for the follow-up'); }
+  await p.click('#data-buttons [data-kind="kpi"]');
+  await p.waitForSelector('#data-docs .data-doc');
+  if (!(await p.isDisabled('#data-buttons [data-kind="kpi"]'))) throw new Error('a data kind can be asked twice');
+  await p.fill('#corridor-input', 'How did you learn the job here?'); await p.press('#corridor-input', 'Enter');
+  await p.waitForFunction(() => document.querySelectorAll('#corridor-log .msg.them').length === 1);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/followup.png' });
+  // Close the tab during the follow-up: it comes back with the documents and the chat.
+  await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
+  await p.waitForSelector('#w-leads.open');
+  if (!(await p.$$eval('#corridor-log .msg.them', l => l.length)) || !(await p.$$eval('#data-docs .data-doc', l => l.length))) throw new Error('follow-up not restored');
+  await p.click('#btn-callback');
+  await visible('#w-call');
+  if (await p.isVisible('#w-call.ended')) throw new Error('callback window still ended');
+  await p.fill('#chat-input', 'The log says it is mostly agency newcomers. Did you know?'); await p.press('#chat-input', 'Enter');
+  await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.you').length === 3);
+  await p.click('#btn-hangup');
+  await p.waitForSelector('#w-leads.open');
+  const r1 = await p.evaluate(() => { const r = window.__intake.state.run; return { left: r.questionsLeft, cb: r.calledBack, srcs: r.transcript.map(t => t.src) }; });
+  if (r1.left !== 5 || !r1.cb || !r1.srcs.includes('frontline') || !r1.srcs.includes('callback')) throw new Error('follow-up state wrong: ' + JSON.stringify(r1));
+  if (!(await p.isDisabled('#btn-callback'))) throw new Error('second callback allowed');
+  await p.click('#btn-leads-done');
+}
 (async () => {
   MOBILE = process.argv.includes('--mobile');
   const b = await chromium.launch(); p = await b.newPage({ viewport: MOBILE ? { width: 390, height: 844 } : { width: 1366, height: 768 } });
   visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
-  let calls = 0;
+  let calls = 0, corridor = 0, callbacks = 0;
   await p.route('https://generativelanguage.googleapis.com/**', async route => {
     calls++;
     const body = JSON.parse(route.request().postData());
@@ -52,10 +82,11 @@ async function caseBoard(req) {
     if ('temperature' in body.generationConfig) throw new Error('temperature sent');
     if (!route.request().url().includes('gemini-3.5-flash-lite')) throw new Error('wrong model ' + route.request().url());
     let out;
-    if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('The call so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
+    if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
     else if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
-    else { const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak' }; }
+    else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good' }; }
+    else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak' }; }
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
   });
   await p.goto('http://localhost:8765/');
@@ -117,6 +148,7 @@ async function caseBoard(req) {
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/call.png" });
     }
     await p.click('#btn-hangup');
+    if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
     if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/write.png" });
     if (req === 1) {
@@ -147,6 +179,10 @@ async function caseBoard(req) {
   await p.waitForSelector('#s-end.active');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
+  if (corridor !== 1 || callbacks !== 1) throw new Error('coffee machine or callback prompt missing: ' + corridor + ' ' + callbacks);
+  // The stakeholder never knows what only the floor or the data knows.
+  const leaks = await p.evaluate(() => window.__intake.state.pool.flatMap(c => { const sys = Prompts.stakeholder(c).system; return c.hiddenFacts.filter(f => !f.foundAt.includes('call') && sys.includes('[' + f.id + ']')).map(f => c.id + ':' + f.id); }));
+  if (leaks.length) throw new Error('stakeholder knows off-call facts: ' + leaks);
   if (await p.evaluate(() => window.__intake.state.cards.filter(c => c.difficulty === 0).length) !== 2) throw new Error('first week should open with two starters');
   // Week 2 in test mode: Autofill plays a whole request; no starters, and the scores file keeps both weeks.
   await p.goto('http://localhost:8765/?debug=1');
@@ -155,7 +191,11 @@ async function caseBoard(req) {
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   if (await p.evaluate(() => window.__intake.state.cards.some(c => c.difficulty === 0))) throw new Error('starters in a second week');
   if (await p.isVisible('#w-coe')) throw new Error('the CoE folder should only open by itself in the first week');
-  await p.click('#btn-debug');                       // inbox -> scripted call -> case board
+  await p.click('#btn-debug');                       // inbox -> scripted call -> follow-up
+  await p.waitForSelector('#w-leads.open');
+  await p.click('#btn-debug');                       // data requests and the coffee machine, scripted
+  if (!(await p.$$eval('#data-docs .data-doc', l => l.length))) throw new Error('autofill asked for no data');
+  await p.click('#btn-leads-done');
   await p.waitForSelector('#w-write.open');
   if (await p.evaluate(() => window.__intake.state.run.revealed.size) < 3) throw new Error('autofill call revealed too little');
   await p.click('#btn-debug');                       // fills every step, lands on the memo
