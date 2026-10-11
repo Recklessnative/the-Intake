@@ -5,6 +5,12 @@
   "tier": 1,
   "tier_label": "Real skill gap, open stakeholder",
   "title": "Safety Refresher, But They Have No Time",
+  "briefing": [
+    "Grocery distribution centre running 24/5; reach trucks lift pallets to height in narrow aisles.",
+    "Belgian employers must have a prevention advisor, a legally required safety role who owns the risk analysis.",
+    "Agency workers are employed by a temp agency; the contract decides who pays for their training time.",
+    "Near-miss reports are voluntary; more reports can mean a better safety culture, not a worse site."
+  ],
   "stakeholder": {
     "name": "Sofie Van den Broeck",
     "role": "Site Operations Manager",
@@ -18,7 +24,11 @@
   "surface_ask": "A 15-minute mobile safety refresher for all 220 staff.",
   "gold": {
     "real_problem": "Near-misses cluster on the night shift between 2:00 and 4:00 and mostly involve agency reach-truck drivers in their first six weeks. They get a 20-minute video induction with no practical on this site's narrow aisles, there is no supervisor on the floor after 1:00, and a per-case night bonus introduced four months ago rewards rushing.",
-    "root_cause_types": ["skill", "environment", "incentive"],
+    "root_cause_types": [
+      "skill",
+      "environment",
+      "incentive"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "New agency drivers need a site-specific practical sign-off and supervised first nights before driving solo; the night supervision gap and the per-case bonus need fixing alongside it. A refresher for everyone misses the people at risk."
   },

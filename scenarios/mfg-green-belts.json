@@ -5,6 +5,12 @@
   "tier": 1,
   "tier_label": "Real skill gap, open stakeholder",
   "title": "Twenty-Two Green Belts",
+  "briefing": [
+    "Corrugated cardboard plant running six production lines on three shifts.",
+    "OEE (overall equipment effectiveness) combines availability, speed and quality into one percentage; world class is often quoted around 85%.",
+    "Lean Six Sigma belts are certifications: a Green Belt typically means several days of classroom statistics plus an improvement project.",
+    "Belgian plants have a works council, and training rules and pay scales are partly set in sector collective agreements."
+  ],
   "stakeholder": {
     "name": "Marc Peeters",
     "role": "Plant Manager",
@@ -18,7 +24,11 @@
   "surface_ask": "A Lean Six Sigma Green Belt certification for all 22 team leads.",
   "gold": {
     "real_problem": "Team leads lose most of their shift firefighting and have no daily management routine. Shift handovers are a two-minute shout at the machine, so the same problems repeat shift after shift, and half of all downtime is logged as 'Other', so nobody knows which stops to attack.",
-    "root_cause_types": ["skill", "process", "system"],
+    "root_cause_types": [
+      "skill",
+      "process",
+      "system"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "Team leads need to run a short structured shift start and handover, log stops properly and do simple root cause on the top stops of their line. That is a practised floor routine plus a fix to downtime coding, not a project-based statistics certificate."
   },

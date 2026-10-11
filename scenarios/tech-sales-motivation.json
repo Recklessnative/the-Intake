@@ -5,6 +5,12 @@
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Bring Me a Navy SEAL",
+  "briefing": [
+    "B2B SaaS company selling analytics subscriptions to mid-sized and large companies.",
+    "Account executives are paid a base salary plus commission against a quota; commission plans are set by sales leadership and finance.",
+    "Enterprise deals often stall in procurement, where buyers compare price and contract terms.",
+    "In Germany, tools that monitor employees (such as call recordings) need works council co-determination."
+  ],
   "stakeholder": {
     "name": "Jasper Wouters",
     "role": "VP Sales EMEA",
@@ -18,7 +24,11 @@
   "surface_ask": "A motivational off-site with an external speaker for 60 account executives.",
   "gold": {
     "real_problem": "A new commission plan in January pays accelerators on multi-year deals but claws back commission on deals discounted over 20%, so reps chase multi-year deals with heavy discounts and lose the commission. A new 'Pro' pricing tier launched without enablement and stalls at procurement. The drop is concentrated in reps hired in the last year, who got a two-day bootcamp and no coaching.",
-    "root_cause_types": ["incentive", "skill", "process"],
+    "root_cause_types": [
+      "incentive",
+      "skill",
+      "process"
+    ],
     "is_training_the_lever": "partly",
     "need_statement": "Motivation is not the gap. Newer reps can't sell the Pro tier through procurement and get no deal coaching, and the commission plan punishes the discounts it encourages. Enablement for new reps on Pro, a coaching rhythm for managers, and a data case on the clawback are the levers."
   },

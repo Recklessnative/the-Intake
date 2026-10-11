@@ -1,0 +1,170 @@
+{
+  "id": "pharma-read-and-sign",
+  "schema_version": 1,
+  "sector": "Pharma",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "Read, Sign, Repeat",
+  "briefing": [
+    "Sterile injectables plant, regulated under Good Manufacturing Practice (GMP). Every task an operator performs must be covered by a documented, effective training.",
+    "'Read and sign' means an operator reads the procedure (SOP) and signs that they understood it. It is cheap and auditable; whether it works is another question.",
+    "Deviations are recorded quality events. Each one needs an investigation and a corrective and preventive action (CAPA), and repeated deviations draw inspectors' attention.",
+    "The Belgian medicines agency (FAMHP) inspects the site; Quality Assurance (QA) must approve anything that counts as GMP training."
+  ],
+  "stakeholder": {
+    "name": "Dr. Nathalie Dubois",
+    "role": "Site Quality Director",
+    "org": "Vespera Pharma, a sterile injectables plant near Wavre with 650 staff",
+    "voice": "Exact, calm, slightly formal; thinks in deviations, CAPAs and inspection readiness. Bilingual French and English. Dry, under-the-breath humour about paperwork. Appreciates precise questions.",
+    "patience": 4,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "opening_message": "We've had a run of deviations on aseptic interventions. The CAPA says 'retrain operators'. I need all 140 cleanroom operators to re-read and sign the 23 relevant SOPs within the month, with a quiz. Can L&D set that up in the system?",
+  "surface_ask": "Read-and-sign retraining on 23 SOPs plus a quiz for all 140 cleanroom operators.",
+  "gold": {
+    "real_problem": "The deviations come almost entirely from the new isolator line, from operators who joined in the last eight months. They were qualified by read-and-sign only, because the experienced trainer who did hands-on coaching left and was never replaced. The intervention SOP was rewritten into a 41-page document, and the glove-port technique can't be learned from paper.",
+    "root_cause_types": ["skill", "process"],
+    "is_training_the_lever": "yes",
+    "need_statement": "New operators on the isolator line lack the hands-on skill for aseptic interventions. They need practical training and observed qualification on a mock-up or during line downtime, and the SOP needs a usable one-page visual. Re-reading 23 SOPs for all 140 operators adds paperwork without adding skill."
+  },
+  "hidden_facts": [
+    {
+      "id": "one_line",
+      "fact": "Fourteen of the 16 deviations happened on the new isolator line; the two older lines are almost clean.",
+      "unlocks_when": "The player asks where, on which line or in which area the deviations occur.",
+      "reveal_line": "Fourteen of the sixteen are on Line 4, the new isolator. Lines 1 and 2 are practically boring. I like boring.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "new_operators",
+      "fact": "The operators involved joined in the last eight months.",
+      "unlocks_when": "The player asks who was involved, how experienced they are, or whether it is all operators.",
+      "reveal_line": "Mostly recent hires. We expanded fast for Line 4. The veterans stayed on the old lines. Of course they did.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "trainer_left",
+      "fact": "The experienced operator-trainer who did hands-on coaching left last year; since then new hires are qualified by read-and-sign only.",
+      "unlocks_when": "The player asks how operators are trained or qualified on the line, or what changed in onboarding.",
+      "reveal_line": "We had Luc. Luc trained everyone at the glove port. Luc retired in March. Since then... they read the SOP and sign.",
+      "weight": 3,
+      "critical": true
+    },
+    {
+      "id": "sop_length",
+      "fact": "The intervention SOP was rewritten after the last inspection and is now 41 pages long.",
+      "unlocks_when": "The player asks about the procedures themselves, their length, clarity or recent changes.",
+      "reveal_line": "After the last inspection we made the intervention SOP 'more complete'. It's 41 pages. It is very complete.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "mockup",
+      "fact": "A training mock-up of the isolator glove ports exists in a storage room; it has never been used.",
+      "unlocks_when": "The player asks about practice facilities, simulators, equipment or how people could practise safely.",
+      "reveal_line": "There's a mock-up. The supplier delivered it with the isolator. It's in room B-12, under a cover. Next to the Christmas decorations.",
+      "weight": 2,
+      "critical": false
+    },
+    {
+      "id": "quiz_scores",
+      "fact": "Operators involved in deviations scored above 90% on the existing SOP quizzes.",
+      "unlocks_when": "The player asks whether the operators already did quizzes or how well they know the procedures.",
+      "reveal_line": "Their quiz scores are excellent. 92% on average. They know what the SOP says. Their gloves don't.",
+      "weight": 2,
+      "critical": false
+    }
+  ],
+  "volunteered_facts": [
+    "16 deviations on aseptic interventions in the last quarter.",
+    "The CAPA owner has written 'retrain operators' as the corrective action."
+  ],
+  "constraints": {
+    "budget": "Internal resources; can fund a trainer role if justified.",
+    "deadline": "CAPA due within a month; FAMHP inspection expected in the next six months.",
+    "audience": "140 cleanroom operators on three lines, two-shift pattern; about 35 on the isolator line.",
+    "schedule": "Line time is extremely expensive; practical sessions must use the mock-up or planned downtime.",
+    "languages": "French and Dutch, some English.",
+    "data_available": [
+      "Deviation records with line, shift and operator",
+      "Training records and quiz scores in the learning management system",
+      "Environmental monitoring results",
+      "Line downtime schedule"
+    ],
+    "data_not_available": [
+      "Any record of observed practical competence"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Quality Assurance (her own team)",
+      "concern": "Must approve any new training as GMP-valid, including observed qualification.",
+      "if_ignored": "A better training that doesn't count for the inspector."
+    },
+    {
+      "who": "Production manager of Line 4",
+      "concern": "Owns line time and the operators' schedule.",
+      "if_ignored": "No time for practice and the pilot collapses."
+    },
+    {
+      "who": "SOP owner / technical writer",
+      "concern": "Any visual or simplified job aid must be a controlled document.",
+      "if_ignored": "Unofficial cheat sheets appear on the walls, which is itself a deviation."
+    },
+    {
+      "who": "HR",
+      "concern": "Replacing Luc means a new operator-trainer role and pay grade.",
+      "if_ignored": "The skill gap returns with the next hiring wave."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Read-and-sign completion and quiz scores, which are already high.",
+      "Counting the CAPA as closed when the training record is complete."
+    ],
+    "gold_plan": {
+      "baseline": "Intervention deviations per 1,000 interventions on Line 4 versus Lines 1 and 2, over the last two quarters.",
+      "behaviour": "Observed qualification: each operator performs the critical interventions on the mock-up, checked against a short checklist by a qualified trainer.",
+      "leading_indicators": "Share of Line 4 operators with an observed qualification; findings during routine line observations.",
+      "business_metric": "Intervention deviations on Line 4 and environmental monitoring excursions.",
+      "collection": "Deviation system, the observation checklist stored as a GMP training record, monthly review in the quality meeting."
+    }
+  },
+  "concepts": {
+    "conventional": "Re-read and sign 23 SOPs with a quiz for all 140 operators.",
+    "solid": "Targeted hands-on training for Line 4 operators on the mock-up, with an observed qualification as the GMP record, a one-page visual job aid for interventions, and a replacement for Luc's coaching role.",
+    "next_level_examples": [
+      "Turn the veterans of Lines 1 and 2 into certified glove-port coaches, so the skill lives in people rather than in one retiring trainer.",
+      "Record short first-person videos of correct interventions on the mock-up as a controlled job aid, approved by QA.",
+      "Change the qualification standard itself: no operator works an intervention on Line 4 without an observed sign-off, written into the SOP."
+    ],
+    "also_valid": [
+      "A short read-and-sign of the single intervention SOP can stay as part of the record, if hands-on qualification is the core."
+    ],
+    "red_flags": [
+      "Read-and-sign for everyone as the answer.",
+      "Another quiz.",
+      "Blaming new operators as careless.",
+      "Proposing anything that bypasses QA approval."
+    ]
+  },
+  "defence_objections": [
+    "The inspector will ask for a training record on all 23 SOPs. 'We practised on a mock-up' is not a document.",
+    "Veterans coaching new hires? Their own lines will slow down, and my production manager will come for me personally.",
+    "Videos in a GMP environment? Every frame becomes a controlled document. Do you know how long that takes?"
+  ],
+  "question_you_didnt_ask": "Which line do the deviations come from?",
+  "actor_notes": [
+    "Nathalie suspects read-and-sign won't work but needs a defensible CAPA; she rewards players who give her a better one that still survives an inspection.",
+    "She answers precise questions precisely and gets curt with vague ones ('could you be more specific?').",
+    "Low risk appetite: anything that sounds like it weakens documentation triggers pushback; framing it as a stronger GMP record lowers resistance.",
+    "She mentions the mock-up only when asked about practice facilities, with mild embarrassment."
+  ],
+  "flavour_lines": [
+    "Our SOPs are so thorough that SOP-001 explains how to read SOPs.",
+    "Everyone has read the procedure. That's what their signatures say."
+  ]
+}
