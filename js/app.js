@@ -68,11 +68,62 @@
     if (!key) { toast('Paste a Gemini API key first.'); return; }
     Gemini.save(key, $('in-model').value.trim(), $('in-remember').checked);
     show('s-title');
+    runsLeft();
   };
+  $('btn-clear-key').onclick = () => { Gemini.forget(); $('in-key').value = ''; show('s-title'); runsLeft(); };
+
+  // ---------- free runs and unlocks (only with a backend) ----------
+  async function runsLeft() {
+    $('runs-left').textContent = '';
+    if (Gemini.key) { $('runs-left').textContent = 'Playing on your own Gemini key.'; return; }
+    if (!Gemini.hasBackend) return;
+    try {
+      const r = await Gemini.backend('status');
+      if (r.ok) $('runs-left').textContent = r.data.runsLeft === 1 ? '1 free week left.' : r.data.runsLeft + ' free weeks left.';
+    } catch (e) { /* offline: say nothing */ }
+  }
+  function openCap() {
+    const url = (window.INTAKE_CONFIG || {}).donateUrl;
+    const d = $('cap-donate');
+    d.textContent = '';
+    if (url) {
+      d.append('Want a code? ');
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Buy Yannick a coffee';
+      d.append(a, ' and you get one back.');
+    }
+    $('in-code').value = '';
+    show('s-cap');
+  }
+  $('btn-unlock').onclick = async () => {
+    const code = $('in-code').value.trim();
+    if (!code) return;
+    try {
+      const r = await Gemini.backend('unlock', { code });
+      if (!r.ok) { toast(r.data.error || 'That code did not work.'); return; }
+      show('s-title');
+      runsLeft();
+    } catch (e) { toast('Could not reach the game server.'); }
+  };
+  $('btn-cap-key').onclick = () => openSettings();
+  $('btn-cap-back').onclick = () => show('s-title');
+
+  // Start a week: own key plays freely; otherwise the backend counts the run.
+  async function claimRun() {
+    Gemini.runId = null;
+    if (Gemini.key) return true;
+    if (!Gemini.hasBackend) { openSettings(); return false; }
+    let r;
+    try { r = await Gemini.backend('start'); } catch (e) { toast('Could not reach the game server. You can still play on your own Gemini key.'); return false; }
+    if (r.status === 402) { openCap(); return false; }
+    if (!r.ok) { toast(r.data.error || 'The game server said no.'); return false; }
+    Gemini.runId = r.data.runId;
+    return true;
+  }
 
   $('btn-start').onclick = async () => {
-    if (!Gemini.key) { openSettings(); return; }
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
+    if (!(await claimRun())) return;
     state.cards = pickWeek();
     state.index = 0;
     state.results = [];
@@ -342,6 +393,8 @@
     $('end-note').textContent = 'Average over ' + state.results.length + ' requests.';
     show('s-end');
   }
+
+  runsLeft();
 
   // test hook
   window.__intake = { state, points };
