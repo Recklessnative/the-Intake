@@ -96,7 +96,7 @@ async function followUp() {
   visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
-  let calls = 0, corridor = 0, callbacks = 0, quickCalls = 0;
+  let boardCalls = 0, calls = 0, corridor = 0, callbacks = 0, quickCalls = 0;
   await p.route('https://generativelanguage.googleapis.com/**', async route => {
     calls++;
     const body = JSON.parse(route.request().postData());
@@ -109,6 +109,8 @@ async function followUp() {
     else if (sys.includes('measurement exercise')) { quickCalls++; const r = { score: 3, note: 'Specific.' }; out = { baseline: r, behaviour: r, metric: r, collection: r }; }
     else if (sys.includes('exactly ONE question')) { quickCalls++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Since June, now that you ask.', revealed: facts.slice(0, 1), score: 3, note: 'Good: you asked what changed.' }; }
     else if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
+    else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.' }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?' }, { role: 'COO', preempted: false, line: 'Who covers the shifts?' }] }; }
+    else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good' }; }
     else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak' }; }
@@ -210,11 +212,34 @@ async function followUp() {
     }
     await p.click('#btn-next');
   }
+  // Friday: the board room. Pick a concept, the slide comes prefilled from the write-up.
+  await p.waitForSelector('#p-board.active .board-pick');
+  if (await p.$$eval('.board-pick', l => l.length) !== 3) throw new Error('board pick should list the three full cases');
+  await p.click('.board-pick');
+  await p.waitForSelector('.slide textarea');
+  const pre = await p.$$eval('.slide textarea', l => l.filter(t => t.value.trim()).length);
+  if (pre < 3) throw new Error('slide not prefilled from the write-up: ' + pre);
+  await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#p-board.active .slide');
+  await p.fill('.slide textarea[name=ask]', 'EUR 30k, 3 months, sponsor: the COO.');
+  await p.fill('.slide textarea[name=evidence]', 'Six of nine new hires left in month one.');
+  await p.click('#boardroom button.primary');
+  await p.waitForSelector('.member textarea');
+  if (await p.$$eval('.member textarea', l => l.length) !== 2 || !(await p.$('.member.nod'))) throw new Error('board questions wrong');
+  await p.fill('.member textarea[name=b0]', 'Yes, we showed it to them on Tuesday.');
+  await p.fill('.member textarea[name=b1]', 'We pilot on day shift first.');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board.png' });
+  await p.click('#boardroom button.primary');
+  await p.waitForSelector('#boardroom .score-total');
+  const bt = await p.textContent('#boardroom .score-total');
+  if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
+  await p.click('#boardroom button.primary');
   await p.waitForSelector('#s-end.active');
+  if (!(await p.textContent('#end-board')).includes('Approved as a pilot') || !(await p.textContent('#share-text')).includes('as a pilot')) throw new Error('board result missing on the end screen');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
   if (!(await p.$('#share-img canvas')) || await p.isVisible('#btn-linkedin') || !(await p.textContent('#share-text')).includes('hidden facts')) throw new Error('share card wrong on a normal week');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });
+  if (boardCalls !== 2) throw new Error('expected two board calls, got ' + boardCalls);
   if (quickCalls !== 1) throw new Error('expected one Gemini call for the quick intakes, got ' + quickCalls);
   // Every quick kind grades and draws its form and debrief.
   const kinds = await p.evaluate(async () => {
@@ -284,7 +309,7 @@ async function followUp() {
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-scores"]'); } else await p.click('.desk-icon[data-app="w-scores"]');
   await visible('#w-scores');
   const txt = await p.textContent('#scores');
-  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 10') || !txt.includes('[starter]') || !txt.includes('[quick: triage]')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
+  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 10') || !txt.includes('[starter]') || !txt.includes('[quick: triage]') || !txt.includes('board: pilot 80/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
   await p.goto('http://localhost:8765/?debug=1');
@@ -309,6 +334,16 @@ async function followUp() {
     console.log('hard request', i + 1, await p.textContent('#score-total'));
     await p.click('#btn-next');
   }
+  await p.waitForSelector('#p-board.active .board-pick');
+  await p.click('#btn-debug');                       // pick
+  if (await p.$$eval('.slide textarea', l => l.filter(t => t.value.trim()).length)) throw new Error('hard-mode slide should start blank');
+  await p.click('#boardroom button.primary');
+  if (await p.isVisible('.member')) throw new Error('an empty slide was presented');
+  await p.click('#btn-debug'); await p.click('#boardroom button.primary');
+  await p.waitForSelector('.member textarea');
+  await p.click('#btn-debug'); await p.click('#boardroom button.primary');
+  await p.waitForSelector('#boardroom .score-total');
+  await p.click('#boardroom button.primary');
   await p.waitForSelector('#s-end.active');
   if (!(await p.isVisible('#btn-linkedin')) || !(await p.isVisible('#share-badge'))) throw new Error('hard week has no LinkedIn card');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-hard.png', fullPage: true });

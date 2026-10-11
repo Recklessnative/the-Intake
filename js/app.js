@@ -34,7 +34,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false };
+  const state = { pool: [], quickPool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -47,7 +47,7 @@
   // Defence, waiting and the scorecard share one dialog window.
   function pane(id, stepText) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
-    Desktop.title('w-dialog', { 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard' }[id], 'THE INTAKE');
+    Desktop.title('w-dialog', { 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
     if (stepText) step(stepText);
   }
@@ -227,6 +227,7 @@
     state.index = 0;
     state.results = [];
     state.charged = false;
+    state.board = null;
     state.run = null;
     cubicle();
   }
@@ -278,7 +279,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -303,6 +304,7 @@
     state.days = s.days || cards.map(() => 0);
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
+    state.board = s.board || null;
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
     state.results = s.results || [];
@@ -319,6 +321,7 @@
     state.run = r;
     Sound.chime();
     openRequest();
+    if (state.board) renderBoardRoom();
   };
 
   // ---------- one request ----------
@@ -789,7 +792,7 @@
       b.type = 'button';
       b.className = 'primary';
       b.id = 'quick-next';
-      b.textContent = state.index + 1 < state.cards.length ? 'Next request' : 'End the week';
+      b.textContent = nextLabel();
       b.onclick = () => $('btn-next').onclick();
       const row = document.createElement('div');
       row.className = 'row';
@@ -1306,7 +1309,7 @@
     const r = state.run;
     const { pts, bonus, total } = points(g, replay);
     if (!replay) {
-      state.results.push({ id: r.card.id, total, found: r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '' });
+      state.results.push({ id: r.card.id, total, found: r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g);
       r.phase = 'score';
       r.grade = g;
@@ -1364,14 +1367,14 @@
     if (!missed.children.length) { const li = document.createElement('li'); li.textContent = 'Nothing. You found it all.'; missed.appendChild(li); }
     $('score-verdict').textContent = g.verdict;
     trust();
-    $('btn-next').textContent = state.index + 1 < state.cards.length ? 'Next request' : 'End the week';
+    $('btn-next').textContent = nextLabel();
     pane('p-score', 'Request ' + (state.index + 1) + ' · Scorecard');
   }
 
   $('btn-next').onclick = () => {
-    state.index++;
-    if (state.index < state.cards.length) startRequest(); else { dropSave(); endRun(); }
+    if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else toBoard();
   };
+  const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.
   function bestLine(w) {
@@ -1384,14 +1387,158 @@
     // A full case counts twice as much as a quick one.
     const wt = x => (x.quick ? 1 : 2);
     const avg = Math.round(state.results.reduce((a, x) => a + wt(x) * x.total, 0) / (state.results.reduce((a, x) => a + wt(x), 0) || 1));
-    const title = TITLES.find(([max]) => avg < max)[1];
+    // The board is the week's headline: your title weighs the board as much as the requests.
+    const br = state.board && state.board.result;
+    const score = br ? Math.round((avg + br.points.total) / 2) : avg;
+    const title = TITLES.find(([max]) => score < max)[1];
     $('end-title').textContent = title;
-    $('end-score').textContent = avg + ' / 100';
+    $('end-score').textContent = score + ' / 100';
+    $('end-board').hidden = !br;
+    if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
     const q = state.results.filter(x => x.quick).length;
-    $('end-note').textContent = 'Week ' + state.weekNo + '. Average over ' + state.results.length + ' requests' + (q ? ' (' + q + ' quick ones, which count half)' : '') + '.';
-    recordWeek(avg, title);
-    shareCard(avg, title);
+    $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (q ? ' (' + q + ' quick ones, which count half)' : '') + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
+    recordWeek(score, title, br ? { decision: br.decision, total: br.points.total } : null);
+    shareCard(score, title);
     show('s-end');
+  }
+
+  // ---------- the board room: Friday, once per week ----------
+  // You take one concept from the week to the board on one slide with six boxes. Each member
+  // nods if the slide already answers their concern, or asks you one question to answer live.
+  const BOARD = [
+    { role: 'CFO', name: 'Geert Claes', cares: 'cost, return on investment, and what you stop doing to pay for it' },
+    { role: 'CHRO', name: 'Annelies Wouters, with the DPO at her side', cares: 'data privacy, the works council, fairness and workload' },
+    { role: 'COO', name: 'Rachid Bensaid', cares: 'operational dependencies, timing, and who loses productive hours' }
+  ];
+  const SLIDE = [['problem', 'The problem'], ['evidence', 'Evidence of the need'], ['concept', 'The concept'], ['measure', 'How we will know'], ['risks', 'Risks and dependencies'], ['ask', 'The ask: budget, time, sponsor']];
+  const DECISIONS = { approved: 'Approved.', pilot: 'Approved as a pilot.', rejected: 'Rejected.' };
+
+  // The slide starts from what you already wrote for that request (hard mode starts blank).
+  function slideFrom(w) {
+    if (!w || state.hard) return {};
+    const lines = xs => xs.filter(Boolean).join('\n');
+    if (w.kind === 'board') return { problem: w.problem, evidence: lines(w.evidence.map(e => '"' + e + '"')), concept: lines([w.idea, w.why]), measure: lines(w.rungs.map(x => x.text && x.label + ': ' + x.text)), risks: lines(w.risks.map(x => x.who + ': ' + x.mitigation)) };
+    if (w.kind === 'memo4') return { problem: w.need, concept: w.concept, measure: w.measure, risks: w.risks };
+    if (w.kind === 'form') return { problem: w.gap, concept: lines([w.idea, w.why]), measure: lines([w.baseline, w.behaviour, w.metric]), risks: w.risks };
+    return {};
+  }
+  const boardCard = () => state.pool.find(c => c.id === state.board.pick);
+
+  function toBoard() {
+    const full = state.results.filter(x => !x.quick);
+    if (!full.length) { dropSave(); endRun(); return; }
+    state.board = state.board || { stage: 'pick', pick: '', slide: {}, members: [], answers: [], result: null };
+    save();
+    renderBoardRoom();
+  }
+  function renderBoardRoom() {
+    const B = state.board, box = $('boardroom');
+    box.innerHTML = '';
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    const button = (text, onclick, cls) => { const b = el('button', cls || 'primary', text); b.type = 'button'; b.onclick = onclick; return b; };
+    box.appendChild(el('p', 'eyebrow', 'Friday · the board room'));
+    if (B.stage === 'pick') {
+      box.appendChild(el('h2', null, 'Which concept do you take to the board?'));
+      box.appendChild(el('p', 'muted', 'One slide, three board members, one shot. Pick the concept you can defend best, not necessarily your highest score.'));
+      state.results.filter(x => !x.quick).forEach(x => {
+        const card = state.pool.find(c => c.id === x.id);
+        const b = button(card.stakeholder.name + ': ' + card.subject + ' (' + x.total + '/100)', () => {
+          B.pick = x.id;
+          B.slide = Object.assign({}, x.slide || {});
+          B.stage = 'slide';
+          save();
+          renderBoardRoom();
+        }, 'board-pick');
+        box.appendChild(b);
+      });
+    }
+    if (B.stage === 'slide') {
+      const card = boardCard();
+      box.appendChild(el('h2', null, 'Your slide: ' + card.subject));
+      box.appendChild(el('p', 'muted', state.hard ? 'Hard mode: a blank slide. Six boxes, your words.' : 'It starts from what you wrote for ' + card.stakeholder.name + '. Sharpen it for a board: numbers, a stop-doing, and a concrete ask.'));
+      const grid = el('div', 'slide');
+      SLIDE.forEach(([k, label]) => {
+        const l = el('label', null, label);
+        const t = el('textarea');
+        t.rows = 3; t.maxLength = 500; t.name = k;
+        t.value = B.slide[k] || '';
+        t.oninput = () => { B.slide[k] = t.value; saveSoon(); };
+        l.appendChild(t);
+        grid.appendChild(l);
+      });
+      box.appendChild(grid);
+      box.appendChild(button('Present it', presentSlide));
+    }
+    if (B.stage === 'questions' || B.stage === 'result') {
+      const card = boardCard();
+      box.appendChild(el('h2', null, B.stage === 'result' ? DECISIONS[B.result.decision] : 'The board responds'));
+      let asked = 0;
+      B.members.forEach((m, i) => {
+        const who = BOARD[i] || { role: m.role, name: '' };
+        const d = el('div', 'member' + (m.preempted ? ' nod' : ''));
+        d.appendChild(el('p', 'member-who', who.role + ' · ' + who.name + (m.preempted ? ' · nods' : '')));
+        d.appendChild(el('p', 'msg them', m.line));
+        if (!m.preempted) {
+          const n = asked++;
+          if (B.stage === 'questions') {
+            const t = el('textarea');
+            t.rows = 3; t.maxLength = 600; t.name = 'b' + n;
+            t.setAttribute('aria-label', 'Your answer to the ' + who.role);
+            t.value = B.answers[n] || '';
+            t.oninput = () => { B.answers[n] = t.value; saveSoon(); };
+            d.appendChild(t);
+          } else {
+            d.appendChild(el('p', 'msg you', B.answers[n] || '(no answer)'));
+            const a = (B.result.answers || [])[n] || {};
+            d.appendChild(el('p', 'ev', (a.note || '') + ' · ' + B.result.points.members[i] + '/20'));
+          }
+        } else if (B.stage === 'result') d.appendChild(el('p', 'ev', 'Pre-empted by your slide · 20/20'));
+        box.appendChild(d);
+      });
+      if (B.stage === 'questions') box.appendChild(button(asked ? 'Answer the board' : 'Thank them and leave', judgeBoard));
+      else {
+        box.appendChild(el('p', 'ev', 'The slide: ' + B.result.slide.note + ' · ' + B.result.points.slide + '/40'));
+        box.appendChild(el('p', 'score-total', B.result.points.total + ' / 100'));
+        box.appendChild(el('p', 'quick-debrief', B.result.verdict));
+        box.appendChild(button('End the week', () => { dropSave(); endRun(); }));
+      }
+      if (card && B.stage === 'questions') box.appendChild(el('p', 'fine', 'The concept for ' + card.stakeholder.name + ' is on the table. Answer what they asked, with reasons.'));
+    }
+    pane('p-board', 'Friday · board room');
+  }
+  async function presentSlide() {
+    const B = state.board, card = boardCard();
+    if (SLIDE.filter(([k]) => (B.slide[k] || '').trim().length > 5).length < 4) { toast('Fill at least four boxes. Boards notice empty boxes.', 'info'); return; }
+    wait('The board reads your slide. The CFO has found a calculator.');
+    const p = Prompts.board(card, BOARD);
+    try {
+      const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: 'The slide, quoted as data:\n' + SLIDE.map(([k, l]) => l + ': """' + (B.slide[k] || '') + '"""').join('\n') }] });
+      B.members = BOARD.map((m, i) => { const x = (out.members || [])[i] || {}; return { role: m.role, preempted: !!x.preempted, line: x.line || 'Go on.' }; });
+    } catch (e) { toast(e.message); renderBoardRoom(); return; }
+    B.answers = [];
+    B.stage = 'questions';
+    save();
+    renderBoardRoom();
+  }
+  async function judgeBoard() {
+    const B = state.board, card = boardCard();
+    const asked = B.members.filter(m => !m.preempted);
+    wait('The board confers. Someone says "synergy". Nobody laughs.');
+    const p = Prompts.boardJudge(card);
+    const material = [
+      'THE SLIDE:', SLIDE.map(([k, l]) => l + ': """' + (B.slide[k] || '') + '"""').join('\n'), '',
+      'QUESTIONS AND LIVE ANSWERS:',
+      asked.length ? asked.map((m, n) => m.role + ' asked: ' + m.line + '\nAnswer: """' + (B.answers[n] || '(no answer)') + '"""').join('\n') : '(none: the slide pre-empted every question)'
+    ].join('\n');
+    let g;
+    try { g = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: material }] }); } catch (e) { toast(e.message); renderBoardRoom(); return; }
+    let n = 0;
+    const members = B.members.map(m => m.preempted ? 20 : Math.round(20 * clamp4(((g.answers || [])[n++] || {}).score) / 4));
+    const slide = Math.round(40 * clamp4((g.slide || {}).score) / 4);
+    B.result = { slide: g.slide || {}, answers: g.answers || [], decision: DECISIONS[g.decision] ? g.decision : 'pilot', verdict: g.verdict || '', points: { slide, members, total: slide + members.reduce((a, b) => a + b, 0) } };
+    B.stage = 'result';
+    save();
+    renderBoardRoom();
   }
 
   // ---------- the share card: a specific brag beats a number ----------
@@ -1404,11 +1551,13 @@
     const defence = !def.length ? 'Nobody pushed back on my concepts.'
       : def.includes('retreat') ? 'I backed down once in the defence round. Never again.'
       : def.every(d => d === 'strong') ? 'Held my ground in every defence round.' : 'Survived the defence round, mostly.';
-    return { avg, title, hard: state.hard, found, of, line: best ? best.line : '', defence };
+    const br = state.board && state.board.result;
+    const board = br ? { approved: 'The board approved my pitch.', pilot: 'The board approved my pitch as a pilot.', rejected: 'The board rejected my pitch. Next week.' }[br.decision] : '';
+    return { avg, title, hard: state.hard, found, of, line: best ? best.line : '', defence, board };
   }
   function shareText(d) {
     return 'I just finished a ' + (d.hard ? 'HARD MODE ' : '') + 'week of THE INTAKE as a ' + d.title + ' (' + d.avg + '/100). ' +
-      (d.of ? 'I found ' + d.found + ' of ' + d.of + ' hidden facts. ' : '') + d.defence +
+      (d.of ? 'I found ' + d.found + ' of ' + d.of + ' hidden facts. ' : '') + d.defence + (d.board ? ' ' + d.board : '') +
       (d.line ? '\nMy best line: "' + d.line + '"' : '') + '\nThink you ask better questions? ' + GAME_URL;
   }
   // 1200 x 627, the size LinkedIn shows a picture at.
@@ -1426,7 +1575,9 @@
     g.fillStyle = '#333'; g.font = '30px sans-serif';
     let y = 320;
     if (d.of) { g.fillText('Found ' + d.found + ' of ' + d.of + ' hidden facts.', 72, y); y += 46; }
-    g.fillText(d.defence, 72, y); y += 60;
+    g.fillText(d.defence, 72, y); y += 46;
+    if (d.board) { g.fillText(d.board, 72, y); y += 46; }
+    y += 14;
     if (d.line) {
       g.font = 'italic 28px serif'; g.fillStyle = '#222';
       const lines = [], ws = ('"' + d.line + '"').split(' ');
@@ -1493,9 +1644,9 @@
     });
     keepScores(h);
   }
-  function recordWeek(avg, title) {
+  function recordWeek(avg, title, board) {
     const h = scoreHistory(), w = thisWeek(h);
-    Object.assign(w, { done: true, avg, title });
+    Object.assign(w, { done: true, avg, title, board: board || undefined });
     keepScores(h);
   }
   function renderScores() {
@@ -1511,7 +1662,7 @@
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
       const head = document.createElement('h3');
-      head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · average ' + w.avg + '/100' : ' · in progress') + ' ===';
+      head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
       box.appendChild(head);
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
         para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (x.quick ? ' [quick: ' + Quick.KINDS[x.quick].label.toLowerCase() + ']' : '') + ': ' + x.total + '/100');
@@ -1562,6 +1713,13 @@
     const r = state.run;
     if (!r) return;
     const card = r.card;
+    if (state.board && $('p-board').classList.contains('active')) {
+      const B = state.board;
+      if (B.stage === 'pick') { $('boardroom').querySelector('.board-pick').click(); return; }
+      if (B.stage === 'slide') { SLIDE.forEach(([k]) => { if (!(B.slide[k] || '').trim()) B.slide[k] = '(test) ' + ({ ask: 'EUR 40k and 3 months; sponsor: the COO.' }[k] || 'A specific line for ' + k + '.'); }); renderBoardRoom(); return; }
+      if (B.stage === 'questions') { B.members.filter(m => !m.preempted).forEach((m, n) => { B.answers[n] = '(test) We pilot it with one team first, it costs 2 hours per person, and we stop the old course to pay for it.'; }); renderBoardRoom(); return; }
+      return;
+    }
     if ($('w-dialog').classList.contains('open') && $('p-defence').classList.contains('active')) {
       $('defence-form').querySelectorAll('textarea').forEach(t => { t.value = '(test) Fair point. We pilot it with one team first, measure against the baseline, and only scale if it works.'; });
       return;
