@@ -5,10 +5,42 @@ const srv = http.createServer((q, s) => {
   const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]) === '/' ? 'index.html' : decodeURIComponent(q.url.split('?')[0]));
   fs.readFile(f, (e, d) => { if (e) { s.writeHead(404); return s.end(); } s.writeHead(200, { 'Content-Type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.css') ? 'text/css' : f.endsWith('.json') ? 'application/json' : 'text/html' }); s.end(d); });
 }).listen(8765);
+let p, visible, MOBILE, shot = 0;
+// The case board: five short steps, each locked in (some with feedback first), then the memo.
+async function caseBoard(req) {
+  const next = () => p.click('#board-next');
+  const lockAndGo = async () => { await next(); if (await p.isVisible('#board-feedback')) { if (!(await p.textContent('#board-feedback')).startsWith('Mieke:')) throw new Error('feedback without Mieke'); if (req === 0 && !MOBILE && !shot++) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/feedback.png' }); await next(); } };
+  await next();                                          // nothing filled: refused
+  if (!(await p.isVisible('.bstep[data-step="diagnose"]'))) throw new Error('empty diagnosis was accepted');
+  await p.click('#ev-diagnose .ev-card >> nth=1');
+  await p.click('#tags [data-tag="skill"]'); await p.click('#tags [data-tag="process"]');
+  await p.fill('#b-problem', 'Night-shift newcomers skip the scan because nobody shows them and the bonus rewards speed.');
+  await lockAndGo();
+  if (req === 2) {
+    await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
+    if (!(await p.isVisible('.bstep[data-step="lever"]'))) throw new Error('board did not resume at the lever step: ' + JSON.stringify(await p.evaluate(() => ({ step: window.__intake.state.run.board && window.__intake.state.run.board.step, phase: window.__intake.state.run.phase, desk: document.getElementById('desktop').dataset.phase, wwrite: document.getElementById('w-write').className, board: document.getElementById('board').hidden }))));
+  }
+  await p.click('#lever [data-lever="partly"]'); await p.fill('#b-lever-why', 'Half of it is the bonus and the rota.');
+  await lockAndGo();
+  await p.fill('[data-rung="baseline"]', 'Incidents per 1,000 picks on nights, last quarter.');
+  await p.selectOption('[data-rung-ev="baseline"]', { index: 2 });
+  await p.fill('[data-rung="metric"]', 'Night incident rate down by a third.');
+  await lockAndGo();
+  await p.fill('#b-idea', 'A ten-minute buddy walk on every newcomer\'s first three nights.');
+  await p.click('#formats [data-format="On-the-job huddle"]');
+  await p.fill('#b-why', 'It puts a person next to the newcomer when it matters.'); await p.fill('#b-not', 'Not another video.');
+  await lockAndGo();
+  await p.click('#tiles button >> nth=0'); await p.click('#tiles button >> nth=1');
+  await p.fill('#mitigations input >> nth=0', 'Ask them first.'); await p.fill('#mitigations input >> nth=1', 'Pilot on one shift.');
+  await lockAndGo();
+  if (!(await p.textContent('#memo')).includes('Big idea: A ten-minute buddy walk')) throw new Error('memo not assembled');
+  if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
+  await next();
+}
 (async () => {
-  const MOBILE = process.argv.includes('--mobile');
-  const b = await chromium.launch(); const p = await b.newPage({ viewport: MOBILE ? { width: 390, height: 844 } : { width: 1366, height: 768 } });
-  const visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
+  MOBILE = process.argv.includes('--mobile');
+  const b = await chromium.launch(); p = await b.newPage({ viewport: MOBILE ? { width: 390, height: 844 } : { width: 1366, height: 768 } });
+  visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
   let calls = 0;
@@ -47,6 +79,15 @@ const srv = http.createServer((q, s) => {
     await p.click('#btn-call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
+    if (req === 1) {
+      // Close the tab mid-call and come back: the week resumes where it was.
+      await p.reload();
+      if (!(await p.isVisible('#btn-resume'))) throw new Error('no resume button after reload');
+      await p.click('#btn-resume');
+      await p.waitForSelector('#s-desk.active');
+      if (await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('call transcript not restored');
+      if (!MOBILE) await visible('#w-call');
+    }
     if (req === 0) {
       await p.click('#chat-log .msg.them .pin');
       if (!(await p.inputValue('#notes')).includes('Nights, mostly.') && !(await p.inputValue('#notes')).length) throw new Error('pin did not reach the notes');
@@ -64,8 +105,14 @@ const srv = http.createServer((q, s) => {
     await p.click('#btn-hangup');
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
     if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/write.png" });
-    for (const n of ['gap', 'who', 'cause', 'lever', 'baseline', 'behaviour', 'metric', 'collect', 'idea', 'format', 'why', 'not', 'risks']) await p.fill(`#write-form [name=${n}]`, 'Something specific about ' + n);
-    await p.click('#write-form button[type=submit]');
+    if (req === 1) {
+      // Memo mode: the long form is still there for those who want it.
+      await p.click('#btn-memo-mode');
+      for (const n of ['gap', 'who', 'cause', 'lever', 'baseline', 'behaviour', 'metric', 'collect', 'idea', 'format', 'why', 'not', 'risks']) await p.fill(`#write-form [name=${n}]`, 'Something specific about ' + n);
+      await p.click('#write-form button[type=submit]');
+    } else {
+      await caseBoard(req);
+    }
     await p.waitForSelector('#p-defence.active, #p-score.active');
     let objs = 0;
     if (await p.$('#p-defence.active')) {
@@ -76,6 +123,11 @@ const srv = http.createServer((q, s) => {
     await p.waitForSelector('#p-score.active');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + (MOBILE ? "/score-mobile.png" : "/score.png") });
+    if (req === 0) {
+      // Reload on the scorecard: it comes back without counting the request twice.
+      await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#p-score.active');
+      if (await p.evaluate(() => window.__intake.state.results.length) !== 1) throw new Error('scorecard counted twice after resume');
+    }
     await p.click('#btn-next');
   }
   await p.waitForSelector('#s-end.active');

@@ -21,7 +21,7 @@ echo json_encode(['candidates' => [['content' => ['parts' => [['text' => json_en
 PHP
 cat > "$T/config.php" <<PHP
 <?php return ['gemini_key'=>'SERVER-KEY','models'=>['gemini-3.5-flash-lite'],'db_dsn'=>'sqlite:$T/db.sqlite','db_user'=>null,'db_pass'=>null,
-'free_runs'=>2,'calls_per_run'=>3,'daily_calls'=>100,'max_output'=>1500,'ip_salt'=>'salt','allowed_origins'=>['https://example.test'],
+'free_runs'=>2,'calls_per_run'=>3,'charge_after_calls'=>3,'daily_calls'=>100,'max_output'=>1500,'ip_salt'=>'salt','allowed_origins'=>['https://example.test'],
 'gemini_base'=>'http://127.0.0.1:8792/models/'];
 PHP
 php -S 127.0.0.1:8792 -t "$T/mock" "$T/mock/index.php" >/dev/null 2>&1 &
@@ -34,8 +34,9 @@ check() { if [[ "$2" == *"$3"* ]]; then echo "ok   $1"; else echo "FAIL $1: $2";
 
 r=$(call status '{}'); check "status gives a token and 2 runs" "$r" '"runsLeft":2'
 TOKEN=$(echo "$r" | sed -E 's/.*"token":"([a-f0-9]{32})".*/\1/')
-r=$(call start "{\"token\":\"$TOKEN\"}"); check "first run starts" "$r" '"runsLeft":1'
+r=$(call start "{\"token\":\"$TOKEN\"}"); check "first run starts, not charged yet" "$r" '"runsLeft":2'
 RUN=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
+r=$(call start "{\"token\":\"$TOKEN\"}"); check "unplayed week is handed back" "$r" "\"runId\":\"$RUN\""
 REQ='{"contents":[{"role":"user","parts":[{"text":"hi"}]}],"systemInstruction":{"parts":[{"text":"s"}]},"generationConfig":{"maxOutputTokens":99999,"temperature":0}}'
 r=$(call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}"); check "proxy uses the server key" "$r" 'SERVER-KEY'
 check "proxy caps output tokens" "$r" '\"max\":1500'
@@ -44,12 +45,18 @@ check "proxy strips temperature" "$r" '\"temp\":false'
 call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}" >/dev/null; call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}" >/dev/null
 r=$(call gemini "{\"runId\":\"$RUN\",\"request\":$REQ}"); check "per-run call limit" "$r" ' 429'
 r=$(call gemini "{\"runId\":\"$(printf 'a%.0s' {1..32})\",\"request\":$REQ}"); check "unknown run refused" "$r" ' 403'
-r=$(call start "{\"token\":\"$TOKEN\"}"); check "second run starts" "$r" '"runsLeft":0'
+r=$(call status "{\"token\":\"$TOKEN\"}"); check "a week that used its calls counts" "$r" '"runsLeft":1'
+r=$(call start "{\"token\":\"$TOKEN\"}"); check "second run starts" "$r" '"runsLeft":1'
+RUN2=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
+[[ "$RUN2" != "$RUN" ]] && echo "ok   second run is a new run" || { echo "FAIL second run reused the first"; fails=$((fails+1)); }
+r=$(call played "{\"token\":\"$TOKEN\",\"runId\":\"$RUN2\"}"); check "first scorecard charges the week" "$r" '"runsLeft":0'
 r=$(call start "{\"token\":\"$TOKEN\"}"); check "third run capped" "$r" ' 402'
 r=$(call unlock "{\"token\":\"$TOKEN\",\"code\":\"nope\"}"); check "bad code refused" "$r" ' 404'
 r=$(call unlock "{\"token\":\"$TOKEN\",\"code\":\"coffee-test\"}"); check "code unlocks 2 runs" "$r" '"runsLeft":2'
 r=$(call unlock "{\"token\":\"$TOKEN\",\"code\":\"COFFEE-TEST\"}"); check "code used up" "$r" ' 404'
-r=$(call start "{\"token\":\"$TOKEN\"}"); check "unlocked run starts" "$r" '"runsLeft":1'
+r=$(call start "{\"token\":\"$TOKEN\"}"); check "unlocked run starts" "$r" '"runsLeft":2'
+RUN3=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
+r=$(call played "{\"token\":\"$TOKEN\",\"runId\":\"$RUN3\"}"); check "unlocked week charged when played" "$r" '"runsLeft":1'
 r=$(call status '{}'); check "fresh browser on same IP still has runs (office IP)" "$r" '"runsLeft":2'
 r=$(curl -s -D - -o /dev/null -X OPTIONS -H 'Origin: https://example.test' "$API?action=status"); check "CORS for allowed origin" "$r" 'Access-Control-Allow-Origin: https://example.test'
 r=$(curl -s -D - -o /dev/null -X OPTIONS -H 'Origin: https://evil.test' "$API?action=status"); [[ "$r" != *"Access-Control-Allow-Origin"* ]] && echo "ok   no CORS for other origins" || { echo "FAIL CORS leak"; fails=$((fails+1)); }
