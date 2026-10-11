@@ -18,22 +18,40 @@
       <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
       <button id="btn-start" class="primary">Clock in</button>
       <button id="btn-settings" class="ghost">Gemini key</button>
+      <p id="runs-left" class="fine"></p>
     </div>
   </section>
 
   <!-- Settings / key -->
   <section id="s-settings" class="screen">
     <div class="panel narrow">
-      <h2>Bring your own Gemini key</h2>
-      <p>For now THE INTAKE runs on your own Gemini API key. You can get a free one at Google AI Studio. The key stays in this browser and is sent only to Google.</p>
+      <h2>Your own Gemini key</h2>
+      <p id="settings-intro">You can play on your own Gemini API key, with no limit on runs. Get a free one at Google AI Studio. The key stays in this browser and is sent only to Google.</p>
       <label>API key <input id="in-key" type="password" autocomplete="off" placeholder="AIza..."></label>
       <label>Model <input id="in-model" type="text" spellcheck="false"></label>
       <label class="check"><input id="in-remember" type="checkbox"> Remember the key in this browser</label>
       <p class="fine">Please don't type real company data: on Google's free tier, prompts may be used to improve their models.</p>
       <div class="row">
         <button id="btn-save-key" class="primary">Save</button>
+        <button id="btn-clear-key" class="ghost">Forget my key</button>
         <button id="btn-back-title" class="ghost">Back</button>
       </div>
+    </div>
+  </section>
+
+  <!-- Free runs used up -->
+  <section id="s-cap" class="screen">
+    <div class="panel narrow">
+      <p class="eyebrow">HR has noticed your overtime</p>
+      <h2>Your free weeks are used up</h2>
+      <p>Every run costs real Gemini calls, which Yannick pays for. You can keep playing in two ways.</p>
+      <label>Unlock code <input id="in-code" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. COFFEE-2026"></label>
+      <div class="row">
+        <button id="btn-unlock" class="primary">Unlock</button>
+        <button id="btn-cap-key" class="ghost">Use my own Gemini key</button>
+      </div>
+      <p id="cap-donate" class="fine"></p>
+      <button id="btn-cap-back" class="ghost">Back</button>
     </div>
   </section>
 
@@ -152,6 +170,7 @@
 
   <div id="toast" class="toast" role="status"></div>
 </main>
+<script src="js/config.js"></script>
 <script src="js/gemini.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/prompts.js"></script>

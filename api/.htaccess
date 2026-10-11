@@ -1,0 +1,4 @@
+# Keep config and SQL files private; only index.php is public.
+<FilesMatch "\.(sql|md)$|^config\.php$|^config\.sample\.php$">
+  Require all denied
+</FilesMatch>
