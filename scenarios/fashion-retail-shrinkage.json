@@ -1,0 +1,213 @@
+{
+  "id": "fashion-retail-shrinkage",
+  "schema_version": 1,
+  "sector": "Fashion retail",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "The Jeans That Never Arrived",
+  "briefing": {
+    "headline": "Stock loss in fashion retail: what you should know before the call",
+    "points": [
+      "Shrinkage is the gap between the stock the books say a shop has and what the stock count finds; it is usually quoted as a percentage of sales.",
+      "Shrinkage has several sources: shoplifting, staff theft, supplier or delivery errors, and administrative mistakes in receiving, pricing and returns.",
+      "Belgian rules on camera surveillance and on checks of staff are strict: the 1992 privacy law, collective agreement 68 on cameras at work, and the new camera law of this spring.",
+      "Store staff in retail fall under their own joint committee; schedules are tight and most shops run with two or three people on the floor."
+    ]
+  },
+  "stakeholder": {
+    "name": "Katrien Desmet",
+    "role": "Head of Store Operations",
+    "org": "Nora & Lou, a Belgian women's fashion chain with 52 stores and head office in Kortrijk",
+    "voice": "Polished, fast, speaks in retail acronyms and percentages. Loyal to her boss, careful about what she puts in an e-mail. Becomes vague when head office decisions come up.",
+    "patience": 3,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Nadia Benali",
+    "role": "Store manager, Liège city centre, 11 years with the chain",
+    "voice": "Direct, funny, switches between French and Dutch mid-sentence. Fiercely defends her team and has kept her own notes for months."
+  },
+  "opening_message": "Bonjour! Our shrinkage went from 1.6% to 3.4% of sales this year. The sector average is about 1.5. Our COO wants a loss prevention training for all shop staff, around 400 people: how to spot shoplifters, how to watch the fitting rooms, how to approach someone. Before the Christmas season. Can you do it?",
+  "surface_ask": "A loss prevention training on spotting and approaching shoplifters for about 400 shop staff before Christmas.",
+  "gold": {
+    "real_problem": "Shrinkage doubled in the months after two head office decisions, both championed by the COO: in February stores were told to stop counting deliveries ('trusted delivery') to save time, and in March the warehouse was outsourced to a logistics partner whose picking has never been audited. Boxes regularly arrive short, nobody may count them, and the missing pieces show up later as 'shrinkage'. Stores also had to start tagging part of the stock themselves without extra hours, and the alarm gates in a dozen stores don't work. Shoplifting exists, but it is not what changed.",
+    "root_cause_types": [
+      "process",
+      "system",
+      "incentive"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Most of the extra shrinkage is created before an item reaches the shop floor: short deliveries nobody is allowed to count, unaudited warehouse picking and untagged stock. The fix is a receiving check, a picking audit with the logistics partner and working tags and gates. Training has a small role: how to receive and tag, not how to spot thieves."
+  },
+  "hidden_facts": [
+    {
+      "id": "never_on_the_floor",
+      "fact": "The stock count shows the biggest losses on items that were never on display: sizes and colours still listed in the stockroom, and whole lines missing from boxes. The jump started in April, right after the warehouse switch.",
+      "unlocks_when": "The player asks what kind of items go missing, where in the store, or when exactly the shrinkage started rising.",
+      "reveal_line": "By product? Hm. A lot of it is... stockroom stock. Sizes we never put out. That's odd for shoplifters, I admit. They usually prefer the shop.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Shrinkage % of sales, all stores: Jan 1.5, Feb 1.7, Mar 1.8, Apr 3.1, May 3.6, Jun 3.4, Jul 3.5, Aug 3.3. Breakdown of unexplained differences at the June count: items never displayed (stockroom only) 58%, items on display 42%. Most-missing: jeans in sizes 36-40, whole colour lines of knitwear.",
+      "data_source": "Stock count results and shrinkage report, January to August"
+    },
+    {
+      "id": "trusted_delivery",
+      "fact": "Since February, stores are not allowed to open and count delivery boxes on arrival ('trusted delivery'); they sign the delivery note and unpack later. The COO introduced it to save about three hours per store per week.",
+      "unlocks_when": "The player asks how deliveries are received in the stores, or what changed in store processes this year.",
+      "reveal_line": "We stopped counting deliveries in February. Philippe's idea, our COO. Three hours a week per store. The board loved the number.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "We sign for the boxes, we're not allowed to count. Then a box says twenty jeans and there are seventeen. Who stole three jeans out of a sealed box? A very small thief."
+    },
+    {
+      "id": "warehouse_outsourced",
+      "fact": "In March the warehouse moved to an outside logistics partner, TransNord Logistics, also the COO's project. The contract promises 99% picking accuracy, but no one has audited it since go-live. A recount of 40 boxes by three stores found 2.7% of pieces missing.",
+      "unlocks_when": "The player asks how stock gets to the stores, who picks the orders, or whether delivery accuracy is checked.",
+      "reveal_line": "The warehouse is TransNord since March. They have a 99% accuracy target in the contract. Has anyone checked it? ... That's not really my area.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:process",
+        "call"
+      ],
+      "data_doc": "Contract TransNord Logistics, service levels: picking accuracy 99.0%, measured by the supplier. Independent audit: not scheduled. Store recount (Liège, Hasselt, Mons), 40 boxes, 1,120 pieces expected, 1,090 found: 2.7% short.",
+      "data_source": "Logistics contract summary and store recount note"
+    },
+    {
+      "id": "tagging_and_gates",
+      "fact": "Since spring, stores must attach security tags to about 40% of the stock themselves, with no extra hours, so busy stores skip it. The alarm gates in 12 of the 52 stores have not worked for months; the repair request is still with head office.",
+      "unlocks_when": "The player asks what security measures stores have, how tagging works, or whether the alarm gates work.",
+      "reveal_line": "Security tags? That's the stores' job since spring. They should be fine.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The tags? We put them on ourselves now, forty percent of the stock, with two people on the floor on a Saturday. So no. And our gate has been beeping at nothing since May. Or not beeping at anything. Twelve shops have the same problem. The repair request is in Kortrijk. Somewhere."
+    },
+    {
+      "id": "staff_suspicion",
+      "fact": "The COO privately suspects staff theft and wants the training partly as a signal to shop staff. He has asked about bag checks and cameras on the tills.",
+      "unlocks_when": "The player asks who the training is really aimed at, what the COO thinks is happening, or what else is being considered.",
+      "reveal_line": "Between us? Philippe thinks some of it is our own people. The training is also... a message. He's asked about bag checks.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
+    },
+    {
+      "id": "past_training",
+      "fact": "A loss prevention session on spotting shoplifters ran for all store managers in 2005, delivered by a security firm. Shrinkage stayed at 1.5-1.6% before and after.",
+      "unlocks_when": "The player asks what was done before about shrinkage or what training store staff already had.",
+      "reveal_line": "We had a security company in 2005. Very good presenter, former police. Shrinkage didn't move. It was already low, to be fair.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Loss prevention workshop, external security firm, half a day, 52 store managers, 2005. Shrinkage 2004: 1.6%. 2006: 1.5%.",
+      "data_source": "Training records, store operations"
+    }
+  ],
+  "volunteered_facts": [
+    "Shrinkage went from 1.6% to 3.4% of sales this year; the sector average is around 1.5%.",
+    "The COO presented the loss figures to the board himself in September."
+  ],
+  "constraints": {
+    "budget": "About 25,000 euro, earmarked as 'loss prevention' in the store operations budget.",
+    "deadline": "Before the Christmas season starts at the end of November.",
+    "audience": "About 400 shop staff in 52 stores, many part-time and on student contracts; 52 store managers.",
+    "schedule": "Stores open six days a week; staff can be away at most an hour before opening. No sessions in December.",
+    "languages": "Dutch and French; 21 stores are in Wallonia or Brussels.",
+    "data_available": [
+      "Stock count results per store and category",
+      "Shrinkage report per month",
+      "Delivery notes signed by stores",
+      "Maintenance requests for alarm gates"
+    ],
+    "data_not_available": [
+      "Any independent check of the logistics partner's picking",
+      "Any count of actual shoplifting incidents (stores rarely report them)"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The COO",
+      "concern": "Owns both the trusted delivery rule and the outsourcing decision, and presented their savings to the board.",
+      "if_ignored": "Any plan that sounds like 'your projects caused the loss' is stopped before it starts."
+    },
+    {
+      "who": "TransNord Logistics",
+      "concern": "Measures its own accuracy and has no interest in an audit that ends in penalties.",
+      "if_ignored": "Short deliveries continue and stay invisible."
+    },
+    {
+      "who": "Works council and unions",
+      "concern": "Bag checks and cameras on staff fall under collective agreement 68, the 1992 privacy law and the new camera law; staff are already annoyed by extra tagging work.",
+      "if_ignored": "A training seen as 'they think we steal' ends in a formal dispute."
+    },
+    {
+      "who": "Facilities, head office",
+      "concern": "Owns the repair budget for alarm gates.",
+      "if_ignored": "Twelve stores keep a gate that guards nothing."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Number of staff trained and satisfaction sheets.",
+      "Number of shoplifters stopped, which rewards suspicion and is rarely logged.",
+      "Total shrinkage for the year alone, which mixes delivery, admin and theft and arrives months late."
+    ],
+    "gold_plan": {
+      "baseline": "Shrinkage per month since January, split into stockroom and display items, plus a recount of a sample of deliveries in pilot stores.",
+      "behaviour": "Pilot stores count a sample of boxes on arrival and log differences; stock tagged as required.",
+      "leading_indicators": "Short-delivery rate per box from the pilot recounts; share of stock tagged; gates working.",
+      "business_metric": "Shrinkage as a percentage of sales in pilot stores versus comparable stores, at the next stock count.",
+      "collection": "A simple delivery difference sheet faxed to head office weekly, monthly stock reports, the facilities repair list."
+    }
+  },
+  "concepts": {
+    "conventional": "A loss prevention training on spotting and approaching shoplifters for all 400 shop staff.",
+    "solid": "No shoplifter training. A sample-count on delivery in eight pilot stores for two months, an independent picking audit of TransNord, the 12 gates repaired, and a short receiving-and-tagging briefing for staff. Compare shrinkage in pilot stores with the rest.",
+    "next_level_examples": [
+      "Present the pilot to the COO as 'proving the savings': a measured version of trusted delivery that keeps most of the three hours while catching short boxes, so he gets to improve his own policy.",
+      "Let Nadia and two other store managers design the receiving check with TransNord's drivers, so the stores own it and the partner sees the numbers.",
+      "Move part of the loss prevention budget to gate repairs and a one-off delivery audit, and say plainly that the training would not touch the cause."
+    ],
+    "also_valid": [
+      "A short refresher on tagging and on handling a beeping gate politely is fine as a side measure for Christmas."
+    ],
+    "red_flags": [
+      "Shoplifter-spotting training as the main answer.",
+      "Bag checks, till cameras or anything that frames staff as suspects.",
+      "Scrapping trusted delivery or the outsourcing outright, which ignores the time saved and the COO.",
+      "Measuring success by the number of people trained."
+    ]
+  },
+  "defence_objections": [
+    "You want me to tell Philippe his warehouse partner is losing our jeans? He chose them. He signed the contract. He's my boss.",
+    "Counting boxes again costs three hours a week per store. That was the whole saving. The board has already spent it.",
+    "If we don't do any loss prevention training before Christmas and shrinkage stays high, it's my name on the report, not yours."
+  ],
+  "question_you_didnt_ask": "What changed in February and March?",
+  "actor_notes": [
+    "Katrien suspects the warehouse but cannot say so first; she gives it only when the player asks about deliveries or stock flow directly, and stays careful when the COO comes up.",
+    "Her patience is moderate: questions that sound like an audit of head office cost trust, questions about stores and stock flow earn it.",
+    "If the player implies shop staff are stealing, she agrees too quickly; the judge should note that as a missed diagnosis.",
+    "Her risk appetite is low because the risk is political. A pilot in a few stores that lets the COO claim the improvement is what she responds to."
+  ],
+  "flavour_lines": [
+    "Our customers are very honest. They only steal from the shop floor. Someone else steals from the stockroom.",
+    "We had a security consultant once. He told us to watch the fitting rooms. Our fitting rooms have a curtain and a chair."
+  ]
+}

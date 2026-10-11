@@ -1,0 +1,220 @@
+{
+  "id": "it-helpdesk-reopen",
+  "schema_version": 1,
+  "sector": "Internal IT",
+  "tier": 3,
+  "tier_label": "Mostly not a training problem",
+  "title": "Closed, Reopened, Closed",
+  "briefing": {
+    "headline": "An internal IT helpdesk after outsourcing: what you should know before the call",
+    "points": [
+      "A mid-sized Belgian insurer with offices in Brussels, Ghent and Namur; staff work on desktop PCs running Windows XP, Lotus Notes and an in-house claims application.",
+      "First-line support (the phone and e-mail service desk) was outsourced this year to an external provider; second-line support stayed in-house.",
+      "ITIL is a widely used framework of good practice for IT service management, with a Foundation certificate as its entry level.",
+      "Outsourcing contracts usually define service levels (SLAs) and how the provider is paid and penalised.",
+      "Internal users call in French or Dutch; the provider staffs a bilingual desk."
+    ]
+  },
+  "stakeholder": {
+    "name": "Dirk Wuyts",
+    "role": "IT Service Manager",
+    "org": "Lysander Verzekeringen NV, a Belgian insurer with 1,400 staff on three sites",
+    "voice": "Methodical, a bit weary, speaks in ticket numbers and acronyms (SLA, KPI, P2). Has a printed ITIL book on his desk with coloured tabs. Defensive about the outsourcing decision, which he helped write.",
+    "patience": 4,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Julie Mertens",
+    "role": "First-line agent at the outsourced service desk, eight months on the Lysander account",
+    "voice": "Quick, sarcastic, loyal to her colleagues, tired of being 'the stupid helpdesk'. Speaks freely as long as her own team leader isn't copied."
+  },
+  "opening_message": "Hi. Since we outsourced first line in February, 34% of tickets get reopened. Users are furious, second line is drowning, and the board's IT committee wants a plan by Christmas. I'd like ITIL Foundation for the provider's 22 agents and for my 18 people in second line, so we all speak the same process language. The provider says they'll share the cost. Can you organise the course and the exams?",
+  "surface_ask": "ITIL Foundation training and certification for 22 first-line agents and 18 second-line staff.",
+  "gold": {
+    "real_problem": "The provider is paid per ticket closed within four hours, and a reopened ticket counts as a new ticket, so closing fast and reopening later pays twice. The knowledge base agents should use is nearly empty because second line keeps its know-how in personal Lotus Notes databases. Agents are told to close tickets after one unanswered call-back. Three recurring problems cause most reopens. Most agents already hold ITIL Foundation.",
+    "root_cause_types": [
+      "incentive",
+      "system",
+      "process"
+    ],
+    "is_training_the_lever": "no",
+    "need_statement": "The contract has to stop rewarding fast closure and reopens, second line has to put its fixes in a shared knowledge base, and the three top reopen causes need a permanent fix. Learning plays a small part: agents need short, specific instruction on the three recurring problems once the fixes and articles exist."
+  },
+  "hidden_facts": [
+    {
+      "id": "sla_per_close",
+      "fact": "The contract pays the provider per ticket closed within four hours. A reopened ticket is logged as a new ticket and paid again. Nothing in the SLA measures first-time fix or reopens.",
+      "unlocks_when": "The player asks how the provider is paid, what the SLA measures, or what the contract rewards.",
+      "reveal_line": "The SLA? Let me find it. Tickets closed within four hours, 90%. They hit 96%. And a reopen is... a new ticket. Ah.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:policy"
+      ],
+      "data_doc": "Service level 1: 90% of incidents closed within 4 working hours. Fee: fixed monthly base plus 6.50 euro per closed incident. A reopened incident is registered as a new incident. No service level on first-time fix or reopen rate.",
+      "data_source": "Service desk outsourcing contract, annex B"
+    },
+    {
+      "id": "empty_kb",
+      "fact": "The shared knowledge base contains 23 articles, most written in 2004. Second-line engineers keep their fixes in personal Lotus Notes databases and e-mail folders that the provider cannot see.",
+      "unlocks_when": "The player asks what agents use to solve problems, about the knowledge base, or how know-how is shared between first and second line.",
+      "reveal_line": "There is a knowledge base. In principle. Twenty-three articles. One explains how to install Windows 2000. My guys have their own Notes databases. They're very good. Nobody else can open them.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "The knowledge base? Twenty-three articles. I know them by heart, it takes ten minutes. When I ask second line how they fixed something, they say 'it's in my Notes'. Great, can I have your Notes?"
+    },
+    {
+      "id": "close_after_one_try",
+      "fact": "Agents are instructed by their team leader to close a ticket with 'no response from user' after one unanswered call-back, to protect the four-hour SLA.",
+      "unlocks_when": "The player asks how agents decide a ticket is closed, what happens when they can't reach the user, or how agents are managed by the provider.",
+      "reveal_line": "They close when it's solved. I assume. I'd have to check what their procedure says.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "One call-back. If the user is in a meeting, we close with 'no response'. Team leader's rule, because of the four hours. Then the user calls back furious, new ticket, and we're the idiots. But the stats look beautiful."
+    },
+    {
+      "id": "top_three",
+      "fact": "Three recurring issues cause 58% of reopens: the Lotus Notes password not syncing with the Windows password, printer mappings lost in the claims application after a restart, and expired VPN tokens for brokers' staff working at the brokers' offices.",
+      "unlocks_when": "The player asks what the reopened tickets are about, or which problems come back most.",
+      "reveal_line": "Categories? Let me run a query. Notes password, printers in Claims, VPN tokens. Same three, every week. Hm. Every week.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Reopened incidents, last 3 months: 1,940. Notes/Windows password sync 512, Claims application printer mapping 371, VPN token expired or not recognised 248, other 809.",
+      "data_source": "Service desk ticket tool, reopen report"
+    },
+    {
+      "id": "already_certified",
+      "fact": "17 of the 22 provider agents already hold ITIL Foundation; it was part of the provider's sales pitch. Most of second line took the course in 2005.",
+      "unlocks_when": "The player asks who has had ITIL training already, or what the provider promised.",
+      "reveal_line": "ITIL... the provider's tender said 'all agents ITIL-certified'. So, in principle, yes. And my team did the course in 2005. Hm. That's not a great argument for my request, is it.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Provider agents on the Lysander account: 22. ITIL Foundation certified: 17. Lysander second line: 18 staff, 14 attended ITIL Foundation course in 2005, 9 passed the exam.",
+      "data_source": "Provider tender response and internal training records"
+    },
+    {
+      "id": "second_line_bounce",
+      "fact": "Second line sends escalated tickets back to first line when information is missing, without telling the user. The bounce counts as a closure for second line too.",
+      "unlocks_when": "The player asks what happens at escalation, or how second line handles tickets from first line.",
+      "reveal_line": "If a ticket arrives without the PC number, my people send it back. Can you blame them? It also closes it for our own statistics. I didn't say that.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Second line sends tickets back with 'insufficient info'. No phone call, nothing. Then the user calls me again and asks why nobody came. Good question."
+    }
+  ],
+  "volunteered_facts": [
+    "Reopen rate is 34% since first line was outsourced in February; it was around 9% before.",
+    "The provider has offered to share the cost of ITIL training."
+  ],
+  "constraints": {
+    "budget": "About 40,000 euro in the IT budget for 'service improvement', plus whatever the provider contributes.",
+    "deadline": "A plan for the board's IT committee before Christmas; the contract has a review clause at its first anniversary in February.",
+    "audience": "22 agents employed by the provider, 18 second-line staff at Lysander, about 1,400 internal users.",
+    "schedule": "The desk runs 7:30 to 19:00; agents can be taken off the phones for at most an hour at a time in quiet periods.",
+    "languages": "French and Dutch; agents are bilingual, second line mostly Dutch-speaking with French-speaking staff in Namur.",
+    "data_available": [
+      "Ticket tool data: open, close, reopen, category, first and second line",
+      "The outsourcing contract and monthly SLA reports",
+      "User complaints e-mailed to the IT mailbox"
+    ],
+    "data_not_available": [
+      "Second line's personal Notes databases",
+      "Provider's internal instructions and agent scorecards, unless the provider shares them"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The provider's account manager",
+      "concern": "The current contract earns more with every reopen; changing the SLA changes their revenue.",
+      "if_ignored": "Training happens, the incentive stays, nothing moves."
+    },
+    {
+      "who": "Procurement and legal",
+      "concern": "Own the contract; changes before the review clause need a negotiated amendment.",
+      "if_ignored": "A good idea waits until the contract renewal in two years."
+    },
+    {
+      "who": "Second-line team leads",
+      "concern": "Their know-how is their job security after first line was outsourced; sharing it in a knowledge base feels like writing their own exit.",
+      "if_ignored": "The knowledge base stays at 23 articles."
+    },
+    {
+      "who": "Works council and union delegation",
+      "concern": "Watch closely for signs that second line will be outsourced next.",
+      "if_ignored": "A knowledge base project is read as 'preparing the next outsourcing' and quietly sabotaged."
+    },
+    {
+      "who": "Infrastructure team",
+      "concern": "Owns the Notes, printer and VPN configuration behind the top three problems.",
+      "if_ignored": "Agents get excellent at fixing the same three problems forever."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Number of ITIL certificates.",
+      "The SLA's 'closed within four hours', which is already at 96% and part of the problem.",
+      "Total ticket volume, which goes up when reopens are counted as new tickets."
+    ],
+    "gold_plan": {
+      "baseline": "Reopen rate and first-time fix rate per category over the last three months, counting a reopen as the same incident.",
+      "behaviour": "Agents use knowledge base articles on the top problems and reach the user before closing; second line calls first line back instead of bouncing.",
+      "leading_indicators": "Knowledge base articles created and used per week; tickets closed 'no response'; bounced escalations.",
+      "business_metric": "Reopen rate, total incidents per user per month, and user complaints to the IT mailbox.",
+      "collection": "Weekly ticket tool report with reopens linked to the original ticket, a monthly review with the provider using the same numbers."
+    }
+  },
+  "concepts": {
+    "conventional": "ITIL Foundation training and exams for all 40 first- and second-line staff.",
+    "solid": "No ITIL course. Amend the contract so reopens link to the original ticket and the provider is measured on first-time fix and reopen rate. Fix the three recurring problems with infrastructure. Have second line write knowledge base articles for the top 30 issues, and give agents a short briefing on each. Drop the one-call-back closure rule.",
+    "next_level_examples": [
+      "Sit a second-line engineer at the service desk one day a week to write articles live from real calls, as a recognised expert role rather than a handover.",
+      "A joint weekly reopen review between provider team leader and second line, picking the top three causes and owning one fix each.",
+      "Move part of the provider's fee to a bonus for reducing incidents at the source, so a permanent fix to the Notes password problem pays the provider more than closing it 500 times."
+    ],
+    "also_valid": [
+      "A short shared session on escalation rules between first and second line is fine as a side measure, as long as the contract and knowledge base come first."
+    ],
+    "red_flags": [
+      "ITIL Foundation as the main answer.",
+      "Blaming the provider's agents without looking at the contract.",
+      "Leaving the SLA unchanged.",
+      "Ignoring second line's fear of being outsourced next."
+    ]
+  },
+  "defence_objections": [
+    "Reopen the contract after ten months? I wrote that contract. The IT committee will ask why I didn't think of it.",
+    "My second line writing articles for the provider? They'll say I'm making them write their own replacement manual.",
+    "The provider offered to pay half the ITIL course. If I say no, I'm turning down free money in front of the committee."
+  ],
+  "question_you_didnt_ask": "What exactly does the contract pay the provider for?",
+  "actor_notes": [
+    "Dirk is cooperative and precise; he answers honestly but only reveals a hidden fact when its unlock condition is met.",
+    "He co-wrote the contract and is embarrassed by the SLA. He never volunteers it, but reads it out when asked, slowly realising.",
+    "His risk appetite is low: amending the contract scares him. Framing it as using the contract's first-anniversary review clause, with numbers, is what reassures him.",
+    "If the player proposes ITIL training, he agrees with relief; the judge should note the missed diagnosis."
+  ],
+  "flavour_lines": [
+    "Our closure rate is 96%. Our reopen rate is 34%. Both are excellent at being numbers.",
+    "I have the ITIL books on my shelf. All five. With tabs. The tabs are colour-coded. I'm not sure that helped anybody either."
+  ]
+}

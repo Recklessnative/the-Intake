@@ -9,16 +9,16 @@
     "headline": "Field work at a grid operator: what you should know before the call",
     "points": [
       "Regional electricity and gas grid operator: field technicians install and repair meters, cabins and connections across the region.",
-      "A new work order app on tablets replaced paper forms six months ago as part of a large digital transformation programme.",
+      "A new work-order system on rugged handheld PDAs replaced paper forms six months ago as part of a large 'Mobile Workforce' programme. The handhelds send each job back to the office over the GSM network (GPRS).",
       "Field work is safety-critical: gas and high-voltage jobs follow strict permit and lockout procedures owned by the safety department.",
       "Technicians are heavily unionised; changes to working methods are discussed with union delegates."
     ]
   },
   "stakeholder": {
     "name": "Thomas Lemmens",
-    "role": "Director of Digital Transformation",
+    "role": "Director of Field Operations IT",
     "org": "Netvia, a regional grid operator with 1,100 staff, including 320 field technicians",
-    "voice": "Enthusiastic, fluent in consultancy language ('adoption curve', 'change journey', 'digital mindset'). Means well. Gets slightly defensive when the app is criticised; it's his programme.",
+    "voice": "Enthusiastic, fluent in consultancy language ('adoption curve', 'change journey', 'mindset shift'). Means well. Gets slightly defensive when the handhelds are criticised; it's his programme.",
     "patience": 3,
     "risk_appetite": 2,
     "risk_appetite_label": "Medium"
@@ -28,36 +28,36 @@
     "role": "Field technician, rural route, twelve years in",
     "voice": "Laconic, practical, allergic to buzzwords. Not against technology, against nonsense. Respects anyone who has stood in a cabin in the rain."
   },
-  "opening_message": "Our field technicians are resisting the new work order app. Adoption is stuck at 55%. I'd like a digital skills bootcamp for all 320 of them, something with a 'digital mindset' angle. The board reviews the programme in March.",
-  "surface_ask": "A digital skills and mindset bootcamp for 320 field technicians.",
+  "opening_message": "Our field technicians are resisting the new work-order software on the handhelds. Adoption is stuck at 55%. I'd like a computer skills bootcamp for all 320 of them, something with a 'digital mindset' angle. The board reviews the programme in March.",
+  "surface_ask": "A computer skills and mindset bootcamp for 320 field technicians.",
   "gold": {
-    "real_problem": "The technicians can use the app; it doesn't fit their work. It needs a connection that isn't available in basements and rural cabins, so jobs can't be closed on site, and the safety department still requires the paper permit form because the app's version wasn't validated. Technicians do double work and fall back on paper. Their resistance is rational, and IT chose the app without field input.",
+    "real_problem": "The technicians can use the handheld; it doesn't fit their work. The software needs a GPRS connection to close a job, and there is no signal in basements and rural cabins, so jobs can't be closed on site; and the safety department still requires the paper permit form because the handheld's version wasn't validated. Technicians do double work and fall back on paper. Their resistance is rational, and IT chose the system without field input.",
     "root_cause_types": [
       "system",
       "process"
     ],
     "is_training_the_lever": "partly",
-    "need_statement": "Adoption is blocked by offline use and a duplicate safety form, not by digital skills. Fixing the app's offline mode and getting the digital permit validated are the levers; learning can help through field champions and short how-tos for the workarounds."
+    "need_statement": "Adoption is blocked by the lack of offline use and a duplicate safety form, not by computer skills. Getting the software to store jobs offline and sync later, and getting the digital permit validated, are the levers; learning can help through field champions and short how-tos for the workarounds."
   },
   "hidden_facts": [
     {
       "id": "no_signal",
-      "fact": "The app needs a live connection to close a job; about 40% of jobs are in basements or rural cabins with no signal.",
-      "unlocks_when": "The player asks where technicians work, what happens when they use the app on site, or about connectivity.",
-      "reveal_line": "There's a small connectivity challenge. In basements. And cabins. And, well, the countryside. About 40% of jobs. Offline mode is on the roadmap.",
+      "fact": "The work-order software needs a live GPRS connection to close a job; about 40% of jobs are in basements or rural cabins with no signal.",
+      "unlocks_when": "The player asks where technicians work, what happens when they use the handheld on site, or about connectivity.",
+      "reveal_line": "There's a small connectivity challenge. GPRS doesn't reach basements. Or cabins. Or, well, the countryside. About 40% of jobs. Offline mode is in the next release.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "frontline",
         "call"
       ],
-      "frontline_line": "The app wants signal to close a job. I'm in a basement or a cabin in a field half the day. So I write it on paper and type it in at night. Or I don't."
+      "frontline_line": "The handheld wants signal to close a job. I'm in a basement or a cabin in a field half the day. So I write it on paper and type it in at the depot at night. Or I don't."
     },
     {
       "id": "double_paper",
-      "fact": "The safety department still requires the paper work permit, because the app's digital permit was never validated. Technicians fill in both.",
+      "fact": "The safety department still requires the paper work permit, because the handheld's electronic permit was never validated. Technicians fill in both.",
       "unlocks_when": "The player asks what technicians still do on paper, about safety procedures, or why they fall back on old methods.",
-      "reveal_line": "Safety still wants the paper permit. The digital one is 'under review'. Since June. So yes, technically they fill in both.",
+      "reveal_line": "Safety still wants the paper permit. The electronic one is 'under review'. Since June. So yes, technically they fill in both.",
       "weight": 3,
       "critical": true,
       "found_at": [
@@ -65,13 +65,13 @@
         "data:policy"
       ],
       "data_doc": "Paper permit mandatory. Digital permit status: under review since June.",
-      "frontline_line": "Safety still wants the paper permit. So I fill in the app and the paper. Same thing twice. Then they say we 'resist'.",
+      "frontline_line": "Safety still wants the paper permit. So I fill in the handheld and the paper. Same thing twice. Then they say we 'resist'.",
       "data_source": "Safety procedure SP-07, work permits for gas and high-voltage jobs"
     },
     {
       "id": "skills_fine",
-      "fact": "In the app's own usage data, technicians who use it complete forms as fast as the pilot group; the 45% who don't use it are mostly on basement and rural routes.",
-      "unlocks_when": "The player asks who uses the app and who doesn't, or whether the non-users differ from users.",
+      "fact": "In the system's own usage data, technicians who use the handheld complete forms as fast as the pilot group; the 45% who don't use it are mostly on basement and rural routes.",
+      "unlocks_when": "The player asks who uses the handhelds and who doesn't, or whether the non-users differ from users.",
       "reveal_line": "Interesting, actually. The users are fast. The non-users are mostly the rural and city-basement teams. I'd assumed it was the older guys.",
       "weight": 3,
       "critical": true,
@@ -79,12 +79,12 @@
         "data:kpi"
       ],
       "data_doc": "Users (55%) complete forms in 3.1 min on average (pilot group: 3.0). Non-users by route type: rural 48%, city basement 31%, other 21%.",
-      "data_source": "App usage report"
+      "data_source": "Work-order system usage report"
     },
     {
       "id": "no_field_input",
-      "fact": "The app was selected by IT and the transformation office; no technician took part in the selection or the pilot design.",
-      "unlocks_when": "The player asks how the app was chosen, who was involved, or whether technicians were consulted.",
+      "fact": "The system and the handhelds were selected by IT and the programme office; no technician took part in the selection or the pilot design.",
+      "unlocks_when": "The player asks how the system was chosen, who was involved, or whether technicians were consulted.",
       "reveal_line": "We had a very thorough selection. IT, procurement, my office, the supplier. Technicians? They were... represented. By their managers. Some of them.",
       "weight": 2,
       "critical": false,
@@ -92,23 +92,23 @@
         "call",
         "frontline"
       ],
-      "frontline_line": "Nobody asked us anything. One day there was a tablet on the depot table and a PowerPoint."
+      "frontline_line": "Nobody asked us anything. One day there was a box of handhelds on the depot table and a PowerPoint."
     },
     {
       "id": "union_delegate",
-      "fact": "Marleen, a respected senior technician and union delegate, has built an unofficial paper-plus-WhatsApp workaround that half the teams use.",
+      "fact": "Marleen, a respected senior technician and union delegate, has built an unofficial paper-plus-SMS workaround that half the teams use: a carbon-copy job sheet, and a text message to the depot planner when a job is done.",
       "unlocks_when": "The player asks who the informal leaders are, how teams cope, or who technicians listen to.",
-      "reveal_line": "Marleen. Senior technician, union delegate. She made her own system with paper and a WhatsApp group. It works annoyingly well.",
+      "reveal_line": "Marleen. Senior technician, union delegate. She made her own system with carbon-copy sheets and text messages to the planner. It works annoyingly well.",
       "weight": 2,
       "critical": false,
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "Ask Marleen. She made a system with paper and a WhatsApp group. Half the depot uses it. It works better than the app, to be honest."
+      "frontline_line": "Ask Marleen. She made a system with carbon-copy sheets and an SMS to the planner when you're done. Half the depot uses it. It works better than the handheld, to be honest."
     },
     {
       "id": "board_kpi",
-      "fact": "The programme's board KPI is 'app adoption rate'; Thomas's bonus is tied to it.",
+      "fact": "The programme's board KPI is 'handheld adoption rate'; Thomas's bonus is tied to it.",
       "unlocks_when": "The player asks how success is measured, what the board will look at, or what's at stake for him.",
       "reveal_line": "The board KPI is adoption. 90% by March. It's... also in my objectives.",
       "weight": 1,
@@ -117,13 +117,13 @@
         "call",
         "data:kpi"
       ],
-      "data_doc": "Board KPI 'App adoption rate': target 90% by March. Current: 55%.",
-      "data_source": "Transformation programme dashboard"
+      "data_doc": "Board KPI 'Handheld adoption rate': target 90% by March. Current: 55%.",
+      "data_source": "Mobile Workforce programme monthly report"
     }
   ],
   "volunteered_facts": [
     "Adoption is 55% after six months.",
-    "The board reviews the transformation programme in March."
+    "The board reviews the Mobile Workforce programme in March."
   ],
   "constraints": {
     "budget": "Change management budget of about 80,000 euro in the programme.",
@@ -132,10 +132,10 @@
     "schedule": "Technicians are fully planned on jobs; depot meetings happen weekly on Monday mornings.",
     "languages": "Dutch.",
     "data_available": [
-      "App usage logs per technician and route",
+      "Handheld usage logs per technician and route",
       "Job completion times and backlog",
       "Safety incidents and permit audits",
-      "Help desk tickets about the app"
+      "Help desk tickets about the handhelds"
     ],
     "data_not_available": [
       "Any reliable data on jobs closed late on paper"
@@ -148,9 +148,9 @@
       "if_ignored": "Double paperwork stays and adoption can't pass the paper ceiling."
     },
     {
-      "who": "IT and the app supplier",
-      "concern": "Offline mode is a roadmap item and a contract change.",
-      "if_ignored": "40% of jobs remain impossible to close in the app."
+      "who": "IT and the software supplier",
+      "concern": "Offline mode is planned for a later release and is a contract change.",
+      "if_ignored": "40% of jobs remain impossible to close on the handheld."
     },
     {
       "who": "Union and Marleen",
@@ -158,8 +158,8 @@
       "if_ignored": "A bootcamp gets framed as 'they think we're stupid'."
     },
     {
-      "who": "Works council and DPO",
-      "concern": "Usage logs per technician are monitoring data.",
+      "who": "Works council and the legal department (privacy)",
+      "concern": "Usage logs per technician are monitoring data under the collective labour agreement on monitoring and the 1992 privacy law.",
       "if_ignored": "Adoption tracking per person becomes a conflict."
     },
     {
@@ -172,23 +172,23 @@
     "traps": [
       "Bootcamp attendance and satisfaction.",
       "Adoption rate alone: can be forced up by mandate while work quality drops.",
-      "Ranking individual technicians by app usage."
+      "Ranking individual technicians by handheld usage."
     ],
     "gold_plan": {
       "baseline": "Adoption and job close-out times split by route type (urban, basement, rural), plus share of jobs with duplicate paper permits.",
-      "behaviour": "Jobs closed in the app on site; paper permits no longer used once the digital one is validated.",
+      "behaviour": "Jobs closed on the handheld on site; paper permits no longer used once the electronic one is validated.",
       "leading_indicators": "Help desk tickets by type, offline-mode usage once available, champion sessions held per depot.",
       "business_metric": "Time from job completion to administrative close, backlog, and safety permit audit results.",
-      "collection": "App logs aggregated per depot and route type, permit audits by the safety department, monthly depot review."
+      "collection": "Handheld logs aggregated per depot and route type, permit audits by the safety department, monthly depot review."
     }
   },
   "concepts": {
-    "conventional": "A digital skills and mindset bootcamp for all 320 technicians.",
-    "solid": "Fix the blockers first: push offline mode and the digital permit validation, then appoint one technician champion per depot with short how-tos for the remaining workarounds. Report adoption per route type to the board.",
+    "conventional": "A computer skills and mindset bootcamp for all 320 technicians.",
+    "solid": "Fix the blockers first: push offline mode (store jobs, sync at the depot or when signal returns) and the electronic permit validation, then appoint one technician champion per depot with short how-tos for the remaining workarounds. Report adoption per route type to the board.",
     "next_level_examples": [
       "Invite Marleen to lead the field redesign: her workaround becomes the requirements for offline mode, and she becomes the face of the fix.",
       "Reframe the board KPI from 'adoption' to 'time to close a job', so the programme is judged on the work rather than the tool.",
-      "Run a 'ride along' week where IT and the transformation office spend a day in basements with technicians before any training is designed."
+      "Run a 'ride along' week where IT and the programme office spend a day in basements with technicians before any training is designed."
     ],
     "also_valid": [
       "Short targeted coaching for the few teams with real skill gaps, alongside the system fixes."
@@ -201,19 +201,19 @@
     ]
   },
   "defence_objections": [
-    "Tell the board the app needs fixing? That's my programme you're describing.",
+    "Tell the board the software needs fixing? That's my programme you're describing.",
     "Put Marleen in charge of anything? She's a union delegate. She'll negotiate every screen.",
     "Change the KPI three months before the review? The board will think we're moving the goalposts."
   ],
-  "question_you_didnt_ask": "Where are the technicians standing when they open the app?",
+  "question_you_didnt_ask": "Where are the technicians standing when they switch on the handheld?",
   "actor_notes": [
     "Thomas believes it's a mindset problem; play his surprise when the usage data shows it's about routes, not age.",
-    "He's defensive about the app but honest when asked factual questions.",
-    "Medium risk appetite: bold ideas that make him look good to the board are welcome; anything that implies the app failed triggers pushback.",
+    "He's defensive about the handhelds but honest when asked factual questions.",
+    "Medium risk appetite: bold ideas that make him look good to the board are welcome; anything that implies the system failed triggers pushback.",
     "Consultancy jargon from the player doesn't cost patience with him; it's his language. Vague questions still do."
   ],
   "flavour_lines": [
-    "We're on a digital journey. Some of us are on it in a basement.",
-    "The app has a beautiful dashboard. It shows adoption. In real time. When there's signal."
+    "We're on a change journey. Some of us are on it in a basement.",
+    "The system has a beautiful management report. It shows adoption. Every morning. For the jobs that had signal."
   ]
 }

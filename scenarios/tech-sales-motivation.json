@@ -1,14 +1,14 @@
 {
   "id": "tech-sales-motivation",
   "schema_version": 1,
-  "sector": "Tech / SaaS",
+  "sector": "Tech / software",
   "tier": 3,
   "tier_label": "Mostly not a training problem",
   "title": "Bring Me a Navy SEAL",
   "briefing": {
-    "headline": "B2B SaaS sales teams: what you should know before the call",
+    "headline": "Business software sales teams: what you should know before the call",
     "points": [
-      "B2B SaaS company selling analytics subscriptions to mid-sized and large companies.",
+      "A business software company selling hosted, on-demand reporting and analytics software (ASP model) to mid-sized and large companies, billed as yearly subscriptions instead of a licence plus maintenance.",
       "Account executives are paid a base salary plus commission against a quota; commission plans are set by sales leadership and finance.",
       "Deals move through stages (discovery, proposal, procurement, signature), and the CRM records each stage.",
       "In Germany, tools that monitor employees (such as call recordings) need works council co-determination."
@@ -17,7 +17,7 @@
   "stakeholder": {
     "name": "Jasper Wouters",
     "role": "VP Sales EMEA",
-    "org": "Klarvue, a B2B analytics SaaS scale-up with 60 account executives in four countries",
+    "org": "Klarvue, a fast-growing on-demand analytics software company with 60 account executives in four countries",
     "voice": "High energy, talks in quarters and quotas, uses sports metaphors. Likes bold ideas and quick decisions. Gets bored by process questions but respects anyone who brings pipeline data.",
     "patience": 3,
     "risk_appetite": 3,
@@ -53,7 +53,7 @@
         "data:policy"
       ],
       "data_doc": "8% of first-year ACV; 1.3x accelerator on multi-year deals; full commission clawback on deals with discount above 20%.",
-      "data_source": "Commission plan 2026"
+      "data_source": "Commission plan 2007"
     },
     {
       "id": "new_hire_drop",
@@ -111,9 +111,9 @@
     },
     {
       "id": "cfo_owns_comp",
-      "fact": "The CRO and CFO designed the commission plan. Jasper argued against the clawback and lost.",
+      "fact": "The CEO and CFO designed the commission plan. Jasper argued against the clawback and lost.",
       "unlocks_when": "The player asks who owns the commission plan, or whether it can change.",
-      "reveal_line": "The CFO and the CRO built it. I said the clawback would bite. I lost that meeting. I don't lose many meetings.",
+      "reveal_line": "The CFO and the CEO built it. I said the clawback would bite. I lost that meeting. I don't lose many meetings.",
       "weight": 1,
       "critical": false,
       "found_at": [
@@ -134,7 +134,7 @@
     "data_available": [
       "CRM pipeline by stage, win rates, discount levels",
       "Quota attainment per rep and cohort",
-      "Recorded sales calls in a conversation intelligence tool"
+      "Recorded WebEx demos and sales conference calls"
     ],
     "data_not_available": [
       "Any agreed basis for using call recordings for coaching in the German entity"
@@ -142,13 +142,13 @@
   },
   "dependencies": [
     {
-      "who": "CRO and CFO",
+      "who": "CEO and CFO",
       "concern": "Own the commission plan; changing the clawback is their call.",
       "if_ignored": "Training teaches reps to sell Pro while the plan punishes them for it."
     },
     {
-      "who": "RevOps",
-      "concern": "Owns the pipeline data and dashboards needed to measure anything.",
+      "who": "Sales operations",
+      "concern": "Owns the pipeline data and reports needed to measure anything.",
       "if_ignored": "No baseline and no cohort comparison."
     },
     {
@@ -162,7 +162,7 @@
       "if_ignored": "The coaching rhythm dies by week three."
     },
     {
-      "who": "DPO and German works council",
+      "who": "Legal (privacy) and German works council",
       "concern": "Using recorded calls to coach or assess reps is employee monitoring and needs co-determination in Germany.",
       "if_ignored": "The coaching programme becomes a legal problem in one country."
     }
@@ -178,15 +178,15 @@
       "behaviour": "Multi-threading and a procurement-ready value case in Pro deals, checked in manager deal reviews.",
       "leading_indicators": "Stage conversion at procurement for Pro deals; share of deals with a documented value case.",
       "business_metric": "Pro win rate, time for new hires to reach 70% of quota, and average discount.",
-      "collection": "CRM cohort reports from RevOps monthly; call recordings only with consent and works council agreement."
+      "collection": "CRM cohort reports from sales operations monthly; call recordings only with consent and works council agreement."
     }
   },
   "concepts": {
     "conventional": "A motivational off-site with a famous speaker.",
-    "solid": "Turn the off-site into a deal clinic on the Pro tier: value selling for procurement, live reviews of stalled deals, and a weekly deal-coaching rhythm for managers afterwards. Bring the clawback data to the CRO and CFO.",
+    "solid": "Turn the off-site into a deal clinic on the Pro tier: value selling for procurement, live reviews of stalled deals, and a weekly deal-coaching rhythm for managers afterwards. Bring the clawback data to the CEO and CFO.",
     "next_level_examples": [
-      "Kill the keynote: a 'deal hackathon' where top reps work on the new hires' real stalled Pro deals, with legal and procurement experts in the room.",
-      "Build a commission simulator so reps see their real take-home on a discounted multi-year deal, and put the same numbers in front of the CFO.",
+      "Kill the keynote: a 'deal war room' where top reps work on the new hires' real stalled Pro deals, with legal and procurement experts in the room.",
+      "Build an Excel commission calculator so reps see their real take-home on a discounted multi-year deal, and put the same numbers in front of the CFO.",
       "Spend the speaker fee on protecting managers' coaching time, for example a quota relief for managers tied to coaching hours."
     ],
     "also_valid": [

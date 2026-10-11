@@ -1,0 +1,202 @@
+{
+  "id": "car-dealer-aftersales",
+  "schema_version": 1,
+  "sector": "Automotive retail",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "Smile at the Reception Desk",
+  "briefing": {
+    "headline": "Aftersales in a car dealership group: what you should know before the call",
+    "points": [
+      "A family-owned group of five dealerships for one car brand in Brussels and Walloon Brabant, selling new cars and running workshops for servicing and repairs.",
+      "Service advisors take bookings, receive customers at the desk, explain the work and the invoice, and hand the car back.",
+      "The brand importer phones a sample of customers after each workshop visit and publishes a customer satisfaction index (CSI) per dealer.",
+      "Part of the dealer's margin from the importer is variable and linked to standards such as CSI.",
+      "Mechanics and advisors fall under the joint committee for the metal and motor trade; staff work in French and Dutch."
+    ]
+  },
+  "stakeholder": {
+    "name": "Philippe Delcourt",
+    "role": "Aftersales Director",
+    "org": "Groupe Delcourt-Verbist SA, five dealerships of one brand with 14 service advisors and about 60 mechanics",
+    "voice": "Charming salesman turned manager, switches between French and Dutch mid-sentence. Speaks in percentages and anecdotes about 'a client last week'. Proud of the commercial results of aftersales. Gets slippery when pay or the owner's family comes up.",
+    "patience": 3,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Stijn Lambrechts",
+    "role": "Service advisor at the Waterloo branch, eight years in",
+    "voice": "Friendly, fast-talking, half an eye on the queue at the desk. Bilingual. Defends his colleagues, blunt about the workshop planning."
+  },
+  "opening_message": "Bonjour. The importer's CSI came in: we are second to last in the region on aftersales. Second to last. It costs us the quarterly margin bonus, about 90,000 euro across the group. My service advisors need a customer service training. Welcome, smile, empathy, the full thing. Fourteen people, five sites. Can you have something before the next survey wave in November?",
+  "surface_ask": "A customer service and friendliness training for 14 service advisors.",
+  "gold": {
+    "real_problem": "Customers are unhappy about cars not ready at the promised time and invoices higher than the quote, not about how they are welcomed. Advisors book the workshop at full mechanic capacity with no buffer, while the workshop chef plans separately on a whiteboard. Advisors also earn a bonus on extra labour hours sold at the desk, so they add work during the visit, which makes cars late and invoices higher. Philippe designed that bonus, and the workshop reports to the owner's son, not to him.",
+    "root_cause_types": [
+      "incentive",
+      "process",
+      "system"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "The group needs realistic workshop booking with a buffer for unplanned work, one shared planning between advisors and workshop, and an advisor bonus that does not reward surprises on the invoice. Advisors need to learn to promise realistic times and call the customer before adding work, which is a practised routine, not a smile course."
+  },
+  "hidden_facts": [
+    {
+      "id": "csi_breakdown",
+      "fact": "On the CSI questions about welcome and friendliness the group scores above the regional average. It scores far below on 'vehicle ready at the promised time' and 'invoice matched the estimate'.",
+      "unlocks_when": "The player asks which CSI questions are low, what the survey actually measures, or for the detailed report.",
+      "reveal_line": "The detail? Well, the welcome is fine, friendliness is fine. It's the... ready on time, the invoice. But the customer is grumpy at the desk, so it's the desk, non?",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Aftersales CSI by item, group vs region (0-100). Welcome at reception 88 vs 84. Friendliness of advisor 86 vs 83. Explanation of work done 71 vs 78. Vehicle ready at promised time 52 vs 76. Invoice in line with estimate 49 vs 74. Overall 63 vs 78.",
+      "data_source": "Importer CSI report, last two quarters"
+    },
+    {
+      "id": "full_booking",
+      "fact": "Advisors book the workshop in the dealer system at 100% of mechanic hours, leaving no room for unplanned repairs, absences or waiting for parts. The workshop chef ignores the system and plans on his own whiteboard, so promised times are missed several times a day.",
+      "unlocks_when": "The player asks how workshop appointments are planned, how a pick-up time is promised, or how advisors and the workshop work together.",
+      "reveal_line": "We book in the system, yes. The workshop... has its own way. It's always been a bit like that.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "I book the system full, because full is the target. Then Marcel in the workshop plans on his whiteboard, his way. One car waits for a part, the whole afternoon shifts. At four I'm on the phone saying sorry fifteen times. Then they get the survey."
+    },
+    {
+      "id": "upsell_bonus",
+      "fact": "Since last year advisors get a monthly bonus on extra labour hours sold at the desk. They add brake pads, wiper blades and air-conditioning service during the visit, often without calling the customer first, which delays the car and inflates the invoice.",
+      "unlocks_when": "The player asks how advisors are paid or targeted, what drives extra work on the invoice, or why invoices exceed the estimate.",
+      "reveal_line": "There is a small bonus on additional hours sold. It's commercial, that's the job. Aftersales revenue is up 11%, by the way. I designed it myself.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "Service advisor variable pay: 4% of extra labour hours sold above the original booking, paid monthly. No condition on customer approval or CSI. Introduced January last year.",
+      "data_source": "Variable pay scheme, aftersales"
+    },
+    {
+      "id": "workshop_owner_son",
+      "fact": "The workshops report to Olivier Verbist, the owner's son and Operations Director, not to Philippe. The two disagree about who owns customer promises and barely speak.",
+      "unlocks_when": "The player asks who manages the workshop, who would need to agree, or who else is involved.",
+      "reveal_line": "The workshops are Olivier's. Olivier is the son of Monsieur Verbist. We have... a respectful relationship. We greet each other at the New Year reception.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Aftersales Director (P. Delcourt): service advisors, parts counters. Operations Director (O. Verbist): workshops, workshop chefs, mechanics. Both report to the managing director (J. Verbist).",
+      "data_source": "Group org chart"
+    },
+    {
+      "id": "survey_coaching",
+      "fact": "Last spring advisors were told to tell customers 'you may get a call, anything below 9 counts as a failure for us'. The importer noticed score begging at another dealer and sent a warning letter to all dealers.",
+      "unlocks_when": "The player asks what was tried before to raise CSI, or how advisors talk about the survey with customers.",
+      "reveal_line": "We tried a little... awareness. Advisors mentioned the survey. Then the importer sent a letter to everyone about 'influencing'. Not addressed to us. Not only to us.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Last spring we had to say 'only a 9 or a 10 counts'. Customers laughed at us. Then the importer sent a letter and we had to stop. Now we just pray."
+    }
+  ],
+  "volunteered_facts": [
+    "The group is second to last in the region on the importer's aftersales CSI.",
+    "Missing the CSI standard costs about 90,000 euro of margin bonus per quarter across the group."
+  ],
+  "constraints": {
+    "budget": "About 25,000 euro this year, plus training credits the importer offers dealers through its own training centre.",
+    "deadline": "Next importer survey wave starts in November, about seven weeks away.",
+    "audience": "14 service advisors on five sites; the workshop chefs and mechanics report elsewhere.",
+    "schedule": "Desks open 7:30 to 18:00; advisors cannot all leave the same day. Saturday mornings are open at two sites.",
+    "languages": "French at three sites, Dutch at one, mixed at the Brussels site.",
+    "data_available": [
+      "Importer CSI report per site and per question",
+      "Dealer management system: bookings, promised times, actual hand-over times, estimates and invoices",
+      "Advisor variable pay figures"
+    ],
+    "data_not_available": [
+      "The workshop chefs' whiteboard plans",
+      "Customer comments per advisor (the importer only reports per site)"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Olivier Verbist, Operations Director",
+      "concern": "Owns the workshops and their planning; sees aftersales as 'the people who overbook my mechanics'.",
+      "if_ignored": "Advisors learn to promise better times that the workshop does not keep."
+    },
+    {
+      "who": "Managing director, Jean Verbist",
+      "concern": "Likes the revenue growth from the upsell bonus and the family peace.",
+      "if_ignored": "Any change to pay or planning gets parked 'until after the season'."
+    },
+    {
+      "who": "Brand importer",
+      "concern": "Owns the CSI survey, the bonus rules and the dealer training centre; watching for score begging.",
+      "if_ignored": "A clever fix to the score turns into another warning letter."
+    },
+    {
+      "who": "Union delegation and HR",
+      "concern": "Changing the advisor variable pay touches individual contracts and the company's collective agreement.",
+      "if_ignored": "Fourteen advisors hear 'your bonus is going' and the desks get even less friendly."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Overall CSI alone: one number, sampled, quarterly, influenced by everything.",
+      "Happy sheets after a friendliness training.",
+      "Mystery shopping of the welcome, which is already the strongest item."
+    ],
+    "gold_plan": {
+      "baseline": "Share of cars handed back at the promised time and share of invoices within 10% of the estimate, per site, from the dealer system.",
+      "behaviour": "Advisors book with a planned buffer and call the customer for approval before adding work, checked in the job card notes.",
+      "leading_indicators": "Daily on-time hand-over rate; share of extra work with recorded customer approval.",
+      "business_metric": "CSI items 'ready on time' and 'invoice matched estimate', and the quarterly margin bonus.",
+      "collection": "Weekly dealer system report per site, pilot sites against the others, importer CSI per quarter."
+    }
+  },
+  "concepts": {
+    "conventional": "A customer service and friendliness training for all 14 advisors.",
+    "solid": "One shared workshop planning between advisors and workshop chef, booking at about 80% of capacity, an approval call before any extra work, and a revised bonus that counts only approved extra work and includes on-time hand-over. Short practice sessions for advisors on promising realistic times and the approval call.",
+    "next_level_examples": [
+      "Pilot at one site with Olivier as co-owner: a ten-minute morning stand-up between advisors and the workshop chef at the board, with the chef's whiteboard as the single plan.",
+      "Rebuild the advisor bonus on two measures: approved extra hours and cars ready on time, so selling and keeping promises pay the same.",
+      "Use the importer's dealer training centre for a workshop-planning module that both chefs and advisors attend together, paid with importer credits."
+    ],
+    "also_valid": [
+      "A short module on explaining work and invoices is fine as a side measure, since that item is also below average."
+    ],
+    "red_flags": [
+      "Friendliness or smile training as the main answer.",
+      "Ignoring the upsell bonus because Philippe designed it.",
+      "Asking advisors to coach customers on the survey again.",
+      "Leaving the workshop and Olivier out of the plan."
+    ]
+  },
+  "defence_objections": [
+    "Touch the bonus? Aftersales revenue is up 11% thanks to that bonus. The managing director will ask me why I am breaking the only thing that works.",
+    "Book at 80%? That's 20% of my mechanics' hours I am throwing away. Who pays for that?",
+    "You want me to go to Olivier and say his whiteboard should run my desk? Bon. You come with me."
+  ],
+  "question_you_didnt_ask": "Which questions in the survey are actually low?",
+  "actor_notes": [
+    "Philippe is friendly and talkative but steers every answer back to 'attitude at the desk'. He reveals the bonus only when asked directly about advisor pay or targets, and then defends it with the revenue figure.",
+    "He becomes evasive and very polite about Olivier and the owner's family. A player who proposes involving Olivier as co-owner rather than as the culprit earns trust.",
+    "He respects players who ask for the detailed CSI report; it is a little embarrassing that he never opened it past page one.",
+    "If the player delivers the smile training, he is delighted, and the judge should note the missed diagnosis."
+  ],
+  "flavour_lines": [
+    "Our advisors smile. They smile a lot at four o'clock, when they phone to say the car is not ready.",
+    "The importer sends us a coffee machine standard. Sixty pages. The coffee is excellent. The cars are late."
+  ]
+}

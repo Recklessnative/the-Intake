@@ -1,0 +1,216 @@
+{
+  "id": "home-care-turnover",
+  "schema_version": 1,
+  "sector": "Home care",
+  "tier": 2,
+  "tier_label": "Root cause hidden behind politics",
+  "title": "Resilience on a Bicycle",
+  "briefing": {
+    "headline": "Home care in Flanders: what you should know before the call",
+    "points": [
+      "A non-profit home-care organisation (vzw) whose family carers help elderly and sick people at home with personal care, cooking and housekeeping.",
+      "Home care is subsidised by the Flemish government, largely per hour of care delivered at the client's home.",
+      "Carers work alone, visiting several clients a day, and travel between them by bicycle, moped or their own car.",
+      "Pay and working conditions are set largely in the joint committee for the Flemish social profit sector; unions are well represented.",
+      "Turnover is a known problem across the care sector, with many carers leaving in their first year."
+    ]
+  },
+  "stakeholder": {
+    "name": "Griet Van Acker",
+    "role": "Director of Care",
+    "org": "Thuiszorg Leieland vzw, a home-care organisation in the Ghent region with 310 family carers and 14 team leaders",
+    "voice": "Warm, idealistic, speaks about 'our carers' and 'our clients' with real affection. Uses care-sector language ('well-being', 'burden', 'self-care'). Turns precise and defensive when money or the board comes up.",
+    "patience": 3,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Nadia Bouzid",
+    "role": "Family carer, four years in, cycles between clients in Ghent",
+    "voice": "Kind, tired, funny about the absurd parts. Loves her clients by name. Speaks frankly as long as her team leader won't hear it."
+  },
+  "opening_message": "Hello, thank you for making time. We lost 31% of our carers last year and it's getting worse. The work is emotionally heavy, the clients are getting older and sicker, and our carers burn out. I'd like a resilience training for all of them: stress management, self-care, setting boundaries. We have some money from the sector training fund. Could you think along with us?",
+  "surface_ask": "A resilience and self-care training for all 310 family carers.",
+  "gold": {
+    "real_problem": "Carers do not leave because the care is too heavy; they leave because of the schedule. Since a central planning cell took over last year, carers get routes spread across the whole city with gaps between clients, and travel time between clients is not counted as working time, so a nine-hour day pays six. Schedules change by SMS the evening before, and the monthly team meeting was dropped to raise billable hours, so carers never see colleagues. The board introduced central planning to maximise subsidised hours.",
+    "root_cause_types": [
+      "process",
+      "incentive",
+      "environment"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Carers need compact, stable routes in one neighbourhood, travel time that counts as work, schedules that don't change overnight and regular contact with a team. Learning has a small role: team leaders and planners need to learn to plan by neighbourhood, and new carers need a buddy in their first months, not a resilience course."
+  },
+  "hidden_facts": [
+    {
+      "id": "exit_reasons",
+      "fact": "In exit interviews, 68% of leavers name the schedule, travel or unpaid gaps as the main reason. Only 12% name the emotional burden of the work.",
+      "unlocks_when": "The player asks why carers leave, what exit interviews say, or whether reasons for leaving are recorded.",
+      "reveal_line": "We do exit interviews, yes. I haven't... let me see the summary. Schedule, travel, schedule. Burden of care, 12%. Hm. That's less than I would have said.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Main reason for leaving, 96 exit interviews last year: schedule, travel or unpaid gaps 65; emotional burden of care 12; pay level 9; physical complaints 6; other 4.",
+      "data_source": "HR exit interview summary, last year"
+    },
+    {
+      "id": "unpaid_travel",
+      "fact": "Since central planning started, carers get routes across the whole city. Travel between clients and the gaps between visits are not counted as working time, so a carer can be out of the house nine hours and be paid for six.",
+      "unlocks_when": "The player asks how a carer's day is planned, how travel time is counted or paid, or what changed recently in the organisation.",
+      "reveal_line": "Travel between clients isn't working time, that's how the subsidy works, every organisation does it. Well. Most. The planning is more efficient since last year. The board was very clear about the billable hours.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Yesterday: Mariakerke at eight, Ledeberg at ten, back to Mariakerke at one. On the bike, in the rain. I leave home at seven, I'm home at six, I'm paid for six hours. My clients I love. My schedule I hate."
+    },
+    {
+      "id": "sms_changes",
+      "fact": "The planning cell changes schedules by SMS the evening before, often after 21:00, and carers regularly find a new client on their list without any information about the person.",
+      "unlocks_when": "The player asks how carers learn their schedule, about last-minute changes, or how carers are informed about new clients.",
+      "reveal_line": "Changes go by SMS. That's quick and reliable. I believe it happens in the evening, sometimes.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "frontline",
+        "call"
+      ],
+      "frontline_line": "Ten past nine at night, my GSM beeps. New schedule. A new lady at eight, no name of the illness, no key code, nothing. I ring the bell and I hope."
+    },
+    {
+      "id": "no_team",
+      "fact": "The monthly team meeting was cancelled last year to free up billable hours. Many carers have not seen a colleague or their team leader in months, and new carers learn alone.",
+      "unlocks_when": "The player asks how carers get support, how often they meet colleagues or their team leader, or how new carers are introduced.",
+      "reveal_line": "The team meetings were... reduced. They're optional now. Team leaders are reachable by phone. In principle.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The team meeting is gone since last year. I don't know who my colleagues are any more. The new girls, they cry in the street after a bad client and nobody knows. They're gone after three months."
+    },
+    {
+      "id": "first_year",
+      "fact": "Two thirds of leavers leave in their first year, and most of those in the first six months.",
+      "unlocks_when": "The player asks who leaves, when they leave, or about tenure of leavers.",
+      "reveal_line": "Who leaves? Mostly the new ones. The old guard stays. They're tough. Or they have a car.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:org",
+        "call"
+      ],
+      "data_doc": "Leavers last year: 96. Tenure at leaving: under 6 months 44, 6-12 months 20, 1-5 years 21, over 5 years 11.",
+      "data_source": "HR headcount and leaver list"
+    },
+    {
+      "id": "resilience_before",
+      "fact": "A one-day stress management session was given to all carers two years ago. It was rated 8.4 out of 10; turnover rose the year after.",
+      "unlocks_when": "The player asks what has been tried before, or whether carers had similar training.",
+      "reveal_line": "We had a stress day two years ago. A lovely trainer. Breathing exercises. They gave it 8.4. Turnover went up after, but that's not her fault, surely.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Stress management day, all family carers, two years ago. Evaluation 8.4/10. Comments: 'nice to see colleagues', 'good lunch', 'the breathing helps on the bike'.",
+      "data_source": "Training evaluation summary"
+    }
+  ],
+  "volunteered_facts": [
+    "31% of carers left last year.",
+    "There is money from the sector training fund for the social profit sector."
+  ],
+  "constraints": {
+    "budget": "About 30,000 euro from the sector training fund, earmarked for training; it cannot pay for working time or planning changes.",
+    "deadline": "Griet wants something started before the board's budget meeting in December.",
+    "audience": "310 family carers in 14 teams, 14 team leaders and a central planning cell of 4.",
+    "schedule": "Carers work 8:00 to 18:00 in split days; every hour off the road is an hour of care not delivered or subsidised.",
+    "languages": "Dutch; a growing group of carers speaks Dutch as a second language.",
+    "data_available": [
+      "Exit interview summaries",
+      "Leaver list with tenure",
+      "Planning data: client addresses, visit times, kilometres per carer",
+      "Sick leave per team"
+    ],
+    "data_not_available": [
+      "Any record of schedule changes and when they were sent",
+      "Hours carers are actually away from home per day"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Board of directors",
+      "concern": "Introduced central planning to raise subsidised hours; reads any change as a cost.",
+      "if_ignored": "The proposal is 'very interesting' and never funded."
+    },
+    {
+      "who": "Unions and the joint committee",
+      "concern": "Travel time, split days and working time are partly set in sector agreements; the unions have raised unpaid travel before.",
+      "if_ignored": "The organisation is overtaken by a union campaign it could have led."
+    },
+    {
+      "who": "Central planning cell",
+      "concern": "Judged on billable hours; planning by neighbourhood feels like a step back to them.",
+      "if_ignored": "New routes look neat on paper and fall apart in a month."
+    },
+    {
+      "who": "Flemish government subsidy rules",
+      "concern": "The subsidy pays mainly for care hours at the client's home.",
+      "if_ignored": "A plan that adds paid meeting time has no funding line."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Evaluation scores after a resilience day; the last one scored 8.4 and turnover rose.",
+      "Annual turnover alone: lagging and noisy, reported once a year.",
+      "Number of carers trained."
+    ],
+    "gold_plan": {
+      "baseline": "Turnover in the first six months, kilometres and gaps per carer per day, and exit reasons, per team.",
+      "behaviour": "Routes planned by neighbourhood, schedules fixed a week ahead, a team meeting held every month.",
+      "leading_indicators": "Average gap and travel time per day; share of schedule changes sent after 18:00; new carers with an assigned buddy.",
+      "business_metric": "Six-month retention of new carers and annual turnover, pilot teams versus others; cost of recruitment.",
+      "collection": "Planning system export per month, a short check-in survey with new carers at one and three months, HR leaver list, pilot teams against comparison teams."
+    }
+  },
+  "concepts": {
+    "conventional": "A resilience and stress management training for all 310 carers.",
+    "solid": "Pilot neighbourhood-based planning in two teams, with fixed schedules a week ahead, a monthly team meeting and a buddy for new carers. Use the training fund for team leaders and planners (planning by neighbourhood, onboarding) and for the buddy training. Put the unpaid travel question on the table with the board and unions.",
+    "next_level_examples": [
+      "Small self-organising neighbourhood teams of 8 to 10 carers who plan their own clients together with their team leader, tested in one district.",
+      "Show the board the cost of turnover: recruitment and induction of 96 leavers set against the billable hours lost to neighbourhood planning.",
+      "A 'first hundred days' path for new carers: first weeks paired with an experienced carer, a meeting with the team leader at one and three months."
+    ],
+    "also_valid": [
+      "A short peer support or debriefing session within team meetings is fine as a side measure, as long as it is not the main answer."
+    ],
+    "red_flags": [
+      "Resilience or self-care training as the main answer.",
+      "Framing turnover as carers not being strong enough.",
+      "Ignoring unpaid travel time and the board's planning decision.",
+      "Spending the training fund on an off-site day that takes carers away from clients again."
+    ]
+  },
+  "defence_objections": [
+    "Plan by neighbourhood? The board will see fewer billable hours on the first spreadsheet and stop reading.",
+    "If I bring up unpaid travel, the unions will hear 'management admits it'. That's a very short step to a strike notice.",
+    "The training fund is for training. I can't pay for planning or meetings with it. What do I do with the money?"
+  ],
+  "question_you_didnt_ask": "What does a carer's day look like, from leaving home to coming back?",
+  "actor_notes": [
+    "Griet genuinely cares and believes the problem is emotional burden. She reveals planning facts when asked about the day itself, but frames them as 'the way the sector works'.",
+    "She becomes careful and formal when the board's efficiency decision or the unions come up; she was in the meeting that approved central planning.",
+    "Her risk appetite is low: a pilot in one or two teams, presented with numbers the board understands, is the move that lowers her resistance.",
+    "If the player implies carers are weak or need to toughen up, trust drops sharply."
+  ],
+  "flavour_lines": [
+    "We had a stress day with breathing exercises. They use them on the bike, uphill, in the rain.",
+    "Our carers know every client's grandchildren by name. They don't know each other's."
+  ]
+}
