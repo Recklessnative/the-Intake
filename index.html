@@ -55,26 +55,75 @@
     </div>
   </section>
 
-  <!-- Cubicle intro -->
-  <section id="s-cubicle" class="screen">
-    <div class="cubicle">
-      <div class="monitor"><div class="glow"></div></div>
-      <p id="cubicle-line" class="narration"></p>
-      <button id="btn-sit" class="primary">Sit down</button>
+  <!-- Boot: the office PC starts up while you settle in -->
+  <section id="s-cubicle" class="screen boot">
+    <div class="glare" aria-hidden="true">
+      <svg class="reflection" viewBox="0 0 200 220" aria-hidden="true">
+        <defs><radialGradient id="face" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
+        <ellipse cx="100" cy="78" rx="38" ry="48" fill="url(#face)"/>
+        <path d="M20 220 C24 160 60 136 100 136 C140 136 176 160 180 220 Z" fill="url(#face)"/>
+      </svg>
     </div>
+    <div class="boot-center">
+      <div class="boot-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <p class="boot-name">KimOS <em>office</em></p>
+      <div class="boot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p id="cubicle-line" class="boot-line" aria-live="polite"></p>
+      <button id="btn-sit" class="boot-btn">Go on</button>
+    </div>
+    <p class="boot-foot">Copyright © KimCorp. All rights reserved, especially the ones you didn't ask for.</p>
   </section>
 
   <!-- Desk: the desktop, with windows -->
   <section id="s-desk" class="screen">
     <div id="desktop" class="desktop">
 
-      <!-- Inbox -->
-      <div class="win" id="w-inbox" data-title="Inbox" data-icon="✉">
-        <div class="mail">
-          <div class="mail-head"><span class="muted">From:</span> <strong id="mail-from"></strong> <span id="mail-role"></span></div>
-          <p id="mail-body" class="mail-body"></p>
-          <button id="btn-call" class="primary">Call them back</button>
-          <p class="fine">Read the case file first. Jot whatever you like in your notes; nobody grades them.</p>
+      <!-- Inbox: an early-2000s mail client -->
+      <div class="win" id="w-inbox" data-title="Inbox - KimMail" data-icon="✉">
+        <div class="mail-toolbar" role="toolbar" aria-label="Mail">
+          <button type="button" data-mail="new"><span>✉</span>Create Mail</button>
+          <button type="button" data-mail="reply"><span>↩</span>Reply</button>
+          <button type="button" data-mail="replyall"><span>⇇</span>Reply All</button>
+          <button type="button" data-mail="forward"><span>↪</span>Forward</button>
+          <button type="button" data-mail="delete"><span>✖</span>Delete</button>
+          <button type="button" data-mail="sendrecv"><span>⇅</span>Send/Recv</button>
+        </div>
+        <div class="mail-client">
+          <nav class="mail-folders" aria-label="Folders">
+            <div class="mail-pane-head">Folders</div>
+            <ul>
+              <li class="f-root">🖥 Local Folders
+                <ul>
+                  <li class="f-sel">📥 <b>Inbox <span id="mail-unread"></span></b></li>
+                  <li>📤 Outbox</li>
+                  <li>📨 Sent Items</li>
+                  <li>🗑 Deleted Items <span class="muted">(312)</span></li>
+                  <li>📝 Drafts <span class="muted">(1)</span></li>
+                </ul>
+              </li>
+            </ul>
+            <div class="mail-pane-head">Contacts</div>
+            <ul id="mail-contacts" class="contacts"></ul>
+          </nav>
+          <div class="mail-main">
+            <table class="mail-list">
+              <thead><tr><th class="ic">!</th><th class="ic">📎</th><th>From</th><th>Subject</th><th class="when">Received</th></tr></thead>
+              <tbody id="mail-rows"></tbody>
+            </table>
+            <div class="mail-preview">
+              <div class="mail-head">
+                <div><span class="lbl">From:</span> <strong id="mail-from"></strong> <span id="mail-role" class="muted"></span></div>
+                <div><span class="lbl">To:</span> Learning team</div>
+                <div><span class="lbl">Subject:</span> <span id="mail-subject"></span></div>
+                <button type="button" id="mail-attach" class="attach">📎 case-file.txt</button>
+              </div>
+              <p id="mail-body" class="mail-body"></p>
+              <div id="mail-actions">
+                <button id="btn-call" class="primary">☎ Call them back</button>
+                <p class="fine">The case file is attached. Jot whatever you like in your notes; nobody grades them.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
