@@ -47,7 +47,9 @@ async function retro() {
   await p.waitForFunction(n => document.querySelectorAll('#mieke-log .msg.them').length === n + 1, before);
   if (!(await p.textContent('#mieke-log')).includes('You have just sent a nudge.') || !(await p.textContent('#mieke-log')).includes('Mieke says:')) throw new Error('nudge or Messenger lines missing');
   if (!MOBILE) await p.screenshot({ path: SHOTS + '/messenger.png' });
-  await start('w-phone');
+  await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-phone"]');
+  await p.waitForSelector('#phone:not([hidden])');
+  if (await p.$('#w-phone, #phone .titlebar')) throw new Error('the phone should not be a window');
   await p.click('#phone-keys [data-k="2"]');
   if (!(await p.textContent('#phone-screen')).includes('Mum')) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
   await p.click('#phone-keys [data-k="back"]'); await p.click('#phone-keys [data-k="1"]');
@@ -62,7 +64,7 @@ async function retro() {
   if (!(await p.textContent('#toast')).includes('Locked')) throw new Error('locked wallpaper did not explain');
   if (!(await p.evaluate(() => document.getElementById('desktop').style.backgroundImage)).includes('svg')) throw new Error('no wallpaper painted');
   if (!MOBILE) await p.screenshot({ path: SHOTS + '/display.png' });
-  await p.click('#w-display .tb.close'); await p.click('#w-phone .tb.close'); await p.click('#w-mieke .tb.close');
+  await p.click('#w-display .tb.close'); if (!MOBILE) await p.click('#phone-away'); if (await p.isVisible('#phone')) throw new Error('phone did not go away'); await p.click('#w-mieke .tb.close');
   if (MOBILE) await p.click('.task:has-text("Call")');
 }
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
