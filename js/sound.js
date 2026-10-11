@@ -69,11 +69,23 @@
     voice(c, g, 79, t + 0.12, 0.3, 0.4, 'sine');
   }
 
+  // A hidden fact turned up: a bright little arpeggio.
+  function found() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.02;
+    const g = c.createGain();
+    g.gain.value = 0.14;
+    g.connect(c.destination);
+    [76, 79, 83, 88].forEach((n, i) => voice(c, g, n, t + i * 0.07, 0.18, 0.45, 'square'));
+  }
+
   function toggle() {
     on = !on;
     try { window.localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
     return on;
   }
 
-  window.Sound = { chime, ding, toggle, get on() { return on; } };
+  window.Sound = { chime, ding, found, toggle, get on() { return on; } };
 })();

@@ -200,7 +200,8 @@ label.check input { width: auto; }
 #w-notes .win-body, #w-case .win-body { padding: 4px; }
 
 .chat-head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid #c9c4b2; padding-bottom: 8px; }
-.meters { display: flex; gap: 14px; }
+.meters { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: flex-end; }
+.meters span { white-space: nowrap; }
 .chat-log { flex: 1; min-height: 120px; overflow-y: auto; padding: 10px; margin: 8px 0; display: flex; flex-direction: column; gap: 8px;
   background: #fff; border: 1px solid var(--field-line); }
 .msg { max-width: 85%; padding: 6px 10px; border-radius: 4px; white-space: pre-wrap; position: relative; border: 1px solid #c8d3e4; }
@@ -455,3 +456,14 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
   .mail-list th:nth-child(3) { width: 30%; }
   .mail-list th.when, .mail-list td.when { width: 52px; }
 }
+
+/* A hidden fact turned up */
+.stamp { position: fixed; left: 50%; top: 38%; z-index: 9000; pointer-events: none; display: flex; flex-direction: column; align-items: center; padding: 10px 22px; border: 4px solid #c0392b; border-radius: 8px; color: #c0392b; background: rgba(255, 252, 240, .92); font-family: "Courier New", monospace; font-weight: 700; transform: translate(-50%, -50%) rotate(-8deg); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.stamp-t { font-size: 34px; letter-spacing: .12em; }
+.stamp-n { font-size: 15px; letter-spacing: .06em; }
+.stamp.go { animation: stamp 1.9s ease-out forwards; }
+@keyframes stamp { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(2.4); } 12% { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(.95); } 18% { transform: translate(-50%, -50%) rotate(-8deg) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .stamp.go { animation: none; } }
+.stamp[hidden] { display: none; }
+.chat-head > div:first-child { min-width: 0; }
+.chat-head .meters { flex: 1 1 260px; }

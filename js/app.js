@@ -89,7 +89,7 @@
   const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
   const SHAPES = [
     [[0, 2], [1, 2], [3, 3]],
-    [[0, 1], [1, 2], [2, 2], [3, 3]],
+    [[0, 1], [2, 2], [3, 3]],
     [[0, 2], [2, 3], [3, 3]]
   ];
   function shapeFor(n) {
@@ -329,7 +329,7 @@
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
     // Your very first request: the Center of Excellence folder opens on the flowchart.
-    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) { openApp('w-coe'); if (state.academy) Desktop.focus('w-academy'); }
+    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) toast('New here? The Center of Excellence folder on your desktop has the intake flowchart.', 'info');
     if (state.index) Sound.ding();
     if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
     save();
@@ -356,9 +356,13 @@
     Desktop.reset();
     mailbox();
     contacts();
-    selectMail(state.run.mails.find(m => m.current));
+    // Calm Monday: the week's first request opens on the inbox alone (with the CoE mail on top
+    // if there is a module); the case file and notes join when you open the request.
+    const calm = state.index === 0 && r.phase === 'inbox' && !r.readMail.current;
+    selectMail(calm && state.academy && !state.academy.done ? state.run.mails.find(m => m.academy) : calm ? null : state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
+    if (calm) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
     if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
     step(dayOf(state.index) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
@@ -431,6 +435,8 @@
   }
   function selectMail(m) {
     const r = state.run;
+    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; renderMail(); return; }
+    if (m.current && r.phase === 'inbox' && !r.readMail.current) Desktop.layout('inbox', 'w-inbox');   // calm Monday: the case file joins
     r.selected = m;
     if (!m.read) { m.read = true; if (m.current) r.readMail.current = true; else if (!m.request) r.readMail[m.subject] = true; }
     const person = m.request ? m.request.stakeholder : null;
@@ -552,8 +558,27 @@
     const w = $('w-notes');
     if (!w.classList.contains('open') || w.classList.contains('minimised')) Desktop.open('w-notes');
   }
+  // A hidden fact turns up: stamp it, ding it, count it. The best moment in the game should feel like one.
+  function discover(ids) {
+    const r = state.run;
+    const fresh = ids.filter(id => !r.revealed.has(id));
+    fresh.forEach(id => r.revealed.add(id));
+    if (!fresh.length) return;
+    const of = r.card.hiddenFacts.length, n = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length;
+    Sound.found();
+    const s = $('stamp');
+    s.querySelector('.stamp-n').textContent = n + ' of ' + of + ' facts';
+    s.hidden = false;
+    s.classList.remove('go');
+    void s.offsetWidth;
+    s.classList.add('go');
+    clearTimeout(discover.t);
+    discover.t = setTimeout(() => { s.hidden = true; }, 1900);
+    meters();
+  }
   function meters() {
     const r = state.run;
+    $('found').textContent = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length + ' / ' + r.card.hiddenFacts.length;
     $('q-left').textContent = touchpoints(r.card) && r.phase === 'call' ? Math.min(r.legLeft, r.questionsLeft) + ' on this call (' + r.questionsLeft + ' in total)' : r.questionsLeft;
     $('patience').textContent = '●'.repeat(Math.max(0, r.patience)) || '0';
     trust();
@@ -578,7 +603,7 @@
       r.turns.push({ role: 'model', text: JSON.stringify(out) });
       addMsg('them', out.reply);
       const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('call')));
-      facts.forEach(id => r.revealed.add(id));
+      discover(facts);
       r.transcript.push({ q, a: out.reply, quality: out.quality, facts, src: r.leg });
       r.questionsLeft--;
       r.legLeft--;
@@ -710,7 +735,7 @@
     if (!facts.length) r.docs.push({ kind, source: DATA_KINDS[kind], text: '' });
     facts.forEach(f => {
       r.docs.push({ kind, source: f.dataSource || DATA_KINDS[kind], text: f.dataDoc });
-      r.revealed.add(f.id);
+      discover([f.id]);
       r.transcript.push({ q: 'Data request: ' + DATA_KINDS[kind], a: (f.dataSource ? f.dataSource + ': ' : '') + f.dataDoc, quality: 'good', facts: [f.id], src: 'data' });
     });
     tick(15);
@@ -734,7 +759,7 @@
       r.corridorTurns.push({ role: 'model', text: JSON.stringify(out) });
       r.corridor.push({ who: 'them', text: out.reply });
       const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('frontline')));
-      facts.forEach(id => r.revealed.add(id));
+      discover(facts);
       r.transcript.push({ q, a: out.reply, quality: out.quality, facts, src: 'frontline' });
       r.corridorLeft--;
       r.questionsLeft--;
@@ -1642,6 +1667,11 @@
     const all = h.weeks.flatMap(w => w.requests);
     if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
     const best = all.reduce((a, b) => (b.total > a.total ? b : a));
+    const done = h.weeks.filter(w => w.done && !w.hard);
+    if (done.length > 1) {
+      const bars = ' ▁▂▃▄▅▆▇█';
+      para('\nYour weeks so far: ' + done.map(w => bars[Math.max(1, Math.round(w.avg / 100 * 8))]).join('') + '  (' + done[0].avg + ' → ' + done[done.length - 1].avg + ')');
+    }
     para('\nRequests handled: ' + all.length + ' · average ' + Math.round(all.reduce((a, b) => a + b.total, 0) / all.length) + '/100 · best ' + best.total + '/100 (' + best.who + ')');
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {

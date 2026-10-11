@@ -136,7 +136,9 @@ async function followUp() {
       const first = await p.evaluate(() => window.__intake.state);
       const shape = first.cards.map(c => c.difficulty).join(' ');
       if (shape !== '0 0 1' || first.days.join('') !== '013') throw new Error('week 1 shape wrong: ' + shape + ' / ' + first.days);
-      if (!(await p.evaluate(() => document.getElementById('w-coe').classList.contains('open')))) throw new Error('CoE folder did not open on the first request');
+      // Calm Monday: the inbox and the module only; the CoE folder waits on the desktop.
+      if (await p.evaluate(() => document.getElementById('w-coe').classList.contains('open'))) throw new Error('CoE folder should not open by itself any more');
+      if (!MOBILE && (await p.isVisible('#w-case') || await p.isVisible('#w-notes'))) throw new Error('calm Monday: case file and notes should wait');
       await academy();
       if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coe"]'); } else await p.click('.desk-icon[data-app="w-coe"]');
       await visible('#w-coe');
@@ -154,6 +156,7 @@ async function followUp() {
       if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
       await p.click('[data-mail="delete"]');
       await p.click('#mail-rows tr:has-text("❗")');
+      if (!MOBILE) await visible('#w-case');
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
     }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
@@ -187,6 +190,10 @@ async function followUp() {
       await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.you').length === 3);
       await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 4);
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/call.png" });
+    }
+    if (req === 0) {
+      const f = await p.textContent('#found');
+      if (!/^[1-9]\d* \/ \d+$/.test(f)) throw new Error('found-facts counter did not move: ' + f);
     }
     await p.click('#btn-hangup');
     if (req === 2) await followUp();
