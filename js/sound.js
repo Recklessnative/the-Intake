@@ -81,28 +81,62 @@
     [76, 79, 83, 88].forEach((n, i) => voice(c, g, n, t + i * 0.07, 0.18, 0.45, 'square'));
   }
 
-  // Doors Messenger: a two-note "ba-dum" when somebody says something.
+  // A bell: a sine with an inharmonic partial and a fast decay, the "glassy" messenger timbre.
+  function bell(c, out, note, t, gain, len) {
+    [[1, 1], [2.76, 0.35], [5.4, 0.12]].forEach(([mul, g0]) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = hz(note) * mul;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(gain * g0, t + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + len / mul);
+      o.connect(g); g.connect(out);
+      o.start(t); o.stop(t + len + 0.1);
+    });
+  }
+  // Doors Messenger, new message: a bright rising "ba-ding" in the spirit of the 2000s
+  // messengers (our own notes, not a copy of anyone's sound).
   function im() {
     if (!on) return;
     const c = audio();
     if (!c) return;
     const t = c.currentTime + 0.02;
     const g = c.createGain();
-    g.gain.value = 0.14;
+    g.gain.value = 0.22;
     g.connect(c.destination);
-    voice(c, g, 79, t, 0.1, 0.5, 'sine');
-    voice(c, g, 86, t + 0.11, 0.25, 0.45, 'sine');
+    bell(c, g, 81, t, 0.8, 0.5);
+    bell(c, g, 88, t + 0.09, 1, 0.9);
   }
-  // A nudge: a low buzz.
+  // A nudge: a wooden rattle, then the window shakes.
   function nudge() {
     if (!on) return;
     const c = audio();
     if (!c) return;
     const t = c.currentTime + 0.02;
     const g = c.createGain();
-    g.gain.value = 0.08;
+    g.gain.value = 0.18;
     g.connect(c.destination);
-    [0, 0.12, 0.24].forEach(d => voice(c, g, 40, t + d, 0.08, 0.6, 'sawtooth'));
+    for (let i = 0; i < 9; i++) {
+      const len = 0.035, n = c.createBufferSource(), b = c.createBuffer(1, Math.ceil(c.sampleRate * len), c.sampleRate), d = b.getChannelData(0);
+      for (let k = 0; k < d.length; k++) d[k] = (Math.random() * 2 - 1) * Math.pow(1 - k / d.length, 3);
+      n.buffer = b;
+      const f = c.createBiquadFilter();
+      f.type = 'bandpass'; f.frequency.value = i % 2 ? 900 : 1300; f.Q.value = 6;
+      n.connect(f); f.connect(g);
+      n.start(t + i * 0.055);
+    }
+    bell(c, g, 69, t + 0.5, 0.6, 0.4);
+  }
+  // Someone signs in: three soft rising notes.
+  function online() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.02;
+    const g = c.createGain();
+    g.gain.value = 0.16;
+    g.connect(c.destination);
+    [76, 81, 85].forEach((n, i) => bell(c, g, n, t + i * 0.12, 0.9, i === 2 ? 1.1 : 0.4));
   }
   // A text on the brick phone: the beep-beep everyone recognises (well, nearly).
   function sms() {
@@ -122,5 +156,5 @@
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, sms, toggle, get on() { return on; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, toggle, get on() { return on; } };
 })();

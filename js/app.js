@@ -34,7 +34,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null, academy: null };
+  const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null, academy: null, team: null };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
@@ -106,13 +106,28 @@
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const fresh = list => list.slice().sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const cards = [], days = [];
-    shapeFor(n).forEach(([day, what]) => {
+    // A team lead takes two requests of their own (Monday and Thursday); the team takes the rest.
+    shapeFor(n).filter((x, i) => !teamWeek(n) || i !== 1).forEach(([day, what]) => {
       const full = fresh(state.pool.filter(c => !cards.includes(c) && (what === 0 ? c.difficulty === 0 : c.difficulty !== 0)));
       const near = full.slice().sort((a, b) => Math.abs(a.difficulty - what) - Math.abs(b.difficulty - what));
       const card = near.find(c => c.difficulty === what && !cards.some(x => x.sector === c.sector)) || near.find(c => c.difficulty === what) || near[0];
       if (card) { cards.push(card); days.push(day); }
     });
     return { cards, days };
+  }
+  // After the promotion every normal week is a team week: three drafts to review.
+  function teamWeek(n) {
+    const p = scoreHistory().promoted;
+    return !state.hard && !!p && n > p.week;
+  }
+  function pickTeamCards() {
+    const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
+    const pool = state.pool.filter(c => c.difficulty >= 1 && !state.cards.includes(c) && c.dependencies.length)
+      .sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
+    const out = [];
+    pool.forEach(c => { if (out.length < Team.JUNIORS.length && !out.some(x => x.sector === c.sector)) out.push(c); });
+    pool.forEach(c => { if (out.length < Team.JUNIORS.length && !out.includes(c)) out.push(c); });
+    return out;
   }
   // Hard mode: three full cases, the hardest there are, one a day.
   function pickHardWeek() {
@@ -216,6 +231,7 @@
     state.charged = false;
     state.board = null;
     state.academy = state.hard ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
+    state.team = teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
     state.run = null;
     if (!state.hard && !seenIntro()) intro(cubicle); else cubicle();
   }
@@ -305,7 +321,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -331,6 +347,7 @@
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
     state.board = s.board || null;
+    state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
     state.academy = s.academy || (s.hard ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
@@ -393,6 +410,7 @@
     briefing(state.hard ? null : card.briefing);
     if (state.hard) $('briefing-head').textContent = 'Hard mode: no case file. Ask.';
     Desktop.reset();
+    document.body.classList.toggle('has-team', !!state.team);
     mailbox();
     contacts();
     // Calm Monday: the week's first request opens on the inbox alone (with the CoE mail on top
@@ -437,26 +455,36 @@
 
   function mailbox() {
     const r = state.run;
-    const mails = FILLER.map(f => Object.assign({ read: !!r.readMail[f.subject], at: r.clock - f.ago - 40 * state.index }, f));
+    // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
+    const today = state.days[state.index] || 0;
+    const mails = FILLER.map(f => Object.assign({ read: !!r.readMail[f.subject], day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
-      from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, at: 8 * 60 + 55 + 40 * i,
+      from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
     }));
     // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
     if (!state.hard) {
       const sm = Story.storyMail(state.weekNo);
-      mails.push(Object.assign({ read: !!r.readMail[sm.subject], at: 8 * 60 + 12, story: true }, sm));
-      Story.news(state.weekNo, state.days[state.index] || 0).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
+      mails.push(Object.assign({ read: !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
+      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
     }
     // This week's CoE Academy module arrives first thing Monday.
     if (state.academy) {
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
       const subject = 'Assigned to you: ' + m.title + ' (' + m.minutes + ' min)';
-      mails.push({ from: 'CoE Academy', subject, academy: true, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
+      mails.push({ from: 'CoE Academy', subject, academy: true, day: 0, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
         body: 'Good morning,\n\nThis week\'s module: "' + m.title + '". ' + m.intro + '\n\nFour questions, then what to look out for in your cases this week. No avatars, no "click to reveal", and it does not count toward anything.\n\nThe CoE team' });
     }
-    mails.push({ from: r.card.stakeholder.name, subject: r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, at: r.clock - 2, body: r.card.surfaceAsk });
-    mails.sort((a, b) => b.at - a.at);
+    if (state.team) {
+      const left = state.team.drafts.filter(d => !d.grade).length;
+      const subject = 'Our drafts for your review (' + state.team.drafts.length + ')';
+      mails.push({ from: 'Bart, Priya and Jens', subject, team: true, day: 0, read: !!r.readMail[subject] || !left, at: 8 * 60 + 41,
+        body: 'Hi boss!\n\nWe each took a request this week and wrote the one-pager. Could you check them before they go out? We think they are good to go.\n\n' +
+          state.team.drafts.map(d => '- ' + Team.junior(d.junior).name + ': ' + state.pool.find(c => c.id === d.card).subject + (d.grade ? ' (reviewed)' : '')).join('\n') +
+          '\n\nBart, Priya and Jens\n\nP.S. from HR: your team is now "processed". Review all three before Friday; unreviewed drafts go out as they are.' });
+    }
+    mails.push({ from: r.card.stakeholder.name, subject: r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, day: today, at: r.clock - 2, body: r.card.surfaceAsk });
+    mails.sort((a, b) => (b.day * 1440 + b.at) - (a.day * 1440 + a.at));
     r.mails = mails;
     renderMail();
   }
@@ -468,7 +496,7 @@
       const tr = document.createElement('tr');
       tr.className = (m.read ? '' : 'unread') + (m === r.selected ? ' sel' : '');
       tr.tabIndex = 0;
-      const cells = [m.current ? '❗' : '', m.request && !m.done ? '📎' : '', (m.read ? '📭 ' : '📩 ') + m.from, m.subject, (m.done ? '✓ ' : '') + hhmm(m.at)];
+      const cells = [m.current ? '❗' : '', m.request && !m.done ? '📎' : '', (m.read ? '📭 ' : '📩 ') + m.from, m.subject, (m.done ? '✓ ' : '') + (m.day === (state.days[state.index] || 0) ? 'Today ' : DAYS[m.day].slice(0, 3) + ' ') + hhmm(m.at)];
       cells.forEach((t, i) => { const td = document.createElement('td'); td.textContent = t; if (i < 2) td.className = 'ic'; if (i === 4) td.className = 'when'; tr.appendChild(td); });
       tr.onclick = () => selectMail(m);
       tr.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectMail(m); } };
@@ -480,7 +508,7 @@
   }
   function selectMail(m) {
     const r = state.run;
-    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; renderMail(); return; }
+    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; $('mail-team').hidden = true; renderMail(); return; }
     if (m.current && r.phase === 'inbox' && !r.readMail.current) Desktop.layout('inbox', 'w-inbox');   // calm Monday: the case file joins
     r.selected = m;
     if (!m.read) { m.read = true; if (m.current) r.readMail.current = true; else if (!m.request) r.readMail[m.subject] = true; }
@@ -492,6 +520,7 @@
     $('mail-attach').hidden = !m.current;
     $('mail-actions').hidden = !m.current;
     $('mail-academy').hidden = !m.academy;
+    $('mail-team').hidden = !m.team;
     if (m.academy) $('btn-academy').textContent = state.academy.done ? '🎓 See the tips again' : state.academy.started ? '🎓 Carry on with the module' : '🎓 Open the module';
     renderMail();
   }
@@ -865,6 +894,35 @@
     Desktop.focus('w-academy');
   }
   $('btn-academy').onclick = () => openAcademy();
+
+  // ---------- the team: review the juniors' drafts ----------
+  function renderTeam() {
+    if (!state.team) return;
+    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); }, sendTeam);
+  }
+  async function sendTeam(d) {
+    const j = Team.junior(d.junior), card = state.pool.find(c => c.id === d.card);
+    if (!d.pick) { toast('Click the line with the problem first.', 'info'); return; }
+    if (words(d.note || '') < 6) { toast('Write ' + j.name + ' a real note: what is wrong, why, and what to try.', 'info'); return; }
+    const flawLabel = Team.LINES.find(([k]) => k === d.flaw)[1];
+    const p = Prompts.coach(card, j, flawLabel, d.why);
+    const material = 'The draft:\n' + d.lines.map(l => '- ' + l.label + ': ' + l.text).join('\n') +
+      '\n\nThe line the team lead marked as the problem: "' + Team.LINES.find(([k]) => k === d.pick)[1] + '"' +
+      '\n\nThe team lead\'s note to ' + j.name + ': """' + d.note.trim() + '"""';
+    $('btn-team-send').disabled = true;
+    $('btn-team-send').textContent = 'Sending...';
+    try {
+      const g = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: material }] });
+      const coach = Math.max(0, Math.min(3, g.score | 0)) * 2, spot = Team.spotPoints(d);
+      d.grade = { spot, coach, total: spot + coach, reply: g.reply, note: g.note };
+      Sound.ding();
+      recordTeam();
+    } catch (e) { toast(e.message); }
+    renderTeam();
+    save();
+    if (state.run) mailbox();
+  }
+  $('btn-team').onclick = () => openApp('w-team');
   function academyTips() {
     const A = state.academy;
     return A && A.done ? Academy.MODULES.find(m => m.id === A.id).tips : [];
@@ -974,7 +1032,7 @@
     const t = TEXTS[n % TEXTS.length];
     Retro.sms(t[0], t[1]);
     const ping = !state.index ? ['Mieke', 'Morning! Do the CoE module first, it is short. Then open the request. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
-    setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }), 1200);
+    setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
   }
   // Staply turns up at most once per request, and never in hard mode.
   function staply(trigger) {
@@ -986,7 +1044,7 @@
   $('btn-staply').onclick = () => { $('start-menu').hidden = true; Retro.setStaply(!Retro.staplyOn()); staplyLabel(); toast(Retro.staplyOn() ? 'Staply is back. He missed you.' : 'Staply is off.', 'info'); };
   Retro.init({
     toast,
-    onStaplyYes: () => { if (!state.hard) setTimeout(() => Retro.im('Mieke', 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.', () => openApp('w-mieke')), 1800); },
+    onStaplyYes: () => { if (!state.hard) setTimeout(() => Retro.im('Mieke', 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.', () => openApp('w-mieke')), 5200); },
     onStaplyChange: staplyLabel
   });
   staplyLabel();
@@ -996,6 +1054,7 @@
   }
   Retro.setLevel(wallpaperLevel());
   $('btn-wait-snake').onclick = () => Retro.showPhone('snake');
+  $('btn-phone').onclick = () => openApp('w-phone');
 
   // ---------- the case board ----------
   // Five short steps built on what the stakeholder actually said. Each step locks before the
@@ -1529,6 +1588,11 @@
     const h = scoreHistory(), w = thisWeek(h);
     const promoted = !state.hard && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
     if (promoted) { h.promoted = { week: state.weekNo, at: Date.now() }; keepScores(h); }
+    $('end-team').hidden = !state.team;
+    if (state.team) {
+      const t = Team.score(state.team);
+      $('end-team').textContent = 'Your team: ' + t.total + '/' + t.of + ' for your reviews' + (t.reviewed < state.team.drafts.length ? ', with ' + (state.team.drafts.length - t.reviewed) + ' draft(s) sent out unreviewed.' : '.') + ' It does not change your title, but Darren reads it.';
+    }
     $('end-memo').hidden = state.hard;
     if (!state.hard) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
     shareCard(score, title);
@@ -1783,6 +1847,12 @@
     w.academy = { title: Academy.MODULES.find(m => m.id === A.id).title, right: A.right, of: A.of };
     keepScores(h);
   }
+  function recordTeam() {
+    if (!state.team) return;
+    const h = scoreHistory(), w = thisWeek(h);
+    w.team = Team.score(state.team);
+    keepScores(h);
+  }
   function recordWeek(avg, title, board) {
     const h = scoreHistory(), w = thisWeek(h);
     Object.assign(w, { done: true, avg, title, board: board || undefined });
@@ -1802,12 +1872,14 @@
       const bars = ' ▁▂▃▄▅▆▇█';
       para('\nYour weeks so far: ' + done.map(w => bars[Math.max(1, Math.round(w.avg / 100 * 8))]).join('') + '  (' + done[0].avg + ' → ' + done[done.length - 1].avg + ')');
     }
+    scoreCharts(box, h);
     para('\nRequests handled: ' + all.length + ' · average ' + Math.round(all.reduce((a, b) => a + b.total, 0) / all.length) + '/100 · best ' + best.total + '/100 (' + best.who + ')');
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
       const head = document.createElement('h3');
       head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
       box.appendChild(head);
+      if (w.team) para('Team reviews: ' + w.team.total + '/' + w.team.of + ' (' + w.team.reviewed + ' of ' + w.team.of / 10 + ' drafts reviewed)', 'muted');
       if (w.academy && w.academy.of) para('CoE Academy: ' + w.academy.title + ' · ' + w.academy.right + ' of ' + w.academy.of + ' right', 'muted');
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
         para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
@@ -1818,12 +1890,90 @@
     });
   }
 
+  // Two charts on top of scores.txt: every request over time, and the score parts as a share of
+  // their maximum over your last five requests, with the weakest one called out.
+  function scoreCharts(box, h) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const mk = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); if (text != null) e.textContent = text; return e; };
+    const reqs = [];
+    h.weeks.filter(w => w.requests.length).forEach((w, wi) => w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => reqs.push({ x, wi, w })));
+    const wrap = document.createElement('div');
+    wrap.className = 'charts';
+    box.appendChild(wrap);
+    // 1. The trend: one dot per request, a line through them, weeks marked on the axis.
+    const W = 520, H = 190, L = 34, R = 10, T = 12, B = 30;
+    const fig = document.createElement('figure');
+    fig.className = 'chart';
+    const cap = document.createElement('figcaption');
+    cap.textContent = 'Every request, oldest to newest (score out of 100)';
+    const sv = mk('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Line chart of ' + reqs.length + ' request scores, from ' + reqs[0].x.total + ' to ' + reqs[reqs.length - 1].x.total });
+    const xs = i => L + (reqs.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (reqs.length - 1));
+    const ys = v => T + (100 - v) * (H - T - B) / 100;
+    [0, 25, 50, 75, 100].forEach(v => { sv.appendChild(mk('line', { x1: L, x2: W - R, y1: ys(v), y2: ys(v), class: 'grid' })); sv.appendChild(mk('text', { x: L - 6, y: ys(v) + 4, class: 'ax', 'text-anchor': 'end' }, v)); });
+    let lastWeek = -1;
+    reqs.forEach((r, i) => {
+      if (r.wi === lastWeek) return;
+      lastWeek = r.wi;
+      if (i) sv.appendChild(mk('line', { x1: (xs(i) + xs(i - 1)) / 2, x2: (xs(i) + xs(i - 1)) / 2, y1: T, y2: H - B, class: 'wk' }));
+      sv.appendChild(mk('text', { x: xs(i), y: H - B + 16, class: 'ax' }, (r.w.hard ? 'Hard ' : 'Wk ') + (r.wi + 1)));
+    });
+    if (reqs.length > 1) sv.appendChild(mk('polyline', { points: reqs.map((r, i) => xs(i) + ',' + ys(r.x.total)).join(' '), class: 'trend' }));
+    reqs.forEach((r, i) => {
+      const g = mk('g', { class: 'pt', tabindex: '0' });
+      g.appendChild(mk('title', {}, r.x.who + ' (' + (r.w.hard ? 'hard mode, ' : '') + 'week ' + (r.wi + 1) + '): ' + r.x.total + '/100'));
+      g.appendChild(mk('circle', { cx: xs(i), cy: ys(r.x.total), r: 12, class: 'hit' }));
+      g.appendChild(mk('circle', { cx: xs(i), cy: ys(r.x.total), r: 4.5, class: 'dot' }));
+      sv.appendChild(g);
+    });
+    // Label only the first, the best and the latest point.
+    const best = reqs.reduce((a, r, i) => (r.x.total > reqs[a].x.total ? i : a), 0);
+    [...new Set([0, best, reqs.length - 1])].forEach(i => sv.appendChild(mk('text', { x: xs(i), y: ys(reqs[i].x.total) - 9, class: 'val', 'text-anchor': i === 0 && reqs.length > 1 ? 'start' : i === reqs.length - 1 && reqs.length > 1 ? 'end' : 'middle' }, reqs[i].x.total)));
+    fig.append(cap, sv);
+    wrap.appendChild(fig);
+    // 2. The score parts, last five requests, as a share of each part's maximum.
+    const recent = reqs.slice(-5).map(r => r.x);
+    const parts = DIMENSIONS.map(([k, label, max]) => ({ k, label, max, avg: recent.reduce((a, x) => a + (x.pts[k] || 0), 0) / recent.length })).map(d => Object.assign(d, { pct: Math.round(d.avg / d.max * 100) }));
+    const weak = parts.reduce((a, d) => (d.pct < a.pct ? d : a));
+    const fig2 = document.createElement('figure');
+    fig2.className = 'chart';
+    const cap2 = document.createElement('figcaption');
+    cap2.textContent = 'Score parts, your last ' + recent.length + (recent.length === 1 ? ' request' : ' requests') + ' (% of the points available)';
+    const RH = 22, W2 = 520, LW = 168, H2 = parts.length * RH + 8;
+    const sv2 = mk('svg', { viewBox: '0 0 ' + W2 + ' ' + H2, role: 'img', 'aria-label': 'Bar chart of score parts. Weakest: ' + weak.label + ' at ' + weak.pct + '%' });
+    const bx = v => LW + v * (W2 - LW - 48) / 100;
+    [0, 50, 100].forEach(v => sv2.appendChild(mk('line', { x1: bx(v), x2: bx(v), y1: 0, y2: H2 - 6, class: 'grid' })));
+    parts.forEach((d, i) => {
+      const y = 4 + i * RH, g = mk('g', { class: 'pt' + (d === weak ? ' weak' : ''), tabindex: '0' });
+      g.appendChild(mk('title', {}, d.label + ': ' + (Math.round(d.avg * 10) / 10) + ' of ' + d.max + ' points on average (' + d.pct + '%)'));
+      g.appendChild(mk('text', { x: LW - 8, y: y + 13, class: 'lab', 'text-anchor': 'end' }, (d === weak ? '▲ ' : '') + d.label));
+      g.appendChild(mk('rect', { x: LW, y: y, width: Math.max(2, bx(d.pct) - LW), height: RH - 8, rx: 3, class: 'bar' }));
+      g.appendChild(mk('text', { x: bx(d.pct) + 6, y: y + 13, class: 'val' }, d.pct + '%'));
+      sv2.appendChild(g);
+    });
+    fig2.append(cap2, sv2);
+    wrap.appendChild(fig2);
+    const tip = document.createElement('p');
+    tip.className = 'weak-spot';
+    tip.textContent = '▲ Your weak spot right now: ' + weak.label + ' (' + weak.pct + '%). ' + WEAK_TIPS[weak.k];
+    wrap.appendChild(tip);
+  }
+  const WEAK_TIPS = {
+    diagnosis: 'Ask why one more time before you name the need, and quote what they said.',
+    measurement: 'Get a baseline number on the call, and name the business metric that should move.',
+    fit: 'Check your concept against the cause you found. If the cause is a process, a course will not fix it.',
+    nextLevel: 'Say what happens after the pilot: who owns it, and what scales if it works.',
+    risks: 'Name one dependency outside learning (IT, the works council, a manager) and how you handle it.',
+    pitch: 'In the defence, answer the objection first, then add your evidence. Do not restate your memo.'
+  };
+
   // ---------- desktop icons and apps ----------
   function openApp(id) {
     const r = state.run;
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
     if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
     if (id === 'w-academy') { openAcademy(); return; }
+    if (id === 'w-team' && !state.team) { toast(scoreHistory().promoted ? 'Your team starts on Monday. HR is still "processing".' : 'No team yet. Darren promotes you after a week of 64+ with every diagnosis at 15+, or after the week 4 tender.', 'info'); return; }
+    if (id === 'w-team') renderTeam();
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
     if (id === 'w-write' && (!r || r.phase === 'inbox' || r.phase === 'call' || r.phase === 'investigate')) { toast('The case board opens when you are done asking questions.', 'info'); return; }
     if (id === 'w-leads' && (!r || !touchpoints(r.card))) { toast(r && r.card.difficulty === 0 ? 'Starter cases are all on the call. Follow-up opens on the next ones.' : 'Nothing to follow up yet.', 'info'); return; }
@@ -1866,6 +2016,11 @@
       if (!A.started) A.started = true;
       else if (A.picks[A.at] == null) A.picks[A.at] = Academy.MODULES.find(m => m.id === A.id).questions[A.at].options.findIndex(o => o.ok);
       openAcademy();
+      return;
+    }
+    if (state.team && $('w-team').classList.contains('open') && !$('w-team').classList.contains('minimised')) {
+      const d = state.team.drafts[state.team.at];
+      if (!d.grade) { d.pick = d.flaw; d.note = '(test) The ' + d.flaw + ' line has the problem: it does not follow from what you found. What did the client say that points elsewhere?'; renderTeam(); }
       return;
     }
     if (state.board && $('p-board').classList.contains('active')) {

@@ -51,7 +51,7 @@
     // A weekend headline lands in Monday's inbox.
     const sat = from - 2 * DAY;
     return NEWS.filter(n => n.at >= sat && n.at < to).map(n => ({
-      from: 'NewsFlash Daily', subject: n.subject,
+      from: 'NewsFlash Daily', subject: n.subject, day: Math.max(0, Math.floor((n.at - from) / DAY)),
       body: fmt(new Date(n.at)) + '\n\n' + n.body + '\n\nP.S. from the intranet team: ' + n.ps
     }));
   }
