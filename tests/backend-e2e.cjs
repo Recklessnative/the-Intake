@@ -10,9 +10,11 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.waitForFunction(() => /free weeks? left/.test(document.getElementById('runs-left').textContent));
   console.log('title:', await p.textContent('#runs-left'));
   await p.click('#btn-start');
+  await p.waitForSelector('#s-intro.active'); await p.click('#btn-intro-skip');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
   if (await p.isVisible('#w-coe')) await p.click('#w-coe .tb.close');
+  await p.click('#mail-rows tr:has-text("❗")');     // calm Monday: open the request first
   await p.click('#btn-call');
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);

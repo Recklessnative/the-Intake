@@ -37,6 +37,34 @@ async function caseBoard(req) {
   if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
   await next();
 }
+// The 2000s layer: Messenger nudge, the brick phone (texts and Snake), wallpapers.
+async function retro() {
+  const SHOTS = process.argv[3] || require('os').tmpdir();
+  const start = async id => { if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="' + id + '"]'); } else { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="' + id + '"]'); } await visible('#' + id); };
+  await start('w-mieke');
+  const before = await p.$$eval('#mieke-log .msg.them', l => l.length);
+  await p.click('#btn-nudge');
+  await p.waitForFunction(n => document.querySelectorAll('#mieke-log .msg.them').length === n + 1, before);
+  if (!(await p.textContent('#mieke-log')).includes('You have just sent a nudge.') || !(await p.textContent('#mieke-log')).includes('Mieke says:')) throw new Error('nudge or Messenger lines missing');
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/messenger.png' });
+  await start('w-phone');
+  await p.click('#phone-keys [data-k="2"]');
+  if (!(await p.textContent('#phone-screen')).includes('Mum')) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
+  await p.click('#phone-keys [data-k="back"]'); await p.click('#phone-keys [data-k="1"]');
+  if (!(await p.$('#phone-screen canvas.ph-snake'))) throw new Error('Snake did not start');
+  await p.click('#phone-keys [data-k="8"]'); await p.waitForTimeout(600);
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/phone.png' });
+  await p.click('#phone-keys [data-k="back"]');
+  await start('w-display');
+  const wp = await p.$$eval('#display-grid .wp', l => l.map(b => b.className));
+  if (wp.length !== 5 || wp.filter(c => c.includes('locked')).length !== 4 || !wp[0].includes(' on')) throw new Error('wallpapers wrong: ' + wp);
+  await p.click('#display-grid .wp >> nth=2');
+  if (!(await p.textContent('#toast')).includes('Locked')) throw new Error('locked wallpaper did not explain');
+  if (!(await p.evaluate(() => document.getElementById('desktop').style.backgroundImage)).includes('svg')) throw new Error('no wallpaper painted');
+  if (!MOBILE) await p.screenshot({ path: SHOTS + '/display.png' });
+  await p.click('#w-display .tb.close'); await p.click('#w-phone .tb.close'); await p.click('#w-mieke .tb.close');
+  if (MOBILE) await p.click('.task:has-text("Call")');
+}
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
 async function academy() {
   await visible('#w-academy');
@@ -124,6 +152,14 @@ async function followUp() {
   await p.click('#btn-start');                      // no key -> settings
   await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
   await p.click('#btn-start');
+  // The cold open: 2007, AI years away. Click through it once.
+  await p.waitForSelector('#s-intro.active');
+  for (let i = 0; i < 5; i++) await p.click('#s-intro', { position: { x: 20, y: 20 } });
+  await p.waitForSelector('#intro-card:not([hidden])');
+  if (!(await p.textContent('#intro-lines')).includes('fifteen years away')) throw new Error('intro lines missing');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/intro.png' });
+  await p.click('#btn-intro-go');
+  await p.waitForSelector('#s-cubicle.active');
   let req = -1;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
@@ -131,12 +167,18 @@ async function followUp() {
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
+    // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
+    const inbox = await p.textContent('#mail-rows');
+    if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
+    if (n === 2 && !(await p.textContent('#os-step')).includes('Thursday 6 Sep 2007')) throw new Error('game date wrong: ' + await p.textContent('#os-step'));
     if (n === 0) {
       // First request ever: the CoE Academy module on top, the Center of Excellence open on the flowchart.
       const first = await p.evaluate(() => window.__intake.state);
       const shape = first.cards.map(c => c.difficulty).join(' ');
       if (shape !== '0 0 1' || first.days.join('') !== '013') throw new Error('week 1 shape wrong: ' + shape + ' / ' + first.days);
-      if (!(await p.evaluate(() => document.getElementById('w-coe').classList.contains('open')))) throw new Error('CoE folder did not open on the first request');
+      // Calm Monday: the inbox and the module only; the CoE folder waits on the desktop.
+      if (await p.evaluate(() => document.getElementById('w-coe').classList.contains('open'))) throw new Error('CoE folder should not open by itself any more');
+      if (!MOBILE && (await p.isVisible('#w-case') || await p.isVisible('#w-notes'))) throw new Error('calm Monday: case file and notes should wait');
       await academy();
       if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coe"]'); } else await p.click('.desk-icon[data-app="w-coe"]');
       await visible('#w-coe');
@@ -154,6 +196,7 @@ async function followUp() {
       if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
       await p.click('[data-mail="delete"]');
       await p.click('#mail-rows tr:has-text("❗")');
+      if (!MOBILE) await visible('#w-case');
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
     }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
@@ -188,9 +231,24 @@ async function followUp() {
       await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 4);
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/call.png" });
     }
+    if (req === 0) {
+      const f = await p.textContent('#found');
+      if (!/^[1-9]\d* \/ \d+$/.test(f)) throw new Error('found-facts counter did not move: ' + f);
+      await retro();
+    }
     await p.click('#btn-hangup');
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
+    if (req === 0) {
+      // Staply turns up on the case board with confidently bad advice.
+      await p.waitForSelector('#staply:not([hidden])');
+      if (!(await p.textContent('#staply')).includes('learning styles')) throw new Error('Staply said the wrong thing: ' + await p.textContent('#staply'));
+      if (!MOBILE) { await p.waitForTimeout(600); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/staply.png' }); }
+      await p.click('#staply [data-st="yes"]');
+      if ((await p.textContent('#staply .st-text')).includes('learning styles questionnaire?') || await p.isVisible('#staply .st-actions')) throw new Error('Staply did not answer the yes');
+      await p.waitForSelector('#im-pop:not([hidden]) >> text=stapler');
+      await p.evaluate(() => { document.getElementById('staply').hidden = true; document.getElementById('im-pop').hidden = true; });
+    }
     if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + "/write.png" });
     if (req === 1) {
       // Memo mode: the long form is still there for those who want it.
@@ -239,6 +297,7 @@ async function followUp() {
   if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#s-end.active');
+  if (!(await p.textContent('#end-memo-body')).includes('A pilot. That is not a no') || !(await p.textContent('#end-memo-body')).includes('week 1 of 4')) throw new Error('Friday memo wrong: ' + await p.textContent('#end-memo-body'));
   if (!(await p.textContent('#end-board')).includes('Approved as a pilot') || !(await p.textContent('#share-text')).includes('as a pilot')) throw new Error('board result missing on the end screen');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
   if (!mieke) throw new Error('Mieke was never asked');
