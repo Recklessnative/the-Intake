@@ -144,7 +144,7 @@ async function followUp() {
     let out;
     if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
     else if (sys.startsWith('You are the examiner')) out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
-    else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.' }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?' }, { role: 'COO', preempted: false, line: 'Who covers the shifts?' }] }; }
+    else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); if (!body.contents[0].parts[0].text.includes('How the slide looks: Design')) throw new Error('board got no design'); const R = ['nod', 'note', 'frown', 'eyebrow', 'yawn', 'calculator']; out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.', reactions: R }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?', reactions: R.slice().reverse() }, { role: 'COO', preempted: false, line: 'Who covers the shifts?', reactions: ['nod'] }], aside: 'CFO, to the COO: was that a star?' }; }
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
     else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
@@ -293,8 +293,25 @@ async function followUp() {
   await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#p-board.active .slide');
   await p.fill('.slide textarea[name=ask]', 'EUR 30k, 3 months, sponsor: the COO.');
   await p.fill('.slide textarea[name=evidence]', 'Six of nine new hires left in month one.');
+  // Pitchwright: a design, a star wipe and WordArt, then the show, one box per click.
+  await p.click('.pw-theme.t-ocean');
+  await p.selectOption('select[name=pw-transition]', 'star');
+  await p.click('input[name=pw-wordart]');
+  if (!(await p.$('.pw-slide.t-ocean .pw-title.wordart')) || (await p.inputValue('.slide textarea[name=ask]')) !== 'EUR 30k, 3 months, sponsor: the COO.') throw new Error('slide design did not apply or lost text');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/slide-editor.png' });
   await p.click('#boardroom button.primary');
+  await p.waitForSelector('#slideshow .ss-slide.in-star');
+  if (await p.$$eval('#slideshow .ss-box.later', l => l.length) !== 6) throw new Error('slide show should start with only the title');
+  for (let i = 0; i < 6; i++) await p.click('#slideshow');
+  const reacts = await p.$$eval('#slideshow .ss-react', l => l.map(x => x.textContent).join(''));
+  if (await p.$$eval('#slideshow .ss-box.later', l => l.length) || !reacts.includes('🧮')) throw new Error('slide show builds or reactions wrong: ' + reacts);
+  await p.waitForTimeout(1200);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/show.png' });
+  await p.click('#slideshow');
+  if (!(await p.textContent('#slideshow .ss-end')).includes('was that a star')) throw new Error('no aside on a flashy slide');
+  await p.click('#slideshow');
   await p.waitForSelector('.member textarea');
+  if (await p.$('#slideshow')) throw new Error('slide show did not close');
   if (await p.$$eval('.member textarea', l => l.length) !== 2 || !(await p.$('.member.nod'))) throw new Error('board questions wrong');
   await p.fill('.member textarea[name=b0]', 'Yes, we showed it to them on Tuesday.');
   await p.fill('.member textarea[name=b1]', 'We pilot on day shift first.');
@@ -303,6 +320,9 @@ async function followUp() {
   await p.waitForSelector('#boardroom .score-total');
   const bt = await p.textContent('#boardroom .score-total');
   if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
+  if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('no stamp on the result');
+  await p.waitForTimeout(900);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board-result.png' });
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#s-end.active');
   if (!(await p.textContent('#end-memo-body')).includes('A pilot. That is not a no') || !(await p.textContent('#end-memo-body')).includes('week 1 of 4')) throw new Error('Friday memo wrong: ' + await p.textContent('#end-memo-body'));
@@ -422,6 +442,8 @@ async function followUp() {
   await p.click('#boardroom button.primary');
   if (await p.isVisible('.member')) throw new Error('an empty slide was presented');
   await p.click('#btn-debug'); await p.click('#boardroom button.primary');
+  await p.waitForSelector('#slideshow');
+  await p.keyboard.press('Escape');
   await p.waitForSelector('.member textarea');
   await p.click('#btn-debug'); await p.click('#boardroom button.primary');
   await p.waitForSelector('#boardroom .score-total');
