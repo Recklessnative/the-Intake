@@ -1,0 +1,339 @@
+{
+ "seats": [
+  "assessment",
+  "consultant",
+  "manager"
+ ],
+ "items": {
+  "W01": {
+   "card": "it-helpdesk-reopen",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 0,
+   "leverCall": "yes",
+   "wayBack": "vague"
+  },
+  "W02": {
+   "card": "insurance-claims-backlog",
+   "diagnosis": 0,
+   "measurement": 1,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 0,
+   "leverCall": "yes",
+   "wayBack": "vague"
+  },
+  "W03": {
+   "card": "law-firm-juniors",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "yes",
+   "wayBack": "concrete"
+  },
+  "W04": {
+   "card": "law-firm-juniors",
+   "diagnosis": 1,
+   "measurement": 3,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 1,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W05": {
+   "card": "mfg-green-belts",
+   "diagnosis": 4,
+   "measurement": 2,
+   "fit": 2,
+   "nextLevel": 2,
+   "risks": 2,
+   "pitch": 2,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W06": {
+   "card": "it-helpdesk-reopen",
+   "diagnosis": 1,
+   "measurement": 4,
+   "fit": 1,
+   "nextLevel": 0,
+   "risks": 1,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W07": {
+   "card": "airport-ground-handling",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "partly",
+   "wayBack": "concrete"
+  },
+  "W08": {
+   "card": "insurance-claims-backlog",
+   "diagnosis": 4,
+   "measurement": 0,
+   "fit": 3,
+   "nextLevel": 3,
+   "risks": 2,
+   "pitch": 3,
+   "leverCall": "yes",
+   "wayBack": "vague"
+  },
+  "W09": {
+   "card": "ngo-volunteer-churn",
+   "diagnosis": 4,
+   "measurement": 3,
+   "fit": 1,
+   "nextLevel": 2,
+   "risks": 1,
+   "pitch": 2,
+   "leverCall": "partly",
+   "wayBack": "vague"
+  },
+  "W10": {
+   "card": "healthcare-sepsis",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W11": {
+   "card": "ngo-volunteer-churn",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 1,
+   "pitch": 1,
+   "leverCall": "yes",
+   "wayBack": "concrete"
+  },
+  "W12": {
+   "card": "tech-sales-motivation",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W13": {
+   "card": "mfg-green-belts",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W14": {
+   "card": "healthcare-sepsis",
+   "diagnosis": 3,
+   "measurement": 3,
+   "fit": 1,
+   "nextLevel": 1,
+   "risks": 2,
+   "pitch": 2,
+   "leverCall": "partly",
+   "wayBack": "concrete"
+  },
+  "W15": {
+   "card": "tech-sales-motivation",
+   "diagnosis": 4,
+   "measurement": 0,
+   "fit": 3,
+   "nextLevel": 3,
+   "risks": 3,
+   "pitch": 3,
+   "leverCall": "partly",
+   "wayBack": "concrete"
+  },
+  "W16": {
+   "card": "ngo-volunteer-churn",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "partly",
+   "wayBack": "concrete"
+  },
+  "W17": {
+   "card": "insurance-claims-backlog",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "yes",
+   "wayBack": "concrete"
+  },
+  "W18": {
+   "card": "healthcare-sepsis",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "partly",
+   "wayBack": "concrete"
+  },
+  "W19": {
+   "card": "tech-sales-motivation",
+   "diagnosis": 4,
+   "measurement": 1,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 2,
+   "pitch": 3,
+   "leverCall": "partly",
+   "wayBack": "vague"
+  },
+  "W20": {
+   "card": "airport-ground-handling",
+   "diagnosis": 2,
+   "measurement": 2,
+   "fit": 1,
+   "nextLevel": 0,
+   "risks": 1,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "vague"
+  },
+  "W21": {
+   "card": "car-dealer-aftersales",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 2,
+   "nextLevel": 0,
+   "risks": 3,
+   "pitch": 3,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W22": {
+   "card": "it-helpdesk-reopen",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W23": {
+   "card": "airport-ground-handling",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W24": {
+   "card": "law-firm-juniors",
+   "diagnosis": 1,
+   "measurement": 1,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 2,
+   "pitch": 2,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W25": {
+   "card": "education-ai-cheating",
+   "diagnosis": 4,
+   "measurement": 4,
+   "fit": 4,
+   "nextLevel": 4,
+   "risks": 4,
+   "pitch": 4,
+   "leverCall": "yes",
+   "wayBack": "concrete"
+  },
+  "W26": {
+   "card": "car-dealer-aftersales",
+   "diagnosis": 2,
+   "measurement": 2,
+   "fit": 1,
+   "nextLevel": 1,
+   "risks": 2,
+   "pitch": 0,
+   "leverCall": "partly",
+   "wayBack": "vague"
+  },
+  "W27": {
+   "card": "education-ai-cheating",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 1,
+   "leverCall": "yes",
+   "wayBack": "none"
+  },
+  "W28": {
+   "card": "mfg-green-belts",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 0,
+   "pitch": 1,
+   "leverCall": "yes",
+   "wayBack": "vague"
+  },
+  "W29": {
+   "card": "education-ai-cheating",
+   "diagnosis": 2,
+   "measurement": 4,
+   "fit": 1,
+   "nextLevel": 1,
+   "risks": 2,
+   "pitch": 3,
+   "leverCall": "no",
+   "wayBack": "concrete"
+  },
+  "W30": {
+   "card": "car-dealer-aftersales",
+   "diagnosis": 0,
+   "measurement": 0,
+   "fit": 0,
+   "nextLevel": 0,
+   "risks": 1,
+   "pitch": 2,
+   "leverCall": "yes",
+   "wayBack": "none"
+  }
+ }
+}

@@ -8,6 +8,8 @@
 //     --saved file     also rescore write-ups saved by the game: in the browser console,
 //                      copy(localStorage['intake-graded']) and save that to a file
 //     --only-saved     skip the made-up write-ups
+//     --calibration    grade the 30 committee write-ups in tests/calibration instead and report
+//                      how often the examiner lands on the committee's consensus
 //     --out file.json  write the raw results as well
 //     --base url       Gemini endpoint (default Google; tests point it at a stand-in)
 //   INTAKE_MODEL picks the model (default: the game's).
@@ -96,7 +98,56 @@ async function pool(jobs, n) {
   return out;
 }
 
+const CAL = path.join(__dirname, 'calibration');
+const SRC = { call: 'Call', callback: 'Callback', frontline: 'Coffee machine' };
+function calMaterial(it) {
+  const t = it.transcript.map((x, i) => x.src === 'data' ? `D${i + 1} [Data] ${x.q}\n${x.a}` : `Q${i + 1} [${SRC[x.src] || 'Call'}]: """${x.q}"""\nA${i + 1}: ${x.a}`).join('\n');
+  return ['INTAKE TRANSCRIPT (player questions with the answers, from the call, a callback, the coffee machine with a front-line employee, and data requests; each data request cost one question):', t || '(the player asked no questions)', '',
+    'WRITE-UP:', '"""', it.writeup, '"""', '', 'DEFENCE ROUND:', '(none, the stakeholder accepted the concept)', '',
+    'DATA FACTS the player received in documents (report in factsUsed the ids the write-up uses):', '(none)', '',
+    'WAY BACK (if it does not work, how do you back out?):', (it.wayBack || '').trim() ? '"""' + it.wayBack.trim() + '"""' : '(none given)'].join('\n');
+}
+
+// Committee mode: each write-up graded RUNS times, merged to the median of the first three as the
+// game does, then compared with the median of the three committee graders.
+async function calibration() {
+  const items = JSON.parse(fs.readFileSync(path.join(CAL, 'items.json'), 'utf8'));
+  const want = JSON.parse(fs.readFileSync(path.join(CAL, 'consensus.json'), 'utf8')).items;
+  const jobs = items.flatMap(it => Array.from({ length: RUNS }, () => async () => {
+    try { return { it, g: await examine(loadCard(it.card), calMaterial(it)) }; } catch (e) { return { it, err: e.message }; }
+  }));
+  console.error('Grading ' + items.length + ' committee write-ups ' + RUNS + ' times each with ' + MODEL + ' (' + jobs.length + ' calls)…');
+  const done = await pool(jobs, 4);
+  const tally = Object.fromEntries(Scoring.DIMS.map(k => [k, { exact: 0, within1: 0, diff: 0 }]));
+  let n = 0, wb = 0, lv = 0; const far = [];
+  console.log('# Examiner vs committee, ' + MODEL + '\n');
+  console.log('| Write-up | Card | Committee pts | Examiner pts | Off by a level or more |');
+  console.log('|---|---|---:|---:|---|');
+  items.forEach(it => {
+    const gs = done.filter(d => d.it === it && d.g).map(d => d.g);
+    if (gs.length < 3) { console.log('| ' + it.id + ' | ' + it.card + ' | failed | | |'); return; }
+    const g = Scoring.median(gs.slice(0, 3)), c = want[it.id]; n++;
+    const off = [];
+    Scoring.DIMS.forEach(k => {
+      const d = Scoring.clamp4(g[k].score) - c[k];
+      if (!d) tally[k].exact++; if (Math.abs(d) <= 1) tally[k].within1++; tally[k].diff += d;
+      if (d) off.push(k + ' ' + (d > 0 ? '+' : '') + d);
+    });
+    if (g.wayBack === c.wayBack) wb++; if (g.leverCall === c.leverCall) lv++;
+    const cp = Scoring.DIMS.reduce((a, k) => a + W[k] * c[k] / 4, 0);
+    if (Scoring.DIMS.some(k => Math.abs(Scoring.clamp4(g[k].score) - c[k]) >= 2)) far.push(it.id);
+    console.log('| ' + [it.id, it.card, r1(cp), r1(examinerPoints(g)), off.join(', ') || 'none'].join(' | ') + ' |');
+  });
+  console.log('\n| Dimension | Exact | Within 1 | Average lean |');
+  console.log('|---|---:|---:|---:|');
+  Scoring.DIMS.forEach(k => console.log('| ' + k + ' | ' + tally[k].exact + '/' + n + ' | ' + tally[k].within1 + '/' + n + ' | ' + (tally[k].diff >= 0 ? '+' : '') + r1(tally[k].diff / (n || 1)) + ' |'));
+  console.log('\nWay back read the same: ' + wb + '/' + n + '. Lever call read the same: ' + lv + '/' + n + '.');
+  console.log('Two levels or more off on some dimension: ' + (far.join(', ') || 'none'));
+  if (arg('out')) fs.writeFileSync(arg('out'), JSON.stringify({ model: MODEL, runs: RUNS, done: done.map(d => ({ id: d.it.id, g: d.g, err: d.err })) }, null, 1));
+}
+
 (async () => {
+  if (flag('calibration')) return calibration();
   const items = [];
   if (!flag('only-saved')) ids.forEach(id => {
     const raw = JSON.parse(fs.readFileSync(path.join(SCEN, id + '.json'), 'utf8')), card = Cards.normalise(raw), w = madeUp(raw, card);

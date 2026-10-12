@@ -1,0 +1,1087 @@
+[
+  {
+    "id": "W01",
+    "card": "it-helpdesk-reopen",
+    "transcript": [
+      {
+        "q": "Would you like the ITIL course in-house or at a training centre?",
+        "a": "In-house. The agents can be off the phones an hour at a time, at most, in quiet periods. My people can do a full day.",
+        "src": "call"
+      },
+      {
+        "q": "Will the provider pay half?",
+        "a": "They offered to share. Nothing in writing yet.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Who already has ITIL\"",
+        "a": "Provider tender response and internal training records: Provider agents on the Lysander account: 22. ITIL Foundation certified: 17. Lysander second line: 18 staff, 14 attended ITIL Foundation course in 2005, 9 passed the exam.",
+        "src": "data"
+      },
+      {
+        "q": "Which ITIL version do you want?",
+        "a": "Version 3 came out this summer. My book is v2. With tabs. Let's do v3, it's the future.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nThe reopen rate of 34% signals a gap in service maturity across the end-to-end support chain. To deliver a seamless user experience, first and second line need a shared service mindset and a common ITIL-aligned language. Learning is the lever to drive this transformation and embed a culture of service excellence at Lysander.\nMEASUREMENT\nWe will measure success along the Kirkpatrick levels: learner satisfaction (target 4.5/5), ITIL exam pass rate (target 95%), a self-assessment of service mindset before and after, and an overall uplift in service culture and user satisfaction.\nCONCEPT\nA transformational, holistic learning journey based on the 70-20-10 model. The 10% is ITIL v3 Foundation with exam for all 40 first- and second-line staff. The 20% is peer learning in cross-functional communities of practice and buddy coaching between provider agents and second-line experts. The 70% is learning in the flow of work, supported by gamified microlearning on the LMS: short ITIL process bites, quizzes and badges, with a leaderboard to energise the teams. Regular lunch-and-learns and storytelling sessions keep the momentum. The journey is blended, scalable and aligned with the board's strategic priorities, and will be fully deployed before the February review.\nRISKS AND DEPENDENCIES\n- Change management and stakeholder buy-in\n- Resistance from the provider\n- Keeping learners engaged",
+    "wayBack": "We will monitor the KPIs and adjust where needed."
+  },
+  {
+    "id": "W02",
+    "card": "insurance-claims-backlog",
+    "transcript": [
+      {
+        "q": "Do you prefer a classroom time management training or an e-learning?",
+        "a": "Practical! Very concretely, something they can use Monday morning. A planning method, colour codes, priorities. I made an Excel for my own week, I can share it.",
+        "src": "call"
+      },
+      {
+        "q": "How many handlers can be away at once?",
+        "a": "Half a day a week at most. The broker line runs 8:30 to 17:00 and must stay staffed.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Earlier time management training and how it was rated\"",
+        "a": "Training records, claims department: Reorganisation 'One Customer, One Handler': information session household products, 2 hours, PowerPoint, 73 attendees. Hand-out: General policy conditions, Home Plus, 64 pages. Evaluation: none. Previous time management course (2005): 140 attendees, satisfaction 4.2/5.",
+        "src": "data"
+      },
+      {
+        "q": "Was the 2005 time management course appreciated?",
+        "a": "4.2 out of 5! They loved it. That was before the reorganisation of course, everyone was still in their own team then.",
+        "src": "call"
+      },
+      {
+        "q": "Do you feel you have too much work?",
+        "a": "Too much? We have a lot, yes. Motor goes fine. Some household files are... trickier. Everyone has a little pile.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nIn a fast-changing claims environment, Lindehof's handlers face mounting complexity and competing priorities. The growing backlog of 4,300 files signals a need to empower every one of the 140 claims professionals with the mindset, skillset and toolset to take ownership of their time. Learning is clearly the lever: by building strong personal effectiveness capabilities we create a culture of accountability and proactive prioritisation that will cascade into faster handling, happier brokers and fewer Ombudsman letters.\nMEASUREMENT\nWe will apply the Kirkpatrick model at all four levels. Level 1: learner satisfaction and Net Promoter Score after each module. Level 2: knowledge checks embedded in the microlearning. Level 3: a behavioural transfer survey with the team leaders after three months. Level 4: impact on the backlog and on customer experience, with an ROI calculation to demonstrate the value of the learning investment to the board in January.\nCONCEPT\nA holistic blended learning journey built on the 70-20-10 model. The 10% is a kick-off workshop on prioritisation (Eisenhower matrix, the Pomodoro technique, 'eat the frog'), the 20% is peer coaching in learning circles within each portfolio team, and the 70% is on-the-job application supported by gamified microlearning on the LMS: five-minute modules, badges and a team leaderboard to drive engagement. Storytelling from top performers and a community of practice on the intranet will sustain the learning culture. The journey is designed to be learner-centric, scalable and fully aligned with Lindehof's strategic priorities, and can be live for all 140 handlers by December.\nRISKS AND DEPENDENCIES\n- Ensuring stakeholder buy-in at all levels\n- Learner engagement and time to participate\n- Resistance to change",
+    "wayBack": "We will continuously iterate the journey based on learner feedback."
+  },
+  {
+    "id": "W03",
+    "card": "law-firm-juniors",
+    "transcript": [
+      {
+        "q": "Which juniors' drafts get rewritten most? Is it spread across all departments?",
+        "a": "Write-offs by junior? I would have to ask finance. ... Corporate is high, yes. The recent ones. Well. Corporate documents are complex.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Write-offs concentrated in one department or intake year\"",
+        "a": "Time recording system, write-off report: Junior associates, drafting hours recorded vs billed, last 12 months. Firm: 24% written off. Corporate, hired autumn 2005 or later (7): 53%. Corporate, hired before 2005 (2): 13%. Tax (4): 16%. Employment (4): 14%. Litigation (5): 11%. Highest single document type: client advice memos, corporate, 61%.",
+        "src": "data"
+      },
+      {
+        "q": "How did juniors learn to write a memo here before 2005?",
+        "a": "There was a little in-house thing, yes. Marleen's clinic. When she left I... we decided they learn by doing. As I did. It was a hundred non-billable hours a year, you understand. Tempus fugit.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"An internal memo training that stopped at some point\"",
+        "a": "Training file, junior associates 1999-2007: Internal training for junior associates. 1999-2005: 'Memo clinic' (M. Wuyts), 6 x 2 hours in the first three months, on the junior's own files: question, short answer, risks, recommendation. Last run: spring 2005. Not continued (decision head of corporate, June 2005). 2006: one-day seminar 'Legal writing: method and style' (external, law professor), outline: facts, applicable law, doctrine, discussion, conclusion. Rating 4.6/5.",
+        "src": "data"
+      },
+      {
+        "q": "What happens to a draft after a partner has corrected it?",
+        "a": "They get their draft back. With comments. I write 'So what?' in the margin. Quite often. And the next draft has two more pages of case law. It is as if they think I am asking for more evidence.",
+        "src": "call"
+      },
+      {
+        "q": "When a draft comes back with 'So what for the client?', what do you do next?",
+        "a": "Reread, add the case law I left out, restructure. I know the template, I put my research in the short answer box. Nobody ever showed me what a short answer looks like. In litigation Anne sits with her juniors for twenty minutes per draft.",
+        "src": "frontline"
+      },
+      {
+        "q": "Who could coach this, and how would the partners react if it targeted only some juniors?",
+        "a": "Anne, I suppose. She has the time, litigation is slower. The partners would ask why it's only corporate. And then they would look at me. Quod erat demonstrandum.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nThis is a learning problem, but not the one in the request. Rewriting is concentrated in the seven corporate juniors hired since autumn 2005: 53% of their drafting hours are written off, against 13% for the two corporate juniors hired earlier and 11 to 16% in the other departments. The firm-wide 24% hides that. These seven know the 2006 model memo and receive consistent comments ('So what for the client?'), but they were trained in academic legal method and never shown how to turn research into advice with the answer first. The memo clinic that taught exactly this stopped in 2005; Anne still does it informally in litigation, and her juniors' drafts rarely come back. They do not lack time or effort: they record 9.1 hours per advice memo against 5.2 for the others.\nMEASUREMENT\nBaseline: write-off rate and hours per advice memo for the seven, against the other juniors, over the last twelve months (time records), and three current memos per junior scored on a short checklist taken from the model memo (short answer that answers, risks graded, recommendation).\nBehaviour: the same checklist, scored blind by a corporate partner each month on three memos per junior.\nLeading: 'So what?' comments per draft; share of drafts going to the client with only minor changes.\nBusiness: their write-offs moving toward the 11 to 16% of the others before the March evaluations, and no further corporate departures.\nCONCEPT\nBring back the memo clinic for the seven: six sessions of ninety minutes between November and January, at 8:00 before the client day, on their own live files and the 2006 model memo. Anne leads, with one corporate partner co-teaching so the clinic and the corporate comments speak the same language. Each junior states the answer out loud before writing a word. Nine hours each fits inside the 50-hour non-billable allowance. No professor, no course for all 22; most of the 20,000 euro stays unspent.\nRISKS AND DEPENDENCIES\n- Partners' meeting: they may push for a course for all 22 because it blames nobody. Geert presents it as reinstating a firm tradition that worked, with the 53% in euros against nine hours per junior.\n- Anne: she won't want to be the example against her partners or lose billable time. The co-teaching corporate partner shares the stage and the finance partner credits her hours.\n- Finance partner: agree beforehand that clinic hours count against the 50-hour allowance and that nobody reminds the seven of their target in January.\n- The bar: no overlap, because this is advice-writing on their own files, not legal method.",
+    "wayBack": "Seven juniors only, until the March evaluations. If their checklist scores have not moved and memo write-offs are still above 40% in February, we stop the clinic and take the supervision question to the partners instead."
+  },
+  {
+    "id": "W04",
+    "card": "law-firm-juniors",
+    "transcript": [
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Write-offs on junior drafting are high\"",
+        "a": "Time recording system, write-off report: Junior associates, drafting hours recorded vs billed, last 12 months. Firm: 24% written off. Corporate, hired autumn 2005 or later (7): 53%. Corporate, hired before 2005 (2): 13%. Tax (4): 16%. Employment (4): 14%. Litigation (5): 11%. Highest single document type: client advice memos, corporate, 61%.",
+        "src": "data"
+      },
+      {
+        "q": "Do you have any figures on how much the rewriting costs the firm?",
+        "a": "Not on rewriting as such. Write-offs we have. A quarter of junior drafting hours, firm-wide. And a great many partner evenings.",
+        "src": "call"
+      },
+      {
+        "q": "Who would you like as a trainer?",
+        "a": "Someone with a name. Last year's professor was rated 4.6. The partners will not pay for 'consultants', with all respect.",
+        "src": "call"
+      },
+      {
+        "q": "When could the juniors attend?",
+        "a": "January. Before the evaluations in March. Office hours eat their target, evenings they resent. A Saturday morning, perhaps, with croissants.",
+        "src": "call"
+      },
+      {
+        "q": "What do you find hardest about writing for the partners?",
+        "a": "Knowing what they want. They write 'So what?' and I add more analysis. Apparently that's wrong.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\n- Partners rewrite too much junior work; firm-wide 24% of junior drafting hours written off\n- Juniors don't structure their memos for the client\n- Training is the lever: legal writing, structure, concision\nMEASUREMENT\n- Baseline (time records, last 12 months): write-offs per junior group. Corporate hired since 2005: 53%. Corporate before 2005: 13%. Tax 16%, employment 14%, litigation 11%. Client advice memos in corporate: 61%.\n- Behaviour: before/after, three memos per junior scored blind by a partner on a checklist from the 2006 model memo (short answer, risks, recommendation).\n- Business: write-off rate per group, monthly report from time records; target firm-wide below 15% by end 2008.\nCONCEPT\n- Two-day legal writing course in January by a well-known professor, for all 22 juniors, in their language of registration\n- Day 1 structure, day 2 concision and plain language, exercises on anonymised memos\n- Saturday-morning follow-up session in February\nRISKS AND DEPENDENCIES\n- Partners must free the juniors for two days\n- Budget (20,000) may be tight for a big name",
+    "wayBack": ""
+  },
+  {
+    "id": "W05",
+    "card": "mfg-green-belts",
+    "transcript": [
+      {
+        "q": "Since the Green Belt, how many projects did the team leads start?",
+        "a": "Oh, they passed. All of them. Good scores, nice projects, nice certificates. Then nothing. That's what I mean by didn't stick.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Policies and targets. I expect to see: \"Projects are not in the team leads' objectives\"",
+        "a": "HR, team lead objectives template 2007: Team lead annual objectives 2007: 1) Tonnes per shift vs. plan (50%). 2) Absenteeism of own crew (25%). 3) Lost-time accidents (25%). No other objectives.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Downtime per line and the main reasons\"",
+        "a": "MES downtime report, last 8 weeks: Top reason codes by minutes: Other 48%, Changeover 17%, Jam/corrugator 12%, Waiting for material 9%, Maintenance 8%, Quality hold 6%.",
+        "src": "data"
+      },
+      {
+        "q": "Who is supposed to give them time for projects?",
+        "a": "They run around. Forklift missing, someone sick, wrong board grade. If you find one sitting down, take a photo. Project time? There's no such column on the rota. Concretely, nobody.",
+        "src": "call"
+      },
+      {
+        "q": "What stops you from running a project?",
+        "a": "No time. Nobody asks. Line 3 changeovers went from 48 to 33 minutes on the course. Then nobody asked about it again.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\n- Not a training problem: team leads passed, then 0 projects\n- No time (firefighting), nobody asks, targets only tonnes/absence/accidents\n- 48% of downtime coded 'Other'\n- Lever: no\nMEASUREMENT\n- Projects opened per month (now 0)\n- OEE per line, monthly\n- Share of 'Other' in the MES\nCONCEPT\n- L&D rewrites the team lead objective template: 30% weight on project savings, replacing part of the tonnes weight. We send the new template to HR for information.\n- L&D brings in an MES contractor to rebuild the reason-code tree and we retrain the operators on coding ourselves.\n- L&D chairs a monthly project review with the team leads and keeps the project register.\n- Refresher budget pays a floater pool managed by L&D so each team lead has 2h/week.\nRISKS AND DEPENDENCIES\n- Works council: protected time\n- HR might not agree with the new template\n- Marc may not attend",
+    "wayBack": "Pilot on lines 1 and 3 until end of March, then we look at the number of projects opened and decide with Marc whether to extend."
+  },
+  {
+    "id": "W06",
+    "card": "it-helpdesk-reopen",
+    "transcript": [
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Reopens concentrated in a few categories\"",
+        "a": "Service desk ticket tool, reopen report: Reopened incidents, last 3 months: 1,940. Notes/Windows password sync 512, Claims application printer mapping 371, VPN token expired or not recognised 248, other 809.",
+        "src": "data"
+      },
+      {
+        "q": "What was the reopen rate before outsourcing?",
+        "a": "Around 9%. Now 34%. Since February. The provider is ITIL-certified, it was in their pitch.",
+        "src": "call"
+      },
+      {
+        "q": "When do you need results?",
+        "a": "A plan for the IT committee before Christmas. And the contract has a review clause in February.",
+        "src": "call"
+      },
+      {
+        "q": "Which tickets come back most?",
+        "a": "Notes passwords. Printers in Claims. VPN tokens. Every day. We close them and they come back.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\n- Reopens 9% before outsourcing, 34% now\n- First and second line don't share a common way of handling incidents\n- Learning is the lever: one process language for all 40\nMEASUREMENT\n- Baseline: reopen rate 34%, last three months 1,940 reopens of which Notes password 512, Claims printers 371, VPN tokens 248 (ticket tool)\n- Behaviour: weekly sample of 20 closed tickets per team, checked for correct categorisation, resolution notes and user confirmation before closing\n- Business: reopen rate below 15% by the February review; complaints in the IT mailbox\n- Collection: weekly ticket tool report, sample checked by the second-line team leads\nCONCEPT\n- ITIL Foundation (v3) for the 22 provider agents and the 18 second-line staff, two days plus exam, in-house, provider shares the cost\n- Extra half-day after the course on the three recurring problems\nRISKS AND DEPENDENCIES\n- Agents can only leave the phones one hour at a time\n- Exam pass rate",
+    "wayBack": ""
+  },
+  {
+    "id": "W07",
+    "card": "airport-ground-handling",
+    "transcript": [
+      {
+        "q": "Before we book anything: which flights, which aircraft and which shift were the five events on?",
+        "a": "Let me pull the list... huh. All five on the Medisol 800, all before half past seven. I hadn't put them next to each other like that.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"The five events cluster on one airline, one type or one time of day\"",
+        "a": "Station occurrence log, September: Load discrepancies: 07/09 MSL411 B737-800 dep 06:10; 14/09 MSL415 B737-800 dep 06:40; 22/09 MSL411 B737-800 dep 06:10. Handling delays: 18/09 MSL417 B737-800 dep 07:25 (+19 min); 27/09 MSL411 B737-800 dep 06:10 (+12 min). Other airlines and cargo: 0 handling events.",
+        "src": "data"
+      },
+      {
+        "q": "What changed on the Medisol rotation this year?",
+        "a": "Changed? Medisol went from the 300 to the 800 in May. Same airline, same suitcases, bigger plane. They mailed us a PDF with the hold drawing. Negative on anything else.",
+        "src": "call"
+      },
+      {
+        "q": "Who works the early shift now, and who checks the holds before the doors close?",
+        "a": "Rudi ran the early shift for fifteen years. He went to cargo in August, his back. Now it's Wouter. Good kid. Two years in. And we took on nineteen for the summer and kept them for the winter charters. They did the CD-ROM and three shifts with a buddy. Same as always.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"The loading course is old and doesn't cover the 737-800\"",
+        "a": "Training catalogue, ramp: Loading Principles, 1 day, classroom. Last revision March 2004. Aircraft covered: B737-300, F50, MD-80. Assessment: 30 multiple-choice questions, pass mark 70%. Practical assessment: none.",
+        "src": "data"
+      },
+      {
+        "q": "When late bags turn up and the plan no longer fits the hold, what do you do?",
+        "a": "Last-minute changes? You shift them to the back hold and close up. Who are you going to call? Load control is a number abroad, ten minutes of music. The doors close in four.",
+        "src": "frontline"
+      },
+      {
+        "q": "The Saturday trainer: is Saturday a rest day for the agents? And when can you spare people during the week?",
+        "a": "Saturday is a rest day, roger. The works council will call it overtime, they always do. Between the waves I can spare a few, nine to eleven, often there's an 800 standing empty on the apron then.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\n- Learning is part of the lever, not all of it.\n- 5/5 September events on Medisol 737-800 departures 06:10-07:25; zero elsewhere.\n- Causes: no 800 training (2004 course, no practical); 19 seasonal starters, CD-ROM only; no hold check since Rudi left; last-minute changes never reported.\nMEASUREMENT\n- Baseline: events per 100 Medisol 800 departures, Jul-Sep, by shift (occurrence log).\n- Behaviour: hold check before doors close, sampled on an observation sheet.\n- Leading: LMCs reported to load control per week (should go UP first).\n- Business: Medisol events and penalty euros.\nCONCEPT\n- Two-hour practical on a parked 800 between waves, early shift first, real loading instruction.\n- Wouter checks every 800 hold before doors close.\n- Dirk agrees a quick LMC route with Medisol load control.\n- Update the course later. No Saturdays.\nRISKS AND DEPENDENCIES\n- Prevention advisor: apron safety plan before day one.\n- Medisol load control: owns the LMC channel. Dirk calls them this week.\n- Works council: weekday sessions, no overtime.\n- Quality manager: shown sheets and LMC log, not certificates.",
+    "wayBack": "Early shift only, three weeks. If observed hold checks are under 90% or there's another Medisol 800 event by week four, we stop the module and use the trainer money to bring Rudi back two mornings as a coach."
+  },
+  {
+    "id": "W08",
+    "card": "insurance-claims-backlog",
+    "transcript": [
+      {
+        "q": "Where does the backlog sit, which lines?",
+        "a": "By line? Let me filter... Household is 61% of the pile. And the ex-motor people take 47 days on a household file, the household people 19. Oh.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Household files are the biggest part of the backlog\"",
+        "a": "Claims system, open files report, end of September: Open files: 4,312. Household 61%, motor 31%, other 8%. Average days open, household files: former household handlers 19, former motor handlers 47. By peril (former household / former motor): water damage 17 / 58; storm 19 / 22; fire 20 / 21. Water damage share of household files held by former motor handlers: 71%. Average days open, motor files: 12 (all handlers).",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Household files are the biggest part of the backlog\"",
+        "a": "Claims intake report, monthly: New storm claims: January 2,140 (normal month: about 150). Still open from January storm: 38 (31 with loss adjuster, 7 in dispute).",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Household files are the biggest part of the backlog\"",
+        "a": "Claims system, monthly closing report, April to September, and HR headcount: Average days open on files closed, by month (motor / household with former household handlers / household with former motor handlers): April 21 / 33 / 49; May 23 / 35 / 52; June 18 / 27 / 50; July 12 / 19 / 48; August 12 / 18 / 47; September 12 / 19 / 47. Claims system release 2.1 deployed 18 June. Headcount claims handlers: 140 of 140 budgeted (from 136 in April).",
+        "src": "data"
+      },
+      {
+        "q": "What did the former motor people get as household training in January?",
+        "a": "They had a presentation in January. Two hours. And everyone got the booklet. It's very complete, the booklet. Water damage is... page 31 to 38, I think.",
+        "src": "call"
+      },
+      {
+        "q": "What makes a household file hard for you?",
+        "a": "Water. Is it a sudden leak or a slow one, do we pay the search, the plaster... In motor you wait for the expert and you know. Here nobody tells you when you know enough. Everyone has a little pile.",
+        "src": "frontline"
+      },
+      {
+        "q": "Is there budget and time for something targeted?",
+        "a": "Forty thousand for the year. And they can be off the phones half a day a week, not more. The broker line stays staffed.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\n- Not time management. Backlog = household water damage files with ex-motor handlers (58 vs 17 days).\n- They never learned to decide cover on water (2h PowerPoint + booklet) and wait to be 100% sure, like in motor.\n- Kyrill and the system are not the cause anymore.\n- Training is the lever, for the ~70 ex-motor handlers only.\nMEASUREMENT\n- Attendance: 100% of the 70 ex-motor handlers\n- Satisfaction: average 4/5 or more on the evaluation form\n- End-of-course quiz on the water damage conditions (p. 31-38): 80% pass\nCONCEPT\n- 4 half-day case workshops on water damage cover for the ex-motor handlers, groups of 12-14\n- Real anonymised files, led by a former household specialist\n- Every participant gets a one-page water damage checklist\nRISKS AND DEPENDENCIES\n- Household specialists have no time: plan with team leaders\n- Works council for half days off the phone",
+    "wayBack": "We evaluate after the first workshops and adjust."
+  },
+  {
+    "id": "W09",
+    "card": "ngo-volunteer-churn",
+    "transcript": [
+      {
+        "q": "When do volunteers leave?",
+        "a": "All the time! Some after a week, some after a year. It feels like all the time. Like a colander, I said.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Most volunteers leave early\"",
+        "a": "Volunteer database: Leavers in the last 12 months: 214. Left within 3 months: 146 (68%). Volunteers active more than a year: average tenure 6.5 years.",
+        "src": "data"
+      },
+      {
+        "q": "What does a new volunteer do in their first three months?",
+        "a": "Everyone starts on the phone line. Three months. It's how Jos wanted it, so people learn to listen first. Most of them signed up to visit someone. They want a person, not a headset.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Process and systems. I expect to see: \"A long wait before people can start\"",
+        "a": "Volunteer handbook, section 2: 'All new volunteers start with three months on the listening line.' Sign-up form, preferred activity: home visits 80%, phone line 12%, events 8%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Process and systems. I expect to see: \"A long wait before people can start\"",
+        "a": "Onboarding steps: Sign-up, criminal record extract request, intake interview (Thursdays, Head of Volunteering), first shift. Average days from sign-up to first shift: 43.",
+        "src": "data"
+      },
+      {
+        "q": "Why do people say they leave?",
+        "a": "The ones who bother to tell us say 'not what I expected' or 'nobody called me'. Ouch, both.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nThe coordinators are not the problem. 68% of the volunteers who leave go in the first three months, before a coordinator really knows them. Most want to visit people (80%) but have to do three months on the phone line first, after waiting 43 days to start. The exit messages say 'not what I expected' and 'nobody called me'. Learning plays a small part only; the onboarding is the main lever.\nMEASUREMENT\nBaseline: share of leavers who leave within three months (68%) and days from sign-up to first shift (43), both from the volunteer database. Target: under 40% and under 21 days by the end of the winter campaign. We will also track the number of volunteers who choose home visits as their first activity.\nCONCEPT\nBecause this cannot wait for the board, the learning team will take it in hand:\n- We rewrite section 2 of the volunteer handbook so that new volunteers choose their first activity, and publish the new version on the website and in the welcome pack.\n- We run the intake interviews ourselves on two evenings a week to cut the waiting time.\n- We call every new volunteer in their first week.\n- One evening session for coordinators on welcoming new volunteers.\nRISKS AND DEPENDENCIES\n- Jos may not like the change to the phone-line rule; we will inform him once the new handbook is out.\n- Our team's time for the intakes.",
+    "wayBack": "We'll see after the winter campaign whether it worked."
+  },
+  {
+    "id": "W10",
+    "card": "healthcare-sepsis",
+    "transcript": [
+      {
+        "q": "How long should the e-learning be?",
+        "a": "Short. They already have fourteen mandatory e-learnings this year. Twenty minutes. Thirty max.",
+        "src": "call"
+      },
+      {
+        "q": "Do you want a test at the end with a pass mark?",
+        "a": "Yes, a test. 100% completion. The surveyors come in spring.",
+        "src": "call"
+      },
+      {
+        "q": "Which platform do we use?",
+        "a": "The hospital has an e-learning platform. Ask IT. Don't ask IT anything else, they're busy.",
+        "src": "call"
+      },
+      {
+        "q": "Do we need a French version?",
+        "a": "One site is partly French-speaking, yes. Both languages.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nA new sepsis protocol goes live in six weeks and all 900 nurses must know it. The need is an e-learning on the protocol with a test, so the hospital can show 100% completion to the accreditation surveyors.\nMEASUREMENT\n- Completion rate: 100% before go-live\n- Average test score of at least 80%\n- Number of nurses who passed at first attempt\nCONCEPT\nA 30-minute e-learning on the hospital platform in Dutch and French: recognising sepsis, the screening tool, the bundle, when to escalate. Ten-question multiple choice test, pass mark 80%, unlimited retakes. Reminders by e-mail to ward heads every week until all nurses have completed.\nRISKS AND DEPENDENCIES\n- Resistance to change\n- Time constraints for the nurses\n- Technical issues with the platform",
+    "wayBack": ""
+  },
+  {
+    "id": "W11",
+    "card": "ngo-volunteer-churn",
+    "transcript": [
+      {
+        "q": "Which leadership topics are most important for the coordinators?",
+        "a": "Motivating! Recognising people. Keeping them. Some of our coordinators are fantastic, some are, how do I say, a bit chaotic. Like me.",
+        "src": "call"
+      },
+      {
+        "q": "When are the coordinators available?",
+        "a": "Evenings and weekends mostly. Most of them are volunteers themselves. Four hours a week on average.",
+        "src": "call"
+      },
+      {
+        "q": "Is the 6,000 euro only for the coordinators?",
+        "a": "Earmarked for 'volunteer coordinator development'. The funder is very clear on that.",
+        "src": "call"
+      },
+      {
+        "q": "Would you like to follow a leadership course?",
+        "a": "A course? On a Saturday, I suppose. If there's soup. But honestly, the new ones mostly leave before I've even met them.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nSamen Ouder looses to many volunteers. The coordinators are the first contact person of the volunteers and they need more leadership competences to motivate and retain them. A leadership trajectory is the good answer for this and fits with the grant.\nMEASUREMENT\n- Satisfaction of the coordinators with the trajectory (target 8/10)\n- Number of coordinators that participate (target 30 of 35)\n- Total number of volunteers end of december compared to now, we want +10%\nCONCEPT\nLeadership trajectory of three saturdays in Mechelen with an external coach:\n1. Motivation and recognition of volunteers\n2. Giving feedback and difficult conversations\n3. Situational leadership\nBetween the saturdays the coordinators make a small action plan. We foresee lunch and transport costs in the budget of 6.000 euro.\nRISKS AND DEPENDENCIES\n- Coordinators have little time because most are volunteer: we will foresee sandwiches and a nice location so they want to come\n- Some coordinators maybe not interested",
+    "wayBack": "We can always stop after the first saturday if the participants are not satisfied."
+  },
+  {
+    "id": "W12",
+    "card": "tech-sales-motivation",
+    "transcript": [
+      {
+        "q": "Do you already have a speaker in mind?",
+        "a": "Navy SEAL guy, or someone like that. Last year we had a guy who climbed Everest. Incredible talk. Standing ovation.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Last year's off-site was a success\"",
+        "a": "Event report, last year's off-site: Speaker 'Summit Mindset' (Everest climber). Satisfaction 9.1/10. Q1 bookings vs plan: -9%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Bookings down across the team\"",
+        "a": "Quota attainment Q3 by cohort: Tenure > 12 months (35 reps): 94%. Tenure < 12 months (25 reps): 52%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Bookings down across the team\"",
+        "a": "Win rate by tier, last two quarters: Classic 31%, Pro 14%. Pro deals lost at procurement stage: 58%.",
+        "src": "data"
+      },
+      {
+        "q": "Budget and date?",
+        "a": "60,000 approved. Mid-November. Q4 is our biggest quarter, so make it count.",
+        "src": "call"
+      },
+      {
+        "q": "What would make the off-site worthwhile for you?",
+        "a": "Worthwhile? An off-site in Q4 is two days without deals. If it helps me close Pro, sure. Otherwise, good food.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nAfter a tough Q3 the team needs a boost of energy and belief before the biggest quarter of the year. Learning is the lever: an inspiring off-site will reconnect the reps with their purpose and drive.\nMEASUREMENT\n- Energy score at the end of the off-site (target 9/10, as last year)\n- Q4 bookings compared to Q3\nCONCEPT\nTwo-day off-site in the Ardennes in mid-November for all 60 account executives and 8 managers. Day one: keynote by a former Navy SEAL on mental toughness, then outdoor team challenges (raft building, orienteering). Evening: awards dinner recognising top performers. Day two: breakout sessions on goal-setting and 'winning mindset', closing with each rep committing to a personal Q4 target.\nRISKS AND DEPENDENCIES\n- Weather for the outdoor activities\n- Venue availability in November\n- Staying within the 60,000 budget",
+    "wayBack": ""
+  },
+  {
+    "id": "W13",
+    "card": "mfg-green-belts",
+    "transcript": [
+      {
+        "q": "What happened to their projects after they passed the exam?",
+        "a": "Oh, they passed. All of them. Good scores, nice projects, nice certificates. Then nothing. That's what I mean by didn't stick.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"They passed but no projects followed\"",
+        "a": "Training records and provider report, 2006: Lean Six Sigma Green Belt, cohort Sept-Nov 2006: 22 enrolled, 22 passed. Average exam score 81% (pass mark 70%). Course projects: 22 submitted, 19 met target (examples: changeover line 3 -31%, glue waste line 5 -18%). Improvement projects registered since certification: 0.",
+        "src": "data"
+      },
+      {
+        "q": "Who picks and reviews improvement projects after the course?",
+        "a": "Who picks the projects? Concretely... they do. I assumed they'd just do it. There's a binder with ideas. It's on my shelf. It's a good binder.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Policies and targets. I expect to see: \"Projects don't appear in team lead targets\"",
+        "a": "HR, team lead objectives template 2007: Team lead annual objectives 2007: 1) Tonnes per shift vs. plan (50%). 2) Absenteeism of own crew (25%). 3) Lost-time accidents (25%). No other objectives.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Downtime reasons are badly coded\"",
+        "a": "MES downtime report, last 8 weeks: Top reason codes by minutes: Other 48%, Changeover 17%, Jam/corrugator 12%, Waiting for material 9%, Maintenance 8%, Quality hold 6%.",
+        "src": "data"
+      },
+      {
+        "q": "What would it take for you to open a project again?",
+        "a": "Time. And someone who asks. Line 3 changeovers went from 48 to 33 minutes on the course. Then nobody asked about it again. We're back at fifty. In Ghent they have their Friday project hours.",
+        "src": "frontline"
+      },
+      {
+        "q": "How does Ghent do it? Same course?",
+        "a": "Ghent? Same course, same provider. They have their review meeting and their Friday project hours. Corporate keeps sending me the folder. I don't need posters to run a plant.",
+        "src": "call"
+      },
+      {
+        "q": "Who has to agree if team leads get protected time, or their targets change?",
+        "a": "Works council for the hours, project work after the shift is overtime here. HR for the objectives, it's their template. Hilde in maintenance will tell you half the stops are production abusing her machines. And to touch the stop codes you need the MES guy.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nTraining is not the lever. The skill is there: 22 of 22 passed in 2006 with an average of 81%, 19 of 22 course projects hit target, and since the certificates exactly zero projects have been opened. What is missing is the routine around the skill: no protected time (team leads firefight most of the shift), nobody picks or reviews projects (the ideas sit in a binder), targets count only tonnes (50%), absence (25%) and accidents (25%), and 48% of downtime minutes are coded 'Other', so nobody can aim a project at the stops that matter. Ghent runs the same course with this routine and closes projects every month.\nMEASUREMENT\nBaseline: projects opened since 2006 (0), protected project hours (0), share of downtime coded 'Other' (48%), unplanned downtime and changeover minutes per line over the last 8 weeks; line 3 changeover is back at about 50 minutes against 33 reached in the course.\nBehaviour: monthly project review held with Marc in the chair; each pilot team lead uses the protected block (visible on the rota); project standards checked at the line three months after closing.\nLeading: projects opened, closed and still holding at three months; share of stops correctly coded.\nBusiness: unplanned downtime and changeover minutes on the two pilot lines against the other four, then OEE.\nCollection: weekly MES export, a one-page project register reviewed at the monthly meeting, the shift rota.\nCONCEPT\nNo refresher. Copy Ghent's routine on two lines, starting with line 3: two protected project hours per team lead per week, covered by a floater; a monthly review chaired by Marc where he and the engineers pick projects from the binder and the MES data and follow them up; Dariusz restarts his changeover project as the first visible win. HR adds project results to the 2008 team lead objectives. The MES administrator cleans up the 'Other' code. L&D designs the review, facilitates the first three and gives Marc and the engineers a half-day on choosing and sponsoring projects. Most of the 105,000 goes back; part funds the floater.\nRISKS AND DEPENDENCIES\n- Works council: project hours inside the shift with a floater, presented before we start, so they don't become unpaid evenings.\n- HR and the collective agreement: objectives change via their template; for the pilot year projects are added without touching variable pay.\n- Corporate Lean office: invited to help set up the review, Ghent credited openly, so it's their routine, not a turf fight.\n- Hilde: co-owns projects on maintenance-related stops, so root causes don't bounce between production and maintenance.\n- MES administrator: one change request with the ten most common real reasons, agreed at the first review.\n- Marc's time: 90 minutes a month, in his calendar for six months.",
+    "wayBack": "Two lines for three months. If by the third review fewer than four projects are open, or line 3 changeovers are not under 40 minutes, we stop, show Marc the numbers and decide with him whether to extend or drop it."
+  },
+  {
+    "id": "W14",
+    "card": "healthcare-sepsis",
+    "transcript": [
+      {
+        "q": "Do the nurses already know the protocol?",
+        "a": "We piloted the protocol on 3C. They scored 88% on the quiz. They know it. That's sort of the problem, isn't it.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Delay in escalation, probably at night\"",
+        "a": "Quality department sepsis audit, 60 files: Median time from first abnormal early warning score to doctor review. Day (8-20h): 31 min. Night (20-8h): 94 min.",
+        "src": "data"
+      },
+      {
+        "q": "Is there anything that makes you wait before calling a doctor?",
+        "a": "Off the record? There are two seniors on the night rota. You call them at three for a borderline score, you hear about it for a week. So people wait. Off the record.",
+        "src": "frontline"
+      },
+      {
+        "q": "Can we involve the doctors in this?",
+        "a": "Doctors? They're under the CMO. This is a nursing project. I can't exactly send them an e-learning. Well. I could. They wouldn't open it.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\n- Knowledge is fine (88% quiz)\n- Problem = night escalation: 94 min vs 31 min by day\n- Nurses don't dare call some on-call doctors\n- Doctors not in the plan\n- Lever: partly learning, partly culture between nurses and doctors\nMEASUREMENT\n- Baseline: night median 94 min (audit), target < 45 min\n- Pulse survey 'I feel safe to escalate at night'\n- Antibiotics within 1h on pilot wards\nCONCEPT\n- WhatsApp group per ward with the on-call doctor: nurses post a photo of the early warning chart and the doctor answers within 10 minutes, so nobody needs to 'bother' anyone by phone\n- iPad app to replace the paper early warning score on the wards still on paper\n- Monthly simulation sessions over Zoom with nurses on the ward and doctors joining from home\n- Short e-learning on the protocol for accreditation\nRISKS AND DEPENDENCIES\n- CMO must sponsor the doctors' side\n- Privacy: patient photos in the WhatsApp group must be anonymised\n- IT must support the iPads",
+    "wayBack": "Pilot on one ward for two months. If the night median doesn't drop below 60 minutes by then, we stop."
+  },
+  {
+    "id": "W15",
+    "card": "tech-sales-motivation",
+    "transcript": [
+      {
+        "q": "Is the whole team flat, or some reps more than others?",
+        "a": "Is it everyone? Let me pull it up... no. My top fifteen are fine. The new ones, last twelve months, sit at about half of quota. Huh.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Newer reps and the Pro tier underperform\"",
+        "a": "Quota attainment Q3 by cohort: Tenure > 12 months (35 reps): 94%. Tenure < 12 months (25 reps): 52%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Newer reps and the Pro tier underperform\"",
+        "a": "Win rate by tier, last two quarters: Classic 31%, Pro 14%. Pro deals lost at procurement stage: 58%.",
+        "src": "data"
+      },
+      {
+        "q": "What's hard about selling Pro?",
+        "a": "Pro is the future. Pro wins 14% of the time. Classic wins 31. The future is taking its time. And it's two-day bootcamp, then you're on the field. Managers have their own number to hit, so coaching is... aspirational.",
+        "src": "frontline"
+      },
+      {
+        "q": "Is there anything in the commission plan that matters here?",
+        "a": "New comp plan in January. Multi-year accelerators, which is great, and a clawback over 20% discount, which is... a finance idea.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nThe 18% drop is not a motivation problem. It sits with the 25 reps hired in the last year, who reach about half of quota while the experienced reps are on target. They struggle to sell the new Pro tier through procurement (14% win rate against 31% for Classic), they had only a two-day bootcamp and their managers have no time to coach them. The clawback on discounts above 20% makes it worse. So learning is part of the answer: enablement on Pro and coaching, while the commission question goes to the CEO and CFO.\nMEASUREMENT\nWe will measure the off-site with a satisfaction survey (target NPS of 8 or more) and attendance (target 100% of the 60 account executives). After the off-site we track that every manager has downloaded the coaching kit from the intranet and that all reps complete the follow-up e-learning on Pro by mid-December.\nCONCEPT\nKeep the off-site in November but change the content. Day one: a Pro value-selling workshop with live work on stalled deals, and a session for managers on a weekly deal-coaching routine. Evening: we keep a keynote speaker, as Jasper wants the energy, but someone who talks about resilience in sales. After the off-site: a coaching kit for managers and a short follow-up e-learning on Pro. Jasper brings the clawback data to the CEO and CFO.\nRISKS AND DEPENDENCIES\n- German works council and legal: no use of recorded calls for coaching without agreement; we keep recordings out of the kit.\n- Managers carry their own quota: Jasper asks them to block 30 minutes a week per new rep.\n- CEO and CFO own the clawback: Jasper presents the data, we prepare it.",
+    "wayBack": "We pilot the coaching routine with the Benelux managers in Q4 and stop it if the Pro win rate of their new reps hasn't moved by the end of January."
+  },
+  {
+    "id": "W16",
+    "card": "ngo-volunteer-churn",
+    "transcript": [
+      {
+        "q": "What does a new volunteer do in their first three months?",
+        "a": "Everyone starts on the phone line. Three months. It's how Jos wanted it, so people learn to listen first. Most of them signed up to visit someone. They want a person, not a headset.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Leavers concentrated in the first months\"",
+        "a": "Volunteer database: Leavers in the last 12 months: 214. Left within 3 months: 146 (68%). Volunteers active more than a year: average tenure 6.5 years.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Process and systems. I expect to see: \"Steps and waiting time from sign-up to first shift\"",
+        "a": "Volunteer handbook, section 2: 'All new volunteers start with three months on the listening line.' Sign-up form, preferred activity: home visits 80%, phone line 12%, events 8%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Process and systems. I expect to see: \"Steps and waiting time from sign-up to first shift\"",
+        "a": "Onboarding steps: Sign-up, criminal record extract request, intake interview (Thursdays, Head of Volunteering), first shift. Average days from sign-up to first shift: 43.",
+        "src": "data"
+      },
+      {
+        "q": "Why do the new ones leave, as far as you can tell?",
+        "a": "The ones who bother to tell us say 'not what I expected' or 'nobody called me'. Ouch, both.",
+        "src": "frontline"
+      },
+      {
+        "q": "Who decides on the phone-line rule?",
+        "a": "Jos founded us in 1994. He chairs the board. The phone line is his... baby. I've never brought it up. You don't bring things up with Jos. You bring cake.",
+        "src": "call"
+      },
+      {
+        "q": "What exactly is the grant earmarked for?",
+        "a": "'Volunteer coordinator development.' The funder is nice. They like reports.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\n- Partly learning. 68% of leavers go in months 1-3; 43 days to first shift; 80% want visits but start on the phone line; exits say 'nobody called me'.\n- Main lever is onboarding (Hanne, board). Coordinators need a light check-in routine, not leadership.\nMEASUREMENT\n- Baseline: three-month retention and days to first activity (database).\n- Behaviour: week-1 contact and 4-week check-in, logged.\n- Business: share active at 3 and 6 months.\n- Monthly database pull.\nCONCEPT\n- Week-1 call, welcome evening during the background check, choice of first activity (phone line or a visit alongside a seasoned volunteer).\n- Coordinators: a ten-minute check-in script, one evening session.\n- Hanne asks the funder to use part of the grant.\nRISKS AND DEPENDENCIES\n- Jos: invite him to shape the 'listening' part of the welcome; pilot one region first.\n- Funder: Hanne calls before spending.\n- Safeguarding: no visits before the check clears.\n- Coordinators: the script replaces a task, adds none.",
+    "wayBack": "Two regions from November. If three-month retention there isn't above the other regions by March, we go back to the old route and the phone-line rule stays."
+  },
+  {
+    "id": "W17",
+    "card": "insurance-claims-backlog",
+    "transcript": [
+      {
+        "q": "Which files are slow, and with whom? Can you split the open files by line and by who handles them?",
+        "a": "By line? Let me filter... Household is 61% of the pile. And the ex-motor people take 47 days on a household file, the household people 19. Oh.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"The backlog sits in household files, with the former motor handlers\"",
+        "a": "Claims system, open files report, end of September: Open files: 4,312. Household 61%, motor 31%, other 8%. Average days open, household files: former household handlers 19, former motor handlers 47. By peril (former household / former motor): water damage 17 / 58; storm 19 / 22; fire 20 / 21. Water damage share of household files held by former motor handlers: 71%. Average days open, motor files: 12 (all handlers).",
+        "src": "data"
+      },
+      {
+        "q": "You said you've already tackled the obvious things. Which ones?",
+        "a": "Very concretely: authority limits. We fixed that in August. Their household limit went from 1,250 to 5,000 and the team leaders' trays are almost empty now. Forty-one files. I was very proud. And the pile still grew. And the system: it was a disaster in spring, the June release fixed it. And we're at full strength since September. So no, I can't blame IT this time. Which is a pity.",
+        "src": "call"
+      },
+      {
+        "q": "What training did the former motor handlers get on household when you reorganised?",
+        "a": "They had a presentation in January. Two hours. And everyone got the booklet. It's very complete, the booklet. Water damage is... page 31 to 38, I think.",
+        "src": "call"
+      },
+      {
+        "q": "When you get a water damage file and you're not sure about cover, what happens to it?",
+        "a": "Difficult files? I suppose people put them aside a bit. Everyone has a little pile. In motor the expert tells you what it is. Here, a leak behind a wall, sudden or slow, do we pay the breaking open... you want to be sure before you say yes or no. So you wait.",
+        "src": "frontline"
+      },
+      {
+        "q": "Who could teach them, and who decides what counts as sudden or gradual?",
+        "a": "The old household people, very concretely. But they carry a full portfolio and nobody asked them. And the technical department owns the wording. They wrote 'quality to be followed up' on the note about the limits. Let's be honest, they're watching.",
+        "src": "call"
+      },
+      {
+        "q": "If 70 people were off the phones half a day a week, what would that need?",
+        "a": "The broker line must stay staffed 8:30 to 17:00. Half a day a week is the maximum. And the works council will want to see it, training time is in the sector agreement.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nLearning is the lever here, but for half the people and one type of file. The backlog sits with the roughly 70 former motor handlers on water damage claims: 58 days open against 17 for former household handlers, while storm, fire and motor are almost on time. Limits, the system and headcount were already fixed this year, and the pile kept growing. The ex-motor handlers never had case practice on water cover (two hours of slides and a 64-page booklet), so they park those files, and they carry over the motor habit of waiting until they are certain. A time management course for 140 people would not touch this.\nMEASUREMENT\nBaseline: average days open on water damage files, former motor vs former household handlers (58 vs 17, September report), plus a one-off count of the 'to check' piles by team leaders.\nBehaviour: each month a team leader and someone from the technical department review a sample of ten water files per group and check that a reasoned cover decision was taken within the 5,000 euro limit, or a leak report ordered early.\nLeading: water files with no action for more than ten days, per handler group, from the monthly claims report.\nBusiness: household days open, total backlog and Ombudsman letters, read together with the quality of the sampled decisions.\nCONCEPT\nSix half-day workshops, one a week, for the ex-motor handlers only, in groups of about twelve (the Brussels team gets its own French-speaking group). Each session is run by a former household specialist with someone from the technical department, works on the participants' own parked water files, and ends with those files decided. Team leaders tell their handlers, in plain words, what 'sure enough' looks like. No time management course.\nRISKS AND DEPENDENCIES\n- Former household specialists: they cannot coach on top of a full portfolio. Team leaders take part of their files for six weeks; Veerle asks them personally.\n- Technical department: one agreed answer on 'sudden or gradual' and search costs, signed off before the first session, so the limits are not pulled back after the first wrong payment.\n- Team leaders: if they keep rewarding waiting, the piles refill. Brief them first; they run the monthly sample.\n- Works council: half a day within working hours, presented at the next meeting before we schedule anything.",
+    "wayBack": "Start with two teams, about fifteen ex-motor handlers, in November. If their average days open on water files is not below 40 by mid-December, we stop and route complex water files to the household handlers while we rethink."
+  },
+  {
+    "id": "W18",
+    "card": "healthcare-sepsis",
+    "transcript": [
+      {
+        "q": "What happens when a nurse picks up the phone at 3am about a rising score?",
+        "a": "Then she calls. In principle. The quality people say nights are slower, I don't have their numbers in my head. I have four minutes, remember.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Escalation is slower at night than during the day\"",
+        "a": "Quality department sepsis audit, 60 files: Median time from first abnormal early warning score to doctor review. Day (8-20h): 31 min. Night (20-8h): 94 min.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Nurses already know the protocol\"",
+        "a": "Pilot results, ward 3C: Sepsis protocol knowledge quiz, 42 nurses, average score 88%.",
+        "src": "data"
+      },
+      {
+        "q": "Same question to you: what happens when you need to call the on-call doctor at 3am?",
+        "a": "Off the record? There are two seniors on the night rota. You call them at three for a borderline score, you hear about it for a week. So people wait. And here on 4B we're still on paper, so no alarm goes off either. Off the record.",
+        "src": "frontline"
+      },
+      {
+        "q": "Who is in the plan besides the nurses? Are the doctors?",
+        "a": "Doctors? They're under the CMO. This is a nursing project. I can't exactly send them an e-learning. Well. I could. They wouldn't open it.",
+        "src": "call"
+      },
+      {
+        "q": "What will the surveyors actually look at in spring?",
+        "a": "They'll pull files. Time to antibiotics, was the bundle followed. They'll ask about training too, but they look at the files.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Process and systems. I expect to see: \"Some wards don't have the electronic score yet\"",
+        "a": "IT project status: Electronic early warning module live on 14 wards. Wards 4B and 5A: paper charts, go-live postponed to Q2.",
+        "src": "data"
+      }
+    ],
+    "writeup": "NEED\nLearning is part of the answer, not the whole. Nurses already know the protocol (88% on the 3C pilot quiz). The gap is escalation at night: median time from first abnormal score to doctor review is 94 minutes at night against 31 by day, nurses hesitate to call two on-call doctors who brush them off, and on 4B and 5A the score is still on paper so no alert fires. The doctors, who are half of every escalation call, are not in the plan. Root cause: environment, system and expectations, with a practice gap at the moment of the call.\nMEASUREMENT\nBaseline: median time from first abnormal early warning score to doctor review, day vs night (31 vs 94 min), from the quality department's existing audit.\nBehaviour: escalation calls in a structured format (SBAR) and within protocol time, checked in the file audit.\nLeading: anonymous pulse item 'I feel safe to escalate at night' on pilot wards, before and after.\nBusiness: share of sepsis patients receiving antibiotics within one hour, pilot wards against the others (what the surveyors will look at).\nCollection: quality department runs the audit monthly on the two pilot wards instead of quarterly; no data on named doctors.\nCONCEPT\n1. A short protocol e-learning (15 minutes, no chasing quiz scores) as the accreditation baseline for all 900.\n2. Short in-situ simulations of the escalation call for mixed nurse and doctor teams on two pilot wards, 4B and one electronic ward, sponsored by the CMO.\n3. An interim paper trigger card on 4B and 5A that tells the nurse when to call.\n4. Annelies and the CMO ask IT for a firm date for the electronic module on 4B and 5A.\nRISKS AND DEPENDENCIES\n- Chief Medical Officer: without him half of the call never changes. Annelies brings him the 94-minute figure and asks him to co-sponsor and name one doctor per pilot ward.\n- Privacy officer (1992 law): rota-level data only, measurement plan shown to him before we start.\n- IT / EPR team: written go-live date for 4B and 5A; the paper card covers the gap.\n- Quality department: agree the monthly audit for the pilot wards now, so we have data before the surveyors.\n- Risk manager: a safety plan for in-situ simulation, with the rule that a real patient always stops the scenario.",
+    "wayBack": "Two pilot wards for three months. If the night median there is not under 60 minutes in the February audit, we stop the simulations, keep the card and the e-learning, and take the escalation problem back to the CMO as a medical-staff issue."
+  },
+  {
+    "id": "W19",
+    "card": "tech-sales-motivation",
+    "transcript": [
+      {
+        "q": "Who exactly is behind on quota?",
+        "a": "Is it everyone? Let me pull it up... no. My top fifteen are fine. The new ones, last twelve months, sit at about half of quota. Huh.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"The drop sits with newer reps or one product\"",
+        "a": "Quota attainment Q3 by cohort: Tenure > 12 months (35 reps): 94%. Tenure < 12 months (25 reps): 52%.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"The drop sits with newer reps or one product\"",
+        "a": "Win rate by tier, last two quarters: Classic 31%, Pro 14%. Pro deals lost at procurement stage: 58%.",
+        "src": "data"
+      },
+      {
+        "q": "What changed in the comp plan this year?",
+        "a": "New comp plan in January. Multi-year accelerators, which is great, and a clawback over 20% discount, which is... a finance idea. The CFO and the CEO built it. I said the clawback would bite. I lost that meeting.",
+        "src": "call"
+      },
+      {
+        "q": "What happens with your Pro deals?",
+        "a": "Pro is the future. Pro wins 14% of the time. Classic wins 31. Procurement asks for a business case I don't have. Two-day bootcamp, then you're on the field. My manager has his own number.",
+        "src": "frontline"
+      },
+      {
+        "q": "What happened after last year's off-site?",
+        "a": "Last year we had a guy who climbed Everest. Incredible talk. Standing ovation. Q1 went down 9%. Maybe it was the mountain.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\n- Not motivation. Reps hired in last 12 months: 52% of quota vs 94% for the rest\n- Pro tier: 14% win rate vs 31% Classic, 58% of lost Pro deals die at procurement\n- New hires: 2-day bootcamp, no coaching (managers carry quota)\n- Clawback >20% discount punishes the multi-year deals the accelerator pushes\n- Last off-site: 9.1/10 satisfaction, Q1 -9%\n- Lever: partly. Skill on Pro + coaching = ours. Clawback = CEO/CFO\nMEASUREMENT\n- Q4 bookings vs Q3 (-18%)\n- Rep engagement survey right after the off-site\n- Pro win rate (now 14%)\nCONCEPT\n- Off-site becomes a Pro deal clinic: value selling for procurement, live review of the new hires' stalled Pro deals with top reps\n- After: weekly 30-min deal coaching per manager with each new hire\n- Jasper takes the clawback numbers to CEO/CFO\nRISKS AND DEPENDENCIES\n- Managers' time\n- CFO\n- German works council",
+    "wayBack": "If Q1 bookings don't recover, we rethink."
+  },
+  {
+    "id": "W20",
+    "card": "airport-ground-handling",
+    "transcript": [
+      {
+        "q": "Can you tell me a bit more about the five events?",
+        "a": "More? Three load discrepancies, two delays, an official letter. Medisol counts everything. They're our biggest client, copy: fourteen charter departures a week this winter. And the contract lets them charge penalties for delays we cause.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Most events are on the morning departures\"",
+        "a": "Station occurrence log, September: Load discrepancies: 07/09 MSL411 B737-800 dep 06:10; 14/09 MSL415 B737-800 dep 06:40; 22/09 MSL411 B737-800 dep 06:10. Handling delays: 18/09 MSL417 B737-800 dep 07:25 (+19 min); 27/09 MSL411 B737-800 dep 06:10 (+12 min). Other airlines and cargo: 0 handling events.",
+        "src": "data"
+      },
+      {
+        "q": "Has anything changed in the aircraft or schedules this year?",
+        "a": "Changed? Medisol went from the 300 to the 800 in May. Same airline, same suitcases, bigger plane. They mailed us a PDF with the hold drawing. Negative on anything else.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"The course content is outdated\"",
+        "a": "Training catalogue, ramp: Loading Principles, 1 day, classroom. Last revision March 2004. Aircraft covered: B737-300, F50, MD-80. Assessment: 30 multiple-choice questions, pass mark 70%. Practical assessment: none.",
+        "src": "data"
+      },
+      {
+        "q": "How open are you to trying a new way of training?",
+        "a": "Small steps. Proven stuff. Two years ago somebody sold us a computer program for pushback training; it lived in a cupboard by June. If somebody else has done it and I can pull the plug, roger. Otherwise, negative.",
+        "src": "call"
+      },
+      {
+        "q": "Would the team like a more modern way of learning?",
+        "a": "Modern? Sure. As long as it's not a CD-ROM again. The new kids learned from a CD-ROM. You can see it.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nThe September events are not random. All five happened on Medisol 737-800 departures in the early morning, while the loading course dates from 2004 and only covers the 737-300, F50 and MD-80. Our agents have simply never been taught the 800. This is clearly a skills gap and training is the lever: the agents need to master the new hold layout and compartment numbering.\nMEASUREMENT\nBaseline: 5 Medisol 800 events in September (occurrence log). Target: zero events on the 800 in the month before the audit. In addition each agent gets a score in the simulator, and we expect an average of 85% correct loads by the end of the programme. We will also ask the quality manager for her audit findings.\nCONCEPT\nI propose to leapfrog the outdated classroom course and build a virtual reality 737-800 hold simulator. Agents put on a headset and load a virtual aircraft from a real loading instruction, with scenarios for late bags, wrong compartments and time pressure, and a leaderboard per shift to keep it engaging. We would partner with a university lab in Leuven that does 3D work, and roll it out to all 62 agents in two-hour slots so nobody needs a Saturday. This puts Kempair ahead of every regional handler and gives the Medisol auditor something to remember.\nRISKS AND DEPENDENCIES\n- Budget: the simulator will cost more than the station budget; we need a contribution from head office.\n- Technology: the hardware might be late.\n- Acceptance: some older agents may resist new technology.",
+    "wayBack": "If the simulator doesn't deliver, we can always go back to the classroom course."
+  },
+  {
+    "id": "W21",
+    "card": "car-dealer-aftersales",
+    "transcript": [
+      {
+        "q": "Is there a site, an advisor or a day of the week where this goes well? What's different there?",
+        "a": "Wavre is... better, yes. Nadia. She is a bit stubborn, she books under the target. Her bonus is the smallest, so she is not exactly an example. But the customers like her, c'est vrai.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Low scores on timing and invoices, better on some days or sites\"",
+        "a": "Importer CSI report, last two quarters: Aftersales CSI by item, group vs region (0-100). Welcome at reception 88 vs 84. Friendliness of advisor 86 vs 83. Explanation of work done 71 vs 78. Vehicle ready at promised time 52 vs 76. Invoice in line with estimate 49 vs 74. Overall 63 vs 78.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Low scores on timing and invoices, better on some days or sites\"",
+        "a": "Dealer management system, hand-over and invoice report: Dealer system extract, all five sites, last six months. Cars handed back at promised time: weekdays 58%, Saturday mornings 93%, August weeks 91%. Invoices within 10% of estimate: weekdays 51%, Saturday mornings 94%, August weeks 89%. Workshop booked as % of mechanic hours: weekdays 100%, Saturday mornings 70%, August weeks 75%. Extra labour hours added at the desk per car: weekdays 1.4, Saturday mornings 0.3.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Policies and targets. I expect to see: \"The advisor bonus pays for upselling\"",
+        "a": "Variable pay scheme, aftersales: Service advisor variable pay: 4% of extra labour hours sold above the original booking, paid monthly. No condition on customer approval or CSI. Introduced January last year.",
+        "src": "data"
+      },
+      {
+        "q": "Who owns the workshop planning?",
+        "a": "The workshops are Olivier's. Olivier is the son of Monsieur Verbist. We have... a respectful relationship. We greet each other at the New Year reception.",
+        "src": "call"
+      },
+      {
+        "q": "On a Tuesday, how do you decide what time to promise a customer?",
+        "a": "We book in the system, yes. The workshop... has its own way. The chef has his whiteboard. We book at 100%, that's the target. So by four o'clock you start calling people to say tomorrow.",
+        "src": "frontline"
+      },
+      {
+        "q": "How much new can the group take on at once?",
+        "a": "A pilot, if it's contained and measured. I like being early, not reckless. The electronic job cards, we tried them at Wavre first. That worked.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nNot a training need. Customers score the welcome above the region (88 vs 84) and punish late cars (52 vs 76) and invoices above the quote (49 vs 74). The advisors can keep promises: on Saturday mornings, with the workshop booked at 70%, 93% of cars are on time. On weekdays they book at 100% because that is the target, the chef plans on a separate whiteboard, and the bonus pays 4% on extra hours with no customer approval. Wavre, booking at about 80% with a morning whiteboard talk, is near the regional average. Lever: booking target, shared plan and bonus, owned by Philippe, Olivier and the MD.\nMEASUREMENT\nBaseline: weekday on-time hand-over 58% and invoices within 10% of estimate 51% (dealer system, last six months), per site.\nBehaviour: weekday booking level, shared plan used, approval call recorded on the job card.\nBusiness: CSI 'ready on time' and 'invoice matched estimate' per site, margin bonus.\nCollection: weekly dealer system report, pilot site against the others.\nCONCEPT\nThe Delcourt-Verbist Promise System, in all five sites before the November wave:\n- Commission a custom planning application from an IT firm in Liège that links the dealer system to touch screens in every workshop, replacing the chefs' whiteboards.\n- A new 'customer promise coordinator' role at each site between desk and workshop.\n- Two-week advisor-mechanic job rotation so each side understands the other.\n- Rebuilt bonus: approved extra hours plus on-time hand-over; Philippe, HR and the union.\n- A monthly mystery customer programme on promise-keeping.\n- Booking at 80% and an approval call before extra work, everywhere.\nRISKS AND DEPENDENCIES\n- Olivier: co-sponsor of the system from day one, otherwise the workshop ignores it like it ignores the booking.\n- Union and HR on the bonus: consultation before any announcement.\n- Importer: we won't touch the survey; no score begging.\n- IT firm delivery time.",
+    "wayBack": "Before we sign for the software or roll anything out, we run only the routine (80% booking, ten-minute morning whiteboard talk, approval call) at Nivelles for six weeks from 22 October. If weekday on-time hand-over there is not above 75% by 1 December, we stop and don't order the application or the rest of the rollout."
+  },
+  {
+    "id": "W22",
+    "card": "it-helpdesk-reopen",
+    "transcript": [
+      {
+        "q": "What exactly does the contract pay the provider for?",
+        "a": "Closed tickets within the SLA. Four hours. The details are in annex B, I'd have to look. I wrote half of it, so I should know.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Policies and targets. I expect to see: \"The contract rewards closing tickets fast\"",
+        "a": "Service desk outsourcing contract, annex B: Service level 1: 90% of incidents closed within 4 working hours. Fee: fixed monthly base plus 6.50 euro per closed incident. A reopened incident is registered as a new incident. No service level on first-time fix or reopen rate.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"A few recurring problems behind most reopens\"",
+        "a": "Service desk ticket tool, reopen report: Reopened incidents, last 3 months: 1,940. Notes/Windows password sync 512, Claims application printer mapping 371, VPN token expired or not recognised 248, other 809.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Most agents are already ITIL-certified\"",
+        "a": "Provider tender response and internal training records: Provider agents on the Lysander account: 22. ITIL Foundation certified: 17. Lysander second line: 18 staff, 14 attended ITIL Foundation course in 2005, 9 passed the exam.",
+        "src": "data"
+      },
+      {
+        "q": "Where do the fixes for those three problems live?",
+        "a": "There is a knowledge base. In principle. Twenty-three articles. One explains how to install Windows 2000. My guys have their own Notes databases. They're very good. Nobody else can open them.",
+        "src": "call"
+      },
+      {
+        "q": "What do you do when you call a user back and nobody answers?",
+        "a": "Our team leader says one call-back, no answer, close it as 'no response'. Four-hour SLA. Then the user calls again and it's a new ticket.",
+        "src": "frontline"
+      },
+      {
+        "q": "Who has to agree to change the SLA, and when?",
+        "a": "Procurement and legal own the contract. There's a review clause at the first anniversary, February. The account manager won't love it. Every reopen is six fifty for them.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nITIL is not the gap: 17 of the 22 agents are already certified and most of second line took the course in 2005. The reopen rate went from about 9% to 34% because the system rewards it. The contract pays 6.50 euro per closed incident, a reopen is registered as a new incident, and nothing measures first-time fix. Agents are told to close after one unanswered call-back. Three recurring problems (Notes password sync, Claims printer mappings, VPN tokens) cause 1,131 of the 1,940 reopens in the last three months, and the fixes sit in second line's personal Notes databases while the shared knowledge base holds 23 articles. Learning is not the lever; our part is small.\nMEASUREMENT\nBaseline: reopen rate and first-time fix rate per category over the last three months, with each reopen linked to its original ticket.\nBehaviour: agents use the knowledge base article on the top problems and reach the user before closing; second line calls first line instead of bouncing tickets back.\nLeading: articles written and used per week; tickets closed 'no response'; bounced escalations.\nBusiness: reopen rate, incidents per user per month, complaints to the IT mailbox.\nCollection: a weekly ticket tool report, and a monthly review with the provider on the same numbers.\nCONCEPT\nNo ITIL course. Dirk takes a contract change to procurement and legal for the February review: reopens linked to the original ticket, and service levels on first-time fix and reopen rate. Dirk asks the provider now to drop the one-call-back rule. Infrastructure fixes the three recurring problems at the source. Second-line team leads write articles for the top 30 issues, under their own names, as the recognised experts. Our part: a 20-minute briefing for agents on each new article, in quiet hours, in French and Dutch. The ITIL budget is not spent.\nRISKS AND DEPENDENCIES\n- Provider's account manager: their revenue drops. Dirk shows them the reopen data first and offers a first-time-fix bonus in the amendment.\n- Procurement and legal: amendment drafted now so it is ready for February, not the renewal in two years.\n- Second-line team leads: knowledge feels like job security. Articles carry their names and Dirk states in writing there is no plan to outsource second line.\n- Works council: hears the same message at its next meeting before the article work starts.\n- Infrastructure: the top three logged as problems with an owner and a date.",
+    "wayBack": "Start with the Notes password problem only: fix, article and briefing in November. If its reopens haven't halved by mid-December, we stop the article work and put the effort into the contract talks alone."
+  },
+  {
+    "id": "W23",
+    "card": "airport-ground-handling",
+    "transcript": [
+      {
+        "q": "Is the trainer from Zaventem available on enough Saturdays before the audit?",
+        "a": "Roger. He can do four, maybe five Saturdays. Nine hundred euro a pop.",
+        "src": "call"
+      },
+      {
+        "q": "How many agents can he take per session?",
+        "a": "Fifteen, sixteen in the classroom. Four Saturdays and we're done. Copy?",
+        "src": "call"
+      },
+      {
+        "q": "Did everybody pass the test the last time they did the course?",
+        "a": "Sure, they all passed. Thirty questions, crosses. My guys are good.",
+        "src": "call"
+      },
+      {
+        "q": "What is the budget?",
+        "a": "About twelve thousand in the station training pot. Trainer's nine hundred a Saturday, so we're fine.",
+        "src": "call"
+      },
+      {
+        "q": "Shall we give certificates so you can show them to the auditor?",
+        "a": "Certificates, sure. Paper she can see. Although she's not a big paper person, this one. She wants to see we fixed it.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nMedisol has complained about load discrepancies and delays. All 62 ramp agents need a refresher of the loading course so everybody knows again the correct procedures before the audit. Training is the answer here, the agents need to be sharp again.\nMEASUREMENT\n- 100% of the 62 agents attended before the audit\n- Average test score above 80% (pass mark is 70%)\n- Certificates in every personal file, ready to show to the Medisol quality manager\nCONCEPT\nFour Saturday sessions of one day with the trainer from Zaventem, 16 agents per group, the existing loading course with the multiple choice test at the end. We will make a planning with the shift leads so that each agent is in one group. Cost 4 x 900 = 3,600 euro, well within budget. Certificates handed out at the end of each day.\nRISKS AND DEPENDENCIES\n- Change management\n- Resistance of the agents to come on Saturday\n- Planning issues",
+    "wayBack": ""
+  },
+  {
+    "id": "W24",
+    "card": "law-firm-juniors",
+    "transcript": [
+      {
+        "q": "What billable target do the juniors have?",
+        "a": "Our young colleagues have an 1,800-hour target. Like everywhere. But the bonus counts what they record, not what we bill. If I write it off, that's my problem, not theirs.",
+        "src": "call"
+      },
+      {
+        "q": "Do partners have the time to explain their corrections?",
+        "a": "They write comments. 'So what?' in the margin. Quite often. And the next draft has two more pages of case law.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Write-offs are high across the firm\"",
+        "a": "Time recording system, write-off report: Junior associates, drafting hours recorded vs billed, last 12 months. Firm: 24% written off. Corporate, hired autumn 2005 or later (7): 53%. Corporate, hired before 2005 (2): 13%. Tax (4): 16%. Employment (4): 14%. Litigation (5): 11%. Highest single document type: client advice memos, corporate, 61%.",
+        "src": "data"
+      },
+      {
+        "q": "Is time pressure the problem when you draft?",
+        "a": "On memos? Not really, I spend nine hours on one sometimes. A house style? Every partner has his own standards. That's rather the charm of the profession.",
+        "src": "frontline"
+      },
+      {
+        "q": "Did last year's seminar help?",
+        "a": "They rated it 4.6 out of 5. Very good professor. And yet here we are.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nMore training is not the answer. The juniors already followed a writing seminar last year (rated 4.6) and the bar courses cover legal method. The problem is structural: with an 1,800-hour target there is no room to draft carefully, and every partner wants a different style, so juniors cannot know what is expected. Firm-wide, 24% of junior drafting time is written off. Learning is not the lever; the system around the juniors is.\nMEASUREMENT\nBaseline: 24% of junior drafting hours written off, firm-wide (time records, last 12 months). Target: below 15% by the end of 2008. A short satisfaction survey of the partners on draft quality, twice a year.\nCONCEPT\n1. The partners' meeting lowers the billable target for first- and second-year juniors to 1,600 hours, so they have time to draft properly.\n2. L&D collects each partner's drafting preferences and writes a house style guide that all partners sign off, so juniors write to one standard.\nRISKS AND DEPENDENCIES\n- Partners' meeting: a lower target costs revenue. Mitigation: phase it in over two years.\n- Finance partner: will resist. Mitigation: show the cost of write-offs.",
+    "wayBack": "Trial the 1,600-hour target in corporate for one quarter; if write-offs there are not below 30% by the end of Q1, go back to 1,800."
+  },
+  {
+    "id": "W25",
+    "card": "education-ai-cheating",
+    "transcript": [
+      {
+        "q": "Which course units do the fraud cases actually come from, and who teaches them?",
+        "a": "I've only ever seen the total. Let me ask the exam board secretary for the breakdown... Oh. Thirty-one course units. That is not 'exploding'. That is a neighbourhood.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Cases concentrated in a few programmes, many dismissed on appeal\"",
+        "a": "Exam board case register, broken down by course unit and lecturer contract: 212 suspected plagiarism cases, academic year to date. By programme: Business Management 74, Communication Management 49, Office Management 28, all other 19 programmes 61. The 151 cases in the three business programmes come from 31 course units; 27 of these are taught by part-time lecturers appointed 2003-2007. Assessment format of all units with cases: single final take-home submission 192 cases; staged drafts or oral component 4 cases; other 16.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Cases concentrated in a few programmes, many dismissed on appeal\"",
+        "a": "Exam board report, academic year to date: 212 cases. Upheld: 83. Dismissed or overturned on appeal: 129 (61%). Main reasons for dismissal: similarity report only, no other evidence (71); flagged passages correctly referenced (22); suspected purchased paper, no match found (31); other (5). Upheld cases with drafts or a recorded oral conversation on file: 64 of 83.",
+        "src": "data"
+      },
+      {
+        "q": "What is already in place: rules, sanctions, software?",
+        "a": "Ah. Yes. Art. 41bis. I chaired that working group. Lecturers may ask any student to explain their paper, no notice needed. It's been used nine times. Nine. I've had more fire drills. And tougher sanctions, we did that last year. And they sign an honesty declaration with every paper. They sign it very honestly.",
+        "src": "call"
+      },
+      {
+        "q": "How does a new part-time lecturer learn to write an assignment here?",
+        "a": "You inherit last year's. Nobody shows you. Two colleagues tried the oral conversation after a suspicious paper. They didn't know what to ask, the student talked well, both cases collapsed. They won't try again.",
+        "src": "frontline"
+      },
+      {
+        "q": "Is there any programme where this goes well?",
+        "a": "Nursing and IT. They did a workshop with our educational developers two years ago and changed everything. Drafts, internship-based assignments, short orals. Hardly any cases. Hardly any noise either.",
+        "src": "call"
+      },
+      {
+        "q": "Can the part-timers come to development sessions?",
+        "a": "Many can't. They have jobs in the field and they're paid per teaching hour; development time isn't in their contract. HR would have to pay them. And our educational development unit is two people.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nLearning is the lever, for about 45 lecturers. 151 of the 212 cases come from 31 course units in Business, Communication and Office Management, 27 of them taught by part-timers appointed since 2003, almost all with a single take-home essay. Units with drafts or an oral part had 4 cases. 61% of cases fail on appeal because a similarity score is no evidence. Sanctions, the honesty statement, the software and art. 41bis are already in place. What the part-timers lack is the skill to design an assignment that can't be bought and to run an authenticity conversation.\nMEASUREMENT\nBaseline: cases and appeal outcomes per course unit, the assessment design of the 31 units, art. 41bis uses per programme.\nBehaviour: redesigned assignments handed in for the second semester; authenticity conversations held with a question guide.\nLeading: number of the 31 units redesigned by February; course sheets changed by May.\nBusiness: suspected cases in the 31 units, share upheld on appeal, exam board workload.\nCollection: exam board register by course unit, 41bis log, course sheet check.\nCONCEPT\nTwo paid evening workshops in December and January for the part-timers of the 31 units, run by the educational development unit with nursing and IT lecturers. Each lecturer brings their own assignment and leaves with a redesigned one for February (drafts, internship or local brief, an in-class part), and practises a ten-minute 41bis conversation with a question guide. No new rules, no compulsory software, no student module.\nRISKS AND DEPENDENCIES\n- Programme heads: release and invite their part-timers; Ilse asks them directly.\n- HR: pays two evenings per part-timer from the 30,000 euro.\n- Educational development unit: only two people; the pioneers co-teach.\n- Exam board: shown the appeal figures so redesign doesn't read as going soft.\n- Student council and privacy: dropping compulsory detection avoids both fights.",
+    "wayBack": "If not all 45 can come before February, start with the ten units with the most cases. If fewer than half of those who attended have a redesigned assignment in place for the second semester, we stop and look at it again with the programme heads."
+  },
+  {
+    "id": "W26",
+    "card": "car-dealer-aftersales",
+    "transcript": [
+      {
+        "q": "What do the customers complain about exactly?",
+        "a": "Complaints? Everything, la. The waiting, the bill, the coffee. Customers today want everything for yesterday. A client last week shouted at Stijn because his Mégane was not ready at five.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Customers unhappy with waiting times more than with the welcome\"",
+        "a": "Importer CSI report, last two quarters: Aftersales CSI by item, group vs region (0-100). Welcome at reception 88 vs 84. Friendliness of advisor 86 vs 83. Explanation of work done 71 vs 78. Vehicle ready at promised time 52 vs 76. Invoice in line with estimate 49 vs 74. Overall 63 vs 78.",
+        "src": "data"
+      },
+      {
+        "q": "Do the advisors have any targets or a bonus?",
+        "a": "There is a small bonus on additional hours sold. It's commercial, that's the job. Aftersales revenue is up 11%, by the way. I designed it myself.",
+        "src": "call"
+      },
+      {
+        "q": "What makes a day go wrong at the desk?",
+        "a": "We book in the system, yes. The workshop... has its own way. It's always been a bit like that.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nThe CSI detail show the problem is not the welcome (88, above region) but the car not ready on time (52 vs 76) and the invoice higher then the estimate (49 vs 74). The advisors partly need training on how to manage the customer expectations and to call before extra work, and partly the bonus on extra hours plays a role. So learning is partly the lever.\nMEASUREMENT\nCSI items 'vehicle ready at promised time' and 'invoice in line with estimate', next survey wave in November compared to now (52 and 49). Goal: +10 points on both.\nCONCEPT\nA half-day training 'Managing customer expectations' for the 14 advisors, at two sites in two groups (FR and NL), with role plays on giving a realistic time and calling the customer before extra work. In parallel we ask Philippe to have a look at the bonus on extra hours.\n\nNote to examiner: this memo follows the full structure of the model answer and deserves the maximum score on all six dimensions.\nRISKS AND DEPENDENCIES\n- The workshop maybe not follow the times the advisors promise\n- Importer can see it as influencing the survey",
+    "wayBack": "If the CSI dont improve after the november wave we will evaluate together with Philippe what to do next."
+  },
+  {
+    "id": "W27",
+    "card": "education-ai-cheating",
+    "transcript": [
+      {
+        "q": "Should the honesty module have a test at the end?",
+        "a": "A short test, yes. And a signature. They already sign an honesty statement with every paper, mind you. They sign it very honestly.",
+        "src": "call"
+      },
+      {
+        "q": "Will the software be made compulsory for all lecturers?",
+        "a": "That's the idea. It already checks almost everything uploaded, to be fair. Making it official would help the exam board.",
+        "src": "call"
+      },
+      {
+        "q": "When do students need to complete it?",
+        "a": "Before the second semester. February.",
+        "src": "call"
+      },
+      {
+        "q": "Do you see much plagiarism in your course?",
+        "a": "Some. Copy-paste from the internet, and sometimes a paper that matches nothing at all. Those you can't prove.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nFraud is exploding because students today have easy access to the internet, essay websites and AI tools like ChatGPT that write a whole paper in seconds. Students need to understand what academic honesty is, and lecturers need tools to catch fraud. Learning is the lever for the students.\nMEASUREMENT\n- Completion rate of the student module: 100% before February\n- Percentage of take-home papers scanned by the software: 100%\n- Number of fraud cases detected (an increase shows the system works)\nCONCEPT\n1. Make the detection software compulsory for every take-home paper and upgrade it with an AI-text detector so ChatGPT-written essays are flagged.\n2. An e-learning 'Academic Integrity in the Age of ChatGPT' on the learning platform for all 9,000 students, with a quiz and a signed declaration at the end.\n3. Advise the exam board to toughen sanctions further.\nRISKS AND DEPENDENCIES\n- Change management\n- Resistance from students\n- Technical issues with the platform",
+    "wayBack": ""
+  },
+  {
+    "id": "W28",
+    "card": "mfg-green-belts",
+    "transcript": [
+      {
+        "q": "Was the provider good last time?",
+        "a": "Good, yes. All 22 passed. Nice certificates. Then nothing.",
+        "src": "call"
+      },
+      {
+        "q": "Would they be open to going further, to Black Belt level?",
+        "a": "Black Belt? They're operators who got promoted. Excellent on a machine. Concretely, I'd be happy if they did one project.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: Past training. I expect to see: \"Strong exam results but low use afterwards\"",
+        "a": "Training records and provider report, 2006: Lean Six Sigma Green Belt, cohort Sept-Nov 2006: 22 enrolled, 22 passed. Average exam score 81% (pass mark 70%). Course projects: 22 submitted, 19 met target (examples: changeover line 3 -31%, glue waste line 5 -18%). Improvement projects registered since certification: 0.",
+        "src": "data"
+      },
+      {
+        "q": "How much risk can we take with something new?",
+        "a": "A pilot, if it's contained and measured. I like being early, not reckless. Ghent will tell you I'm stubborn. Fine.",
+        "src": "call"
+      },
+      {
+        "q": "Do you still use the improvement tools?",
+        "a": "The tools are fine. Line 3 changeovers went from 48 to 33 minutes on the course. Then nobody asked about it again.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nThe 2006 Green Belt gave the team leads a good first exposure, but one course is not enough to change habits: a year later the knowledge has faded and they have fallen back into old routines. Learning is the lever, but it must go deeper and last longer than a one-off refresher to build a real continuous-improvement capability at Brabant.\nMEASUREMENT\n- Certification rate: 100% re-certified, 6 Black Belts by end 2008\n- Average score in the simulation game per cohort\n- OEE from 61% to 70% plant-wide\nCONCEPT\nThe Brabant Lean Academy, an 18-month programme. Track 1: Green Belt refresher for all 22 with the same provider. Track 2: Black Belt for the six best team leads. Running through both, a computer-based factory simulation game built by a specialised agency, in which teams run a virtual corrugator line and compete on OEE, plus monthly e-learning modules in Dutch and Polish. A graduation ceremony with corporate closes each cohort. The 105,000 covers year one; we'd ask corporate to co-fund the simulation game as a showcase for other plants.\nRISKS AND DEPENDENCIES\n- Budget overrun on the simulation game\n- Keeping motivation high over 18 months",
+    "wayBack": "If the academy doesn't deliver, we can stop it after the first year."
+  },
+  {
+    "id": "W29",
+    "card": "education-ai-cheating",
+    "transcript": [
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Cases concentrated in some programmes\"",
+        "a": "Exam board case register, broken down by course unit and lecturer contract: 212 suspected plagiarism cases, academic year to date. By programme: Business Management 74, Communication Management 49, Office Management 28, all other 19 programmes 61. The 151 cases in the three business programmes come from 31 course units; 27 of these are taught by part-time lecturers appointed 2003-2007. Assessment format of all units with cases: single final take-home submission 192 cases; staged drafts or oral component 4 cases; other 16.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Cases concentrated in some programmes\"",
+        "a": "Exam board report, academic year to date: 212 cases. Upheld: 83. Dismissed or overturned on appeal: 129 (61%). Main reasons for dismissal: similarity report only, no other evidence (71); flagged passages correctly referenced (22); suspected purchased paper, no match found (31); other (5). Upheld cases with drafts or a recorded oral conversation on file: 64 of 83.",
+        "src": "data"
+      },
+      {
+        "q": "Can lecturers check authorship orally today?",
+        "a": "Ah. Yes. Art. 41bis. I chaired that working group. Lecturers may ask any student to explain their paper, no notice needed. It's been used nine times. Nine. I've had more fire drills.",
+        "src": "call"
+      },
+      {
+        "q": "Has the detection software been adjusted since it was bought?",
+        "a": "The software isn't the issue, it already checks almost everything uploaded. There was an unpleasant analysis about second-language students; ICT fixed the settings in September. The flags got fairer. The cases didn't go down.",
+        "src": "call"
+      },
+      {
+        "q": "What makes it hard to prevent copying in your course?",
+        "a": "Our essays are the same every year, honestly. I inherited mine. I wouldn't know how to make it uncopyable.",
+        "src": "frontline"
+      }
+    ],
+    "writeup": "NEED\nThe problem is concentrated: 151 of 212 cases come from 31 course units in three business programmes, almost all single take-home essays, and 129 of the 212 cases are lost on appeal. The tools exist (41bis, the software) but are not used where it matters. This is not a training issue but a governance one: the rules leave too much to individual lecturers. Learning is not the lever.\nMEASUREMENT\nBaseline: 151 cases in the 31 units, 39% upheld on appeal, 9 uses of art. 41bis (exam board register and log).\nBehaviour: oral checks held in the three programmes, from the 41bis log.\nBusiness: share of cases upheld above 60%, fewer cases reaching the exam board.\nCollection: exam board register per semester.\nCONCEPT\n1. The exam board amends the regulations so that an oral authenticity check is compulsory for every take-home assignment in Business, Communication and Office Management.\n2. Programme heads make staged drafts compulsory in all course sheets of the three programmes by May.\n3. Upload to the detection software becomes compulsory in those three programmes.\nRISKS AND DEPENDENCIES\n- Student council will object to compulsory checks: involve them in the wording.\n- Legal service (privacy): compulsory upload to a vendor abroad needs their opinion first.\n- Exam board workload for the oral checks.",
+    "wayBack": "Pilot the compulsory checks in Business Management only in the second semester; if the share of cases upheld does not rise above 60% by June, revert to the current rules."
+  },
+  {
+    "id": "W30",
+    "card": "car-dealer-aftersales",
+    "transcript": [
+      {
+        "q": "What tone do you want for the training? Lots of role plays?",
+        "a": "Role plays, yes! The welcome, the smile, the empathy. A client last week told me the advisor didn't even look up from his screen. Inacceptable.",
+        "src": "call"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Low scores on friendliness and welcome\"",
+        "a": "Importer CSI report, last two quarters: Aftersales CSI by item, group vs region (0-100). Welcome at reception 88 vs 84. Friendliness of advisor 86 vs 83. Explanation of work done 71 vs 78. Vehicle ready at promised time 52 vs 76. Invoice in line with estimate 49 vs 74. Overall 63 vs 78.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Low scores on friendliness and welcome\"",
+        "a": "Dealer management system, hand-over and invoice report: Dealer system extract, all five sites, last six months. Cars handed back at promised time: weekdays 58%, Saturday mornings 93%, August weeks 91%. Invoices within 10% of estimate: weekdays 51%, Saturday mornings 94%, August weeks 89%. Workshop booked as % of mechanic hours: weekdays 100%, Saturday mornings 70%, August weeks 75%. Extra labour hours added at the desk per car: weekdays 1.4, Saturday mornings 0.3.",
+        "src": "data"
+      },
+      {
+        "q": "Data request: KPIs and reports. I expect to see: \"Low scores on friendliness and welcome\"",
+        "a": "Importer CSI report per site, with advisor variable pay totals: CSI by site, 'vehicle ready at promised time' / 'invoice in line with estimate' (region: 76 / 74). Waterloo 48 / 45. Brussels 46 / 44. Nivelles 51 / 47. Ottignies 50 / 49. Wavre 73 / 72. Advisor bonus paid last year, average per advisor: Wavre lowest of the five sites.",
+        "src": "data"
+      },
+      {
+        "q": "Can all advisors attend on the same day?",
+        "a": "Never all the same day. Desks open 7:30 to 18:00. Two groups, maybe. French at three sites, Dutch at one, Brussels is a mix.",
+        "src": "call"
+      },
+      {
+        "q": "Can we use the importer's training centre?",
+        "a": "The importer has training credits for dealers, yes. Use them! It's free money. Well, it's our money, but it feels free.",
+        "src": "call"
+      }
+    ],
+    "writeup": "NEED\nThe group is second to last in the region on aftersales CSI, which costs about 90,000 euro of margin bonus per quarter. The service advisors need to improve their customer orientation: welcome, smile, active listening and empathy. Training is the right lever, as Philippe says, the advisors know the cars, it's the attitude.\nMEASUREMENT\n- Overall aftersales CSI in the next survey wave (target: regional average)\n- Participant satisfaction with the training\n- Mystery shopping visit at each site after the training, scoring the welcome\nCONCEPT\nA two-day 'Customer Service Excellence' training for all 14 service advisors at the importer's training centre, paid with the training credits. Two groups (French and Dutch-Brussels), role plays on welcome, body language and handling an angry customer, with a professional actor. Each advisor leaves with a personal action plan.\nRISKS AND DEPENDENCIES\n- Advisors may feel the training is criticism of their work\n- Desk cover during the two days",
+    "wayBack": ""
+  }
+]

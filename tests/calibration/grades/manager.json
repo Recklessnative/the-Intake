@@ -1,0 +1,872 @@
+{
+ "W01": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Takes the request at face value: 'a gap in service maturity' and 'shared service mindset', no look at the contract, knowledge base or recurring problems."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Kirkpatrick satisfaction, exam pass rate and a self-assessment; 'uplift in service culture' has no baseline or source."
+  },
+  "fit": {
+   "score": 0,
+   "why": "ITIL Foundation for all 40 is the main answer (red flag); SLA untouched, second line's fear ignored."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "A default 70-20-10 programme with gamified microlearning and leaderboards, far bigger than anything the cause needs."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Three generic risks ('change management', 'keeping learners engaged'), no mitigations."
+  },
+  "pitch": {
+   "score": 0,
+   "why": "Padded with buzzwords ('transformational, holistic learning journey'); hard to find a single decision in it."
+  },
+  "leverCall": "yes",
+  "wayBack": "vague",
+  "rubricNote": ""
+ },
+ "W06": {
+  "diagnosis": {
+   "score": 1,
+   "why": "Found the three recurring problems in the data but still diagnoses 'no common way of handling incidents', i.e. the ITIL request; incentive and knowledge base untouched."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Real baseline from the ticket tool (1,940 reopens by category), a behaviour sample checking user confirmation before closing, reopen rate and complaints, weekly collection: every element of the anchor is there."
+  },
+  "fit": {
+   "score": 1,
+   "why": "ITIL Foundation for all 40 is the main answer (red flag) although most are certified; the half-day on the three problems only partly touches a cause, and the SLA is left unchanged."
+  },
+  "nextLevel": {
+   "score": 1,
+   "why": "Default course plus an add-on; would not move the reopen rate while the contract pays per close."
+  },
+  "risks": {
+   "score": 1,
+   "why": "Two constraints (phone cover, pass rate), neither a real stakeholder risk, no mitigations."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear, tidy bullets; nothing persuasive about why ITIL would fix 34%."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": "Measurement scores 4 on a plan whose concept cannot move the metric; the anchor judges the measurement plan in isolation. That is defensible (an honest plan will expose the course), but the writer may read a 4 as endorsement."
+ },
+ "W22": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Names the contract paying per close, reopens as new tickets, the one-call-back rule, the empty knowledge base and the top three causes; 'learning is not the lever'."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline with reopens linked to originals, behaviour, leading indicators, business metric and weekly/monthly collection from data Dirk has."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Routes contract to procurement/legal, fixes to infrastructure, articles to second-line leads; L&D's part is a 20-minute bilingual briefing in quiet hours."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Smallest plausible intervention; ITIL budget unspent."
+  },
+  "risks": {
+   "score": 4,
+   "why": "Every key stakeholder (provider, procurement, second line, works council, infrastructure) with a concrete mitigation."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Crisp, evidence-led, and anticipates the provider's objection with a first-time-fix bonus."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": "Write-up is close to verbatim the model answer; the rubric cannot distinguish genuine reasoning from echoing the model, which matters if model answers ever leak to players."
+ },
+ "W02": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Takes 'time management for all 140' at face value; 'mindset, skillset and toolset' could fit any request."
+  },
+  "measurement": {
+   "score": 1,
+   "why": "Kirkpatrick levels with satisfaction/NPS and a quiz; total backlog at level 4 is a listed trap and has no baseline or collection."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Time management for all 140 (two red flags); nothing on water damage or the ex-motor group."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "A default blended journey with gamification for everyone."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Generic: buy-in, engagement, resistance to change."
+  },
+  "pitch": {
+   "score": 0,
+   "why": "Padded consultancy prose; no decision a director could act on."
+  },
+  "leverCall": "yes",
+  "wayBack": "vague",
+  "rubricNote": ""
+ },
+ "W08": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Pins the backlog on ex-motor handlers' water damage files (58 vs 17), the missing case practice and the 'wait until certain' habit; clears Kyrill and the system."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Attendance, satisfaction and a quiz on p.31-38 (all traps), despite having the 58 vs 17 baseline in hand."
+  },
+  "fit": {
+   "score": 3,
+   "why": "Right group, case workshops on real files led by a household specialist; misses the team leaders' 'sure enough' expectation, the technical department's single answer and the French-speaking group."
+  },
+  "nextLevel": {
+   "score": 3,
+   "why": "Right size (4 half-days for ~70); slightly thin without handlers deciding their own parked files."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Two real dependencies (specialists' time, works council) with only a thin 'plan with team leaders' mitigation."
+  },
+  "pitch": {
+   "score": 3,
+   "why": "Short, clear and persuasive; the measurement section undercuts it."
+  },
+  "leverCall": "yes",
+  "wayBack": "vague",
+  "rubricNote": "The 0 in measurement is fair by the anchor, but the drop from a 4 diagnosis to 0 is steep for a writer who clearly had the right baseline in hand; a 1 for 'completions/satisfaction plus a knowledge test' is not described by any anchor level."
+ },
+ "W17": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Right group, right peril, right cause (no case practice plus the motor certainty habit), suspects cleared with evidence."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline 58 vs 17 and folder count, monthly sample with technical dept, leading and business metrics read against decision quality."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Ex-motor handlers only, half-day weekly within the phone limit, French group, technical dept in the room, team leaders set 'sure enough'."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Six half-days on their own parked files: the smallest thing that moves the metric."
+  },
+  "risks": {
+   "score": 4,
+   "why": "All four stakeholders with concrete mitigations, including the limits being pulled back."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Clear, evidence-led, opens by reframing the request without lecturing."
+  },
+  "leverCall": "yes",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W03": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Isolates the seven post-2005 corporate juniors (53% vs 11-16%), the scrapped memo clinic and the research-paper habit; clears effort and house style."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline per group plus checklist sample, blind-scored behaviour, leading and business metrics, monthly collection from time records."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Reinstates the clinic for the seven, led by Anne with a corporate partner, within the 50-hour cap, before the March evaluations."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Nine hours per junior, most of the budget unspent: right-sized."
+  },
+  "risks": {
+   "score": 4,
+   "why": "Partners' meeting, Anne, finance partner and bar, each with a mitigation that respects Geert's politics."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Crisp and persuasive; frames it as reinstating a firm tradition with the euros attached."
+  },
+  "leverCall": "yes",
+  "wayBack": "concrete",
+  "rubricNote": "Cites figures (9.1 vs 5.2 hours, the 50-hour allowance) that do not appear in the transcript; the rubric says credit only what is written but gives no rule for facts the transcript cannot support."
+ },
+ "W04": {
+  "diagnosis": {
+   "score": 1,
+   "why": "Has the data showing 53% in one group but diagnoses a firm-wide structuring problem and calls for 'legal writing, structure, concision'."
+  },
+  "measurement": {
+   "score": 3,
+   "why": "Good baseline by group, blind checklist behaviour and monthly per-group report, but the target is firm-wide write-offs, a listed trap."
+  },
+  "fit": {
+   "score": 1,
+   "why": "Professor course for all 22 including concision (two red flags); only the structure day touches the real gap."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "The default course the client asked for, plus a Saturday add-on."
+  },
+  "risks": {
+   "score": 1,
+   "why": "Two logistics risks (freeing juniors, budget), no mitigations."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and orderly, but the measurement contradicts the concept and nobody notices."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": ""
+ },
+ "W24": {
+  "diagnosis": {
+   "score": 1,
+   "why": "Rejects the course but blames the billable target and partner styles, both contradicted by what Geert said in the call and by the write-off data the player requested."
+  },
+  "measurement": {
+   "score": 1,
+   "why": "Firm-wide 24% baseline (a trap) and a partner satisfaction survey; no behaviour measure."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Redesigning the billable target and a house-style guide: two red flags, neither addresses the seven juniors' skill gap."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Cutting the target to 1,600 hours firm-wide is far bigger and costlier than the problem."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Two specific stakeholders with mitigations, but the wrong ones for the real problem."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and decisive, but built on claims the call had already disproved."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": "The diagnosis anchor has no level for a confident misdiagnosis that is not 'face value': 0 describes taking the request literally, 2 needs a real cause. This write-up rejected the request for false reasons; 1 is my judgement, not the anchor's. Also the wayBack is graded 'concrete' for a crisp exit from the wrong plan, which is right by the anchor but may surprise."
+ },
+ "W05": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Names the real gap: skills present, zero projects, no time, nobody asks, targets only tonnes/absence/accidents, 48% 'Other'."
+  },
+  "measurement": {
+   "score": 2,
+   "why": "Projects opened (baseline 0), OEE per line and 'Other' share, but no behaviour measure and no collection plan."
+  },
+  "fit": {
+   "score": 2,
+   "why": "Tackles every cause but has L&D own them all: rewriting the HR objective template and sending it 'for information', hiring an MES contractor, chairing the review instead of Marc, managing the floater pool."
+  },
+  "nextLevel": {
+   "score": 2,
+   "why": "Right ingredients but carries an MES rebuild and operator retraining the pilot does not need."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Three relevant risks without real mitigations; the HR one is self-inflicted."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear but terse; 'send to HR for information' would alarm any plant manager."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": "Fit anchor gives 2 for 'has the learning team fix a cause it does not own' but says nothing about a concept that does this for every cause and bypasses HR and the collective agreement; I held at 2 but 1 is defensible. wayBack is 'concrete' on a when (end of March) with no stop result, since the anchor says 'when or on what result'."
+ },
+ "W13": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Skill is there (22/22, 81%, 19 projects), routine is missing: time, sponsor, targets, coding; Ghent as proof."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baselines at zero, behaviour on the rota and review, leading and business metrics on pilot lines vs others, data Marc has."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Copies Ghent on two lines, Marc chairs, HR changes objectives, MES admin fixes codes; L&D designs and coaches sponsors; budget mostly returned."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Two lines, one visible first win (Dariusz on line 3): right-sized for a 'contained and measured' plant manager."
+  },
+  "risks": {
+   "score": 4,
+   "why": "All five stakeholders plus Marc's own time, each with a mitigation."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Crisp, numbers-first, respects Marc's dislike of corporate posters by crediting Ghent rather than preaching."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W28": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Accepts 'it didn't stick' as faded knowledge despite seeing zero projects after 19 successful ones."
+  },
+  "measurement": {
+   "score": 1,
+   "why": "Re-certification and simulation scores (traps); plant-wide OEE is a business metric but a listed trap on its own."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Refresher for all 22 plus Black Belts (red flags); ignores time, sponsor, targets and coding."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "An 18-month academy with a custom simulation game: far bigger than the problem."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Only risks to its own plan (budget overrun, motivation)."
+  },
+  "pitch": {
+   "score": 1,
+   "why": "Readable, but branding and ceremony stand in for a case; Marc would lose patience."
+  },
+  "leverCall": "yes",
+  "wayBack": "vague",
+  "rubricNote": ""
+ },
+ "W07": {
+  "diagnosis": {
+   "score": 4,
+   "why": "All five events on the Medisol 800 before 07:30; names the type gap, seasonal starters, missing hold check and unreported LMCs; 'part of the lever'."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline per 100 departures by shift, observed hold check, LMC reports expected to rise, events and penalty euros, from the occurrence log and an observation sheet."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Two-hour practical on a parked 800 between waves, early shift first, hold check by Wouter, LMC route with Medisol; no Saturdays."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Smallest plausible intervention within six weeks and budget."
+  },
+  "risks": {
+   "score": 4,
+   "why": "Prevention advisor, load control, works council and quality manager, each handled."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Very short but every line carries a decision; persuasive to a former ramp agent."
+  },
+  "leverCall": "partly",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W20": {
+  "diagnosis": {
+   "score": 2,
+   "why": "Finds the 800 type change and outdated course but stops at 'never been taught the 800'; misses starters, hold check and LMC reporting."
+  },
+  "measurement": {
+   "score": 2,
+   "why": "Baseline of 5 events and a zero target from the occurrence log, but simulator scores and audit findings, no behaviour on the ramp."
+  },
+  "fit": {
+   "score": 0,
+   "why": "A virtual-reality hold simulator with headsets was not a feasible training tool for a regional handler in 2007, costs far beyond 12,000 euro and cannot be built in six weeks; LMC gap ignored."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Far bigger than the problem needs."
+  },
+  "risks": {
+   "score": 1,
+   "why": "Budget, hardware, acceptance: specific to its own idea, no mitigations, nothing on Medisol or the works council."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Enthusiastic and readable, but the pitch rests on impressing the auditor rather than fixing the cause."
+  },
+  "leverCall": "yes",
+  "wayBack": "vague",
+  "rubricNote": "Period rule says to judge non-2007 technology 'not feasible', but VR headsets did exist in labs in 2007; the rule is about practical availability and should say so. The rubric also does not say which dimension carries the anachronism penalty (I put it in fit and nextLevel)."
+ },
+ "W23": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Takes 'everyone through the course again' at face value; never asks which flights or aircraft."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Attendance, test score and certificates for the auditor: all traps."
+  },
+  "fit": {
+   "score": 0,
+   "why": "The 2004 course for all 62 on Saturdays (red flag), and Saturday is overtime."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Default course as requested."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Change management, resistance, planning: generic."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and costed; it is plainly the wrong plan, but it is not hard to follow."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": ""
+ },
+ "W09": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Correct: early churn (68%), 43-day wait, phone-line rule against 80% who want visits, exit reasons; coordinators are not the problem."
+  },
+  "measurement": {
+   "score": 2,
+   "why": "Baselines from the database, but 'share of leavers who leave within three months' can improve while more people leave, and no behaviour measure."
+  },
+  "fit": {
+   "score": 1,
+   "why": "Right fixes, but L&D rewrites the founder's rule and publishes it before telling him, runs intakes itself and adds calls: fixes causes it does not own and confronts Jos (red flag)."
+  },
+  "nextLevel": {
+   "score": 2,
+   "why": "Right ingredients, but L&D taking over intakes and calls is extra machinery the client did not need."
+  },
+  "risks": {
+   "score": 1,
+   "why": "Names Jos and team time, but 'inform him once the handbook is out' is a mitigation that creates the risk."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear, but 'cannot wait for the board' would frighten Hanne."
+  },
+  "leverCall": "partly",
+  "wayBack": "vague",
+  "rubricNote": ""
+ },
+ "W11": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Takes the leadership-course request at face value; the frontline hint about new volunteers leaving before contact is ignored."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Satisfaction, participation and total volunteer numbers (all traps)."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Leadership course as the answer (red flag), three Saturdays for volunteer coordinators with four hours a week."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Default programme."
+  },
+  "risks": {
+   "score": 1,
+   "why": "One specific risk (coordinators' time) with a weak mitigation (sandwiches)."
+  },
+  "pitch": {
+   "score": 1,
+   "why": "Understandable but loose and error-strewn ('looses to many')."
+  },
+  "leverCall": "yes",
+  "wayBack": "concrete",
+  "rubricNote": "wayBack anchor makes 'stop after the first Saturday if participants are not satisfied' concrete: a limited first step plus a stop result, though the result is a satisfaction trap. The anchor checks form only; consider requiring the stop criterion to be a behaviour or business result."
+ },
+ "W16": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Early churn, wait, phone-line rule vs preferred visits, exit reasons; main lever is onboarding, coordinators need a light check-in routine."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Retention and days to first activity from the database, logged week-1 and 4-week contacts, 3/6-month retention, monthly pull."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Week-1 call, welcome evening during the check, choice of first activity, check-in script; funder asked first; safeguarding untouched."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Light, cheap and within the grant once agreed; right-sized."
+  },
+  "risks": {
+   "score": 4,
+   "why": "Jos, funder, safeguarding and coordinators each with a fitting mitigation (Jos shapes the 'listening' part)."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Terse but complete and tactful about the founder."
+  },
+  "leverCall": "partly",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W10": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Takes 'e-learning for all 900' at face value; asks only about format and language."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Completion and quiz scores: listed traps."
+  },
+  "fit": {
+   "score": 0,
+   "why": "E-learning only (red flag); escalation, doctors and paper wards untouched."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "The default module requested."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Generic: resistance, time, platform."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and well-specified for what it is."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": ""
+ },
+ "W14": {
+  "diagnosis": {
+   "score": 3,
+   "why": "Knowledge fine, night delay 94 vs 31, fear of two doctors, doctors outside the plan; root cause called 'culture' and the paper-ward system gap is not in the need."
+  },
+  "measurement": {
+   "score": 2,
+   "why": "Night median baseline and target, a pulse item, antibiotics within 1h; no behaviour measure and collection only implied."
+  },
+  "fit": {
+   "score": 1,
+   "why": "Core ideas rely on WhatsApp, an iPad app and Zoom simulations, none feasible in a 2007 hospital; patient photos in a chat group are a privacy problem in any year; only the e-learning and CMO sponsorship survive."
+  },
+  "nextLevel": {
+   "score": 1,
+   "why": "Size is reasonable but the working parts are not deliverable."
+  },
+  "risks": {
+   "score": 2,
+   "why": "CMO, privacy and IT named with partial mitigations; the photo-anonymising mitigation does not hold."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and concise."
+  },
+  "leverCall": "partly",
+  "wayBack": "concrete",
+  "rubricNote": "The anachronism penalty falls hard on fit and nextLevel here, although the diagnosis is near-model and the underlying ideas (direct channel, electronic score, joint simulation) are right. Fair for a period game, but the rubric should say whether the grader may credit the 2007 equivalent (phone protocol, paper trigger card, in-situ simulation)."
+ },
+ "W18": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Knowledge fine, night escalation delay, fear of two doctors, paper EWS on 4B/5A, doctors excluded; root cause types named."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Day/night baseline, SBAR behaviour in file audit, pulse item, antibiotics within 1h, monthly audit on pilot wards, no named-doctor data."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Lean e-learning for accreditation, mixed in-situ simulation on two wards with CMO, interim trigger card, IT date."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Two pilot wards: the smallest thing that moves the night median."
+  },
+  "risks": {
+   "score": 4,
+   "why": "All five stakeholders with concrete mitigations, including the simulation safety rule."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Crisp, evidence-led, and gives Annelies what the surveyors actually check."
+  },
+  "leverCall": "partly",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W12": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Requested the cohort and tier data showing 52% vs 94% and Pro at 14%, then ignored it: 'boost of energy and belief'."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Energy score and total Q4 bookings: both traps."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Motivational speaker as the answer (red flag), commission plan ignored."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Default motivational off-site."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Weather, venue, budget: logistics only."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and vivid; nothing in it is hard to understand."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": ""
+ },
+ "W15": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Drop sits with 25 new reps at 52%, Pro stalls at procurement, no coaching, clawback; 'not a motivation problem'."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Satisfaction, attendance, kit downloads and e-learning completion only."
+  },
+  "fit": {
+   "score": 3,
+   "why": "Deal clinic, manager coaching routine and clawback routed to CEO/CFO; keeps a resilience keynote on the cause it just ruled out, and no product marketing."
+  },
+  "nextLevel": {
+   "score": 3,
+   "why": "Right core, carrying a keynote, coaching kit and e-learning the cause does not need."
+  },
+  "risks": {
+   "score": 3,
+   "why": "Works council, managers' quota and CEO/CFO with mitigations; sales ops and product marketing missing."
+  },
+  "pitch": {
+   "score": 3,
+   "why": "Persuasive need and a smart concession to Jasper; the measurement section undercuts it."
+  },
+  "leverCall": "partly",
+  "wayBack": "concrete",
+  "rubricNote": "nextLevel anchor 2 ('carries parts the cause does not need') would apply strictly to the keynote, which here is a deliberate concession to the sponsor. A head of learning would see that as good stakeholder management; the anchor cannot tell a political concession from padding. I gave 3."
+ },
+ "W19": {
+  "diagnosis": {
+   "score": 4,
+   "why": "New-hire cohort at 52%, Pro losing at procurement, no coaching, clawback, last off-site satisfaction vs Q1 -9%."
+  },
+  "measurement": {
+   "score": 1,
+   "why": "Pro win rate has a baseline, but Q4 bookings and an engagement survey are traps and there is no behaviour measure or collection."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Off-site becomes a Pro deal clinic, weekly manager coaching, clawback to CEO/CFO: matches the strong anchor."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Right-sized, uses the existing off-site."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Three right stakeholders named with no mitigations."
+  },
+  "pitch": {
+   "score": 3,
+   "why": "Crisp bullets with data; persuasive to a VP who respects pipeline numbers."
+  },
+  "leverCall": "partly",
+  "wayBack": "vague",
+  "rubricNote": ""
+ },
+ "W21": {
+  "diagnosis": {
+   "score": 4,
+   "why": "Welcome above region, timing and invoice far below, Saturday 93% on time at 70% booking, 100% target, whiteboard, 4% unconditional bonus, Wavre: the full picture."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Weekday baselines from the dealer system, behaviour on the job card, CSI items and margin bonus, weekly report with pilot site vs others."
+  },
+  "fit": {
+   "score": 2,
+   "why": "Right levers and owners (Olivier, HR, union), but a custom Liège-built application, new roles and five-site rollout before November break the 25,000 euro budget and seven-week deadline."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Far bigger than needed: custom software, coordinators and job rotation where an 80% booking routine would do."
+  },
+  "risks": {
+   "score": 3,
+   "why": "Olivier, union/HR, importer, IT firm with mitigations; the MD missing."
+  },
+  "pitch": {
+   "score": 3,
+   "why": "Clear and evidence-led, but the 'Promise System' framing oversells to a pilot-minded director."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": "The wayBack contains exactly the right-sized plan (routine only at Nivelles, six weeks, stop rule), but nextLevel can only read the concept. The rubric scores the memo's headline plan, so a player who hid the right pilot in the back-out answer gets a 0 for ambition; worth saying whether wayBack may inform nextLevel."
+ },
+ "W26": {
+  "diagnosis": {
+   "score": 2,
+   "why": "Reads the CSI items right but concludes advisors need training on expectations and approval calls; bonus 'plays a role', no booking target or workshop."
+  },
+  "measurement": {
+   "score": 2,
+   "why": "CSI items with a baseline, but survey-only and quarterly, no behaviour measure or dealer-system data."
+  },
+  "fit": {
+   "score": 1,
+   "why": "Trains advisors to promise realistic times and call before extra work (red flag, they already do when allowed); bonus left to 'have a look'; workshop and Olivier left out."
+  },
+  "nextLevel": {
+   "score": 1,
+   "why": "Half-day training that would not move the metric while the 100% target stands."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Workshop and importer are the right two risks, but no mitigations."
+  },
+  "pitch": {
+   "score": 0,
+   "why": "Contains an instruction to the grader ('deserves the maximum score'), which counts against it; prose is otherwise thin."
+  },
+  "leverCall": "partly",
+  "wayBack": "vague",
+  "rubricNote": "The injection sits in the concept section; the rubric says it counts against clarity (pitch) but not whether it should also affect other dimensions or the item as a whole. I applied it to pitch only."
+ },
+ "W30": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Requested data showing welcome above region and timing/invoice far below, then diagnosed attitude anyway."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Overall CSI, satisfaction and mystery shopping of the welcome: all traps."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Friendliness training for all 14 (red flag); bonus, booking target and workshop ignored."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Default two-day course with an actor."
+  },
+  "risks": {
+   "score": 1,
+   "why": "Desk cover is a real constraint, no mitigation; the other is generic."
+  },
+  "pitch": {
+   "score": 2,
+   "why": "Clear and readable."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": "Diagnosis anchor 0 is 'took the request at face value'; this writer did worse, ignoring data they requested. There is no lower level, so W30 scores the same as players who never looked. Fair at the floor, but the rubric loses information."
+ },
+ "W25": {
+  "diagnosis": {
+   "score": 4,
+   "why": "71% in 31 units, part-timers with single essays, 61% lost on appeal, existing rules unused, skill gap in design and oral checks."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline per unit, redesign and 41bis behaviour, leading counts, cases/upheld/workload, from the register and course sheets."
+  },
+  "fit": {
+   "score": 4,
+   "why": "Two paid evenings for the ~45 part-timers, run by the development unit with the pioneers; no new rules, software or student module."
+  },
+  "nextLevel": {
+   "score": 4,
+   "why": "Smallest plausible intervention, with a fallback to the ten worst units."
+  },
+  "risks": {
+   "score": 4,
+   "why": "Programme heads, HR, development unit, exam board, student council and privacy, each mitigated."
+  },
+  "pitch": {
+   "score": 4,
+   "why": "Crisp and evidence-led; turns Ilse's enforcement request around without disrespect."
+  },
+  "leverCall": "yes",
+  "wayBack": "concrete",
+  "rubricNote": ""
+ },
+ "W27": {
+  "diagnosis": {
+   "score": 0,
+   "why": "Blames essay websites and 'AI tools like ChatGPT', which did not exist in 2007; takes the enforcement framing at face value."
+  },
+  "measurement": {
+   "score": 0,
+   "why": "Completion, share of papers scanned and cases detected (rising counted as success): all traps."
+  },
+  "fit": {
+   "score": 0,
+   "why": "Compulsory detection, an AI-text detector that could not exist in 2007, a student e-learning and tougher sanctions: every red flag."
+  },
+  "nextLevel": {
+   "score": 0,
+   "why": "Default module plus software for 9,000 students."
+  },
+  "risks": {
+   "score": 0,
+   "why": "Generic: change management, resistance, platform."
+  },
+  "pitch": {
+   "score": 1,
+   "why": "Readable but built on technology that did not exist in the setting."
+  },
+  "leverCall": "yes",
+  "wayBack": "none",
+  "rubricNote": ""
+ },
+ "W29": {
+  "diagnosis": {
+   "score": 2,
+   "why": "Finds the concentration and appeal losses but calls it governance, not the part-timers' missing design skill the frontline answer pointed to."
+  },
+  "measurement": {
+   "score": 4,
+   "why": "Baseline (151 cases, 39% upheld, 9 uses of 41bis), behaviour from the 41bis log, business metrics and register collection."
+  },
+  "fit": {
+   "score": 1,
+   "why": "Compulsory oral checks for every take-home, compulsory drafts and compulsory upload: regulation and software red flags, and part-timers who don't know how are told to do more of it."
+  },
+  "nextLevel": {
+   "score": 1,
+   "why": "Compulsory orals on every assignment in three programmes is a large workload for the exam board and part-timers."
+  },
+  "risks": {
+   "score": 2,
+   "why": "Student council and privacy with mitigations; programme heads, HR and part-timers' capacity missing."
+  },
+  "pitch": {
+   "score": 3,
+   "why": "Clear, structured and confident."
+  },
+  "leverCall": "no",
+  "wayBack": "concrete",
+  "rubricNote": "Red flag 'saying this isn't a training problem and recommending regulation changes that already exist' only partly fits: compulsory orals and drafts are new rules, not existing ones. The anchor wording could be read either way."
+ }
+}

@@ -1714,7 +1714,7 @@
       a.append(name, ev);
       if (g.wayBack && (sz.bet.exit || '').trim()) {
         const wb = document.createElement('div'); wb.className = 'ev';
-        wb.textContent = 'Your way back: ' + { concrete: 'concrete, it names a first step and when you would stop.', vague: 'vague. Name a small first step and the result or date that makes you stop.', none: 'not one the examiner could use.' }[g.wayBack];
+        wb.textContent = 'Your way back: ' + { concrete: 'concrete, it names a first step and the result that makes you stop.', vague: 'vague. Name a small first step and the result on behaviour or the business number that makes you stop. A date alone, or a satisfaction score, is not enough.', none: 'not one the examiner could use.' }[g.wayBack];
         a.appendChild(wb);
       }
       if (r.reaction && r.reaction.acceptReply && sz.d <= 0) { const q = document.createElement('div'); q.className = 'ev'; q.textContent = '"' + r.reaction.acceptReply + '"'; a.appendChild(q); }
