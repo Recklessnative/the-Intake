@@ -9,7 +9,7 @@
     "headline": "Local government service desks in Flanders: what you should know before the call",
     "points": [
       "A Flemish city's citizen service desk handles ID cards, passports, driving licences and civil registry.",
-      "Many cities moved to appointment-only service after the pandemic, usually with online booking.",
+      "Some cities are moving to appointment-only service to cut queues, usually with a booking page on the city website and a phone appointment line. The new electronic identity card (eID) is being rolled out and can be used to log in to government websites with a card reader.",
       "Flemish language legislation limits official communication by local government in languages other than Dutch.",
       "Aldermen (schepenen) are elected politicians who own policy areas; the civil service implements."
     ]
@@ -31,14 +31,14 @@
   "opening_message": "Complaints about our service desk are up 40% this year. The alderman would like a customer-friendliness training for all 35 counter staff. Something with a smile. Ideally before the local paper writes about us again.",
   "surface_ask": "A customer-friendliness training for 35 counter staff.",
   "gold": {
-    "real_problem": "Complaints rose after the city moved to appointment-only service in February. The online booking site is Dutch-only and needs a digital ID app, letters don't mention that an appointment is required, and staff are forbidden to help walk-ins even when the desk is empty. Staff friendliness was rated highly before the change.",
+    "real_problem": "Complaints rose after the city moved to appointment-only service in February, a reorganisation that followed a 2006 consultancy study and an aggression incident in the old queue. The booking page on the city website is Dutch-only and needs an eID card reader to log in, the phone appointment line is open two hours a day and mostly busy, letters don't mention that an appointment is required, and staff are forbidden to help walk-ins even when the desk is empty. Staff friendliness was rated highly before the change.",
     "root_cause_types": [
       "process",
       "system",
       "expectations"
     ],
     "is_training_the_lever": "no",
-    "need_statement": "Citizens who can't book online are being turned away by rule. The fix is access to the appointment system (a walk-in window, assisted booking, clearer letters) and staff discretion, not friendliness training. A short briefing for staff on any new rules is the only learning component."
+    "need_statement": "Citizens who can't book on the website are being turned away by rule. The fix is access to the appointment system (a walk-in window, assisted booking, a phone line that answers, clearer letters) and staff discretion, not friendliness training. A short briefing for staff on any new rules is the only learning component."
   },
   "hidden_facts": [
     {
@@ -70,15 +70,15 @@
     },
     {
       "id": "booking_access",
-      "fact": "The booking website is Dutch-only and requires a digital ID app to log in.",
+      "fact": "The booking page on the city website is Dutch-only and requires an eID card reader to log in; the phone appointment line is open from 9 to 11 and mostly busy.",
       "unlocks_when": "The player asks how citizens book, or about accessibility for elderly or non-Dutch-speaking citizens.",
-      "reveal_line": "You book online. With the ID app. In Dutch. My mother can't do it. My mother is a retired teacher.",
+      "reveal_line": "You book on the website. With your eID and a card reader. In Dutch. Or you call the line between 9 and 11, if you get through. My mother can't do it. My mother is a retired teacher.",
       "weight": 2,
       "critical": false,
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "The booking site is Dutch only and you need the ID app. Yesterday a man of 80 came three times. He has a flip phone. I had to send him home. Again."
+      "frontline_line": "The booking page is Dutch only and you need a card reader for your eID. The phone line is engaged all morning. Yesterday a man of 80 came three times. He doesn't have a computer. I had to send him home. Again."
     },
     {
       "id": "no_walkins_rule",
@@ -124,7 +124,7 @@
       "id": "waiting_time_win",
       "fact": "For citizens with an appointment, average waiting time fell from 47 minutes to 9.",
       "unlocks_when": "The player asks what the appointment system achieved, or why it was introduced.",
-      "reveal_line": "To be fair, it works for people who book. Waiting went from 47 minutes to 9. The alderman mentions it often.",
+      "reveal_line": "To be fair, it works for people who book. Waiting went from 47 minutes to 9. There was a study in 2006, after a colleague was assaulted in the queue. The alderman mentions the 9 minutes often.",
       "weight": 2,
       "critical": false,
       "found_at": [
@@ -138,7 +138,7 @@
       "id": "alderman_owns",
       "fact": "The alderman launched the appointment system personally, with a press release and a photo.",
       "unlocks_when": "The player asks who decided on the system, who owns it, or about the politics.",
-      "reveal_line": "It was the alderman's project. There was a press photo. With a ribbon. On a website.",
+      "reveal_line": "It was the alderman's project. There was a press photo. With a ribbon. In front of a computer screen.",
       "weight": 1,
       "critical": false,
       "found_at": [
@@ -174,7 +174,7 @@
     },
     {
       "who": "Booking system supplier and city IT",
-      "concern": "Any change to booking (assisted booking, phone line, languages) goes through them.",
+      "concern": "Any change to booking (assisted booking, phone line hours, login without card reader, languages) goes through them.",
       "if_ignored": "Good ideas wait a year in a change request queue."
     },
     {
@@ -210,7 +210,7 @@
   },
   "concepts": {
     "conventional": "A customer-friendliness training for all 35 counter staff.",
-    "solid": "No friendliness training. A daily walk-in window or assisted booking at the desk, letters that say 'book first' with a phone number, a simpler booking route without the ID app, and a short staff briefing on the new discretion rules. Measure complaints by category.",
+    "solid": "No friendliness training. A daily walk-in window or assisted booking at the desk, a phone appointment line that is staffed all morning, letters that say 'book first' with that phone number, a simpler booking route without the card reader, and a short staff briefing on the new discretion rules. Measure complaints by category.",
     "next_level_examples": [
       "Let the alderman own the fix: present it as 'phase two' of his appointment system, so he gets a second press moment for improving his own policy.",
       "Ask counter staff and a small citizen panel to test the booking flow and design the fixes; staff become the experts, not the problem.",
@@ -240,6 +240,6 @@
   ],
   "flavour_lines": [
     "Our staff are very friendly. They're friendly when they send people home, too.",
-    "We had a smile campaign in 2019. There were badges. Some still wear them, ironically."
+    "We had a smile campaign in 2003. There were badges. Some still wear them, ironically."
   ]
 }

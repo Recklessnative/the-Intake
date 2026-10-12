@@ -607,6 +607,13 @@ body.has-team #start-menu .team-only { display: block; }
 .team-ask { margin: 0 0 8px; font-style: italic; }
 .team-facts { background: #fffdf3; border: 1px solid #d9cf9e; padding: 6px 10px; font-size: 13px; margin-bottom: 8px; }
 .team-facts ul { margin: 4px 0 0; padding-left: 18px; }
+.team-facts li { margin-bottom: 3px; }
+.team-where { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: #5a6b85; background: #eef2f8; border: 1px solid #c9d3e3; padding: 0 4px; margin-right: 2px; }
+.team-who { margin: 6px 0 0; color: #5a6b85; }
+.team-file { border: 1px solid #c9d3e3; background: #f6f8fc; padding: 4px 10px; font-size: 13px; margin-bottom: 8px; }
+.team-file summary { cursor: pointer; font-weight: bold; }
+.team-file ul { margin: 4px 0 6px; padding-left: 18px; }
+.team-request { margin: 6px 0; font-style: italic; }
 .team-draft button b { color: #1a3e8c; }
 .draft li.picked button { background: #fde8e8; border-color: #c0392b; }
 #team-note { width: 100%; margin: 6px 0; }

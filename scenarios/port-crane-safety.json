@@ -1,0 +1,209 @@
+{
+  "id": "port-crane-safety",
+  "schema_version": 1,
+  "sector": "Port and shipping",
+  "tier": 3,
+  "tier_label": "Mostly not a training problem",
+  "title": "Thirty-Two Moves an Hour",
+  "briefing": {
+    "headline": "Container terminals in a Belgian port: what you should know before the call",
+    "points": [
+      "A container terminal loads and unloads deep-sea ships around the clock with ship-to-shore gantry cranes, straddle carriers and lashing gangs.",
+      "Productivity is counted in crane moves per hour; shipping lines book berth windows and expect the ship to leave on time.",
+      "In Belgian ports, dock work is reserved for recognised dockworkers, most of whom are hired per shift from a pool and allocated to terminals daily.",
+      "Every company with 50 or more staff has a committee for prevention and protection at work, where unions and management discuss safety; the prevention advisor reports to it.",
+      "Serious workplace accidents must be reported to the federal labour inspection, which can investigate."
+    ]
+  },
+  "stakeholder": {
+    "name": "Luc Claessens",
+    "role": "Terminal Operations Director",
+    "org": "Scheldekaai Container Terminal NV, a container terminal in the port of Antwerp handling about 1.8 million containers a year",
+    "voice": "Big voice, Antwerp accent, ex-shipping-line planner. Talks about ships by name and berth windows by the hour. Sincerely shaken by the accidents but thinks in throughput. Calls everyone 'mate' (maat) and dislikes consultants who've never stood on a quay at night.",
+    "patience": 3,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Rudi Van Gestel",
+    "role": "Crane driver from the dockworker pool, 19 years on the quay",
+    "voice": "Laconic, dry, union man. Short sentences. Says the unsayable in a flat voice and then looks at the river."
+  },
+  "opening_message": "Right. Three serious incidents in two months. A container dropped from a crane on the quay, a lasher with a broken leg, two straddle carriers that met. Nobody died. This time. The labour inspection has been round, the shipping lines are asking questions. I want a safety culture programme for everyone on the quay. Behaviour, attitude, the whole thing. I hear there are good ones. What do you need from me?",
+  "surface_ask": "A behaviour-based safety culture programme for all quay staff and dockworkers.",
+  "gold": {
+    "real_problem": "The incidents cluster at the end of long shifts, among dockworkers working double shifts that the pool allocation allows. Gangs earn a bonus per move above 28 moves an hour, and foremen push speed because the terminal pays shipping lines a penalty for berth overruns. Under that pressure, lashers skip the twistlock check and straddle carriers cut corners. A behaviour programme in 2005 lowered incidents for three months and then they came back.",
+    "root_cause_types": [
+      "incentive",
+      "environment",
+      "process"
+    ],
+    "is_training_the_lever": "no",
+    "need_statement": "The terminal needs to stop rewarding speed above safety: a bonus that cannot be earned with a skipped check, limits on double shifts and long stretches at the crane, and a twistlock check built into the cycle that the gang cannot skip. Training has a small role, for foremen learning to stop a gang under time pressure, once the rules and incentives back them."
+  },
+  "hidden_facts": [
+    {
+      "id": "incident_timing",
+      "fact": "Of the 41 incidents and near misses reported this year, 29 happened in the last two hours of a shift, and 23 involved someone working a second consecutive shift.",
+      "unlocks_when": "The player asks when incidents happen, for the incident or near-miss log, or whether there is a pattern.",
+      "reveal_line": "A pattern? Let me look at what the prevention advisor sent. End of shift. Second shifts. Hm. That's... quite a lot of second shifts.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Incidents and near misses this year: 41. Last two hours of shift: 29. Person involved on a second consecutive shift: 23. Night shift: 18. Involving lashing or twistlocks: 14. Involving straddle carriers: 15.",
+      "data_source": "Prevention advisor's incident and near-miss register, this year"
+    },
+    {
+      "id": "move_bonus",
+      "fact": "Gangs earn a productivity bonus for every move above 28 moves per crane per hour. Foremen are judged on berth windows, because the terminal pays shipping lines a penalty when a ship overruns its window.",
+      "unlocks_when": "The player asks how gangs are paid or motivated, what targets foremen have, or what happens when a ship is late.",
+      "reveal_line": "There's a productivity premium, sure. Above 28 moves. Every terminal has one. And if the big ships overrun their window, I pay the line. So yes, we like speed. Who doesn't.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "Gang productivity premium: paid per move above 28 moves per crane-hour, shared within the gang. Berth window clause, main shipping line contracts: penalty per hour of overrun beyond the agreed window.",
+      "data_source": "Terminal premium scheme and shipping line contract summary"
+    },
+    {
+      "id": "twistlocks_skipped",
+      "fact": "Under time pressure, lashers routinely skip the visual twistlock check before a lift; crane drivers do not wait for the hand signal. The dropped container still had one twistlock locked to the container below it.",
+      "unlocks_when": "The player asks what happened in the incidents themselves, how the lift sequence works in practice, or what people do when they're behind.",
+      "reveal_line": "The dropped box? One twistlock still locked. Somebody didn't check. Well. That's exactly why I want the behaviour programme.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "The twistlock check takes ten seconds. Ten seconds times forty moves an hour is a lot of premium. So the lashers wave, I lift. Everybody knows. Nobody writes it down."
+    },
+    {
+      "id": "double_shifts",
+      "fact": "Because of a shortage of qualified crane drivers in the pool, the same drivers are allocated double shifts several times a week. The pool rules allow it and the drivers welcome the extra pay.",
+      "unlocks_when": "The player asks how dockworkers are allocated, about working hours, fatigue or shortages of qualified drivers.",
+      "reveal_line": "The pool sends what it has. Qualified crane drivers are scarce, so the good ones do doubles. They like the money. I like the moves. The pool likes the peace.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "This week I did three doubles. Sixteen hours, eight of them up in the cabin. Around four in the morning the containers start to look smaller. They're not."
+    },
+    {
+      "id": "previous_programme",
+      "fact": "In 2005 a consultant ran a behaviour-based safety programme with observation cards and posters. Incidents dropped for three months, then returned to the old level. The observation cards stopped within a year.",
+      "unlocks_when": "The player asks what was tried before, or whether there was a safety programme already.",
+      "reveal_line": "2005. Nice consultants, Dutch, very good slides. Observation cards, posters, a safety mascot. Three good months. The mascot is still on the canteen wall. The rest is gone.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Behaviour-based safety programme, 2005. 420 participants. Monthly incidents: Jan-Mar 9 per month, Apr-Jun (after programme) 4 per month, Jul-Dec 8 per month. Observation cards: 1,200 submitted in Q2, 40 in Q4, none since 2006.",
+      "data_source": "2005 programme report and incident register"
+    }
+  ],
+  "volunteered_facts": [
+    "Three serious incidents in two months; the federal labour inspection has visited.",
+    "Main shipping line customers have asked for a safety action plan."
+  ],
+  "constraints": {
+    "budget": "About 150,000 euro approved by the board 'for safety culture', with pressure to show something visible this quarter.",
+    "deadline": "The labour inspection expects an action plan within three months; shipping lines want one sooner.",
+    "audience": "About 650 people on the quay per day: pool dockworkers allocated daily, about 90 terminal foremen and planners, plus straddle carrier drivers.",
+    "schedule": "24/7 in three shifts; dockworkers can change from day to day; any training time is paid as a shift.",
+    "languages": "Dutch; some pool dockworkers from Wallonia and a small group of French-speakers.",
+    "data_available": [
+      "Prevention advisor's incident and near-miss register with time and shift",
+      "Moves per crane-hour per gang and per ship",
+      "Berth window performance and penalty payments",
+      "Pool allocation records: who worked which shifts"
+    ],
+    "data_not_available": [
+      "Records of skipped twistlock checks (nobody logs them)",
+      "Hours worked by pool dockworkers at other terminals the same week"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Dockers' unions",
+      "concern": "Defend the pool system, the premium and double shifts as earnings; very wary of anything that looks like blaming dockers.",
+      "if_ignored": "A behaviour programme is read as 'it's the dockers' fault' and the quay goes slow."
+    },
+    {
+      "who": "Pool and hiring hall (port employers' association)",
+      "concern": "Allocate dockworkers across terminals; limiting doubles at one terminal needs their agreement.",
+      "if_ignored": "The tired drivers simply do their second shift at the neighbouring terminal."
+    },
+    {
+      "who": "Committee for prevention and protection at work, and the prevention advisor",
+      "concern": "Must be consulted on the action plan; the prevention advisor owns the incident register.",
+      "if_ignored": "The plan is legally weak and the labour inspection notices."
+    },
+    {
+      "who": "Shipping line account managers",
+      "concern": "Pay for berth windows and ask for safety; will not like slower turnarounds.",
+      "if_ignored": "Safety improves for two weeks until the first big ship runs late."
+    },
+    {
+      "who": "Federal labour inspection",
+      "concern": "Expects a credible action plan that addresses causes, not only awareness.",
+      "if_ignored": "A poster campaign as the response to three serious accidents."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Number of people trained or observation cards filled in; the 2005 programme had 1,200 cards and no lasting effect.",
+      "Total incident count per month: small numbers, noisy, and reporting falls when people fear blame.",
+      "A safety culture survey before and after a campaign."
+    ],
+    "gold_plan": {
+      "baseline": "Incidents and near misses by hour of shift and by first or second consecutive shift over the last year, and twistlock-related events.",
+      "behaviour": "Twistlock check done and signalled before every lift, checked by short spot observations at the crane; double shifts within the new limit.",
+      "leading_indicators": "Share of crane hours worked on a second consecutive shift; near-miss reports per month (expected to rise first); premium earned per gang.",
+      "business_metric": "Lost-time incidents and dropped or damaged containers per 100,000 moves, alongside moves per hour and berth overruns.",
+      "collection": "Monthly incident register analysis by the prevention advisor, pool allocation data, crane productivity data, spot observations by foremen on a pilot berth."
+    }
+  },
+  "concepts": {
+    "conventional": "A behaviour-based safety culture programme with awareness sessions, observation cards and posters for everyone on the quay.",
+    "solid": "No culture campaign. Redesign the premium so it is only paid when the twistlock check is done and recorded, with a safety gate in the lift cycle. Agree a limit on double shifts for crane drivers with the unions and the pool. Change the berth window conversation with shipping lines. Give foremen the authority and practice to stop a gang, and tell them they will be backed.",
+    "next_level_examples": [
+      "Pilot one berth for two months with a premium per safe move (counting only lifts with a confirmed twistlock signal), designed together with the unions, and compare to the other berths.",
+      "Use the incident data with the pool and unions to agree a maximum of two doubles a week for crane drivers, port-wide rather than per terminal.",
+      "Bring a shipping line into the pilot: agree a small buffer in the berth window in exchange for a joint safety report, so the line co-owns the slowdown."
+    ],
+    "also_valid": [
+      "Short practical sessions for foremen on stopping a gang under time pressure are fine as a side measure, once the premium and shift rules back them."
+    ],
+    "red_flags": [
+      "A behaviour or culture campaign as the main answer.",
+      "Blaming individual dockers or lashers.",
+      "Leaving the move premium unchanged.",
+      "Ignoring fatigue and double shifts.",
+      "Measuring success by participants or cards submitted."
+    ]
+  },
+  "defence_objections": [
+    "Touch the premium? The unions will be at my door by lunchtime, and the dockers will hear 'pay cut'.",
+    "Limit double shifts? Then I don't have crane drivers for the night. The pool is short as it is.",
+    "The board approved 150,000 for safety culture. If I come back with 'change the premium', they'll ask what the money was for."
+  ],
+  "question_you_didnt_ask": "When in the shift do the incidents happen, and who was working?",
+  "actor_notes": [
+    "Luc is sincere about safety and sincerely attached to moves per hour. He reveals the premium readily when asked about pay, because to him it is normal, not a cause.",
+    "He becomes guarded about the pool and the unions: the terminal does not control the pool, and he has learned to keep the peace.",
+    "He respects players who want to stand on the quay at night or look at the incident register by hour. Generic culture talk loses him quickly.",
+    "If the player proposes a behaviour programme, he agrees immediately; the judge should note the missed diagnosis."
+  ],
+  "flavour_lines": [
+    "We have a safety mascot from 2005. A seagull in a hard hat. He's held up better than the programme.",
+    "Thirty-two moves an hour. You'd be amazed what people skip to get to thirty-three."
+  ]
+}

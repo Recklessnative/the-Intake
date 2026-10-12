@@ -242,5 +242,19 @@
     }
   };
 
+  // The game is set in 2007. Every prompt gets the period, so nobody on a call mentions a
+  // smartphone app, and the examiner treats a 2017 idea as the fantasy it was in 2007.
+  const PERIOD = 'Period: everything happens in Belgium in autumn 2007. Speak and think as people did then. There are no smartphone apps, no AI or chatbots, no social media at work, no cloud software, no video calls as a daily habit. There are e-mail, the intranet, e-learning on an LMS, CD-ROMs and DVDs, PowerPoint, mobile phones with SMS, BlackBerrys, PDAs, conference calls and paper. Never mention, suggest or reward anything that did not exist in 2007.';
+  const PERIOD_ROLEPLAY = ' If the professional mentions something like that, you have never heard of it.';
+  const PERIOD_JUDGE = ' If the player proposes something like that, judge it as not feasible.';
+  Object.keys(Prompts).forEach(k => {
+    const make = Prompts[k];
+    Prompts[k] = function () {
+      const p = make.apply(this, arguments);
+      if (p && typeof p.system === 'string') p.system += '\n\n' + PERIOD + (/^You are |^You play /.test(p.system) && !/^You are the examiner|^You are the chair/.test(p.system) ? PERIOD_ROLEPLAY : PERIOD_JUDGE);
+      return p;
+    };
+  });
+
   window.Prompts = Prompts;
 })();

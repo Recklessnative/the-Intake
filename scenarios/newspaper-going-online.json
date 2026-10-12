@@ -1,0 +1,217 @@
+{
+  "id": "newspaper-going-online",
+  "schema_version": 1,
+  "sector": "Media",
+  "tier": 3,
+  "tier_label": "Mostly not a training problem",
+  "title": "Web First, Paper Always",
+  "briefing": {
+    "headline": "A regional newsroom and its website: what you should know before the call",
+    "points": [
+      "A regional daily prints overnight; the newsroom's day is built around the evening deadline for the paper edition.",
+      "Most Belgian newspapers have had a website for years; in 2007 many are trying to publish news online during the day instead of copying the paper at night.",
+      "Journalists hold authors' rights to their articles; how those articles may be reused is set in agreements between publishers and the journalists' union.",
+      "Newsrooms have an editor-in-chief, desk chiefs per section and a separate small team for the website."
+    ]
+  },
+  "stakeholder": {
+    "name": "Frank Verstraeten",
+    "role": "Editor-in-Chief",
+    "org": "Het Scheldeblad, a regional daily in the Antwerp and Waasland area with 64 journalists, part of Mediagroep Noord",
+    "voice": "Energetic, theatrical, loves the word 'revolution' and quotes American media gurus from conferences. Smokes on the balcony. Genuinely loves print and genuinely fears for it.",
+    "patience": 3,
+    "risk_appetite": 3,
+    "risk_appetite_label": "High"
+  },
+  "frontline": {
+    "name": "Ellen Maes",
+    "role": "Court and crime reporter, 15 years at the paper",
+    "voice": "Sharp, quick, cynical about management slogans, passionate about the work. Has a story ready before you finish your question."
+  },
+  "opening_message": "The board decided: from January we are 'web first'. News goes on the website the moment we have it, not at midnight. But my journalists don't put anything online. Two people in the web room do everything. So I need an internet training for all 64 journalists. Web writing, the website, the new possibilities. Web 2.0! Can you build it for November?",
+  "surface_ask": "An internet and web-writing training for all 64 journalists.",
+  "gold": {
+    "real_problem": "Journalists know how to use the internet; they search, e-mail and read competitors' sites daily. They don't publish online because everything rewards the paper: desk chiefs and the editor praise the front-page scoop, and putting a story online at noon hands it to the competing paper for its next edition. The web system is separate from the print system, runs on two PCs in the web room with a shared login, and a story has to be retyped to go online. And the agreement with the journalists' union covers print only; the union has told members not to publish online until reuse and bylines online are settled.",
+    "root_cause_types": [
+      "incentive",
+      "system",
+      "expectations",
+      "environment"
+    ],
+    "is_training_the_lever": "no",
+    "need_statement": "'Web first' fails because the newsroom's rewards, tools and agreements are all print first. The fix is a settled union agreement on online publication, access to the web system from every desk without retyping, a clear rule on which stories go online when, and recognition for online work. Training is a short hands-on session on the web system once journalists can actually use it."
+  },
+  "hidden_facts": [
+    {
+      "id": "scoop_rule",
+      "fact": "In the morning meeting, the editor-in-chief himself regularly praises front-page scoops and has said 'we don't give our scoops away to the website'. Desk chiefs read that as: big stories stay off the web until the paper is printed.",
+      "unlocks_when": "The player asks which stories should go online first, what happens to a scoop, or what journalists are praised for.",
+      "reveal_line": "Scoops online? No, no. The scoop is for the paper. I said that in the meeting. ... I may have said it more than once. It's still true, isn't it?",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Web first, he says. Then in the morning meeting he says 'we don't give our scoops away to the website'. So what goes online? The weather. The traffic jams on the Kennedy tunnel. My court cases go in the paper."
+    },
+    {
+      "id": "separate_systems",
+      "fact": "The web system is separate from the print editorial system. It runs on two PCs in the web room with one shared login, and every story has to be retyped or copied by hand to go online.",
+      "unlocks_when": "The player asks how a journalist actually puts a story online, which systems they use, or who has access to the website.",
+      "reveal_line": "How do they put it online? Well, they send it to the web room. Or they could go to the web room. There are two PCs there. And a login. On a yellow sticker.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Put it online myself? Sure. I walk to the web room, wait for one of the two PCs, log in with the password on the yellow sticker, and retype my article, because the print system doesn't talk to the web system. Forty minutes. Or I just write it for the paper."
+    },
+    {
+      "id": "union_agreement",
+      "fact": "The 2004 agreement with the journalists' union on authors' rights covers print only. The union has advised members not to publish online until reuse, bylines and any extra remuneration online are settled. Talks with Mediagroep Noord are stalled.",
+      "unlocks_when": "The player asks whether journalists are allowed to publish online, about the union, contracts, authors' rights or bylines.",
+      "reveal_line": "The union? There is... a discussion about the web. About bylines and rights. It's a group matter, with Mediagroep Noord. Not really my department.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:policy"
+      ],
+      "data_doc": "Agreement on authors' rights, editorial staff, 2004: covers reproduction in the printed newspaper and its paper archive. Electronic publication: 'to be agreed separately'. Union circular to members, March this year: 'Until an agreement on electronic reuse and bylines is signed, we advise members not to publish content online themselves.'",
+      "data_source": "Collective agreement on authors' rights and union circular"
+    },
+    {
+      "id": "already_trained",
+      "fact": "In 2006, 55 of the 64 journalists followed a two-day 'internet for journalists' course on search engines and online research. Evaluations were good; online publishing did not change.",
+      "unlocks_when": "The player asks what journalists already know about the internet or what was tried before.",
+      "reveal_line": "We had an internet course last year. Two days. Google, research, all that. They loved it. They use it every day. To read the national papers' websites, mostly.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "'Internet for journalists: search and online research', 2 days, 2006. Participants: 55 of 64. Satisfaction 4.3/5. Stories published online by journalists themselves, before: 0 per week; after: 0 per week.",
+      "data_source": "Training records, editorial staff"
+    },
+    {
+      "id": "web_readers",
+      "fact": "The website has about 38,000 visitors a day, with clear peaks at 8:00, 12:30 and 17:00. The most read pages are local breaking news, traffic and court cases; at those hours the site shows yesterday's paper.",
+      "unlocks_when": "The player asks who reads the website, when, or what they read.",
+      "reveal_line": "Readers? Thirty-eight thousand a day. They come at lunchtime, mostly. And get yesterday's paper. Hm. When you say it out loud.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Average daily visitors: 38,200. Peaks: 08:00-09:00, 12:00-13:30, 17:00-18:00. Top sections: local news 34%, traffic 18%, court and crime 15%, sport 14%. Website updates: 23:30 (paper edition), 10:00 and 16:00 (web room).",
+      "data_source": "Website statistics, September"
+    },
+    {
+      "id": "deadline_day",
+      "fact": "Journalists are planned and judged entirely around the 21:30 paper deadline; nobody's job description or evaluation mentions the website, and the web room's two staff are on a lower pay scale with no bylines.",
+      "unlocks_when": "The player asks how journalists are evaluated, how their day is organised, or how web work is recognised.",
+      "reveal_line": "Their day? Morning meeting, out on the story, write for the 21:30 deadline. The website? Well, that's the web room's job. They're very nice people. Young.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Editorial staff: 64 journalists (job descriptions: 'contributes to the daily newspaper'), 6 desk chiefs, web room: 2 web editors (pay scale B, no bylines). Evaluation criteria journalists: output, front pages, exclusives, deadline compliance.",
+      "data_source": "Org chart and evaluation form, newsroom"
+    }
+  ],
+  "volunteered_facts": [
+    "The board of Mediagroep Noord decided on 'web first' for all its titles from January.",
+    "Paper circulation fell by about 3% last year."
+  ],
+  "constraints": {
+    "budget": "About 30,000 euro from the group's 'digital' budget, which the board wants to see spent on the newsroom.",
+    "deadline": "Training in November; 'web first' starts in January.",
+    "audience": "64 journalists, 6 desk chiefs, 2 web editors.",
+    "schedule": "Morning meeting at 10:00, paper deadline at 21:30; journalists are almost never all in the building at once.",
+    "languages": "Dutch.",
+    "data_available": [
+      "Website visitor statistics by hour and section",
+      "Number of web updates per day",
+      "Training records",
+      "Paper circulation figures"
+    ],
+    "data_not_available": [
+      "Any count of stories that could have gone online but didn't",
+      "The group's plans for a new editorial system"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The journalists' union",
+      "concern": "Will not let members publish online until the authors' rights and bylines question is settled.",
+      "if_ignored": "The training runs and nobody publishes, on the union's advice."
+    },
+    {
+      "who": "Mediagroep Noord board and group IT",
+      "concern": "Own the web system and the print system, and any link between them or more logins.",
+      "if_ignored": "Every story still takes forty minutes and a yellow sticker to go online."
+    },
+    {
+      "who": "Desk chiefs",
+      "concern": "Decide every day which story goes where and are judged on the paper.",
+      "if_ignored": "The morning meeting keeps saying 'save it for the paper'."
+    },
+    {
+      "who": "Web room editors",
+      "concern": "Currently the only people with access; worried about being sidelined or swamped.",
+      "if_ignored": "The two people who know the system quietly resist."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Number of journalists trained and course satisfaction.",
+      "Total website visitors, which also move with news events and the season.",
+      "Paper circulation, which is lagging and shaped by much more than the website."
+    ],
+    "gold_plan": {
+      "baseline": "Stories published online during the day, per desk, and the time between a story being ready and appearing online, over a sample week.",
+      "behaviour": "Journalists publishing or filing for the web during the day, and desk chiefs choosing a 'web now' story in the morning meeting.",
+      "leading_indicators": "Daytime web updates per day; share of stories online before 18:00; time from 'ready' to 'online'.",
+      "business_metric": "Daytime website visitors at the 12:30 and 17:00 peaks, and paper circulation trend over a year.",
+      "collection": "Web system log of publication times, website statistics, a tally from the morning meeting."
+    }
+  },
+  "concepts": {
+    "conventional": "A two-day internet and web-writing course for all 64 journalists.",
+    "solid": "No internet course. Push the group and union to settle online rights and bylines; get the web system on every desk, or at least on one PC per desk with personal logins; agree in the morning meeting which stories go online when, with a rule for scoops; put web work into evaluations. A one-hour hands-on session on the web system when access is there.",
+    "next_level_examples": [
+      "A 'web desk of the day' pilot with the court and crime desk: Ellen's stories go online at noon with a byline, the full story still leads the paper, and the editor announces it himself in the morning meeting.",
+      "Let the editor change his own signal first: retract 'we don't give our scoops away' publicly and praise the first story that breaks online.",
+      "Spend part of the digital budget on linking the two systems or more PCs instead of a course, and say plainly why."
+    ],
+    "also_valid": [
+      "A short web-writing workshop is acceptable as a side measure once the union agreement and access are in place."
+    ],
+    "red_flags": [
+      "An internet course as the main answer.",
+      "Treating journalists as afraid of computers.",
+      "Ignoring the union agreement on online rights and bylines.",
+      "Measuring success by course attendance or total visitors."
+    ]
+  },
+  "defence_objections": [
+    "You want me to put a scoop on the website at noon? De Antwerpse Post will have it on their front page tomorrow. With our photo.",
+    "The union question belongs to the group. If I start negotiating bylines from Sint-Niklaas, the board will have my head.",
+    "Linking the two systems is an IT project. IT projects at Mediagroep Noord take three years and a steering committee."
+  ],
+  "question_you_didnt_ask": "Are journalists actually allowed, and able, to put a story online themselves?",
+  "actor_notes": [
+    "Frank loves bold ideas and gets excited by anything that sounds like a revolution; his risk appetite is high, so bold concepts rarely trigger a defence round, but he must be steered from slogans to the actual blocks.",
+    "He reveals his own 'scoops are for the paper' remark only when the player asks about scoops or what journalists are praised for, and then laughs at himself.",
+    "He is vague about the union and treats it as 'a group matter'; the player has to ask about rights, contracts or the union directly, or request the agreement.",
+    "If the player proposes the internet course, he agrees enthusiastically and the judge should note the missed diagnosis."
+  ],
+  "flavour_lines": [
+    "Web 2.0! I was in Amsterdam at a conference. The man had no tie. Very convincing.",
+    "Our website is very up to date. It's up to date as of last night."
+  ]
+}

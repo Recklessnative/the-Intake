@@ -8,6 +8,7 @@
     { id: 'jens', name: 'Jens', role: 'junior consultant', weak: 'concept', face: '👨🏼‍🦱', voice: 'Creative, enthusiastic, reaches for the format he knows before checking the cause.' }
   ];
   const LINES = [['need', 'The need'], ['lever', 'Is learning the lever?'], ['measure', 'How we will know'], ['concept', 'The concept'], ['risks', 'Risks and dependencies']];
+  const WHERE = { call: 'On the call', frontline: 'On the floor', data: 'In the data' };
   const LEVER = { yes: 'Yes. A learning intervention fixes the core of this.', partly: 'Partly. Learning helps, but part of the cause sits outside training.', no: 'No. This is not a learning problem; the fix sits elsewhere.' };
 
   // A seeded random, so the same week shows the same drafts after a reload.
@@ -50,10 +51,12 @@
     const atypical = r() < 0.3;
     const flawAt = atypical ? pick(r, LINES.map(([k]) => k).filter(k => k !== junior.weak)) : junior.weak;
     const f = flawed(card, flawAt, r);
-    const found = card.hiddenFacts.filter(x => x.critical).concat(card.hiddenFacts).slice(0, 2).map(x => x.fact);
+    // The junior did a thorough intake: every fact, with where they found it, so you can check
+    // each line of the draft against the evidence instead of guessing what they assumed.
+    const found = card.hiddenFacts.map(x => ({ fact: x.fact, at: WHERE[(x.foundAt[0] || 'call').split(':')[0]] || 'On the call' }));
     return {
       junior: junior.id, card: card.id, flaw: flawAt, atypical, why: f.why,
-      found: [...new Set(found)],
+      found,
       lines: LINES.map(([k, label]) => ({ k, label, text: k === flawAt ? f.text : good(card, k) })),
       pick: null, note: '', grade: null
     };
@@ -80,12 +83,32 @@
     const d = team.drafts[team.at], j = junior(d.junior), card = cardOf(d.card);
     const page = el('div', 'team-page');
     page.appendChild(el('p', 'team-from', 'From: ' + j.name + ', ' + j.role + ' · Re: ' + card.stakeholder.name + ' (' + card.stakeholder.role + '), "' + card.subject + '"'));
-    page.appendChild(el('p', 'team-ask', '"Hi! Here is my one-pager. Can you check it before I send it? I think it\'s good to go."'));
+    page.appendChild(el('p', 'team-ask', '"Hi! Here is my one-pager. Can you check it before I send it? I think it\'s good to go. My notes are attached."'));
+    // The case file: the request as it came in, the briefing, what the junior found and who is involved.
+    const file = el('details', 'team-file');
+    file.open = true;
+    file.appendChild(el('summary', null, 'Case file: ' + (card.stakeholder.org || card.stakeholder.name)));
+    file.appendChild(el('p', 'team-request', 'The request: "' + card.surfaceAsk + '"'));
+    if (card.briefing) {
+      file.appendChild(el('b', null, card.briefing.headline));
+      const bl = el('ul');
+      (card.briefing.points || []).forEach(p => bl.appendChild(el('li', null, p)));
+      if (card.briefing.text) bl.appendChild(el('li', null, card.briefing.text));
+      file.appendChild(bl);
+    }
+    page.appendChild(file);
     const facts = el('div', 'team-facts');
-    facts.appendChild(el('b', null, 'What ' + j.name + ' found on the call:'));
+    facts.appendChild(el('b', null, j.name + '\'s notes: what the intake turned up'));
     const ul = el('ul');
-    d.found.forEach(f => ul.appendChild(el('li', null, f)));
+    d.found.forEach(f => {
+      const li = el('li');
+      if (typeof f === 'string') li.textContent = f;
+      else li.append(el('span', 'team-where', f.at), ' ' + f.fact);
+      ul.appendChild(li);
+    });
     facts.appendChild(ul);
+    const who = (card.dependencies || []).map(x => x.who);
+    if (who.length) facts.appendChild(el('p', 'team-who', 'Also involved: ' + who.join('; ') + '.'));
     page.appendChild(facts);
     const ol = el('ol', 'draft team-draft' + (d.grade ? ' done' : ''));
     d.lines.forEach(line => {

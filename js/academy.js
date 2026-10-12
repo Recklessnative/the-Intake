@@ -40,11 +40,11 @@
       id: 'is-it-training', art: 'triage', title: 'Is training the answer?', minutes: 5,
       intro: 'Training fixes skill and knowledge. It does not fix a broken tool, a bad incentive or a missing process. Asking for it anyway is the most common request we get.',
       questions: [
-        { q: 'Drivers keep missing bins since the routes moved into a new app. They have driven for ten years. Train?',
+        { q: 'Drivers keep missing bins since the routes moved into the new route software on their handhelds. They have driven for ten years. Train?',
           options: [
-            { t: 'Train: a route refresher.', why: 'Ten years of driving says they can do it. Look at the app.' },
-            { t: 'Don\'t train: check the app first.', ok: true, why: 'They follow the app. If the app is wrong, so are they.' },
-            { t: 'Need more info.', why: 'Fair, but the new app is a strong enough clue to point at it.' }
+            { t: 'Train: a route refresher.', why: 'Ten years of driving says they can do it. Look at the software.' },
+            { t: 'Don\'t train: check the route software first.', ok: true, why: 'They follow the handheld. If the route is wrong, so are they.' },
+            { t: 'Need more info.', why: 'Fair, but the new software is a strong enough clue to point at it.' }
           ] },
         { q: 'Could they do it if their job depended on it? If the answer is yes, the problem is probably…',
           options: [
@@ -158,7 +158,7 @@
           options: [
             { t: '"We need your support for our learning journey."', why: 'Support for what, costing what?' },
             { t: '"EUR 20k and 6 weeks for a pilot in one region; the COO sponsors it; we stop the old induction day to pay for part of it."', ok: true, why: 'Budget, time, sponsor, and what stops. A board can say yes to that.' },
-            { t: '"A blended programme with gamification."', why: 'That is a format, not an ask.' }
+            { t: '"A blended programme with an interactive CD-ROM."', why: 'That is a format, not an ask.' }
           ] }
       ],
       objectives: ["Strike myths and unmeasurable promises", "Check that the concept fixes the cause", "Write an ask a board can approve"],
