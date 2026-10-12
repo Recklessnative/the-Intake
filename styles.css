@@ -806,3 +806,16 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .su-answer .su-right { color: #2e7d32; font-weight: bold; }
 .su-answer .su-wrong { color: #a23b2c; font-weight: bold; }
 .su-why { color: #a23b2c; font-size: 12px; margin: 0; min-height: 1em; }
+
+/* The scorecard teaches: next level, model answers, and one hindsight question. */
+.score-table .next { margin-top: 4px; font-size: 13px; }
+.score-table details.model { margin-top: 4px; font-size: 13px; }
+.score-table details.model summary { cursor: pointer; color: var(--title-a); }
+.score-table details.model p { margin: 4px 0 0; padding: 6px 8px; background: #f4f8ec; border-left: 3px solid #6b9a3a; }
+.redo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.redo .fine { flex-basis: 100%; margin: 0; }
+.redo input { flex: 1 1 220px; min-width: 0; }
+.redo-result p { margin: 4px 0; }
+.redo-result .redo-you { font-weight: 700; }
+.redo-result .redo-found { padding: 6px 8px; background: #fff7d6; border-left: 3px solid #c9a227; }
+.redo[hidden] { display: none; }

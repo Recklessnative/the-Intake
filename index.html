@@ -446,6 +446,13 @@
           <div class="debrief">
             <h3>The question you didn't ask</h3>
             <p id="score-question"></p>
+            <h3>Ask it now</h3>
+            <form id="redo-form" class="redo">
+              <p class="fine">One question to them, with hindsight. It costs nothing and scores nothing; you just see what it would have opened.</p>
+              <input id="redo-q" name="redo" maxlength="300" autocomplete="off" placeholder="The question you wish you had asked">
+              <button type="submit">Ask</button>
+            </form>
+            <div id="redo-result" class="redo-result" aria-live="polite"></div>
             <h3>What you never found out</h3>
             <ul id="score-missed"></ul>
             <h3>Their verdict</h3>

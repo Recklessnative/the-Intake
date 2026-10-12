@@ -167,7 +167,7 @@ async function followUp() {
     if (!route.request().url().includes('gemini-3.5-flash-lite')) throw new Error('wrong model ' + route.request().url());
     let out;
     if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
-    else if (sys.startsWith('You are the examiner')) examiner++, out = { diagnosis: { score: 3, evidence: 'q' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
+    else if (sys.startsWith('You are the examiner')) examiner++, out = { diagnosis: { score: 3, evidence: 'q', next: 'Name the cause in one line.' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); if (!body.contents[0].parts[0].text.includes('How the slide looks: Design')) throw new Error('board got no design'); const R = ['nod', 'note', 'frown', 'eyebrow', 'yawn', 'calculator']; out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.', reactions: R }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?', reactions: R.slice().reverse() }, { role: 'COO', preempted: false, line: 'Who covers the shifts?', reactions: ['nod'] }], aside: 'CFO, to the COO: was that a star?' }; }
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
     else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
@@ -313,6 +313,16 @@ async function followUp() {
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0 && examiner !== 3) throw new Error('expected three examiner runs per request, got ' + examiner);
     if (req === 0 && !(await p.textContent('#score-rows')).includes('Hidden facts found')) throw new Error('diagnosis parts missing');
+    if (req === 0) {
+      // The scorecard teaches: next level, model answers, and one hindsight question.
+      if (!(await p.textContent('#score-rows')).includes('Next level: Name the cause')) throw new Error('no next-level line');
+      if ((await p.$$('#score-rows details.model')).length < 4) throw new Error('model answers missing');
+      await p.fill('#redo-q', 'Which shifts and which people were involved?');
+      await p.click('#redo-form button');
+      await p.waitForSelector('#redo-result .redo-found');
+      if (!(await p.isHidden('#redo-form'))) throw new Error('redo can be asked twice');
+    }
+    if (req === 1 && (await p.textContent('#redo-result')).trim()) throw new Error('redo carried into the next request');
     if (req === 0) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + (MOBILE ? "/score-mobile.png" : "/score.png") });
     if (req === 0) {
       // Reload on the scorecard: it comes back without counting the request twice.
