@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE INTAKE · Office prototype</title>
+<meta name="description" content="A rough prototype for the playtest: one case played as a day in the client's office.">
+<style>
+  :root { --bg: #d9d4c7; --panel: #f3efe4; --ink: #222; --muted: #5d584c; --line: #a39d8c; --accent: #1d4f91; --good: #2e6b2e; --warn: #8a5a00; --bad: #8f2b20; --floor: #e8e2d2; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 14px/1.45 Tahoma, Verdana, "Segoe UI", sans-serif; }
+  button { font: inherit; cursor: pointer; border: 1px solid #6f6a5c; background: linear-gradient(#fbfaf6, #dcd6c6); padding: 5px 12px; border-radius: 3px; color: var(--ink); }
+  button.primary { background: linear-gradient(#3d75c1, #1d4f91); color: #fff; border-color: #163d70; }
+  button:disabled { opacity: .5; cursor: default; }
+  textarea, input, select { font: inherit; width: 100%; padding: 6px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+  [hidden] { display: none !important; }
+  .top { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; padding: 8px 16px; background: #2b2b2b; color: #eee; }
+  .top b { color: #fff; }
+  .top .proto { background: #c9a227; color: #222; font-size: 11px; font-weight: bold; padding: 1px 6px; border-radius: 2px; }
+  .top .sp { flex: 1; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 16px; }
+  .screen { background: var(--panel); border: 1px solid var(--line); padding: 18px; max-width: 720px; margin: 24px auto; }
+  .screen h1 { margin: 0 0 8px; font-size: 22px; }
+  .memo { background: #fff; border: 1px solid var(--line); padding: 12px 14px; margin: 12px 0; }
+  .memo .from { color: var(--muted); font-size: 12px; }
+  .fine { color: var(--muted); font-size: 12px; }
+  .game { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; }
+  .box { background: var(--panel); border: 1px solid var(--line); padding: 12px; min-width: 0; }
+  .box h2 { margin: 0 0 8px; font-size: 16px; }
+  .plan svg { width: 100%; height: auto; display: block; }
+  .room rect { fill: var(--floor); stroke: #7d7766; stroke-width: 2; }
+  .room.here rect { fill: #fff6c9; stroke: var(--accent); stroke-width: 3; }
+  .room { cursor: pointer; }
+  .room:hover rect { fill: #f6f0dc; }
+  .room text.name { font: bold 15px Tahoma, sans-serif; fill: #333; }
+  .room text.who { font: 12px Tahoma, sans-serif; fill: #333; }
+  .dot { stroke: #333; stroke-width: 1; }
+  .rooms-list { display: none; }
+  .rooms-list button { display: block; width: 100%; text-align: left; margin: 0 0 6px; }
+  .rooms-list .who { color: var(--muted); font-size: 12px; display: block; }
+  .day { display: flex; gap: 3px; margin-top: 10px; }
+  .day span { flex: 1; text-align: center; font-size: 11px; padding: 3px 0; background: #ece6d6; border: 1px solid var(--line); }
+  .day span.past { background: #bdb6a3; color: #555; }
+  .day span.now { background: var(--accent); color: #fff; }
+  .day span.meet { border-color: var(--bad); font-weight: bold; }
+  .acts button { display: block; width: 100%; text-align: left; margin: 0 0 6px; }
+  .acts .cost { color: var(--muted); font-size: 12px; }
+  .log { max-height: 46vh; overflow-y: auto; background: #fff; border: 1px solid var(--line); padding: 8px; margin: 8px 0; }
+  .msg { margin: 0 0 8px; }
+  .msg .n { font-weight: bold; }
+  .msg.you .n { color: var(--accent); }
+  .msg.int .n { color: var(--bad); }
+  .q { font-size: 11px; margin-left: 4px; }
+  .q.good { color: var(--good); } .q.ok { color: var(--warn); } .q.weak { color: var(--bad); }
+  .doc { background: #fff; border: 1px dashed var(--line); padding: 8px 10px; margin: 6px 0; font-family: "Courier New", monospace; font-size: 13px; }
+  .stance { font-size: 12px; padding: 1px 6px; border-radius: 2px; color: #fff; }
+  .stance.against, .stance.blocks { background: var(--bad); } .stance.unsure, .stance.conditional { background: var(--warn); } .stance.with, .stance.commits { background: var(--good); }
+  .seats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .seat { flex: 1 1 140px; background: #fff; border: 1px solid var(--line); padding: 6px 8px; font-size: 12px; }
+  .seat b { display: block; font-size: 13px; }
+  form.say { display: flex; flex-direction: column; gap: 6px; }
+  form.say .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .err { color: var(--bad); font-size: 12px; }
+  table.res { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  table.res td, table.res th { border: 1px solid var(--line); padding: 5px 7px; text-align: left; vertical-align: top; font-size: 13px; }
+  .found { color: var(--good); font-weight: bold; }
+  @media (max-width: 760px) {
+    .game { grid-template-columns: 1fr; }
+    .plan svg { display: none; }
+    .rooms-list { display: block; }
+    .wrap { padding: 10px; }
+    .screen { margin: 10px 0; padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="proto">PROTOTYPE</span>
+  <b>Synergix · out of office</b>
+  <span id="hud-case"></span>
+  <span class="sp"></span>
+  <span id="hud-clock"></span>
+  <span id="hud-facts"></span>
+</div>
+<div class="wrap">
+
+  <section id="s-intro" class="screen">
+    <h1>A day at the client's</h1>
+    <p>No desk, no phone call. You spend one day at the client's office: a floor plan, a day of eight hours, people who move around, and a meeting at 15:00 with the person who asked and two colleagues who want different things.</p>
+    <div class="memo"><div class="from" id="intro-from"></div><div id="intro-ask"></div></div>
+    <p>Every visit takes an hour. Look at the plan to see who is where. At 15:00 you sit down with all three and try to leave with commitments.</p>
+    <div id="key-box" hidden>
+      <p class="fine">This prototype needs a Gemini key (the same one the main game uses; it stays in this browser).</p>
+      <input id="key" type="password" autocomplete="off" placeholder="Gemini API key">
+    </div>
+    <p class="err" id="intro-err"></p>
+    <p><button id="btn-go" class="primary">Go to the office</button> <button id="btn-other">Another case</button></p>
+    <p class="fine">Playtest Session B. Run it straight, with your stopwatch from page load, and keep the playtest guide open. <a href="index.html">Back to the game</a></p>
+  </section>
+
+  <section id="s-day" hidden>
+    <div class="game">
+      <div class="box plan">
+        <h2>Floor plan</h2>
+        <svg id="plan" viewBox="0 0 520 360" role="img" aria-label="Floor plan with four rooms"></svg>
+        <div class="rooms-list" id="rooms-list"></div>
+        <div class="day" id="day"></div>
+        <p class="fine" id="plan-hint"></p>
+      </div>
+      <div class="box" id="panel" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="s-end" class="screen" hidden></section>
+</div>
+<script src="js/config.js?v=dev"></script>
+<script src="js/gemini.js?v=dev"></script>
+<script src="js/cards.js?v=dev"></script>
+<script src="js/prompts.js?v=dev"></script>
+<script src="js/office.js?v=dev"></script>
+</body>
+</html>
