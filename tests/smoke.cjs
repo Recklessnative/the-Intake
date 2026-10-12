@@ -397,6 +397,9 @@ async function followUp() {
   await p.click('#mail-rows tr:has-text("drafts for your review")');
   await p.click('#btn-team');
   await visible('#w-team');
+  // The reviewer gets the whole case: the request, the briefing and every fact the junior found.
+  const file = await p.evaluate(() => ({ req: !!document.querySelector('#team .team-request'), notes: document.querySelectorAll('#team .team-facts li').length, where: !!document.querySelector('#team .team-where') }));
+  if (!file.req || file.notes < 3 || !file.where) throw new Error('team case file incomplete: ' + JSON.stringify(file));
   await p.click('#btn-team-send');
   if (!(await p.textContent('#toast')).includes('line with the problem')) throw new Error('team send without a pick should explain');
   await p.click('#btn-debug');                       // picks the flaw and writes a note

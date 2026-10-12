@@ -443,13 +443,13 @@
     { from: 'IT Service Desk', subject: 'Your mailbox is almost full (98%)', ago: 38,
       body: 'Your mailbox has reached 98% of its limit. Please delete or archive items.\n\nTip: the attachment "Learning Styles Revisited FINAL v7.ppt" (41 MB) is a good place to start.' },
     { from: 'Office of the CEO', subject: 'FW: FW: RE: our learning culture', ago: 27,
-      body: 'Team,\n\nRead an article on the plane. We should be more like Netflix. Thoughts?\n\nSent from my BlackBerry' },
+      body: 'Team,\n\nRead an article on the plane. We should be more like Google. Twenty percent time. Thoughts?\n\nSent from my BlackBerry' },
     { from: 'Center of Excellence', subject: 'New here? Start with the folder on your desktop', ago: 60,
       body: 'Welcome to the learning team!\n\nBefore your first intake, open the "Center of Excellence" folder on your desktop. It has our intake flowchart, the quality standard every intake is reviewed against, a list of good intake questions and the measurement ladder.\n\nPlease ignore the learning styles policy. We are working on it.\n\nThe CoE team' },
     { from: 'Mieke', subject: 'cake?', ago: 16,
       body: 'There is cake in the kitchen. Nobody knows whose birthday it is. Don\'t ask, just eat.\n\nAlso: if a request lands on your desk and you want a second opinion, I\'m two cubicles over.\n\nM.' },
-    { from: 'Gamified Microlearning Solutions', subject: 'Re: quick question!!', ago: 9,
-      body: 'Hi there!\n\nJust circling back on my circle-back. Our AI-powered, gamified, bite-sized metaverse academy boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
+    { from: 'Global Multimedia Solutions', subject: 'Re: quick question!!', ago: 9,
+      body: 'Hi there!\n\nJust circling back on my circle-back. Our Web 2.0, multimedia, edutainment academy (now with a Second Life campus!) boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
   ];
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 

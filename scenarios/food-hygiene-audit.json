@@ -1,0 +1,203 @@
+{
+  "id": "food-hygiene-audit",
+  "schema_version": 1,
+  "sector": "Food processing",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "The Night Shift With a Mop",
+  "briefing": {
+    "headline": "Hygiene in a ready-meals plant: what you should know before the call",
+    "points": [
+      "Chilled ready-meals plant (lasagne, stoemp, vol-au-vent) supplying private-label ranges to Belgian supermarket chains.",
+      "HACCP is the hazard-based food safety system every food business must run; operators are expected to know the critical control points on their line.",
+      "Retailers audit their suppliers against a food safety standard such as BRC or IFS; a failed audit can cost a private-label contract.",
+      "The Federal Agency for the Safety of the Food Chain (FAVV/AFSCA) inspects separately and can sample products and surfaces.",
+      "Industrial cleaning in food plants is often done at night, between the last production run and the first one of the next day."
+    ]
+  },
+  "stakeholder": {
+    "name": "Koen Wouters",
+    "role": "Plant Manager",
+    "org": "Kempense Maaltijden NV, a chilled ready-meals plant in Geel with 240 staff on two production shifts",
+    "voice": "Cheerful, practical, ex-butcher who still says 'we' when he means the operators. Talks in products ('the lasagne line', 'the stoemp'). Open about problems, a bit embarrassed by this one. Uses 'eigenlijk' as punctuation.",
+    "patience": 4,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Ana Ferreira",
+    "role": "Team leader of the subcontracted night cleaning crew",
+    "voice": "Direct, proud of her work, speaks careful Dutch with Portuguese grammar. Defends her crew, gets sharp when people say 'the cleaners' as if they were furniture."
+  },
+  "opening_message": "Hello. We failed the hygiene part of our retailer audit in September. Two non-conformities on surface swabs in the slicing hall, again. The auditor comes back in ten weeks. I'd like a HACCP refresher for all 160 operators, half a day each, with a test so I can show the certificates. Can you set that up quickly? We do the lasagne, we can't lose the lasagne.",
+  "surface_ask": "A half-day HACCP refresher with a test for all 160 production operators.",
+  "gold": {
+    "real_problem": "The swab failures come from the start-up after night cleaning, not from operator practice during production. Cleaning is done by a subcontracted night crew of mostly Portuguese- and Polish-speaking cleaners with high turnover, who get a 20-minute induction video in Dutch and laminated cleaning instructions in Dutch only. Nobody ever showed them how to strip the two slicers, so the blade guards are cleaned from the outside. Production overruns also cut their cleaning window.",
+    "root_cause_types": [
+      "skill",
+      "process",
+      "environment"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "The night cleaning crew needs hands-on, multilingual instruction on stripping and cleaning the slicers and the packing line, with visual cleaning cards and a sign-off by a plant hygiene person before start-up. Operators need at most a short reminder; the cleaning window needs protecting from production overruns."
+  },
+  "hidden_facts": [
+    {
+      "id": "swabs_after_cleaning",
+      "fact": "All 11 failed swabs in the last two audits and the internal swab programme were taken at start-up, before production began, on the two slicers and the tray sealer. Swabs during production are mostly fine.",
+      "unlocks_when": "The player asks where and when the failed swabs were taken, what the audit report says exactly, or for the swab results.",
+      "reveal_line": "Where? The slicers, mostly. At start-up. Before anyone has touched a lasagne. Hm. Eigenlijk, that's before my operators even arrive.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Failed ATP and Listeria-indicator swabs, last 6 months: 11 failures. Timing: 11 of 11 at pre-start-up check (05:30-06:00). Location: slicer 1 (5), slicer 2 (4), tray sealer (2). Swabs during production: 2 borderline, 0 failed.",
+      "data_source": "Internal swab programme and audit annex, last 6 months"
+    },
+    {
+      "id": "dutch_only",
+      "fact": "The night cleaning crew of 9 is mostly Portuguese- and Polish-speaking, with high turnover. Their induction is a 20-minute video in Dutch and the cleaning instructions on the wall are laminated Dutch text. Nobody ever showed them how to strip the slicers, so the blade guards are cleaned from the outside.",
+      "unlocks_when": "The player asks who does the cleaning, how cleaners are trained or instructed, or what language the instructions are in.",
+      "reveal_line": "The cleaning is subcontracted. They have their own procedures, I think. In Dutch, I suppose. I've never actually looked.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "My people speak Portuguese, Polish, one speaks Romanian. The instructions on the wall are Dutch, small letters, laminated. The video is Dutch also. Nobody ever showed us how to open the slicer. We clean what we see. Under the guard, we don't see."
+    },
+    {
+      "id": "operators_know",
+      "fact": "Operators scored 84% on last year's HACCP knowledge test, and observations during production are good.",
+      "unlocks_when": "The player asks how well operators already know HACCP, what training they had, or for a baseline.",
+      "reveal_line": "They did HACCP last year. Scored 84 on average. They know their critical points. They could recite them in their sleep, some do.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "HACCP refresher, all production operators, March last year. Average test score 84%. Pass rate 96%. Production hygiene observations by QA, last 6 months: 92% compliant.",
+      "data_source": "Training records and QA observation checklist"
+    },
+    {
+      "id": "window_overrun",
+      "fact": "The cleaning contract assumes a five-hour window from 22:00. Production runs over on about three nights a week, so the crew often has three and a half hours, and is paid per night, not per hour.",
+      "unlocks_when": "The player asks how much time the cleaners have, how the cleaning is organised, or what the contract says.",
+      "reveal_line": "The contract says five hours from ten. Yes, well, when the lasagne runs late, they start late. They still have to be gone at six. So they hurry, I suppose.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:process"
+      ],
+      "data_doc": "Cleaning contract: fixed fee per night, window 22:00-03:00, plant ready for QA check at 05:30. Production end times, last 8 weeks: on time 18 nights, late by 30-90 min 22 nights.",
+      "data_source": "Cleaning contract annex and production log"
+    },
+    {
+      "id": "no_handover_check",
+      "fact": "Nobody from the plant checks the cleaning before start-up; the first operator just starts the line at six. The QA technician used to do a visual check but her post was cut in a reorganisation last year.",
+      "unlocks_when": "The player asks who checks the cleaning, what happens between the cleaners leaving and production starting, or about QA staffing.",
+      "reveal_line": "Who checks? Well, Sandra used to walk the hall at half five. We cut that post last year. Savings. Eigenlijk, the swab is the check now. A bit late as a check.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Before, a lady from quality came at half five and looked with a torch. She showed us things. Now nobody comes. We leave a note. I don't know who reads it."
+    }
+  ],
+  "volunteered_facts": [
+    "Two non-conformities on hygiene at the September retailer audit; a re-audit in ten weeks.",
+    "The private-label lasagne contract is about a fifth of plant turnover."
+  ],
+  "constraints": {
+    "budget": "About 20,000 euro on the training budget for this year, plus sector training funds the plant can claim for its own operators.",
+    "deadline": "Retailer re-audit in ten weeks.",
+    "audience": "160 production operators on two shifts as asked; the 9 night cleaners are employed by the subcontractor, not the plant.",
+    "schedule": "Production 06:00-22:00 in two shifts, often running late. Cleaning 22:00-05:30. QA check before start-up at 05:30.",
+    "languages": "Operators mostly Dutch-speaking; night cleaners speak Portuguese, Polish and some Romanian, with limited Dutch.",
+    "data_available": [
+      "Internal swab programme results with time and location",
+      "Retailer audit reports",
+      "HACCP test scores and QA observation checklists for operators",
+      "Production end times per night"
+    ],
+    "data_not_available": [
+      "Any training records for the subcontracted cleaners",
+      "Turnover figures for the cleaning crew, held by the subcontractor"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Cleaning subcontractor (Proclean Kempen BVBA)",
+      "concern": "Employs and trains the cleaners; any training or schedule change touches their contract and costs.",
+      "if_ignored": "You train nine people who are replaced by nine new ones next quarter."
+    },
+    {
+      "who": "Prevention advisor",
+      "concern": "Stripping slicers involves blades, lockout and cleaning chemicals; safe procedures and protective gear must be in the instructions.",
+      "if_ignored": "A cleaner cuts a hand on a blade guard and the hygiene problem becomes a safety problem."
+    },
+    {
+      "who": "Production planning",
+      "concern": "Late runs eat the cleaning window; protecting it costs output on busy nights.",
+      "if_ignored": "Perfect cleaning instructions, three and a half hours to follow them."
+    },
+    {
+      "who": "QA manager",
+      "concern": "Owns the HACCP plan and the swab programme; would need to own a pre-start-up sign-off again.",
+      "if_ignored": "Nobody checks the cleaning until the auditor does."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "HACCP test scores of operators, which are already high.",
+      "Number of certificates to show the auditor.",
+      "Audit pass or fail alone: one data point, ten weeks away."
+    ],
+    "gold_plan": {
+      "baseline": "Failed and borderline swabs at start-up per machine over the last six months.",
+      "behaviour": "Slicers and tray sealer stripped and cleaned to the visual card, checked at the pre-start-up walk with a short checklist.",
+      "leading_indicators": "Weekly start-up swab pass rate per machine; nights with less than the full cleaning window.",
+      "business_metric": "Zero hygiene non-conformities at the re-audit and the lasagne contract kept.",
+      "collection": "The existing swab programme run twice a week on the three machines, a one-page start-up checklist, the production end-time log."
+    }
+  },
+  "concepts": {
+    "conventional": "A half-day HACCP refresher with a test for all 160 operators.",
+    "solid": "Hands-on cleaning instruction at the slicers for the night crew, done with the subcontractor, using photo-based cleaning cards in Portuguese, Polish and Dutch, plus a pre-start-up check by the plant. Agree with planning that the cleaning window is protected. A short reminder for operators at most.",
+    "next_level_examples": [
+      "Let Ana's crew make the photo cleaning cards themselves with QA at the machine at night: they know where the dirt hides, QA knows what the swab finds.",
+      "Make the 05:30 walk a joint handover between the cleaning team leader and the first operator, with a torch and a checklist, so cleaning gets signed off instead of assumed.",
+      "Put a clause in the cleaning contract: a trained-and-signed-off induction on the slicers before any new cleaner works alone, paid as part of the fee."
+    ],
+    "also_valid": [
+      "A short operator toolbox talk on pre-use checks is fine as a side measure if the main effort goes to the night cleaning."
+    ],
+    "red_flags": [
+      "HACCP refresher for operators as the main answer.",
+      "Dutch-only materials for the cleaning crew.",
+      "Ignoring that the cleaners are employed by a subcontractor.",
+      "Blaming 'the cleaners' without looking at time window and instructions."
+    ]
+  },
+  "defence_objections": [
+    "The cleaners aren't my staff. If I train them, I'm paying for the subcontractor's job. Finance will ask why we pay them at all.",
+    "Instructions in Portuguese and Polish? And when they send a Bulgarian next month?",
+    "The auditor will ask about operator training. I need something to show for my own people too."
+  ],
+  "question_you_didnt_ask": "When exactly were the failed swabs taken, and who had touched the machine last?",
+  "actor_notes": [
+    "Koen is open and cooperative; he answers honestly but only reveals a hidden fact when its unlock condition is met.",
+    "He genuinely has not thought about the cleaners. When the player raises them, he is surprised, then interested, not defensive.",
+    "He warms to anyone who wants to come and see the slicing hall at half five in the morning.",
+    "If the player proposes the operator refresher, he agrees cheerfully; the judge should note the missed diagnosis."
+  ],
+  "flavour_lines": [
+    "Our lasagne has twelve layers. The audit report has fourteen pages. I've read both carefully.",
+    "The auditor wore a hairnet over her hairnet. That's when I knew."
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "id": "insurance-claims-backlog",
+  "schema_version": 1,
+  "sector": "Insurance",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "The Pile Marked 'To Check'",
+  "briefing": {
+    "headline": "Claims handling at a Belgian insurer: what you should know before the call",
+    "points": [
+      "A non-life insurer handles claims on car, home and fire policies; claims handlers check cover, set a reserve, sometimes send an external loss adjuster, and pay.",
+      "Each handler has an authority limit: claims above it go to a team leader or a senior for sign-off.",
+      "Customers who are unhappy can complain to the Ombudsman for insurance, and the regulator, the CBFA, keeps an eye on how insurers treat claims.",
+      "Insurers fall under their own joint committee; training time and job classifications are partly set in the sector agreement."
+    ]
+  },
+  "stakeholder": {
+    "name": "Veerle Janssens",
+    "role": "Claims Director",
+    "org": "Lindehof Verzekeringen NV, a mid-size non-life insurer in Mechelen with 140 claims handlers",
+    "voice": "Efficient, cheerful under pressure, fond of lists and colour-coded Excel files. Says 'very concretely' and 'let's be honest'. Believes almost anything can be fixed with better discipline.",
+    "patience": 4,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Johan De Wilde",
+    "role": "Claims handler, 17 years in motor claims, now 'all lines'",
+    "voice": "Polite, slightly embarrassed, very precise about car claims and visibly lost about anything with a roof. Lowers his voice when he admits something."
+  },
+  "opening_message": "Hello! We have 4,300 open claims files and the backlog grows every month. Customers are phoning, brokers are phoning, the Ombudsman wrote to us twice. My handlers are drowning. I'd like a time management training for all 140, something practical with planning and priorities. Can you have it running by December?",
+  "surface_ask": "A time management and prioritisation training for all 140 claims handlers.",
+  "gold": {
+    "real_problem": "In January, Lindehof reorganised from specialist teams to 'one customer, one handler': every handler now handles car, home and fire claims. Former motor handlers, about half the department, were given a two-hour presentation on household policies and a 64-page policy wording booklet. They don't know how to assess water damage or storm claims, so they park those files in a 'to check' folder or push them up to a team leader because their household authority limit is low. The backlog is mainly household files sitting with ex-motor handlers.",
+    "root_cause_types": [
+      "skill",
+      "process",
+      "system"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Former motor handlers need practical, case-based skill in assessing household claims, especially water and storm damage, with an expert to ask while they learn. Their authority limits and the sign-off queue need to match that learning. That is targeted technical upskilling plus a process fix, not time management for all 140."
+  },
+  "hidden_facts": [
+    {
+      "id": "backlog_split",
+      "fact": "61% of open files are household claims. Household files handled by former motor handlers are open for an average of 47 days, against 19 days for former household handlers. Motor files are handled on time by everyone.",
+      "unlocks_when": "The player asks what kind of files make up the backlog, how old they are, or whether some handlers or lines are slower than others.",
+      "reveal_line": "By line? Let me filter... Household is 61% of the pile. And the ex-motor people take 47 days on a household file. The household people take 19. Oh.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Open files: 4,312. Household (water, storm, fire) 61%, motor 31%, other 8%. Average days open, household files: handled by former household handlers 19, by former motor handlers 47. Average days open, motor files: 12 (all handlers).",
+      "data_source": "Claims system, open files report, end of September"
+    },
+    {
+      "id": "reorganisation",
+      "fact": "In January the department moved from specialist teams (motor, household, fire) to 'one customer, one handler', where every handler handles all lines for a portfolio of brokers.",
+      "unlocks_when": "The player asks what changed in the department, how the work is organised, or when the backlog started growing.",
+      "reveal_line": "We reorganised in January. One customer, one handler. Brokers loved it. Everybody does everything now. Very modern.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call"
+      ]
+    },
+    {
+      "id": "parking_folder",
+      "fact": "Ex-motor handlers put household claims they can't assess into a personal 'to check' folder and open them only when a broker phones. They used to ask the household specialist on the same floor; those specialists now sit in other portfolio teams on other floors.",
+      "unlocks_when": "The player asks what handlers do with a file they find difficult, or how they decide what to work on first.",
+      "reveal_line": "Difficult files? I suppose people put them aside a bit. Everyone has a little pile.",
+      "weight": 3,
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "A car, I see the photos, I know. A leaking pipe behind the bathroom tiles? Covered or not covered? Gradual or sudden? I used to walk over to Marleen. Marleen is on the third floor now. So it goes in my 'to check' folder. My 'to check' folder has 90 files in it. I check it when a broker shouts."
+    },
+    {
+      "id": "authority_limits",
+      "fact": "Former motor handlers have a household authority limit of 1,250 euro; anything above goes to a team leader's tray for sign-off. The team leaders' trays hold around 600 files.",
+      "unlocks_when": "The player asks about authority limits, sign-off, or what happens when a handler can't settle a claim alone.",
+      "reveal_line": "Their household limit is 1,250. Above that it goes to the team leader. Let's be honest, the team leaders' trays are... full. Around 600 files.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:process"
+      ],
+      "data_doc": "Authority limits, household: former household handlers 7,500 euro; former motor handlers 1,250 euro (to be reviewed 'after training'). Files awaiting team leader sign-off: 587.",
+      "data_source": "Claims authority table and sign-off queue"
+    },
+    {
+      "id": "reorg_training",
+      "fact": "The only household training ex-motor handlers received was a two-hour PowerPoint on policy conditions plus the 64-page policy wording booklet. No case practice, no follow-up.",
+      "unlocks_when": "The player asks how handlers were prepared for the new lines, or what training they had at the reorganisation.",
+      "reveal_line": "They had a presentation in January. Two hours. And everyone got the booklet. It's very complete, the booklet.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Reorganisation 'One Customer, One Handler': information session household products, 2 hours, PowerPoint, 73 attendees. Hand-out: General policy conditions, Home Plus, 64 pages. Evaluation: none. Previous time management course (2005): 140 attendees, satisfaction 4.2/5.",
+      "data_source": "Training records, claims department"
+    },
+    {
+      "id": "kyrill_peak",
+      "fact": "Storm Kyrill on 18 January brought in about 2,100 extra storm claims in the same month as the reorganisation; many are still open.",
+      "unlocks_when": "The player asks whether there were exceptional events or peaks this year.",
+      "reveal_line": "And then Kyrill came, the week after we reorganised. Two thousand roofs. Perfect timing.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "New storm claims: January 2,140 (normal month: about 150). Still open from January storm: 380.",
+      "data_source": "Claims intake report, monthly"
+    }
+  ],
+  "volunteered_facts": [
+    "The backlog was around 2,500 files a year ago; it is now 4,300.",
+    "The Ombudsman for insurance has written twice this year about slow handling."
+  ],
+  "constraints": {
+    "budget": "About 40,000 euro in the department's training budget for the coming year.",
+    "deadline": "Something visible by December; the board reviews claims performance in January.",
+    "audience": "140 claims handlers in 9 portfolio teams, about 70 of them former motor handlers; 9 team leaders.",
+    "schedule": "Handlers can be away from the phones for half a day a week at most; the broker phone line must stay staffed 8:30-17:00.",
+    "languages": "Dutch; a portfolio team of 14 serves French-speaking brokers in Brussels and Wallonia.",
+    "data_available": [
+      "Open files by line, age and handler",
+      "Sign-off queue per team leader",
+      "Complaints and Ombudsman letters",
+      "Loss adjuster assignments and report times"
+    ],
+    "data_not_available": [
+      "Contents of handlers' personal 'to check' folders",
+      "Any measure of assessment quality per handler"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Former household specialists",
+      "concern": "The obvious coaches, but they already carry a full portfolio and nobody asked them.",
+      "if_ignored": "Coaching becomes unpaid extra work and quietly stops."
+    },
+    {
+      "who": "Underwriting and the technical department",
+      "concern": "Own the policy wording and the cover interpretation for water damage.",
+      "if_ignored": "Handlers learn three different answers to 'gradual or sudden'."
+    },
+    {
+      "who": "Works council",
+      "concern": "Raising authority limits touches job classification under the sector agreement.",
+      "if_ignored": "Higher limits arrive with a pay-scale dispute."
+    },
+    {
+      "who": "IT, claims system",
+      "concern": "Changing authority limits and routing household files to experienced handlers is a system setting.",
+      "if_ignored": "The 600-file sign-off queue stays exactly where it is."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Satisfaction scores after a time management course.",
+      "Total backlog alone, which also moves with storms and seasonal peaks.",
+      "Files closed per handler per week, which rewards closing easy motor files first."
+    ],
+    "gold_plan": {
+      "baseline": "Average days open for household files, split by former motor and former household handlers, and the sign-off queue size, from the September report.",
+      "behaviour": "Ex-motor handlers assessing and settling household claims within their limit instead of parking or escalating, checked on a sample of files.",
+      "leading_indicators": "Household files escalated to team leaders per week; size of 'to check' folders on a monthly count.",
+      "business_metric": "Average days open for household claims and number of Ombudsman complaints about slow handling.",
+      "collection": "Monthly claims system report by line and handler group, team leader sign-off queue, a quarterly file quality review by the technical department."
+    }
+  },
+  "concepts": {
+    "conventional": "A one-day time management and prioritisation course for all 140 handlers.",
+    "solid": "Case-based workshops on household claims (water, storm, fire) for the 70 ex-motor handlers, using real anonymised files from their own folders, with a former household specialist as go-to coach per team. Raise authority limits in steps as handlers show they can assess, and clear the sign-off queue first. No time management course.",
+    "next_level_examples": [
+      "A 'folder amnesty' week: ex-motor handlers bring their 'to check' files to a table of household specialists and work through them together, so the backlog shrinks while they learn.",
+      "Pair motor and household handlers as cross-trainers: the household specialists learn motor in return, so nobody is only teaching.",
+      "A one-page decision card for the five most common water damage questions, written with underwriting, so the answer is the same on every floor."
+    ],
+    "also_valid": [
+      "Temporarily routing complex household claims back to experienced handlers while ex-motor handlers build skill, if there is a plan to end it."
+    ],
+    "red_flags": [
+      "Time management training as the main answer.",
+      "Blaming handlers for being slow or disorganised.",
+      "Undoing the whole reorganisation, which brokers like.",
+      "Measuring success by files closed per handler."
+    ]
+  },
+  "defence_objections": [
+    "Pull 70 handlers off the phones for workshops while the pile is 4,300 files? The brokers will phone me personally.",
+    "The household people are my best handlers. If they coach, who handles their files?",
+    "Raise authority limits? If someone pays out 7,000 euro on a claim that wasn't covered, it's my signature on the procedure."
+  ],
+  "question_you_didnt_ask": "Which files are in the backlog, and who has them?",
+  "actor_notes": [
+    "Veerle is open and cooperative: she answers reasonable questions honestly and enjoys filtering her Excel files live, but reveals a hidden fact only when its unlock condition is met.",
+    "She is proud of the reorganisation and gets defensive if the player calls it a mistake; she concedes quickly when the player frames the fix as 'finishing' the reorganisation.",
+    "She does not know about the personal 'to check' folders; that only comes from the floor.",
+    "Questions about the type of files rather than the speed of handlers earn her trust fast."
+  ],
+  "flavour_lines": [
+    "We had a time management course in 2005. Everyone got a very nice planner. Some still have it. Unopened.",
+    "Motor is easy. A car has four sides. A house has a cellar."
+  ]
+}
