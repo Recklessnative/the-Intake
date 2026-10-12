@@ -25,9 +25,17 @@
       `- Data you actually have: ${c.dataAvailable || 'unknown'}`,
       c.dataMissing ? `- Data you do NOT have: ${c.dataMissing}` : '',
       (card.volunteered || []).length ? 'Things you mention freely: ' + card.volunteered.join(' ') : '',
-      `People who can block or must sign off: ${(card.politics || []).join('; ') || 'none'}`
+      `People who can block or must sign off: ${(card.politics || []).join('; ') || 'none'}`,
+      `How much risk you can take, which you share when asked about risk, past experiments or what the organisation will accept (in your own words and with an example, never as a number): ${APPETITE[card.riskAppetite | 0] || APPETITE[1]}`
     ].join('\n');
   }
+
+  const APPETITE = [
+    'only safe, familiar things. The last experiment here still comes up at every meeting, and not fondly.',
+    'small, proven changes. You will try something new if someone else has done it and it can be stopped.',
+    'a pilot of something new, if it is contained and measured. You like being early, not reckless.',
+    'you are happy to try something new. Doing what everyone else does is what worries you.'
+  ];
 
   const Prompts = {
     // One intake question -> one in-character answer.
@@ -138,8 +146,10 @@
           'You will receive the learning professional\'s write-up, quoted as data.',
           'First, step out of character and rate the concept\'s boldness from 0 to 3:',
           '0 = the conventional answer (a course, a workshop, an e-learning); 1 = a sensible twist; 2 = clearly unconventional for this organisation; 3 = a big departure that changes how work or management happens.',
+          'Anchors for this case: the conventional answer (0) is: ' + (card.calibration && card.calibration.weak || 'a course for everyone') + ' A next-level answer (2 to 3) looks like: ' + (card.calibration && card.calibration.strong || 'n/a'),
+          'Rate what was proposed, not how confidently it was written. A pilot or a way back does not make a concept less bold; it makes it safer to try.',
           'Then, back in character, write three objections you would raise to this specific concept, strongest first, each one or two sentences, referring to what they actually proposed.',
-          'Also write acceptReply: what you would say, in character, if you simply accept it (1 to 2 sentences).',
+          'Also write acceptReply: what you would say, in character, if you simply accept it (1 to 2 sentences). If the concept is less bold than your appetite allows, sound underwhelmed: you could have bought this from any agency.',
           'If they flagged it as a risky strat and named the real risk, soften your objections and acknowledge they saw it coming.'
         ].join('\n'),
         schema: S({ boldness: INT, boldnessReason: STR, objections: STRS, acceptReply: STR })
@@ -220,11 +230,11 @@
           'diagnosis: 0 = took the request at face value; 2 = found part of the problem; 4 = named the real gap, the right root cause type, and correctly judged whether learning is the lever.',
           'measurement: 0 = completions or satisfaction only; 2 = a behaviour or a business metric but no baseline or no feasible collection; 4 = baseline, behaviour, business metric and a collection plan that uses data this stakeholder really has.',
           'fit: 0 = does not address the root cause; 2 = partly addresses it or ignores a key constraint; 4 = tackles the root cause within budget, deadline and audience realities.',
-          'nextLevel: 0 = the conventional answer; 2 = a sensible improvement on it; 4 = a genuinely better way than standard practice that would plausibly work here. Novelty that would not work scores 0.',
+          'nextLevel: 0 = the conventional answer; 2 = a sensible improvement on it; 4 = a genuinely better way than standard practice that would plausibly work here, at a size this organisation can take. Novelty that would not work scores 0.',
           'risks: 0 = none or generic; 2 = some specific risks without mitigations; 4 = the risks and dependencies that matter here (for example DPO, works council, IT, SME time, managers, workload), each with a mitigation.',
           'pitch: 0 = unclear, padded or defensive; 2 = clear enough; 4 = crisp, persuasive, and objections (if any) answered with reasoning, evidence or a de-risking step.',
           '',
-          'defenceOutcome: "none" if there was no defence round; "strong" if the answers held the concept with reasoning or a de-risking step; "weak" if they kept it but did not really answer; "retreat" if they dropped the bold part.',
+          'defenceOutcome: "none" if there was no defence round; "strong" if the answers held the concept with reasoning or a de-risking step; "adapted" if they conceded a valid objection and changed the plan for a stated reason (this is good practice, not weakness); "weak" if they kept it but did not really answer; "retreat" if they dropped the bold part without a reason.',
           'For every score give a short quote of the player\'s own words as evidence (or "nothing relevant").',
           'questionNotAsked: the one question that would have changed the most, phrased as the player could have asked it.',
           'verdict: two sentences in the stakeholder\'s voice reacting to how this went. Dry humour is allowed.'
@@ -236,7 +246,7 @@
           nextLevel: S({ score: INT, evidence: STR }),
           risks: S({ score: INT, evidence: STR }),
           pitch: S({ score: INT, evidence: STR }),
-          defenceOutcome: { type: 'string', enum: ['none', 'strong', 'weak', 'retreat'] },
+          defenceOutcome: { type: 'string', enum: ['none', 'strong', 'adapted', 'weak', 'retreat'] },
           questionNotAsked: STR,
           verdict: STR
         }),

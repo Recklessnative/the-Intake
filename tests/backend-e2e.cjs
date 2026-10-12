@@ -22,6 +22,10 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.click('#btn-memo-mode');
   for (const n of ['gap', 'idea']) await p.fill(`#write-form [name=${n}]`, 'x');
   await p.click('#write-form button[type=submit]');
+  await p.click('#bet-form [data-bet="bold"] [data-v="0"]'); await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');
+  await p.click('#bet-form button[type=submit]');
+  await p.waitForSelector('#p-defence.active, #p-score.active');
+  if (await p.$('#p-defence.active')) await p.click('#defence-form button[type=submit]');
   await p.waitForSelector('#p-score.active');
   console.log('scored through the proxy:', await p.textContent('#score-total'));
   await p.goto('http://127.0.0.1:8793/');

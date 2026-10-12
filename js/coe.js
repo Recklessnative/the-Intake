@@ -49,7 +49,7 @@
 <tr><td><b>Need diagnosis</b></td><td>Repeats the request.</td><td>Names part of the gap, with some evidence.</td><td>Names the real gap, the causes, and whether learning is the lever, backed by what the stakeholder said.</td></tr>
 <tr><td><b>Measurement</b></td><td>Completion rates or happy sheets.</td><td>A behaviour or a business metric, but no baseline.</td><td>Baseline, behaviour, business metric, and a way to collect it with data that exists.</td></tr>
 <tr><td><b>Concept fit</b></td><td>A course, because a course was asked for.</td><td>Partly fixes the cause, or ignores a constraint.</td><td>Fixes the cause within the budget, the deadline and the audience's day.</td></tr>
-<tr><td><b>Next level</b></td><td>The conventional answer.</td><td>A sensible twist on it.</td><td>Better than standard practice and plausible here. Novelty that won't work doesn't count.</td></tr>
+<tr><td><b>Right-sized ambition</b></td><td>The conventional answer, or a leap this client can't take.</td><td>A sensible twist, or bold without a way back.</td><td>Better than standard practice, as bold as this client can take plus one step, with a way back. Ask about their appetite for risk.</td></tr>
 <tr><td><b>Risks</b></td><td>None, or "change management".</td><td>Real risks, no mitigations.</td><td>The people who can block it, each with a plan.</td></tr>
 <tr><td><b>Pitch</b></td><td>Long, vague or defensive.</td><td>Clear enough.</td><td>Short, in their language, and objections answered with reasons.</td></tr>
 </tbody></table>
