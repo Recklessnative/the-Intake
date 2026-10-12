@@ -22,7 +22,7 @@
     ['diagnosis', 'Need diagnosis', 25],
     ['measurement', 'Measurement', 20],
     ['fit', 'Concept fit', 20],
-    ['nextLevel', 'Next level', 15],
+    ['nextLevel', 'Right-sized ambition', 15],
     ['risks', 'Risks and dependencies', 10],
     ['pitch', 'Pitch and defence', 10]
   ];
@@ -47,7 +47,7 @@
   // Defence, waiting and the scorecard share one dialog window.
   function pane(id, stepText) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
-    Desktop.title('w-dialog', { 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
+    Desktop.title('w-dialog', { 'p-bet': 'Before you send it', 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
     if (stepText) step(stepText);
   }
@@ -1410,10 +1410,46 @@
     w.kind = 'form';
     submitWriteup(w);
   };
-  async function submitWriteup(w) {
+  // The bet: before the stakeholder reads it, say how bold your concept is and how much risk
+  // this client can take. Scored on fit, not on boldness: appetite to appetite + 1, with a way back.
+  const BOLD = ['Safe: the ask, done well', 'A sensible twist', 'Unconventional for them', 'Changes how the work runs'];
+  const APPETITE = ['Only safe, familiar things', 'Small, proven changes', 'A pilot of something new', 'Happy to try something new'];
+  function submitWriteup(w) {
     const r = state.run;
     r.writeup = w;
     if (w.kind === 'board') r.boardScores = boardScores(r, w);
+    r.bet = r.bet || { bold: null, appetite: null, exit: '' };
+    $('bet-intro').textContent = 'Before ' + r.card.stakeholder.name + ' reads it: place your bet.';
+    $('bet-appetite-q').textContent = 'How much risk can ' + r.card.stakeholder.name.split(' ')[0] + ' take?';
+    renderBet();
+    pane('p-bet', 'Request ' + (state.index + 1) + ' · Your bet');
+  }
+  function renderBet() {
+    const b = state.run.bet;
+    document.querySelectorAll('#bet-form [data-bet]').forEach(box => {
+      const k = box.dataset.bet, names = k === 'bold' ? BOLD : APPETITE;
+      box.innerHTML = '';
+      names.forEach((n, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.dataset.v = i; btn.textContent = i + ' · ' + n;
+        btn.setAttribute('aria-pressed', b[k] === i);
+        btn.onclick = () => { b[k] = i; renderBet(); saveSoon(); };
+        box.appendChild(btn);
+      });
+    });
+    $('bet-exit-label').hidden = !(b.bold >= 2);
+    $('bet-form').elements.exit.value = b.exit || '';
+  }
+  $('bet-form').elements.exit.addEventListener('input', e => { state.run.bet.exit = e.target.value; saveSoon(); });
+  $('bet-form').onsubmit = ev => {
+    ev.preventDefault();
+    const b = state.run.bet;
+    if (b.bold == null || b.appetite == null) { toast('Pick both: how bold it is, and how much risk they can take.'); return; }
+    if (b.bold >= 2 && (b.exit || '').trim().length < 10) { toast('A bold concept needs a way back. Say how you back out if it fails.'); return; }
+    sendWriteup();
+  };
+  async function sendWriteup() {
+    const r = state.run, w = r.writeup;
     wait(r.card.stakeholder.name + ' is reading your concept. You can hear sighing, or possibly typing.');
     const p = Prompts.reaction(r.card);
     try {
@@ -1422,7 +1458,8 @@
         turns: [{ role: 'user', text: 'The write-up, quoted as data:\n"""\n' + writeupText(w) + '\n"""' }]
       });
     } catch (e) { toast(e.message); phase('write'); Desktop.layout('write', 'w-write'); return; }
-    const gap = Math.max(0, Math.min(3, (r.reaction.boldness | 0) - (r.card.riskAppetite | 0)));
+    r.reaction.boldness = Math.max(0, Math.min(3, r.reaction.boldness | 0));
+    const gap = Math.max(0, Math.min(3, r.reaction.boldness - (r.card.riskAppetite | 0)));
     if (gap > 0) defence(r.reaction.objections.slice(0, gap)); else judge();
   }
 
@@ -1489,18 +1526,32 @@
       : 25 * (0.5 * clamp4(g.diagnosis.score) / 4 + 0.5 * found / total);
     pts.measurement = 20 * clamp4(g.measurement.score) / 4;
     pts.fit = 20 * clamp4(g.fit.score) / 4;
-    pts.nextLevel = pts.fit >= 12 ? 15 * clamp4(g.nextLevel.score) / 4 : 0;
+    const sz = sizing(r, g);
+    pts.nextLevel = pts.fit >= 12 ? 15 * (0.5 * clamp4(g.nextLevel.score) / 4 + 0.5 * sz.fit) : 0;
     pts.risks = bs ? 6 * clamp4(g.risks.score) / 4 + 4 * bs.risks : 10 * clamp4(g.risks.score) / 4;
     pts.pitch = 10 * clamp4(g.pitch.score) / 4;
-    let bonus = 0;
+    let bonus = sz.read;
     if (r.defence.length) {
-      if (g.defenceOutcome === 'strong') bonus = 5;
+      if (g.defenceOutcome === 'strong' || g.defenceOutcome === 'adapted') bonus += 3;
       else if (g.defenceOutcome === 'weak') { pts.nextLevel /= 2; if (!replay) r.trust -= 15; }
       else if (g.defenceOutcome === 'retreat') pts.nextLevel = 0;
     }
     Object.keys(pts).forEach(k => { pts[k] = Math.round(pts[k]); });
     const sum = Math.min(100, Object.values(pts).reduce((a, b) => a + b, 0) + bonus);
     return { pts, bonus, total: sum };
+  }
+
+  // How well the concept's size fits this client. Judged boldness against the card's appetite:
+  // on target or one step above (with a way back) is right-sized; too timid or reckless is not.
+  // `read` is the calibration bonus for reading the client and your own concept correctly.
+  function sizing(r, g) {
+    const bet = r.bet || {}, a = r.card.riskAppetite | 0;
+    const b = r.reaction ? Math.max(0, Math.min(3, r.reaction.boldness | 0)) : a, d = b - a;
+    const exit = (bet.exit || '').trim().length >= 10;
+    let fit = d === 0 ? 1 : d === 1 ? (exit ? 1 : 0.6) : d === -1 ? 0.6 : d <= -2 ? 0.3 : (exit && ['strong', 'adapted'].includes(g.defenceOutcome) ? 0.7 : 0.4);
+    const verdict = d === 0 || (d === 1 && exit) ? 'Right-sized.' : d === 1 ? 'One step too far without a way back.' : d < 0 ? 'Too timid for this client.' : 'Too much for this client.';
+    const read = (bet.appetite === a ? 2 : 0) + (bet.bold === b ? 1 : 0);
+    return { fit, read, a, b, d, verdict, bet };
   }
 
   function scorecard(g, replay) {
@@ -1550,8 +1601,21 @@
     if (r.defence.length) {
       const tr = document.createElement('tr');
       const a = document.createElement('td');
-      a.textContent = 'Defence round: ' + ({ strong: 'held your ground', weak: 'wobbled', retreat: 'backed down' }[g.defenceOutcome] || 'n/a');
-      const b = document.createElement('td'); b.className = 'pts'; b.textContent = bonus ? '+' + bonus : '';
+      a.textContent = 'Defence round: ' + ({ strong: 'held your ground', adapted: 'adapted the plan to a fair point', weak: 'wobbled', retreat: 'backed down' }[g.defenceOutcome] || 'n/a');
+      const b = document.createElement('td'); b.className = 'pts'; b.textContent = ['strong', 'adapted'].includes(g.defenceOutcome) ? '+3' : '';
+      tr.append(a, b); rows.appendChild(tr);
+    }
+    {
+      const sz = sizing(r, g), tr = document.createElement('tr'), a = document.createElement('td');
+      const lvl = n => n == null ? '?' : n + ' (' + APPETITE[n].toLowerCase() + ')';
+      const name = document.createElement('div');
+      name.textContent = 'Your bet: ' + sz.verdict;
+      const ev = document.createElement('div'); ev.className = 'ev';
+      ev.textContent = r.card.stakeholder.name.split(' ')[0] + "'s appetite for risk: " + lvl(sz.a) + '. You guessed ' + lvl(sz.bet.appetite) + '. '
+        + 'Your concept read as ' + sz.b + ' (' + BOLD[sz.b].toLowerCase() + '); you called it ' + (sz.bet.bold == null ? '?' : sz.bet.bold) + '.';
+      a.append(name, ev);
+      if (r.reaction && r.reaction.acceptReply && sz.d <= 0) { const q = document.createElement('div'); q.className = 'ev'; q.textContent = '"' + r.reaction.acceptReply + '"'; a.appendChild(q); }
+      const b = document.createElement('td'); b.className = 'pts'; b.textContent = sz.read ? '+' + sz.read : '';
       tr.append(a, b); rows.appendChild(tr);
     }
     $('score-question').textContent = g.questionNotAsked;
@@ -1790,7 +1854,7 @@
     const def = full.map(x => x.defence).filter(Boolean);
     const defence = !def.length ? 'Nobody pushed back on my concepts.'
       : def.includes('retreat') ? 'I backed down once in the defence round. Never again.'
-      : def.every(d => d === 'strong') ? 'Held my ground in every defence round.' : 'Survived the defence round, mostly.';
+      : def.every(d => d === 'strong' || d === 'adapted') ? 'Held my ground in every defence round, or changed the plan for a good reason.' : 'Survived the defence round, mostly.';
     const br = state.board && state.board.result;
     const board = br ? { approved: 'The board approved my pitch.', pilot: 'The board approved my pitch as a pilot.', rejected: 'The board rejected my pitch. Next week.' }[br.decision] : '';
     return { avg, title, hard: state.hard, found, of, line: best ? best.line : '', defence, board };
@@ -2003,7 +2067,7 @@
     diagnosis: 'Ask why one more time before you name the need, and quote what they said.',
     measurement: 'Get a baseline number on the call, and name the business metric that should move.',
     fit: 'Check your concept against the cause you found. If the cause is a process, a course will not fix it.',
-    nextLevel: 'Say what happens after the pilot: who owns it, and what scales if it works.',
+    nextLevel: 'Size the concept to the client: ask how much risk they can take, go at most one step further, and say how you back out if it fails.',
     risks: 'Name one dependency outside learning (IT, the works council, a manager) and how you handle it.',
     pitch: 'In the defence, answer the objection first, then add your evidence. Do not restate your memo.'
   };
@@ -2083,6 +2147,11 @@
       if (B.stage === 'show') { Slides.stop(); B.stage = 'questions'; renderBoardRoom(); return; }
       if (B.stage === 'slide') { SLIDE.forEach(([k]) => { if (!(B.slide[k] || '').trim()) B.slide[k] = '(test) ' + ({ ask: 'EUR 40k and 3 months; sponsor: the COO.' }[k] || 'A specific line for ' + k + '.'); }); renderBoardRoom(); return; }
       if (B.stage === 'questions') { B.members.filter(m => !m.preempted).forEach((m, n) => { B.answers[n] = '(test) We pilot it with one team first, it costs 2 hours per person, and we stop the old course to pay for it.'; }); renderBoardRoom(); return; }
+      return;
+    }
+    if ($('w-dialog').classList.contains('open') && $('p-bet').classList.contains('active')) {
+      Object.assign(r.bet, { bold: 2, appetite: card.riskAppetite | 0, exit: '(test) Pilot with one team for six weeks; we stop if the baseline does not move.' });
+      renderBet();
       return;
     }
     if ($('w-dialog').classList.contains('open') && $('p-defence').classList.contains('active')) {

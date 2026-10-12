@@ -408,6 +408,20 @@
 
       <!-- Dialog: defence, waiting, scorecard -->
       <div class="win" id="w-dialog" data-title="THE INTAKE" data-icon="★">
+        <div id="p-bet" class="pane">
+          <p id="bet-intro" class="narration small"></p>
+          <form id="bet-form" class="write">
+            <h3>How bold is your concept?</h3>
+            <div class="chips bet-scale" data-bet="bold"></div>
+            <h3 id="bet-appetite-q">How much risk can they take?</h3>
+            <div class="chips bet-scale" data-bet="appetite"></div>
+            <label id="bet-exit-label" hidden>If it doesn't work, how do you back out?
+              <textarea name="exit" rows="2" maxlength="400" placeholder="A pilot with one team, a stop rule, a cap on scope or budget..."></textarea>
+            </label>
+            <p class="fine">Right-sized beats bold: the score rewards a concept as bold as this client can take, plus one step with a way back.</p>
+            <button type="submit" class="primary">Send it</button>
+          </form>
+        </div>
         <div id="p-defence" class="pane">
           <p id="defence-intro" class="narration small"></p>
           <form id="defence-form" class="write"></form>

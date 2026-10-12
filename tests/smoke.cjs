@@ -7,6 +7,30 @@ const srv = http.createServer((q, s) => {
 }).listen(8765);
 let p, visible, MOBILE, shot = 0;
 // The case board: five short steps, each locked in (some with feedback first), then the memo.
+// The bet before the stakeholder reads the concept. The first time, check the rules: both picks
+// are required, and a bold concept needs a way back.
+let betChecked = false;
+async function bet() {
+  await p.waitForSelector('#p-bet.active');
+  if (!betChecked) {
+    betChecked = true;
+    await p.click('#bet-form button[type=submit]');
+    if (!(await p.textContent('#toast')).includes('Pick both')) throw new Error('bet sent without picks');
+    await p.click('#bet-form [data-bet="bold"] [data-v="3"]');
+    await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');
+    if (!(await p.isVisible('#bet-exit-label'))) throw new Error('bold bet asks no way back');
+    await p.click('#bet-form button[type=submit]');
+    if (!(await p.textContent('#toast')).includes('way back')) throw new Error('bold bet sent without a way back');
+    await p.fill('#bet-form [name=exit]', 'Pilot on one shift; stop if near-misses do not drop.');
+  } else if (await p.isVisible('#btn-debug')) {
+    await p.click('#btn-debug');
+  } else {
+    await p.click('#bet-form [data-bet="bold"] [data-v="1"]');
+    await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');
+  }
+  await p.click('#bet-form button[type=submit]');
+}
+
 async function caseBoard(req) {
   const next = () => p.click('#board-next');
   const lockAndGo = async () => { await next(); if (await p.isVisible('#board-feedback')) { if (!(await p.textContent('#board-feedback')).startsWith('Mieke:')) throw new Error('feedback without Mieke'); if (req === 0 && !MOBILE && !shot++) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/feedback.png' }); await next(); } };
@@ -266,6 +290,7 @@ async function followUp() {
     } else {
       await caseBoard(req);
     }
+    await bet();
     await p.waitForSelector('#p-defence.active, #p-score.active');
     let objs = 0;
     if (await p.$('#p-defence.active')) {
@@ -274,6 +299,7 @@ async function followUp() {
       await p.click('#defence-form button[type=submit]');
     }
     await p.waitForSelector('#p-score.active');
+    if (!(await p.textContent('#score-rows')).includes('Your bet:')) throw new Error('scorecard has no bet row');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + (MOBILE ? "/score-mobile.png" : "/score.png") });
     if (req === 0) {
@@ -362,6 +388,7 @@ async function followUp() {
   await p.click('#btn-debug');                       // fills every step, lands on the memo
   if (!(await p.isVisible('.bstep[data-step="memo"]'))) throw new Error('autofill did not reach the memo');
   await p.click('#board-next');
+  await bet();
   await p.waitForSelector('#p-defence.active, #p-score.active');
   if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
   await p.waitForSelector('#p-score.active');
@@ -375,6 +402,7 @@ async function followUp() {
   await p.click('#btn-debug');
   if (!(await p.inputValue('#memo4-form [name=need]'))) throw new Error('memo autofill empty');
   await p.click('#memo4-form button[type=submit]');
+  await bet();
   await p.waitForSelector('#p-defence.active, #p-score.active');
   if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
   await p.waitForSelector('#p-score.active');
@@ -443,11 +471,13 @@ async function followUp() {
     await p.click('#btn-debug'); await p.click('#btn-leads-done');
     await p.waitForSelector('#hard-form:not([hidden])');
     await p.click('#hard-form button[type=submit]');
-    if (await p.isVisible('#p-score.active') || await p.isVisible('#p-defence.active')) throw new Error('empty memo was sent');
+    if (await p.isVisible('#p-score.active') || await p.isVisible('#p-defence.active') || await p.isVisible('#p-bet.active')) throw new Error('empty memo was sent');
     await p.click('#btn-debug');
     if (!(await p.textContent('#hard-count')).match(/^\d+ \/ 150/)) throw new Error('word count missing');
     await p.click('#hard-form button[type=submit]');
-    await p.waitForSelector('#p-defence.active, #p-score.active', { timeout: 8000 }).catch(async e => { throw new Error('hard memo not sent: ' + await p.textContent('#toast') + ' | ' + await p.textContent('#hard-count') + ' ' + JSON.stringify(errs)); });
+    await p.waitForSelector('#p-bet.active', { timeout: 8000 }).catch(async e => { throw new Error('hard memo not sent: ' + await p.textContent('#toast') + ' | ' + await p.textContent('#hard-count') + ' ' + JSON.stringify(errs)); });
+    await bet();
+    await p.waitForSelector('#p-defence.active, #p-score.active');
     if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
     await p.waitForSelector('#p-score.active');
     console.log('hard request', i + 1, await p.textContent('#score-total'));
