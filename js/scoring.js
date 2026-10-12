@@ -6,6 +6,7 @@
   const DIMS = ['diagnosis', 'measurement', 'fit', 'nextLevel', 'risks', 'pitch'];
   const ORDER = { no: 0, partly: 1, yes: 2 };
   const OUTCOMES = ['retreat', 'weak', 'none', 'adapted', 'strong'];
+  const WAYBACK = ['none', 'vague', 'concrete'];
 
   const clamp4 = n => Math.max(0, Math.min(4, Number(n) || 0));
   const middle = xs => { const s = xs.slice().sort((a, b) => a - b); return s[Math.floor((s.length - 1) / 2)]; };
@@ -19,14 +20,16 @@
 
   // How well the concept's size fits this client. Judged boldness against the card's appetite:
   // on target or one step above (with a way back) is right-sized; too timid or reckless is not.
+  // The way back counts only when the examiner read it as concrete; grades from before that
+  // field existed fall back to "something was written".
   // `read` is the calibration bonus for reading the client and your own concept correctly.
-  function sizing(card, bet, reaction, outcome) {
+  function sizing(card, bet, reaction, outcome, wayBack) {
     bet = bet || {};
     const a = card.riskAppetite | 0;
     const b = reaction ? Math.max(0, Math.min(3, reaction.boldness | 0)) : a, d = b - a;
-    const exit = (bet.exit || '').trim().length >= 10;
+    const exit = wayBack ? wayBack === 'concrete' : (bet.exit || '').trim().length >= 10;
     const fit = d === 0 ? 1 : d === 1 ? (exit ? 1 : 0.6) : d === -1 ? 0.6 : d <= -2 ? 0.3 : (exit && ['strong', 'adapted'].includes(outcome) ? 0.7 : 0.4);
-    const verdict = d === 0 || (d === 1 && exit) ? 'Right-sized.' : d === 1 ? 'One step too far without a way back.' : d < 0 ? 'Too timid for this client.' : 'Too much for this client.';
+    const verdict = d === 0 || (d === 1 && exit) ? 'Right-sized.' : d === 1 ? 'One step too far without a concrete way back.' : d < 0 ? 'Too timid for this client.' : 'Too much for this client.';
     const read = (bet.appetite === a ? 2 : 0) + (bet.bold === b ? 1 : 0);
     return { fit, read, a, b, d, verdict, bet };
   }
@@ -44,8 +47,9 @@
     pts.diagnosis = 13 * clamp4(g.diagnosis.score) / 4 + 8 * facts + 4 * lv;
     pts.measurement = 20 * clamp4(g.measurement.score) / 4;
     pts.fit = 20 * clamp4(g.fit.score) / 4;
-    const sz = sizing(card, run.bet, run.reaction, g.defenceOutcome);
-    pts.nextLevel = pts.fit >= 12 ? 15 * (0.5 * clamp4(g.nextLevel.score) / 4 + 0.5 * sz.fit) : 0;
+    const sz = sizing(card, run.bet, run.reaction, g.defenceOutcome, g.wayBack);
+    // A ramp, not a gate: a concept counts as right-sized only as far as it fits the need.
+    pts.nextLevel = 15 * clamp4(g.fit.score) / 4 * (0.5 * clamp4(g.nextLevel.score) / 4 + 0.5 * sz.fit);
     pts.risks = 10 * clamp4(g.risks.score) / 4;
     pts.pitch = 10 * clamp4(g.pitch.score) / 4;
     let bonus = sz.read;
@@ -80,6 +84,7 @@
     };
     out.defenceOutcome = vote('defenceOutcome', OUTCOMES);
     out.leverCall = vote('leverCall', ['no', 'partly', 'yes', 'unclear']);
+    if (grades.some(g => g.wayBack)) out.wayBack = vote('wayBack', WAYBACK);
     const sum = g => DIMS.reduce((a, k) => a + clamp4(g[k].score), 0), target = DIMS.reduce((a, k) => a + out[k].score, 0);
     const closest = grades.slice().sort((a, b) => Math.abs(sum(a) - target) - Math.abs(sum(b) - target))[0];
     out.questionNotAsked = closest.questionNotAsked;
@@ -87,7 +92,17 @@
     return out;
   }
 
-  const Scoring = { DIMS, clamp4, lever, sizing, points, median };
+  // The stakeholder's boldness reading, run several times: the median value and the run that gave it
+  // (its objections and reply go with it).
+  function boldness(reactions) {
+    reactions = reactions.filter(x => x && Array.isArray(x.objections));
+    if (!reactions.length) return null;
+    const b = x => Math.max(0, Math.min(3, x.boldness | 0));
+    const m = middle(reactions.map(b));
+    return Object.assign({}, reactions.find(x => b(x) === m), { boldness: m, runs: reactions.length, spread: Math.max(...reactions.map(b)) - Math.min(...reactions.map(b)) });
+  }
+
+  const Scoring = { DIMS, clamp4, lever, sizing, points, median, boldness };
   if (typeof module !== 'undefined' && module.exports) module.exports = Scoring;
   else root.Scoring = Scoring;
 })(typeof window !== 'undefined' ? window : globalThis);

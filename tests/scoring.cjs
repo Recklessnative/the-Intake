@@ -50,4 +50,26 @@ assert.strictEqual(S.median([grade(3)]).fit.score, 3);
 // A three-way tie on the defence takes the middle outcome.
 assert.strictEqual(S.median([grade(2, { defenceOutcome: 'retreat' }), grade(2, { defenceOutcome: 'strong' }), grade(2, { defenceOutcome: 'weak' })]).defenceOutcome, 'weak');
 
+// Fit is a ramp, not a cliff: ambition scales with fit, one level never moves it by more than a quarter.
+const at = f => S.points(card, run('memo4'), grade(3, { fit: { score: f, evidence: '' } })).pts.nextLevel;
+assert.ok(at(1) > 0 && at(1) < at(2) && at(2) < at(3) && at(3) < at(4));
+assert.strictEqual(at(0), 0);
+assert.ok(at(3) - at(2) <= Math.ceil(15 / 4));
+
+// The way back counts when the examiner reads it as concrete, not when it is merely long.
+const over = { appetite: 1, bold: 2, exit: 'We stop it if it does not work.' };
+assert.strictEqual(S.sizing(card, over, { boldness: 2 }, 'none', 'vague').fit, 0.6);
+assert.strictEqual(S.sizing(card, over, { boldness: 2 }, 'none', 'concrete').fit, 1);
+assert.strictEqual(S.sizing(card, over, { boldness: 2 }, 'none').fit, 1);  // older grades: length only
+assert.strictEqual(S.median([grade(3, { wayBack: 'vague' }), grade(3, { wayBack: 'concrete' }), grade(3, { wayBack: 'concrete' })]).wayBack, 'concrete');
+
+// Boldness: median of the readings, with the objections of a run that gave the median.
+const rx = (b, o) => ({ boldness: b, objections: [o], acceptReply: o });
+const bm = S.boldness([rx(3, 'three'), rx(1, 'one'), rx(2, 'two')]);
+assert.strictEqual(bm.boldness, 2);
+assert.strictEqual(bm.objections[0], 'two');
+assert.strictEqual(bm.spread, 2);
+assert.strictEqual(S.boldness([null, rx(1, 'one')]).boldness, 1);
+assert.strictEqual(S.boldness([]), null);
+
 console.log('scoring ok');

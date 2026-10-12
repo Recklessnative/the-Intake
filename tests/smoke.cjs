@@ -53,11 +53,19 @@ async function caseBoard(req) {
   await p.fill('#b-idea', 'A ten-minute buddy walk on every newcomer\'s first three nights.');
   await p.click('#formats [data-format="On-the-job huddle"]');
   await p.fill('#b-why', 'It puts a person next to the newcomer when it matters.'); await p.fill('#b-not', 'Not another video.');
-  await lockAndGo();
+  await next();                                          // no owners yet: refused
+  if (await p.isVisible('#board-feedback')) throw new Error('concept locked without owners');
+  await p.click('#owners .owner-row >> nth=0 >> [data-owner="us"]');
+  await p.click('#owners .owner-row >> nth=1 >> [data-owner="other"]');
+  await p.fill('#owners input', 'The night shift managers');
+  await next();
+  if (!(await p.textContent('#board-feedback')).includes('not fixing what we do not own')) throw new Error('no owner feedback: ' + await p.textContent('#board-feedback'));
+  await next();
   await p.click('#tiles button >> nth=0'); await p.click('#tiles button >> nth=1');
   await p.fill('#mitigations input >> nth=0', 'Ask them first.'); await p.fill('#mitigations input >> nth=1', 'Pilot on one shift.');
   await lockAndGo();
   if (!(await p.textContent('#memo')).includes('Big idea: A ten-minute buddy walk')) throw new Error('memo not assembled');
+  if (!(await p.textContent('#memo')).includes('Process or workflow: The night shift managers')) throw new Error('memo has no owners');
   if (req === 0 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/memo.png' });
   await next();
 }
@@ -157,7 +165,7 @@ async function followUp() {
   visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
-  let examiner = 0, boardCalls = 0, calls = 0, corridor = 0, callbacks = 0;
+  let examiner = 0, reactions = 0, wayBackSeen = false, boardCalls = 0, calls = 0, corridor = 0, callbacks = 0;
   await p.route('https://generativelanguage.googleapis.com/**', async route => {
     calls++;
     const body = JSON.parse(route.request().postData());
@@ -167,11 +175,11 @@ async function followUp() {
     if (!route.request().url().includes('gemini-3.5-flash-lite')) throw new Error('wrong model ' + route.request().url());
     let out;
     if (sys.startsWith('You are Mieke')) { mieke++; if (!body.contents[0].parts[0].text.includes('What they found so far')) throw new Error('Mieke got no context'); if (/\[\w+\]/.test(sys)) throw new Error('Mieke must not see hidden facts'); out = { reply: 'Ask what changed when the numbers dipped.' }; }
-    else if (sys.startsWith('You are the examiner')) examiner++, out = { diagnosis: { score: 3, evidence: 'q', next: 'Name the cause in one line.' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
+    else if (sys.startsWith('You are the examiner')) examiner++, wayBackSeen = wayBackSeen || JSON.stringify(body).includes('stop if near-misses do not drop'), out = { wayBack: 'vague', diagnosis: { score: 3, evidence: 'q', next: 'Name the cause in one line.' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); if (!body.contents[0].parts[0].text.includes('How the slide looks: Design')) throw new Error('board got no design'); const R = ['nod', 'note', 'frown', 'eyebrow', 'yawn', 'calculator']; out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.', reactions: R }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?', reactions: R.slice().reverse() }, { role: 'COO', preempted: false, line: 'Who covers the shifts?', reactions: ['nod'] }], aside: 'CFO, to the COO: was that a star?' }; }
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
     else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
-    else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
+    else if (sys.includes('rate the concept')) reactions++, out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good', qualityWhy: 'open, about the first day' }; }
     else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak', qualityWhy: calls % 3 ? 'open and specific' : 'closed: yes or no' }; }
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
@@ -312,6 +320,8 @@ async function followUp() {
     if (!(await p.textContent('#score-rows')).includes('Your bet:')) throw new Error('scorecard has no bet row');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0 && examiner !== 3) throw new Error('expected three examiner runs per request, got ' + examiner);
+    if (req === 0 && reactions !== 3) throw new Error('expected three boldness readings per request, got ' + reactions);
+    if (req === 0 && (!wayBackSeen || !(await p.textContent('#score-rows')).includes('Your way back: vague'))) throw new Error('way back not graded');
     if (req === 0 && !(await p.textContent('#score-rows')).includes('Hidden facts found')) throw new Error('diagnosis parts missing');
     if (req === 0) {
       // The scorecard teaches: next level, model answers, and one hindsight question.
