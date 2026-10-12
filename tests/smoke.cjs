@@ -172,8 +172,8 @@ async function followUp() {
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
     else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
     else if (sys.includes('rate the concept')) out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
-    else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good' }; }
-    else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak' }; }
+    else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good', qualityWhy: 'open, about the first day' }; }
+    else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak', qualityWhy: calls % 3 ? 'open and specific' : 'closed: yes or no' }; }
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
   });
   await p.goto('http://localhost:8765/');
@@ -240,6 +240,9 @@ async function followUp() {
     await p.click('#btn-call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
+    // Each question shows how it landed, with the reason, as soon as the answer is back.
+    const tags = await p.$$eval('#chat-log .msg.you .qtag', l => l.map(x => x.className + ' ' + x.textContent));
+    if (tags.length !== 2 || !tags.every(t => /good|ok|weak/.test(t) && t.includes(': '))) throw new Error('question quality not shown: ' + tags);
     if (req === 1) {
       // Close the tab mid-call and come back: the week resumes where it was.
       await p.reload();
@@ -247,6 +250,7 @@ async function followUp() {
       await p.click('#btn-resume');
       await p.waitForSelector('#s-desk.active');
       if (await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('call transcript not restored');
+      if (await p.$$eval('#chat-log .msg.you .qtag', l => l.length) !== 2) throw new Error('question ratings not restored');
       if (!MOBILE) await visible('#w-call');
     }
     if (req === 0) {

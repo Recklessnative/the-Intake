@@ -787,3 +787,9 @@ body.aero .im-pop-bar { background: linear-gradient(rgba(120, 190, 240, .9), rgb
 body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 @media (max-width: 899px) { body.aero .win { padding: 0 3px 3px; } body.aero .start-btn { width: 44px; height: 40px; margin-top: -2px; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { body.aero .win { background: rgba(140, 180, 220, .92); } body.aero .taskbar { background: linear-gradient(#3a4a63, #0a1220); } }
+
+/* How a question landed, under the question on the call and at the coffee machine. */
+.msg .qtag { display: block; margin-top: 4px; font-size: 11px; font-style: italic; white-space: normal; }
+.msg .qtag.good { color: #2e7d32; }
+.msg .qtag.ok { color: #8a6d00; }
+.msg .qtag.weak { color: #b03a2e; }
