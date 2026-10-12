@@ -71,7 +71,6 @@
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
   ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
-  function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
     $('start-menu').hidden = true;
     if (window.confirm('Log off? Your week is saved in this browser; resume it from the title screen.')) { save(); Desktop.reset(); show('s-title'); runsLeft(); }
@@ -373,7 +372,7 @@
     const card = state.cards[state.index];
     const prev = state.run;
     state.run = {
-      card, trust: 100, questionsLeft: questionsFor(card), patience: card.difficulty === 0 ? STARTER.patience : card.patience || 3,
+      card, questionsLeft: questionsFor(card), patience: card.difficulty === 0 ? STARTER.patience : card.patience || 3,
       turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
       miekeLeft: MIEKE_ASKS, clock: prev && state.index && state.days[state.index] === state.days[state.index - 1] ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
@@ -396,11 +395,10 @@
     const r = state.run;
     const card = r.card;
     show('s-desk');
-    trust();
     tick(0);
     $('notes').value = r.notes || '';
     $('chat-log').innerHTML = '';
-    r.chat.forEach(m => addMsg(m.who, m.text, true));
+    r.chat.forEach(m => addMsg(m.who, m.text, true, m));
     $('w-call').classList.remove('ended');
     $('write-form').reset();
     Object.entries(r.draft || {}).forEach(([k, v]) => { const el = $('write-form').elements[k]; if (el) el.value = v; });
@@ -606,15 +604,31 @@
     Desktop.title('w-call', 'On a call with ' + r.card.stakeholder.name, 'Call');
   }
 
-  function addMsg(who, text, replay) {
+  function addMsg(who, text, replay, rated) {
     if (!replay) state.run.chat.push({ who, text });
-    bubble($('chat-log'), who, text, state.run.card.stakeholder.name);
+    return bubble($('chat-log'), who, text, state.run.card.stakeholder.name, rated);
+  }
+  // How your question landed, shown under it as soon as the answer comes back (not in hard mode:
+  // there you find out on the scorecard). Kept on the chat entry so a reload shows it too.
+  const QUALITY = { good: ['✓', 'Good question'], ok: ['~', 'Fair, but generic'], weak: ['✗', 'Weak question'] };
+  function rate(entry, el, out) {
+    if (!out || !QUALITY[out.quality]) return;
+    entry.quality = out.quality; entry.why = String(out.qualityWhy || '').slice(0, 80);
+    if (el) tag(el, entry);
+  }
+  function tag(el, m) {
+    if (state.hard || !QUALITY[m.quality] || el.querySelector('.qtag')) return;
+    const t = document.createElement('span');
+    t.className = 'qtag ' + m.quality;
+    t.textContent = QUALITY[m.quality].join(' ') + (m.why ? ': ' + m.why : '');
+    el.appendChild(t);
   }
   // One chat bubble; what the other person says gets a pin for the notes.
-  function bubble(log, who, text, name) {
+  function bubble(log, who, text, name, rated) {
     const d = document.createElement('div');
     d.className = 'msg ' + who;
     d.textContent = text;
+    if (rated) tag(d, rated);
     if (who === 'them') {
       const pin = document.createElement('button');
       pin.type = 'button';
@@ -628,6 +642,7 @@
     }
     log.appendChild(d);
     log.scrollTop = log.scrollHeight;
+    return d;
   }
   function pinNote(text, btn, name) {
     const r = state.run;
@@ -663,7 +678,6 @@
     $('found').textContent = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length + ' / ' + r.card.hiddenFacts.length;
     $('q-left').textContent = touchpoints(r.card) && r.phase === 'call' ? Math.min(r.legLeft, r.questionsLeft) + ' on this call (' + r.questionsLeft + ' in total)' : r.questionsLeft;
     $('patience').textContent = '●'.repeat(Math.max(0, r.patience)) || '0';
-    trust();
   }
 
   $('chat-form').onsubmit = async ev => {
@@ -673,7 +687,7 @@
     if (!q || r.phase !== 'call' || r.questionsLeft <= 0 || r.legLeft <= 0 || r.patience <= 0) return;
     const btn = ev.submitter || $('chat-form').querySelector('button[type=submit]');
     btn.disabled = true;
-    addMsg('you', q);
+    const mine = addMsg('you', q), asked = r.chat[r.chat.length - 1];
     $('chat-input').value = '';
     r.turns.push({ role: 'user', text: 'The learning professional asks: """' + q + '"""' });
     // One aside per call, on the second answer, so the stakeholder sounds human without rambling.
@@ -683,6 +697,7 @@
     try {
       const out = await Gemini.json({ system: p.system, turns: r.turns, schema: p.schema });
       r.turns.push({ role: 'model', text: JSON.stringify(out) });
+      rate(asked, mine, out);
       addMsg('them', out.reply);
       const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('call')));
       discover(facts);
@@ -690,7 +705,7 @@
       r.questionsLeft--;
       r.legLeft--;
       tick(4);
-      if (out.quality === 'weak') { r.patience--; r.trust -= 10; }
+      if (out.quality === 'weak') r.patience--;
       meters();
       save();
       const more = touchpoints(r.card) && r.questionsLeft > 0;
@@ -791,7 +806,7 @@
     $('corridor-who').textContent = fl ? fl.name + ', ' + fl.role.charAt(0).toLowerCase() + fl.role.slice(1) + ', is waiting for the one coffee machine that works.' : 'Nobody around.';
     const log = $('corridor-log');
     log.innerHTML = '';
-    r.corridor.forEach(m => bubble(log, m.who, m.text, fl ? fl.name : ''));
+    r.corridor.forEach(m => bubble(log, m.who, m.text, fl ? fl.name : '', m));
     const canAsk = !!(on && fl && r.corridorLeft > 0 && n > 0);
     $('corridor-input').disabled = !canAsk;
     $('corridor-form').querySelector('button[type=submit]').disabled = !canAsk;
@@ -839,6 +854,7 @@
     try {
       const out = await Gemini.json({ system: p.system, turns: r.corridorTurns, schema: p.schema });
       r.corridorTurns.push({ role: 'model', text: JSON.stringify(out) });
+      rate(r.corridor[r.corridor.length - 1], null, out);
       r.corridor.push({ who: 'them', text: out.reply });
       const facts = (out.revealed || []).filter(id => r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('frontline')));
       discover(facts);
@@ -1533,7 +1549,7 @@
     let bonus = sz.read;
     if (r.defence.length) {
       if (g.defenceOutcome === 'strong' || g.defenceOutcome === 'adapted') bonus += 3;
-      else if (g.defenceOutcome === 'weak') { pts.nextLevel /= 2; if (!replay) r.trust -= 15; }
+      else if (g.defenceOutcome === 'weak') pts.nextLevel /= 2;
       else if (g.defenceOutcome === 'retreat') pts.nextLevel = 0;
     }
     Object.keys(pts).forEach(k => { pts[k] = Math.round(pts[k]); });
@@ -1628,7 +1644,6 @@
     });
     if (!missed.children.length) { const li = document.createElement('li'); li.textContent = 'Nothing. You found it all.'; missed.appendChild(li); }
     $('score-verdict').textContent = g.verdict;
-    trust();
     $('btn-next').textContent = nextLabel();
     pane('p-score', 'Request ' + (state.index + 1) + ' · Scorecard');
   }
