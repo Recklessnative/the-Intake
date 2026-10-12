@@ -380,9 +380,26 @@ async function followUp() {
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   if (await p.evaluate(() => window.__intake.state.cards.some(c => c.difficulty === 0))) throw new Error('starters in a second week');
   if (await p.isVisible('#w-coe')) throw new Error('the CoE folder should only open by itself in the first week');
-  // Week 2: a new module waits on top (skipped here); the full case has the help faded.
-  const w2 = await p.evaluate(() => ({ no: window.__intake.state.weekNo, shape: window.__intake.state.cards.map(c => c.difficulty).join(' '), mod: window.__intake.state.academy.id }));
+  // Week 2: the Monday stand-up waits on top: last week's full case, recalled from memory.
+  const w2 = await p.evaluate(() => ({ no: window.__intake.state.weekNo, shape: window.__intake.state.cards.map(c => c.difficulty).join(' '), mod: window.__intake.state.academy.id, su: (window.__intake.state.standup || { items: [] }).items.map(i => i.card) }));
   if (w2.no !== 2 || w2.shape !== '1 1 2' || w2.mod !== 'is-it-training') throw new Error('week 2 shape wrong: ' + JSON.stringify(w2));
+  if (!w2.su.length || w2.su.some(id => ['hotel-upgrades', 'construction-cost-reports', 'telecom-first-call'].includes(id))) throw new Error('stand-up should recall last week\'s full cases: ' + w2.su);
+  await visible('#w-standup');
+  if (await p.isVisible('#w-academy')) throw new Error('the module should not open on top of the stand-up');
+  await p.click('#su-reveal');
+  if (await p.$('.su-answer')) throw new Error('stand-up revealed the answer before any recall');
+  await p.fill('#standup textarea', 'Agency drivers on nights, no supervisor, and a bonus that rewards rushing.');
+  await p.click('#su-reveal');
+  if (!(await p.textContent('.su-answer')).includes('What it was:')) throw new Error('stand-up did not show the real problem');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/standup.png' });
+  await p.click('.su-rate [data-rate="partly"]');
+  while (!(await p.$('#su-done'))) await p.click('#btn-debug');
+  await p.click('#su-done');
+  if (await p.isVisible('#w-standup')) throw new Error('stand-up did not close');
+  const rec = await p.evaluate(() => { const h = JSON.parse(localStorage.getItem('intake-scores')); return { r: h.recall, w: h.weeks[h.weeks.length - 1].standup }; });
+  if (!rec.w || rec.w.of !== w2.su.length || rec.r[w2.su[0]] !== 'partly') throw new Error('stand-up not recorded: ' + JSON.stringify(rec));
+  // The module is still there, from the mail or the desktop.
+  if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); } else await p.click('.desk-icon[data-app="w-academy"]');
   await visible('#w-academy');
   await p.click('#btn-debug'); await p.click('#btn-debug');   // autofill: start, answer the first question
   if (!(await p.$('.ac-opt.right'))) throw new Error('academy autofill did not answer');
@@ -436,6 +453,7 @@ async function followUp() {
   const tw = await p.evaluate(() => ({ n: window.__intake.state.cards.length, team: window.__intake.state.team && window.__intake.state.team.drafts.map(d => d.junior + ':' + d.flaw + ':' + d.lines.length), clash: window.__intake.state.team && window.__intake.state.team.drafts.some(d => window.__intake.state.cards.some(c => c.id === d.card)) }));
   if (tw.n !== 2 || !tw.team || tw.team.length !== 3 || tw.clash) throw new Error('team week wrong: ' + JSON.stringify(tw));
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
+  if (await p.isVisible('#w-standup')) await p.click('#w-standup .tb.close');
   await p.click('#mail-rows tr:has-text("drafts for your review")');
   await p.click('#btn-team');
   await visible('#w-team');

@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides', 'Standup'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   $('btn-logoff').onclick = () => {
     $('start-menu').hidden = true;
@@ -230,6 +230,8 @@
     state.charged = false;
     state.board = null;
     state.academy = state.hard ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
+    const recall = state.hard || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
+    state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
     state.team = teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
     state.run = null;
     if (!state.hard && !seenIntro()) intro(cubicle); else cubicle();
@@ -319,7 +321,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -347,6 +349,7 @@
     state.board = s.board || null;
     state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
     state.academy = s.academy || (s.hard ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
+    state.standup = s.standup || null;
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
     state.results = s.results || [];
@@ -414,7 +417,7 @@
     // if the module is due now); the case file and notes join when you open the request.
     // In the very first week the request comes first and the module waits until request 2.
     const calm = state.index === 0 && r.phase === 'inbox' && !r.readMail.current;
-    const moduleNow = state.academy && !state.academy.started && r.phase === 'inbox' && state.index === (state.weekNo === 1 ? 1 : 0);
+    const first = mondayFirst(), moduleNow = first === 'module' && r.phase === 'inbox';
     selectMail(moduleNow ? state.run.mails.find(m => m.academy) : calm && state.weekNo === 1 ? state.run.mails.find(m => m.current) : calm ? null : state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
@@ -424,6 +427,7 @@
     step(Story.day(state.weekNo, state.days[state.index] || 0) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
     // Monday morning: this week's CoE Academy module waits on top, until you start it.
     if (moduleNow) openAcademy();
+    if (first === 'standup' && r.phase === 'inbox') openStandup();
     if (r.phase !== 'inbox') callWindow();
     renderLeads();
     if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
@@ -909,6 +913,33 @@
   }
   $('btn-academy').onclick = () => openAcademy();
 
+  // What waits on top before this request: the Monday stand-up (weeks 2 and later, when there
+  // is something to recall), else the week's CoE module (in week 1 on the second request).
+  function mondayFirst() {
+    if (state.hard) return null;
+    if (state.standup && !state.standup.done && state.index === 0) return 'standup';
+    const A = state.academy;
+    if (A && !A.started && !state.standup && state.index === (state.weekNo === 1 ? 1 : 0)) return 'module';
+    return null;
+  }
+  function openStandup() {
+    const S = state.standup;
+    if (!S) return;
+    Standup.render($('standup'), S, save, (got, of) => {
+      S.done = true;
+      const h = scoreHistory(), w = thisWeek(h);
+      h.recall = h.recall || {};
+      S.items.forEach(i => { if (i.rated) h.recall[i.card] = i.rated; });
+      w.standup = { got, of };
+      keepScores(h);
+      save();
+      Desktop.close('w-standup');
+      Desktop.focus('w-inbox');
+    });
+    Desktop.open('w-standup', Desktop.floating['w-standup']);
+    Desktop.focus('w-standup');
+  }
+
   // ---------- the team: review the juniors' drafts ----------
   function renderTeam() {
     if (!state.team) return;
@@ -1042,8 +1073,9 @@
     const t = TEXTS[n % TEXTS.length];
     // Monday morning gets one ping, not two: the first text waits until the first call ends.
     if (state.index) Retro.sms(t[0], t[1]); else state.run.laterText = t;
-    const moduleFirst = state.academy && !state.academy.started && state.index === (state.weekNo === 1 ? 1 : 0);
-    const ping = moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
+    const moduleFirst = mondayFirst() === 'module';
+    const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
+      : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
       : !state.index ? ['Mieke', 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
     setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
   }
@@ -1990,6 +2022,7 @@
       head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
       box.appendChild(head);
       if (w.team) para('Team reviews: ' + w.team.total + '/' + w.team.of + ' (' + w.team.reviewed + ' of ' + w.team.of / 10 + ' drafts reviewed)', 'muted');
+      if (w.standup && w.standup.of) para('Monday stand-up: recalled ' + w.standup.got + ' of ' + w.standup.of, 'muted');
       if (w.academy && w.academy.of) para('CoE Academy: ' + w.academy.title + ' · ' + w.academy.right + ' of ' + w.academy.of + ' right', 'muted');
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
         para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
@@ -2143,6 +2176,14 @@
     if (state.team && $('w-team').classList.contains('open') && !$('w-team').classList.contains('minimised')) {
       const d = state.team.drafts[state.team.at];
       if (!d.grade) { d.pick = d.flaw; d.note = '(test) The ' + d.flaw + ' line has the problem: it does not follow from what you found. What did the client say that points elsewhere?'; renderTeam(); }
+      return;
+    }
+    const S = state.standup;
+    if (S && !S.done && $('w-standup').classList.contains('open') && !$('w-standup').classList.contains('minimised')) {
+      const it = S.items[S.at];
+      if (it && it.answer == null) it.answer = '(test) ' + it.real.split('.')[0] + '.';
+      else if (it) { it.rated = 'got'; S.at++; }
+      save(); openStandup();
       return;
     }
     if (state.board && $('p-board').classList.contains('active')) {

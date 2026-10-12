@@ -791,3 +791,15 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .msg .qtag.good { color: #2e7d32; }
 .msg .qtag.ok { color: #8a6d00; }
 .msg .qtag.weak { color: #b03a2e; }
+
+/* The Monday stand-up: Mieke's recall questions before the inbox. */
+.standup { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; background: #fbf8f1; font-size: 13px; }
+.su-top { display: flex; justify-content: space-between; gap: 12px; padding: 6px 12px; background: #efe4cc; border-bottom: 1px solid #d8c7a0; }
+.su-body { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.su-body textarea { width: 100%; box-sizing: border-box; font: inherit; }
+.su-body button.primary { align-self: flex-start; }
+.su-mieke { font-style: italic; color: #5b4a2a; margin: 0; }
+.su-case { font-weight: bold; margin: 0; }
+.su-q { margin: 4px 0 0; }
+.su-answer { background: #eef6ee; border-left: 3px solid #2e7d32; padding: 6px 10px; }
+.su-answer p { margin: 2px 0; }
