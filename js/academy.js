@@ -328,7 +328,7 @@
       const ul = el('ul', 'ac-tips');
       m.tips.forEach(t => ul.appendChild(el('li', null, t)));
       tips.appendChild(ul);
-      tips.appendChild(el('p', 'fine', 'These tips are pinned to the top of every case file this week.'));
+      tips.appendChild(el('p', 'fine', 'Keep them in your head, not on a sticky note: the case file will not remind you.'));
       stage.appendChild(tips);
     }
     main.appendChild(stage);
