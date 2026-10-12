@@ -1579,6 +1579,15 @@
       ev.className = 'ev';
       ev.textContent = g[k].evidence;
       a.append(name, ev);
+      // Teach, not just grade: what the next level looks like, and a model answer to compare with.
+      if (g[k].next) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      const model = modelAnswer(r.card, k);
+      if (model) {
+        const d = document.createElement('details'); d.className = 'model';
+        const sm = document.createElement('summary'); sm.textContent = k === 'nextLevel' ? 'A bolder version that would still fit' : 'Compare with a model answer';
+        const t = document.createElement('p'); t.textContent = model;
+        d.append(sm, t); a.appendChild(d);
+      }
       const bs = r.writeup && r.writeup.kind === 'board' ? r.boardScores : null;
       if (k === 'diagnosis') {
         const n = document.createElement('div'); n.className = 'ev';
@@ -1624,6 +1633,7 @@
       tr.append(a, b); rows.appendChild(tr);
     }
     $('score-question').textContent = g.questionNotAsked;
+    renderRedo();
     const missed = $('score-missed');
     missed.innerHTML = '';
     r.card.hiddenFacts.filter(f => !r.revealed.has(f.id)).forEach(f => {
@@ -1636,6 +1646,50 @@
     $('btn-next').textContent = nextLabel();
     pane('p-score', 'Request ' + (state.index + 1) + ' · Scorecard');
   }
+
+  const LEVER_LINE = { yes: 'Training is the lever here.', partly: 'Training is part of the answer; the rest sits outside it.', no: 'This is not a training problem.' };
+  // The card's own gold answer, per scorecard part. Model answers are one good answer, not the only one.
+  function modelAnswer(card, k) {
+    const g = card.goldAnswer || {}, concept = String(g.concept || '').split(' | ');
+    if (k === 'diagnosis') return [card.needStatement, LEVER_LINE[card.learningIsTheAnswer]].filter(Boolean).join(' ');
+    if (k === 'measurement') return String(g.measurement || '').replace(/ \| /g, '. ').replace(/^./, c => c.toUpperCase());
+    if (k === 'fit') return concept[0] || '';
+    if (k === 'nextLevel') return concept.slice(1).join(' Or: ');
+    if (k === 'risks') return (g.risks || []).join('; ');
+    return '';
+  }
+
+  // Redo the moment: with the scorecard in front of you, ask the stakeholder the one question you
+  // wish you had asked, and see what it would have opened. No points; one try per request.
+  function renderRedo() {
+    const r = state.run, box = $('redo-result'), form = $('redo-form');
+    const done = r.redo && r.redo.a;
+    form.hidden = !!done;
+    box.innerHTML = '';
+    if (!done) { $('redo-q').value = ''; return; }
+    const p = (cls, text) => { const e = document.createElement('p'); e.className = cls; e.textContent = text; box.appendChild(e); };
+    p('redo-you', 'You: ' + r.redo.q);
+    p('redo-them', r.card.stakeholder.name.split(' ')[0] + ': ' + r.redo.a);
+    const facts = r.card.hiddenFacts.filter(f => r.redo.found.includes(f.id));
+    p('redo-found', facts.length ? 'That would have opened: ' + facts.map(f => f.fact).join(' ') : 'That would not have opened anything new. Look at where the missed facts were.');
+  }
+  $('redo-form').onsubmit = async ev => {
+    ev.preventDefault();
+    const r = state.run, q = $('redo-q').value.trim();
+    if (q.length < 8 || (r.redo && r.redo.a)) return;
+    const btn = $('redo-form').querySelector('button');
+    btn.disabled = true;
+    const p = Prompts.stakeholder(r.card, '', false);
+    const turns = (r.turns || []).concat([{ role: 'user', text: 'The learning professional asks: """' + q + '"""' }]);
+    try {
+      const out = await Gemini.json({ system: p.system, turns, schema: p.schema });
+      const found = (out.revealed || []).filter(id => !r.revealed.has(id) && r.card.hiddenFacts.some(f => f.id === id && f.foundAt.includes('call')));
+      r.redo = { q, a: out.reply, found };
+      save();
+      renderRedo();
+    } catch (e) { toast(e.message); }
+    btn.disabled = false;
+  };
 
   $('btn-next').onclick = () => {
     if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else toBoard();
