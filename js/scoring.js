@@ -34,9 +34,19 @@
     return { fit, read, a, b, d, verdict, bet };
   }
 
-  // run: { revealed (Set or array of fact ids), writeup, bet, reaction, defence }; g: the examiner's grade.
+  // Which facts count as found. Asked for and heard (call, coffee machine) counts. A data document
+  // only counts once it is used: cited on the case board, or used in the write-up per the examiner.
+  // `unused`: documents you had and did not use.
+  function credit(card, run, g) {
+    const used = new Set((run.cited || []).concat(g.factsUsed || []));
+    const had = (run.had || []).filter(id => card.hiddenFacts.some(f => f.id === id));
+    const found = new Set([...(run.revealed || []), ...had.filter(id => used.has(id))]);
+    return { found, unused: had.filter(id => !found.has(id)) };
+  }
+
+  // run: { revealed (Set or array of fact ids), had, cited, writeup, bet, reaction, defence }; g: the examiner's grade.
   function points(card, run, g) {
-    const revealed = new Set(run.revealed || []);
+    const cr = credit(card, run, g), revealed = cr.found;
     const weight = f => f.weight || 1;
     const total = card.hiddenFacts.reduce((a, f) => a + weight(f), 0) || 1;
     const facts = card.hiddenFacts.filter(f => revealed.has(f.id)).reduce((a, f) => a + weight(f), 0) / total;
@@ -60,7 +70,7 @@
     }
     Object.keys(pts).forEach(k => { pts[k] = Math.round(pts[k]); });
     const sum = Math.min(100, Object.values(pts).reduce((a, b) => a + b, 0) + bonus);
-    return { pts, bonus, total: sum, sz, facts, lever: lv, call: call || '' };
+    return { pts, bonus, total: sum, sz, facts, found: [...revealed], unused: cr.unused, lever: lv, call: call || '' };
   }
 
   // Several examiner runs on the same material, merged into one grade: the median score per
@@ -84,6 +94,10 @@
     };
     out.defenceOutcome = vote('defenceOutcome', OUTCOMES);
     out.leverCall = vote('leverCall', ['no', 'partly', 'yes', 'unclear']);
+    // A data fact counts as used when most runs say so.
+    const seen = {};
+    grades.forEach(g => new Set(g.factsUsed || []).forEach(id => { seen[id] = (seen[id] || 0) + 1; }));
+    out.factsUsed = Object.keys(seen).filter(id => seen[id] * 2 > grades.length);
     if (grades.some(g => g.wayBack)) out.wayBack = vote('wayBack', WAYBACK);
     const sum = g => DIMS.reduce((a, k) => a + clamp4(g[k].score), 0), target = DIMS.reduce((a, k) => a + out[k].score, 0);
     const closest = grades.slice().sort((a, b) => Math.abs(sum(a) - target) - Math.abs(sum(b) - target))[0];
@@ -102,7 +116,7 @@
     return Object.assign({}, reactions.find(x => b(x) === m), { boldness: m, runs: reactions.length, spread: Math.max(...reactions.map(b)) - Math.min(...reactions.map(b)) });
   }
 
-  const Scoring = { DIMS, clamp4, lever, sizing, points, median, boldness };
+  const Scoring = { DIMS, clamp4, lever, sizing, credit, points, median, boldness };
   if (typeof module !== 'undefined' && module.exports) module.exports = Scoring;
   else root.Scoring = Scoring;
 })(typeof window !== 'undefined' ? window : globalThis);

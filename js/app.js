@@ -359,7 +359,7 @@
     r.card = cards[s.index];
     r.revealed = new Set(r.revealed || []);
     // Saves from before the follow-up existed.
-    Object.entries({ leg: 'call', legLeft: r.questionsLeft, calledBack: false, corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: [] })
+    Object.entries({ leg: 'call', legLeft: r.questionsLeft, calledBack: false, corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: [], had: [] })
       .forEach(([k, v]) => { if (r[k] == null) r[k] = v; });
     r.mails = [];
     r.selected = null;
@@ -375,7 +375,7 @@
     const prev = state.run;
     state.run = {
       card, questionsLeft: questionsFor(card), patience: card.difficulty === 0 ? STARTER.patience : card.patience || 3,
-      turns: [], transcript: [], revealed: new Set(), writeup: null, reaction: null, defence: [],
+      turns: [], transcript: [], revealed: new Set(), had: [], writeup: null, reaction: null, defence: [],
       miekeLeft: MIEKE_ASKS, clock: prev && state.index && state.days[state.index] === state.days[state.index - 1] ? prev.clock + 40 : 8 * 60 + 57,
       readMail: prev && state.index ? prev.readMail : {}, mails: [], selected: null,
       phase: 'inbox', chat: [], mieke: [], notes: '', draft: {}, grade: null,
@@ -786,7 +786,9 @@
       div.className = 'data-doc' + (d.text ? '' : ' empty');
       const h = document.createElement('h4');
       h.textContent = d.source;
-      div.append(h, document.createTextNode(d.text || 'Nothing on file. Someone promises to "look into it".'));
+      div.appendChild(h);
+      if (d.expect) { const e = document.createElement('p'); e.className = 'data-expected'; e.textContent = 'You expected: ' + d.expect; div.appendChild(e); }
+      div.appendChild(document.createTextNode(d.text || 'Nothing on file. Someone promises to "look into it".'));
       if (d.text) {
         const pin = document.createElement('button');
         pin.type = 'button'; pin.className = 'pin'; pin.textContent = '📌';
@@ -815,19 +817,25 @@
     meters();
   }
 
-  document.querySelectorAll('#data-buttons button').forEach(b => { b.onclick = () => requestData(b.dataset.kind); });
+  document.querySelectorAll('#data-buttons button').forEach(b => { b.onclick = () => requestData(b.dataset.kind, $('data-expect').value); });
   // A data request is answered from the card itself, no Gemini: every fact filed under that kind.
-  function requestData(kind) {
+  // You say what you expect first, and a document only counts once you use it: cite it on the case
+  // board, or build the write-up on it. Having it is not finding it.
+  function requestData(kind, expect) {
     const r = state.run;
     if (r.phase !== 'investigate' || r.data.includes(kind) || r.questionsLeft <= 0) return;
+    expect = (expect || '').trim();
+    if (expect.length < 8) { toast('Say what you expect the ' + DATA_KINDS[kind].toLowerCase() + ' to show first. A guess is fine.', 'info'); $('data-expect').focus(); return; }
+    $('data-expect').value = '';
     r.data.push(kind);
     r.questionsLeft--;
+    r.had = r.had || [];
     const facts = r.card.hiddenFacts.filter(f => f.foundAt.includes('data:' + kind) && f.dataDoc);
-    if (!facts.length) r.docs.push({ kind, source: DATA_KINDS[kind], text: '' });
-    facts.forEach(f => {
-      r.docs.push({ kind, source: f.dataSource || DATA_KINDS[kind], text: f.dataDoc });
-      discover([f.id]);
-      r.transcript.push({ q: 'Data request: ' + DATA_KINDS[kind], a: (f.dataSource ? f.dataSource + ': ' : '') + f.dataDoc, quality: 'good', facts: [f.id], src: 'data' });
+    if (!facts.length) r.docs.push({ kind, source: DATA_KINDS[kind], text: '', expect });
+    facts.forEach((f, i) => {
+      r.docs.push({ kind, source: f.dataSource || DATA_KINDS[kind], text: f.dataDoc, expect: i ? '' : expect });
+      if (!r.had.includes(f.id)) r.had.push(f.id);
+      r.transcript.push({ q: 'Data request: ' + DATA_KINDS[kind] + '. I expect to see: "' + expect + '"', a: (f.dataSource ? f.dataSource + ': ' : '') + f.dataDoc, quality: 'good', facts: [f.id], src: 'data' });
     });
     tick(15);
     renderLeads();
@@ -1348,8 +1356,10 @@
       if (hit.length) parts.push('Yes, ' + listText(hit.map(t => TAG_NAMES[t])) + ' is in play.');
       if (miss.length) parts.push('I would also look at ' + listText(miss.map(t => TAG_NAMES[t])) + '.');
       if (extra.length) parts.push(listText(extra.map(t => TAG_NAMES[t])) + (extra.length > 1 ? ' don\'t' : ' doesn\'t') + ' look like the driver here.');
-      const lost = r.card.hiddenFacts.filter(f => f.critical && !r.revealed.has(f.id)).length;
+      const lost = r.card.hiddenFacts.filter(f => f.critical && !r.revealed.has(f.id) && !(r.had || []).includes(f.id)).length;
       if (lost) parts.push(lost === 1 ? 'And one important thing never came up in your call.' : 'And ' + lost + ' important things never came up in your call.');
+      const unused = r.card.hiddenFacts.filter(f => f.critical && (r.had || []).includes(f.id) && !r.revealed.has(f.id) && !citedFacts().includes(f.id)).length;
+      if (unused) parts.push('One of your documents says something important that you did not cite. Look again before you send this.');
       // In the first week Mieke also shows her own version, once yours is locked in.
       if ((b.fade || 1) === 1 && r.card.needStatement) parts.push('My version: "' + r.card.needStatement + '"');
       return 'Mieke: ' + parts.map(cap).join(' ');
@@ -1398,6 +1408,14 @@
     save();
     $('w-write').querySelector('.win-body').scrollTop = 0;
   };
+
+  // Facts the player cited on the case board: diagnosis evidence and the measurement rungs.
+  function citedFacts() {
+    const r = state.run, b = r.board;
+    if (!b || b.mode !== 'board') return [];
+    const pool = evidencePool(), ids = b.evidence.concat(Object.values(b.rungs || {}).map(x => x.ev).filter(Boolean));
+    return [...new Set(ids.flatMap(id => (pool.find(x => x.id === id) || { facts: [] }).facts))];
+  }
 
   function boardWriteup() {
     const b = board(), pool = evidencePool();
@@ -1587,6 +1605,9 @@
       'DEFENCE ROUND:',
       r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)',
       '',
+      'DATA FACTS the player received in documents (report in factsUsed the ids the write-up uses):',
+      (r.had || []).length ? r.card.hiddenFacts.filter(f => r.had.includes(f.id)).map(f => `[${f.id}] ${f.fact}`).join('\n') : '(none)',
+      '',
       'WAY BACK (if it does not work, how do you back out?):',
       r.bet && (r.bet.exit || '').trim() ? '"""' + r.bet.exit.trim() + '"""' : '(none given)'
     ].join('\n');
@@ -1600,14 +1621,14 @@
   }
 
   const clamp4 = Scoring.clamp4;
-  const points = g => { const r = state.run; return Scoring.points(r.card, r, g); };
+  const points = g => { const r = state.run; return Scoring.points(r.card, Object.assign({}, r, { cited: citedFacts() }), g); };
   const sizing = (r, g) => Scoring.sizing(r.card, r.bet, r.reaction, g.defenceOutcome, g.wayBack);
 
   function scorecard(g, replay) {
     const r = state.run;
     const parts = points(g), { pts, bonus, total } = parts;
     if (!replay) {
-      state.results.push({ id: r.card.id, total, found: r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
+      state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g);
       r.phase = 'score';
       r.grade = g;
@@ -1690,9 +1711,14 @@
     renderRedo();
     const missed = $('score-missed');
     missed.innerHTML = '';
-    r.card.hiddenFacts.filter(f => !r.revealed.has(f.id)).forEach(f => {
+    r.card.hiddenFacts.filter(f => !parts.found.includes(f.id)).forEach(f => {
       const li = document.createElement('li');
-      li.textContent = f.fact + (touchpoints(r.card) ? ' (Findable ' + listText(f.foundAt.map(placeOf)).replace(/ and /g, ' or ') + '.)' : '');
+      if (parts.unused.includes(f.id)) {
+        // The in-between case teaches the most: you had it in your hands.
+        const doc = (r.docs || []).find(d => d.text === f.dataDoc);
+        li.className = 'unused';
+        li.textContent = 'You had this in ' + (doc ? doc.source : 'a document') + ' but did not use it: ' + f.fact;
+      } else li.textContent = f.fact + (touchpoints(r.card) ? ' (Findable ' + listText(f.foundAt.map(placeOf)).replace(/ and /g, ' or ') + '.)' : '');
       missed.appendChild(li);
     });
     if (!missed.children.length) { const li = document.createElement('li'); li.textContent = 'Nothing. You found it all.'; missed.appendChild(li); }
@@ -2306,7 +2332,7 @@
     }
     // Follow-up: every data kind that holds something, then the coffee machine, scripted.
     if (r.phase === 'investigate') {
-      Object.keys(DATA_KINDS).filter(k => card.hiddenFacts.some(f => f.foundAt.includes('data:' + k) && !r.revealed.has(f.id))).forEach(requestData);
+      Object.keys(DATA_KINDS).filter(k => card.hiddenFacts.some(f => f.foundAt.includes('data:' + k) && !r.revealed.has(f.id))).forEach(k => requestData(k, '(test) Something about ' + DATA_KINDS[k].toLowerCase() + '.'));
       const fl = card.frontline;
       card.hiddenFacts.filter(f => f.foundAt.includes('frontline') && !r.revealed.has(f.id)).slice(0, Math.min(r.corridorLeft, r.questionsLeft)).forEach(f => {
         const qText = '(test) ' + (f.unlockedBy || 'What is it really like?'), a = f.frontlineLine || f.fact;

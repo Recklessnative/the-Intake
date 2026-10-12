@@ -137,8 +137,14 @@ async function followUp() {
   if (r0.phase !== 'investigate' || r0.left !== 8) throw new Error('follow-up budget wrong: ' + JSON.stringify(r0));
   if (!(await p.isDisabled('#btn-callback'))) throw new Error('callback open before finding anything');
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-write"]'); if (!(await p.textContent('#toast')).includes('done asking')) throw new Error('case board should wait for the follow-up'); }
+  await p.click('#data-buttons [data-kind="kpi"]');            // no expectation yet: refused
+  if (await p.$('#data-docs .data-doc')) throw new Error('data request without an expectation');
+  await p.fill('#data-expect', 'Most damage on nights, in the first month.');
   await p.click('#data-buttons [data-kind="kpi"]');
   await p.waitForSelector('#data-docs .data-doc');
+  if (!(await p.textContent('#data-docs')).includes('You expected: Most damage on nights')) throw new Error('expectation not shown with the document');
+  const dr = await p.evaluate(() => { const r = window.__intake.state.run; return { had: r.had.length, rev: r.had.filter(id => r.revealed.has(id)).length }; });
+  if (!dr.had || dr.rev) throw new Error('data facts credited on the click: ' + JSON.stringify(dr));
   if (!(await p.isDisabled('#data-buttons [data-kind="kpi"]'))) throw new Error('a data kind can be asked twice');
   await p.fill('#corridor-input', 'How did you learn the job here?'); await p.press('#corridor-input', 'Enter');
   await p.waitForFunction(() => document.querySelectorAll('#corridor-log .msg.them').length === 1);
