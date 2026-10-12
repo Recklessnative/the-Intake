@@ -1709,6 +1709,7 @@
     }
     $('score-question').textContent = g.questionNotAsked;
     renderRedo();
+    renderPlan();
     const missed = $('score-missed');
     missed.innerHTML = '';
     r.card.hiddenFacts.filter(f => !parts.found.includes(f.id)).forEach(f => {
@@ -1753,6 +1754,32 @@
     const facts = r.card.hiddenFacts.filter(f => r.redo.found.includes(f.id));
     p('redo-found', facts.length ? 'That would have opened: ' + facts.map(f => f.fact).join(' ') : 'That would not have opened anything new. Look at where the missed facts were.');
   }
+  // Take it to Monday: an if-then plan for a real request, pre-filled with your best question from
+  // this call. Kept in My scores and printed on the pocket card in the Center of Excellence folder.
+  const plans = () => (scoreHistory().plans || []);
+  Coe.plans = plans;
+  function renderPlan() {
+    const r = state.run, kept = r.plan;
+    $('plan-form').hidden = !!kept;
+    $('plan-saved').hidden = !kept;
+    if (kept) { $('plan-saved').textContent = 'Kept: when someone asks you for ' + kept.when + ', you will first ask "' + kept.ask + '". It is on your pocket card in the Center of Excellence folder.'; return; }
+    const asked = (r.transcript || []).filter(t => t.src !== 'data' && t.quality === 'good' && t.q.length >= 15 && !t.q.startsWith('(test)'));
+    const best = asked.find(t => (t.facts || []).length) || asked[0];
+    $('plan-when').value = 'a training';
+    $('plan-ask').value = best ? best.q : '';
+    $('plan-ask').placeholder = 'For example: ' + (r.grade && r.grade.questionNotAsked || 'What are people doing now that worries you?');
+  }
+  $('plan-form').onsubmit = ev => {
+    ev.preventDefault();
+    const r = state.run, when = $('plan-when').value.trim(), ask = $('plan-ask').value.trim();
+    if (when.length < 3 || ask.length < 8) { toast('Finish the sentence: when someone asks me for…, I will first ask…', 'info'); return; }
+    const h = scoreHistory();
+    h.plans = (h.plans || []).filter(p => p.ask.toLowerCase() !== ask.toLowerCase()).concat([{ when, ask, card: r.card.id, at: Date.now() }]).slice(-12);
+    keepScores(h);
+    r.plan = { when, ask };
+    save();
+    renderPlan();
+  };
   $('redo-form').onsubmit = async ev => {
     ev.preventDefault();
     const r = state.run, q = $('redo-q').value.trim();

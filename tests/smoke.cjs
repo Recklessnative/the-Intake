@@ -139,12 +139,13 @@ async function followUp() {
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-write"]'); if (!(await p.textContent('#toast')).includes('done asking')) throw new Error('case board should wait for the follow-up'); }
   await p.click('#data-buttons [data-kind="kpi"]');            // no expectation yet: refused
   if (await p.$('#data-docs .data-doc')) throw new Error('data request without an expectation');
+  const before = await p.evaluate(() => window.__intake.state.run.revealed.size);
   await p.fill('#data-expect', 'Most damage on nights, in the first month.');
   await p.click('#data-buttons [data-kind="kpi"]');
   await p.waitForSelector('#data-docs .data-doc');
   if (!(await p.textContent('#data-docs')).includes('You expected: Most damage on nights')) throw new Error('expectation not shown with the document');
-  const dr = await p.evaluate(() => { const r = window.__intake.state.run; return { had: r.had.length, rev: r.had.filter(id => r.revealed.has(id)).length }; });
-  if (!dr.had || dr.rev) throw new Error('data facts credited on the click: ' + JSON.stringify(dr));
+  const dr = await p.evaluate(() => { const r = window.__intake.state.run; return { had: r.had.length, rev: r.revealed.size }; });
+  if (!dr.had || dr.rev !== before) throw new Error('data facts credited on the click: ' + JSON.stringify(dr));
   if (!(await p.isDisabled('#data-buttons [data-kind="kpi"]'))) throw new Error('a data kind can be asked twice');
   await p.fill('#corridor-input', 'How did you learn the job here?'); await p.press('#corridor-input', 'Enter');
   await p.waitForFunction(() => document.querySelectorAll('#corridor-log .msg.them').length === 1);
@@ -238,6 +239,10 @@ async function followUp() {
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/coe.png' });
       await p.click('#coe-files button:has-text("quality standard")');
       if (!(await p.textContent('#coe-doc')).includes('Measurement')) throw new Error('standard did not open');
+      await p.click('#coe-files button:has-text("Pocket card")');
+      if (!(await p.textContent('#coe-doc')).includes('No plan yet')) throw new Error('pocket card did not open');
+      const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#coe-save-pocket')]);
+      if (dl.suggestedFilename() !== 'intake-pocket-card.html') throw new Error('pocket card not saved: ' + dl.suggestedFilename());
       await p.click('#w-coe .tb.close');
       if (!MOBILE) {
         await p.click('.desk-icon[data-app="w-call"]');
@@ -337,7 +342,15 @@ async function followUp() {
       await p.click('#redo-form button');
       await p.waitForSelector('#redo-result .redo-found');
       if (!(await p.isHidden('#redo-form'))) throw new Error('redo can be asked twice');
+      // Take it to Monday: an if-then plan, pre-filled with a question from the call.
+      if (!(await p.inputValue('#plan-ask')).trim()) throw new Error('if-then plan not pre-filled');
+      await p.fill('#plan-ask', 'What are people doing now that worries you?');
+      await p.click('#plan-form button');
+      if (!(await p.textContent('#plan-saved')).includes('pocket card')) throw new Error('plan not kept');
+      const pocket = await p.evaluate(() => Coe.pocketFile(Coe.plans()));
+      if (!pocket.includes('When someone asks me for a training, I will first ask: <b>What are people doing now')) throw new Error('plan not on the pocket card');
     }
+    if (req === 1 && !(await p.isVisible('#plan-form'))) throw new Error('plan form not back for the next request');
     if (req === 1 && (await p.textContent('#redo-result')).trim()) throw new Error('redo carried into the next request');
     if (req === 0) await p.screenshot({ path: (process.argv[3] || require("os").tmpdir()) + (MOBILE ? "/score-mobile.png" : "/score.png") });
     if (req === 0) {

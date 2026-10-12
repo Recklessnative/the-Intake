@@ -78,12 +78,41 @@
     },
     {
       id: 'archive', icon: '🗄', name: 'Learning styles policy (ARCHIVED).doc',
-      html: `<h2>Learning styles policy</h2><p class="doc-meta">Center of Excellence · <span class="archived">ARCHIVED 2009</span></p>
+      html: `<h2>Learning styles policy</h2><p class="doc-meta">Center of Excellence · <span class="archived">ARCHIVED 2006</span></p>
 <p class="archived">This document has been archived. It was never true.</p>
 <p>Please stop sending the "Are you visual, auditory or kinaesthetic?" questionnaire to new hires. Matching teaching to a preferred "style" does not improve learning. Matching it to the task does.</p>
 <p>The laminated poster in meeting room 3 will be removed as soon as somebody finds the screwdriver.</p>`
     }
   ];
+
+  // The pocket card: the folder on one page, plus the player's own if-then plans, to take out of the
+  // game. Plans are player text, so they are escaped. `body` is shared by the window and the file.
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function pocketBody(plans) {
+    return `<h2>Before you build any training</h2>
+<ol class="pocket-steps"><li><b>The ask is not the need.</b> Write down what they asked for, then park it.</li>
+<li><b>Find the gap.</b> What do people do now, what should they do, who exactly, since when?</li>
+<li><b>Find the causes.</b> Skill, process, tools, incentives, expectations, environment. Usually more than one.</li>
+<li><b>Is learning the lever?</b> Could they do it if their job depended on it? If yes, it is not (only) a learning problem. Say so, with evidence.</li>
+<li><b>Say who owns each cause.</b> Ours is the skill part. The rest goes to whoever can change it.</li>
+<li><b>Decide how you will know.</b> Baseline, behaviour, business metric, and data they really have.</li>
+<li><b>Design the smallest thing that works.</b> Going bolder? Name the first step and when you would stop.</li>
+<li><b>Check who can block it.</b> Managers, works council, privacy, IT, budget owner.</li></ol>
+<h3>Ask at least once</h3><ul><li>What are people doing now that worries you?</li><li>Why do you think they do it this way? Do the ones who get it right do something different?</li><li>Where are we today on the number you care about?</li><li>Who has to agree, and who could stop it?</li></ul>
+<h3>My plan for the next request</h3>` + (plans.length
+      ? '<ul class="pocket-plans">' + plans.map(p => `<li>When someone asks me for ${esc(p.when)}, I will first ask: <b>${esc(p.ask)}</b></li>`).join('') + '</ul>'
+      : '<p>No plan yet. After each request, the scorecard asks for one under "Take it to Monday".</p>');
+  }
+  function pocketFile(plans) {
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Intake pocket card</title>
+<style>body{font:15px/1.45 Georgia,serif;max-width:40em;margin:0 auto;padding:16px;color:#222;background:#fff}h2{font-size:1.3em}h3{font-size:1.05em;margin-top:1.2em}li{margin:.25em 0}.foot{color:#666;font-size:12px;margin-top:2em}@media print{body{font-size:12px}}</style></head>
+<body>${pocketBody(plans)}<p class="foot">From THE INTAKE, a practice game for learning professionals.</p></body></html>`;
+  }
+  DOCS.splice(1, 0, {
+    id: 'pocket', icon: '🗂', name: 'Pocket card (take it with you).htm',
+    html: () => '<p class="doc-meta">Center of Excellence · the folder on one page, plus your own plans</p>' + pocketBody(Coe.plans()) +
+      '<p><button type="button" id="coe-save-pocket">💾 Save it to your computer or phone</button></p>'
+  });
 
   function render(filesEl, docEl, openId) {
     filesEl.innerHTML = '';
@@ -98,10 +127,19 @@
       filesEl.appendChild(li);
     });
     const doc = DOCS.find(d => d.id === openId) || DOCS[0];
-    docEl.innerHTML = doc.html;
+    docEl.innerHTML = typeof doc.html === 'function' ? doc.html() : doc.html;
     docEl.scrollTop = 0;
+    const save = docEl.querySelector('#coe-save-pocket');
+    if (save) save.onclick = () => {
+      const a = document.createElement('a');
+      a.download = 'intake-pocket-card.html';
+      a.href = URL.createObjectURL(new Blob([pocketFile(Coe.plans())], { type: 'text/html' }));
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    };
     return doc;
   }
 
-  window.Coe = { docs: DOCS, render };
+  // app.js replaces `plans` with the player's saved if-then plans.
+  const Coe = window.Coe = { docs: DOCS, render, pocketFile, plans: () => [] };
 })();
