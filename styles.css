@@ -532,6 +532,10 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
 .leads-budget { margin: 0 0 8px; }
 .data-buttons { flex-wrap: wrap; gap: 6px; }
 .data-buttons button.asked { opacity: .55; }
+#w-leads .data-expect { display: block; margin-bottom: 6px; }
+#w-leads .data-expect input { width: 100%; box-sizing: border-box; }
+.data-doc .data-expected { margin: 0 0 4px; font-style: italic; color: #5b4a2a; }
+#score-missed li.unused { color: #8a5a00; }
 .data-docs { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .data-doc { background: #fffdf3; border: 1px solid #d9cf9e; border-radius: 3px; padding: 6px 30px 6px 10px; position: relative; font-family: "Courier New", monospace; font-size: 12.5px; white-space: pre-wrap; }
 .data-doc h4 { margin: 0 0 3px; font-family: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }

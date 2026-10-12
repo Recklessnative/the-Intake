@@ -239,6 +239,7 @@
           'For every score give a short quote of the player\'s own words as evidence (or "nothing relevant").',
           'For every score also give next: one sentence to the player on what would have lifted that part one level in THIS case, concrete enough to act on (for example "Name a baseline the warehouse already has: the weekly damage report."). Empty for a 4.',
           'wayBack: the player\'s answer to "if it does not work, how do you back out?", given below the defence round. "none" if there is none; "concrete" if it names a limited first step (one team, one site, a pilot) and when or on what result it stops or changes; otherwise "vague" (for example "we stop it" or "we will evaluate").',
+          'factsUsed: the ids of the DATA FACTS listed after the write-up that the write-up actually uses: it quotes the number, names the finding, or builds the diagnosis, measurement or concept on it. Having asked for the document is not using it. Empty if none.',
           'leverCall: what the write-up itself says about whether training or learning is the lever: "yes", "partly", "no", or "unclear" if it never takes a position. Report the player\'s call, right or wrong.',
           'questionNotAsked: the one question that would have changed the most, phrased as the player could have asked it.',
           'verdict: two sentences in the stakeholder\'s voice reacting to how this went. Dry humour is allowed.'
@@ -253,6 +254,7 @@
           defenceOutcome: { type: 'string', enum: ['none', 'strong', 'adapted', 'weak', 'retreat'] },
           leverCall: { type: 'string', enum: ['yes', 'partly', 'no', 'unclear'] },
           wayBack: { type: 'string', enum: ['none', 'vague', 'concrete'] },
+          factsUsed: { type: 'array', items: { type: 'string' } },
           questionNotAsked: STR,
           verdict: STR
         }),

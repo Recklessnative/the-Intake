@@ -72,4 +72,14 @@ assert.strictEqual(bm.spread, 2);
 assert.strictEqual(S.boldness([null, rx(1, 'one')]).boldness, 1);
 assert.strictEqual(S.boldness([]), null);
 
+// Data facts count only when used: cited on the board or used in the write-up per the examiner.
+const dcard = { learningIsTheAnswer: 'yes', hiddenFacts: [{ id: 'k', weight: 2 }, { id: 'c' }] };
+const drun = extra => Object.assign({ revealed: ['c'], had: ['k'], writeup: { kind: 'memo4' }, bet: {}, defence: [] }, extra);
+assert.deepStrictEqual(S.credit(dcard, drun(), grade(3)).unused, ['k']);
+assert.strictEqual(S.points(dcard, drun(), grade(3)).facts, 1 / 3);
+assert.strictEqual(S.points(dcard, drun({ cited: ['k'] }), grade(3)).facts, 1);
+assert.strictEqual(S.points(dcard, drun(), grade(3, { factsUsed: ['k'] })).facts, 1);
+assert.strictEqual(S.points(dcard, drun({ had: [] }), grade(3, { factsUsed: ['k'] })).facts, 1 / 3);  // cannot use what you never had
+assert.deepStrictEqual(S.median([grade(3, { factsUsed: ['k'] }), grade(3, { factsUsed: ['k', 'c'] }), grade(3)]).factsUsed, ['k']);
+
 console.log('scoring ok');
