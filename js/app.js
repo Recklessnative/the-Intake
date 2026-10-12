@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides', 'Standup'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides', 'Standup', 'Scoring'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   $('btn-logoff').onclick = () => {
     $('start-menu').hidden = true;
@@ -1535,65 +1535,28 @@
     const material = [
       'INTAKE TRANSCRIPT (player questions with the answers, from the call, a callback, the coffee machine with a front-line employee, and data requests; each data request cost one question):',
       transcriptText() || '(the player asked no questions)',
-      'Hidden facts the player surfaced: ' + ([...r.revealed].join(', ') || 'none'),
       '',
       'WRITE-UP:', '"""', writeupText(r.writeup), '"""',
       '',
       'DEFENCE ROUND:',
       r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)'
     ].join('\n');
-    let g;
-    try {
-      g = await Gemini.json({ system: p.system, schema: p.schema, maxTokens: p.maxTokens, turns: [{ role: 'user', text: material }] });
-    } catch (e) { toast(e.message); setTimeout(judge, 4000); return; }
+    // Three examiner runs side by side, merged to the median: one run can swing a dimension by a level.
+    const runs = await Promise.allSettled([0, 1, 2].map(() => Gemini.json({ system: p.system, schema: p.schema, maxTokens: p.maxTokens, turns: [{ role: 'user', text: material }] })));
+    const ok = runs.filter(x => x.status === 'fulfilled').map(x => x.value);
+    if (!ok.length) { toast(runs[0].reason.message); setTimeout(judge, 4000); return; }
+    const g = Scoring.median(ok);
+    keepGraded(r.card.id, r.writeup && r.writeup.kind, material, ok);
     scorecard(g);
   }
 
-  function clamp4(n) { return Math.max(0, Math.min(4, Number(n) || 0)); }
-
-  function points(g, replay) {
-    const r = state.run;
-    const weight = f => f.weight || 1;
-    const total = r.card.hiddenFacts.reduce((a, f) => a + weight(f), 0) || 1;
-    const found = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).reduce((a, f) => a + weight(f), 0);
-    const pts = {};
-    const bs = r.writeup && r.writeup.kind === 'board' ? r.boardScores : null;
-    pts.diagnosis = bs
-      ? 8 * clamp4(g.diagnosis.score) / 4 + 7 * found / total + 4 * bs.tags + 3 * bs.evidence + 3 * bs.lever
-      : 25 * (0.5 * clamp4(g.diagnosis.score) / 4 + 0.5 * found / total);
-    pts.measurement = 20 * clamp4(g.measurement.score) / 4;
-    pts.fit = 20 * clamp4(g.fit.score) / 4;
-    const sz = sizing(r, g);
-    pts.nextLevel = pts.fit >= 12 ? 15 * (0.5 * clamp4(g.nextLevel.score) / 4 + 0.5 * sz.fit) : 0;
-    pts.risks = bs ? 6 * clamp4(g.risks.score) / 4 + 4 * bs.risks : 10 * clamp4(g.risks.score) / 4;
-    pts.pitch = 10 * clamp4(g.pitch.score) / 4;
-    let bonus = sz.read;
-    if (r.defence.length) {
-      if (g.defenceOutcome === 'strong' || g.defenceOutcome === 'adapted') bonus += 3;
-      else if (g.defenceOutcome === 'weak') pts.nextLevel /= 2;
-      else if (g.defenceOutcome === 'retreat') pts.nextLevel = 0;
-    }
-    Object.keys(pts).forEach(k => { pts[k] = Math.round(pts[k]); });
-    const sum = Math.min(100, Object.values(pts).reduce((a, b) => a + b, 0) + bonus);
-    return { pts, bonus, total: sum };
-  }
-
-  // How well the concept's size fits this client. Judged boldness against the card's appetite:
-  // on target or one step above (with a way back) is right-sized; too timid or reckless is not.
-  // `read` is the calibration bonus for reading the client and your own concept correctly.
-  function sizing(r, g) {
-    const bet = r.bet || {}, a = r.card.riskAppetite | 0;
-    const b = r.reaction ? Math.max(0, Math.min(3, r.reaction.boldness | 0)) : a, d = b - a;
-    const exit = (bet.exit || '').trim().length >= 10;
-    let fit = d === 0 ? 1 : d === 1 ? (exit ? 1 : 0.6) : d === -1 ? 0.6 : d <= -2 ? 0.3 : (exit && ['strong', 'adapted'].includes(g.defenceOutcome) ? 0.7 : 0.4);
-    const verdict = d === 0 || (d === 1 && exit) ? 'Right-sized.' : d === 1 ? 'One step too far without a way back.' : d < 0 ? 'Too timid for this client.' : 'Too much for this client.';
-    const read = (bet.appetite === a ? 2 : 0) + (bet.bold === b ? 1 : 0);
-    return { fit, read, a, b, d, verdict, bet };
-  }
+  const clamp4 = Scoring.clamp4;
+  const points = g => { const r = state.run; return Scoring.points(r.card, r, g); };
+  const sizing = (r, g) => Scoring.sizing(r.card, r.bet, r.reaction, g.defenceOutcome);
 
   function scorecard(g, replay) {
     const r = state.run;
-    const { pts, bonus, total } = points(g, replay);
+    const parts = points(g), { pts, bonus, total } = parts;
     if (!replay) {
       state.results.push({ id: r.card.id, total, found: r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g);
@@ -1617,11 +1580,16 @@
       ev.textContent = g[k].evidence;
       a.append(name, ev);
       const bs = r.writeup && r.writeup.kind === 'board' ? r.boardScores : null;
+      if (k === 'diagnosis') {
+        const n = document.createElement('div'); n.className = 'ev';
+        n.textContent = 'Hidden facts found ' + Math.round(parts.facts * 100) + '% · lever ' + (!parts.call || parts.call === 'unclear' ? 'not called' : ({ 1: 'right', 0.25: 'one step off', 0: 'wrong' }[parts.lever] || 'n/a'));
+        a.appendChild(n);
+      }
       if (bs && (k === 'diagnosis' || k === 'risks')) {
         const n = document.createElement('div'); n.className = 'ev';
-        n.textContent = k === 'diagnosis'
-          ? 'Cause types ' + Math.round(bs.tags * 100) + '% · key evidence cited ' + Math.round(bs.evidence * 100) + '% · lever ' + Math.round(bs.lever * 100) + '%'
-          : 'Real blockers picked: ' + Math.round(bs.risks * 2) + ' of 2';
+        n.textContent = 'Practice check, no points: ' + (k === 'diagnosis'
+          ? 'cause types ' + Math.round(bs.tags * 100) + '%, key evidence cited ' + Math.round(bs.evidence * 100) + '%.'
+          : 'real blockers picked, ' + Math.round(bs.risks * 2) + ' of 2.');
         a.appendChild(n);
       }
       if (k === 'nextLevel' && pts.fit < 12) {
@@ -1983,6 +1951,15 @@
       starter: r.card.difficulty === 0, total, pts, question: g.questionNotAsked, verdict: g.verdict
     });
     keepScores(h);
+  }
+  // The last few graded write-ups, as the examiner saw them, for tests/judge-spread.cjs.
+  const GRADED_KEY = 'intake-graded';
+  function keepGraded(card, kind, material, grades) {
+    try {
+      const list = JSON.parse(localStorage.getItem(GRADED_KEY) || '[]').filter(x => !(x.card === card && x.material === material));
+      list.push({ card, kind: kind || '', at: Date.now(), material, scores: grades.map(g => Scoring.DIMS.map(k => clamp4(g[k].score))) });
+      localStorage.setItem(GRADED_KEY, JSON.stringify(list.slice(-12)));
+    } catch (e) { /* storage full or blocked: the harness just has less to work with */ }
   }
   function recordAcademy() {
     const h = scoreHistory(), w = thisWeek(h), A = state.academy;
