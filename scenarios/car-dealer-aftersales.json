@@ -32,14 +32,14 @@
   "opening_message": "Bonjour. The importer's CSI came in: we are second to last in the region on aftersales. Second to last. It costs us the quarterly margin bonus, about 90,000 euro across the group. My service advisors need a customer service training. Welcome, smile, empathy, the full thing. Fourteen people, five sites. Can you have something before the next survey wave in November?",
   "surface_ask": "A customer service and friendliness training for 14 service advisors.",
   "gold": {
-    "real_problem": "Customers are unhappy about cars not ready at the promised time and invoices higher than the quote, not about how they are welcomed. Advisors book the workshop at full mechanic capacity with no buffer, while the workshop chef plans separately on a whiteboard. Advisors also earn a bonus on extra labour hours sold at the desk, so they add work during the visit, which makes cars late and invoices higher. Philippe designed that bonus, and the workshop reports to the owner's son, not to him.",
+    "real_problem": "Customers are unhappy about cars not ready at the promised time and invoices higher than the quote, not about how they are welcomed. The advisors already know how to promise a realistic time and call for approval before extra work: they do it on Saturday mornings and in August, when the desk is quiet, and the one site that books with a buffer scores near the regional average. On weekdays the system pushes them the other way: advisors must book the workshop at 100% of mechanic hours, the workshop chef plans separately on a whiteboard, and the advisor bonus pays for extra labour hours added at the desk with no condition on customer approval. Philippe designed that bonus and the 100% booking target, and the workshop reports to the owner's son, not to him.",
     "root_cause_types": [
       "incentive",
       "process",
       "system"
     ],
-    "is_training_the_lever": "partly",
-    "need_statement": "The group needs realistic workshop booking with a buffer for unplanned work, one shared planning between advisors and workshop, and an advisor bonus that does not reward surprises on the invoice. Advisors need to learn to promise realistic times and call the customer before adding work, which is a practised routine, not a smile course."
+    "is_training_the_lever": "no",
+    "need_statement": "The group does not need advisor training. It needs workshop booking with a buffer for unplanned work, one shared plan between advisors and the workshop chef, and an advisor bonus that pays for approved extra work and cars ready on time instead of surprises on the invoice. L&D's role is to say no to the smile course, put the CSI and dealer-system evidence in front of Philippe and Olivier together, help them design and run a one-site pilot of the new booking routine, and help explain the bonus change to the advisors."
   },
   "hidden_facts": [
     {
@@ -57,7 +57,7 @@
     },
     {
       "id": "full_booking",
-      "fact": "Advisors book the workshop in the dealer system at 100% of mechanic hours, leaving no room for unplanned repairs, absences or waiting for parts. The workshop chef ignores the system and plans on his own whiteboard, so promised times are missed several times a day.",
+      "fact": "Advisors are told to book the workshop in the dealer system at 100% of mechanic hours, a target Philippe set, leaving no room for unplanned repairs, absences or waiting for parts. The workshop chef ignores the system and plans on his own whiteboard, so promised times are missed several times a day. The advisors know a full book means a late afternoon; they book it full because that is the target.",
       "unlocks_when": "The player asks how workshop appointments are planned, how a pick-up time is promised, or how advisors and the workshop work together.",
       "reveal_line": "We book in the system, yes. The workshop... has its own way. It's always been a bit like that.",
       "weight": 3,
@@ -65,11 +65,11 @@
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "I book the system full, because full is the target. Then Marcel in the workshop plans on his whiteboard, his way. One car waits for a part, the whole afternoon shifts. At four I'm on the phone saying sorry fifteen times. Then they get the survey."
+      "frontline_line": "I know how to promise a time, I've done it eight years. But I book the system full, because full is the target. Then Marcel in the workshop plans on his whiteboard, his way. One car waits for a part, the whole afternoon shifts. At four I'm on the phone saying sorry fifteen times. Then they get the survey."
     },
     {
       "id": "upsell_bonus",
-      "fact": "Since last year advisors get a monthly bonus on extra labour hours sold at the desk. They add brake pads, wiper blades and air-conditioning service during the visit, often without calling the customer first, which delays the car and inflates the invoice.",
+      "fact": "Since last year advisors get a monthly bonus on extra labour hours sold at the desk, with no condition on customer approval. They add brake pads, wiper blades and air-conditioning service during the visit, often without calling the customer first, because a call costs time and a 'no' costs bonus. That delays the car and inflates the invoice.",
       "unlocks_when": "The player asks how advisors are paid or targeted, what drives extra work on the invoice, or why invoices exceed the estimate.",
       "reveal_line": "There is a small bonus on additional hours sold. It's commercial, that's the job. Aftersales revenue is up 11%, by the way. I designed it myself.",
       "weight": 3,
@@ -80,6 +80,33 @@
       ],
       "data_doc": "Service advisor variable pay: 4% of extra labour hours sold above the original booking, paid monthly. No condition on customer approval or CSI. Introduced January last year.",
       "data_source": "Variable pay scheme, aftersales"
+    },
+    {
+      "id": "quiet_days",
+      "fact": "On Saturday mornings and in the August holiday weeks, when the desks are quiet and the booking target is not chased, the same 14 advisors hand back over 90% of cars on time and nearly every invoice matches the estimate. The skill is there; the weekday system works against it.",
+      "unlocks_when": "The player asks whether the problem is the same every day or every season, whether some days or weeks go well, or for on-time and invoice figures by day.",
+      "reveal_line": "Saturdays? Saturdays are calm, of course it goes well. That's not real life, that's a Saturday.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Dealer system extract, all five sites, last six months. Cars handed back at promised time: weekdays 58%, Saturday mornings 93%, August weeks 91%. Invoices within 10% of estimate: weekdays 51%, Saturday mornings 94%, August weeks 89%. Workshop booked as % of mechanic hours: weekdays 100%, Saturday mornings 70%, August weeks 75%. Extra labour hours added at the desk per car: weekdays 1.4, Saturday mornings 0.3.",
+      "data_source": "Dealer management system, hand-over and invoice report"
+    },
+    {
+      "id": "wavre_exception",
+      "fact": "At the Wavre site the advisor Nadia Lefèvre and her workshop chef ignore the 100% target: they book at about 80%, hold a short talk at the whiteboard every morning, and she phones every customer before adding work. Wavre's CSI on 'ready on time' and 'invoice matched estimate' is near the regional average. Nadia earns the lowest bonus in the group and got a remark in her appraisal about 'under-booking'. Nobody trained her; she just refuses to make promises the workshop can't keep.",
+      "unlocks_when": "The player asks whether any site or advisor does better, who the best advisor is, or how the sites differ.",
+      "reveal_line": "Wavre is... better, yes. Nadia. She is a bit stubborn, she books under the target. Her bonus is the smallest, so she is not exactly an example. But the customers like her, c'est vrai.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "CSI by site, 'vehicle ready at promised time' / 'invoice in line with estimate' (region: 76 / 74). Waterloo 48 / 45. Brussels 46 / 44. Nivelles 51 / 47. Ottignies 50 / 49. Wavre 73 / 72. Advisor bonus paid last year, average per advisor: Wavre lowest of the five sites.",
+      "data_source": "Importer CSI report per site, with advisor variable pay totals"
     },
     {
       "id": "workshop_owner_son",
@@ -111,7 +138,8 @@
   ],
   "volunteered_facts": [
     "The group is second to last in the region on the importer's aftersales CSI.",
-    "Missing the CSI standard costs about 90,000 euro of margin bonus per quarter across the group."
+    "Missing the CSI standard costs about 90,000 euro of margin bonus per quarter across the group.",
+    "The advisors are experienced; most have been at the desk for years. 'They know the cars. It's the attitude.'"
   ],
   "constraints": {
     "budget": "About 25,000 euro this year, plus training credits the importer offers dealers through its own training centre.",
@@ -154,45 +182,49 @@
   "measurement": {
     "traps": [
       "Overall CSI alone: one number, sampled, quarterly, influenced by everything.",
-      "Happy sheets after a friendliness training.",
+      "Happy sheets or completion rates after a friendliness training nobody needed.",
       "Mystery shopping of the welcome, which is already the strongest item."
     ],
     "gold_plan": {
-      "baseline": "Share of cars handed back at the promised time and share of invoices within 10% of the estimate, per site, from the dealer system.",
-      "behaviour": "Advisors book with a planned buffer and call the customer for approval before adding work, checked in the job card notes.",
-      "leading_indicators": "Daily on-time hand-over rate; share of extra work with recorded customer approval.",
-      "business_metric": "CSI items 'ready on time' and 'invoice matched estimate', and the quarterly margin bonus.",
-      "collection": "Weekly dealer system report per site, pilot sites against the others, importer CSI per quarter."
+      "baseline": "Share of cars handed back at the promised time and share of invoices within 10% of the estimate, per site and per weekday versus Saturday, from the dealer system.",
+      "behaviour": "Workshop booked at the agreed buffer, one shared plan used by advisor and chef, and recorded customer approval before any extra work, checked in the job card notes.",
+      "leading_indicators": "Daily on-time hand-over rate; weekday booking level as % of mechanic hours; share of extra work with recorded customer approval.",
+      "business_metric": "CSI items 'ready on time' and 'invoice matched estimate', and the quarterly margin bonus, weighed against aftersales revenue.",
+      "collection": "Weekly dealer system report per site, pilot site against the others, importer CSI per quarter."
     }
   },
   "concepts": {
     "conventional": "A customer service and friendliness training for all 14 advisors.",
-    "solid": "One shared workshop planning between advisors and workshop chef, booking at about 80% of capacity, an approval call before any extra work, and a revised bonus that counts only approved extra work and includes on-time hand-over. Short practice sessions for advisors on promising realistic times and the approval call.",
+    "solid": "No training. Recommend booking at about 80% of capacity, one shared plan between advisors and the workshop chef, an approval call before any extra work, and a bonus that counts only approved extra hours and includes on-time hand-over. Offer L&D's help where it fits: facilitating the sessions where Philippe and Olivier agree the routine, running the pilot and its measurement, and the briefing to advisors on the new bonus.",
     "next_level_examples": [
-      "Pilot at one site with Olivier as co-owner: a ten-minute morning stand-up between advisors and the workshop chef at the board, with the chef's whiteboard as the single plan.",
-      "Rebuild the advisor bonus on two measures: approved extra hours and cars ready on time, so selling and keeping promises pay the same.",
-      "Use the importer's dealer training centre for a workshop-planning module that both chefs and advisors attend together, paid with importer credits."
+      "Pilot at one site with Olivier as co-owner, copying Wavre: a ten-minute morning stand-up between advisors and the workshop chef at the whiteboard, which becomes the single plan. Nadia explains to the other sites how she does it, as a peer, not as a trainer.",
+      "Rebuild the advisor bonus on two measures, approved extra hours and cars ready on time, so selling and keeping promises pay the same, and take the 'under-booking' remark out of Nadia's appraisal.",
+      "Spend the importer training credits on a workshop-planning module that chefs and advisors attend together, framed as a process change rather than advisor training."
     ],
     "also_valid": [
-      "A short module on explaining work and invoices is fine as a side measure, since that item is also below average."
+      "Redirecting the 25,000 euro budget to facilitation, the pilot and a dealer-system report, with a clear written 'no' to the smile course and the evidence behind it."
     ],
     "red_flags": [
       "Friendliness or smile training as the main answer.",
-      "Ignoring the upsell bonus because Philippe designed it.",
+      "Training advisors to promise realistic times or call for approval, when they already do it whenever the target lets them.",
+      "Ignoring the upsell bonus or the 100% booking target because Philippe designed them.",
       "Asking advisors to coach customers on the survey again.",
       "Leaving the workshop and Olivier out of the plan."
     ]
   },
   "defence_objections": [
+    "No training at all? I have a budget, I have the importer's credits, and I have a director who wants to see that I did something. 'We changed a bonus' is not a programme.",
     "Touch the bonus? Aftersales revenue is up 11% thanks to that bonus. The managing director will ask me why I am breaking the only thing that works.",
     "Book at 80%? That's 20% of my mechanics' hours I am throwing away. Who pays for that?",
     "You want me to go to Olivier and say his whiteboard should run my desk? Bon. You come with me."
   ],
-  "question_you_didnt_ask": "Which questions in the survey are actually low?",
+  "question_you_didnt_ask": "Is there a site, an advisor or a day of the week where this goes well, and what is different there?",
   "actor_notes": [
-    "Philippe is friendly and talkative but steers every answer back to 'attitude at the desk'. He reveals the bonus only when asked directly about advisor pay or targets, and then defends it with the revenue figure.",
+    "Philippe is friendly and talkative but steers every answer back to 'attitude at the desk'. He reveals the bonus only when asked directly about advisor pay or targets, and then defends it with the revenue figure. He presents the 100% booking target as 'just good management'.",
+    "Asked about Wavre or the best advisor, he admits Nadia does better but frames her as stubborn and under-performing on bonus. He does not connect her results to the target or the bonus until the player does.",
     "He becomes evasive and very polite about Olivier and the owner's family. A player who proposes involving Olivier as co-owner rather than as the culprit earns trust.",
-    "He respects players who ask for the detailed CSI report; it is a little embarrassing that he never opened it past page one.",
+    "He respects players who ask for the detailed CSI report or the dealer-system figures; it is a little embarrassing that he never opened the CSI report past page one.",
+    "A clear 'no, training won't fix this' first annoys him, then relieves him if it comes with evidence and a concrete plan he can show the managing director.",
     "If the player delivers the smile training, he is delighted, and the judge should note the missed diagnosis."
   ],
   "flavour_lines": [

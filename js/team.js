@@ -9,18 +9,24 @@
   ];
   const LINES = [['need', 'The need'], ['lever', 'Is learning the lever?'], ['measure', 'How we will know'], ['concept', 'The concept'], ['risks', 'Risks and dependencies']];
   const WHERE = { call: 'On the call', frontline: 'On the floor', data: 'In the data' };
-  const LEVER = { yes: 'Yes. A learning intervention fixes the core of this.', partly: 'Partly. Learning helps, but part of the cause sits outside training.', no: 'No. This is not a learning problem; the fix sits elsewhere.' };
+  // Several wordings per answer, so a flawed line can't be spotted by its phrasing alone.
+  const LEVER = {
+    yes: ['Yes. A learning intervention fixes the core of this.', 'Yes. The gap is know-how, so learning is the right tool.', 'Yes, learning is the lever here; the rest of the setup supports it.'],
+    partly: ['Partly. Learning helps, but part of the cause sits outside training.', 'Partly. Training covers one cause; the others need the client to change something.', 'Partly: learning plus a change in how the work is set up.'],
+    no: ['No. This is not a learning problem; the fix sits elsewhere.', 'No. People already know how; something else stops them.', 'No, training would not move this. The cause is in the system around them.']
+  };
+  const lowerFirst = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : t;
 
   // A seeded random, so the same week shows the same drafts after a reload.
   function rng(seed) { let s = 0; for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
   const pick = (r, list) => list[Math.floor(r() * list.length)];
 
-  function good(card, k) {
+  function good(card, k, r) {
     const m = card.measurementPlan || {};
     const dep = card.dependencies[0];
     return {
       need: card.needStatement,
-      lever: LEVER[card.learningIsTheAnswer] || LEVER.partly,
+      lever: pick(r, LEVER[card.learningIsTheAnswer] || LEVER.partly),
       measure: [m.baseline && 'Baseline: ' + m.baseline, m.business_metric && 'Metric: ' + m.business_metric].filter(Boolean).join(' '),
       concept: (card.calibration.strong || '').split(' Plus: ')[0],
       risks: dep ? dep.who + ': ' + dep.concern : 'Check who signs off before we start.'
@@ -30,20 +36,22 @@
   function flawed(card, k, r) {
     const s = card.stakeholder;
     const dep = card.dependencies[0];
-    if (k === 'need') return { text: 'They asked for it, so: ' + card.subject + '.', why: 'This repeats the request instead of the need. ' + card.needStatement };
+    const ask = String(card.subject || '').replace(/\.$/, '');
+    if (k === 'need') return { text: pick(r, ['They asked for it, so: ' + ask + '.', 'The need is what ' + s.name + ' asked for: ' + lowerFirst(ask) + '.', ask + '. The client knows their people best.', 'Deliver ' + lowerFirst(ask) + ', as requested, and make it engaging.']), why: 'This repeats the request instead of the need. ' + card.needStatement };
     if (k === 'lever') {
-      const wrong = card.learningIsTheAnswer === 'yes' ? LEVER.no : 'Yes. Training will fix this.';
-      return { text: wrong, why: 'The lever call is wrong for this case: ' + card.realProblem };
+      const right = card.learningIsTheAnswer in LEVER ? card.learningIsTheAnswer : 'partly';
+      const wrong = pick(r, Object.keys(LEVER).filter(x => x !== right));
+      return { text: pick(r, LEVER[wrong]), why: 'The lever call is wrong for this case: ' + card.realProblem };
     }
     if (k === 'measure') {
       const trap = card.measurementTraps.length ? pick(r, card.measurementTraps) : 'Satisfaction with the training.';
-      return { text: trap.replace(/\.$/, '') + '. That will tell us if it worked.', why: 'This measures the training, not the change at work. No baseline and no business metric.' };
+      return { text: trap.replace(/\.$/, '') + pick(r, ['. That will tell us if it worked.', '. Easy to collect, and the client likes the numbers.', '. We report it at the end of the pilot.', '.']), why: 'This measures the training, not the change at work. No baseline and no business metric.' };
     }
     if (k === 'concept') {
       const c = card.calibration.weak || pick(r, card.redFlags) || 'A one-day classroom course for everyone.';
       return { text: c, why: 'This is the conventional answer to the request. It does not fit the cause: ' + card.realProblem };
     }
-    return { text: 'None really. ' + s.name + ' is fully on board, so we can start next week.', why: dep ? 'It ignores ' + dep.who + '. ' + (dep.if_ignored || dep.concern) : 'It names no dependency at all.' };
+    return { text: pick(r, ['None really. ' + s.name + ' is fully on board, so we can start next week.', s.name + ' will handle the internal side; we focus on the content.', 'Low risk: it is training, and nobody objects to training.', 'We inform the staff by mail once the content is ready.']), why: dep ? 'It ignores ' + dep.who + '. ' + (dep.if_ignored || dep.concern) : 'It names no dependency at all.' };
   }
   // The draft: four sound lines and one flaw. Mostly the junior's usual weak spot, sometimes not.
   function draft(card, junior, seed) {
@@ -57,7 +65,7 @@
     return {
       junior: junior.id, card: card.id, flaw: flawAt, atypical, why: f.why,
       found,
-      lines: LINES.map(([k, label]) => ({ k, label, text: k === flawAt ? f.text : good(card, k) })),
+      lines: LINES.map(([k, label]) => ({ k, label, text: k === flawAt ? f.text : good(card, k, r) })),
       pick: null, note: '', grade: null
     };
   }

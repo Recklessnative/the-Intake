@@ -3,7 +3,7 @@
   "schema_version": 1,
   "sector": "Media",
   "tier": 3,
-  "tier_label": "Mostly not a training problem",
+  "tier_label": "Hard case: the obvious diagnosis is wrong",
   "title": "Web First, Paper Always",
   "briefing": {
     "headline": "A regional newsroom and its website: what you should know before the call",

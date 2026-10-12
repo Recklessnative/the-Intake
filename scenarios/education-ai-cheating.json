@@ -3,7 +3,7 @@
   "schema_version": 1,
   "sector": "Higher education",
   "tier": 3,
-  "tier_label": "Mostly not a training problem",
+  "tier_label": "Hard case: the obvious diagnosis is wrong",
   "title": "Catch Them If You Can",
   "briefing": {
     "headline": "Plagiarism and assessment in higher education: what you should know before the call",
@@ -28,116 +28,159 @@
     "role": "Lecturer in business management, ten years in",
     "voice": "Sharp, funny, overworked. Has opinions about committees. Cares about students, including the ones who cheat."
   },
-  "opening_message": "Our lecturers need training on plagiarism. Specifically, how to use the plagiarism-detection software we bought last year, so they catch students who copy from the internet or buy their papers. Fraud cases are exploding and the exam board is drowning. Could we have something for all 600 lecturers before the second semester?",
-  "surface_ask": "Plagiarism-detector training for 600 lecturers.",
+  "opening_message": "Plagiarism. Fraud cases are exploding and the exam board is drowning. We bought detection software last year, but using it is optional, so I'd like it made compulsory for every take-home paper, plus an academic-honesty module on the learning platform that all 9,000 students complete before the second semester. The exam board would also like tougher sanctions, but that is their department. Can you help us set this up?",
+  "surface_ask": "Compulsory detection-software checks on every paper plus an academic-honesty e-learning module for all 9,000 students (and, if the exam board gets its way, tougher sanctions).",
   "gold": {
-    "real_problem": "Most assessments are generic take-home written assignments that can be copy-pasted together or bought from an essay mill, so detection is a losing game: a bought custom paper doesn't match anything. The detection software the college bought flags correctly quoted text and the careful, formulaic writing of non-native students disproportionately, and most fraud cases are dismissed on appeal. Lecturers want to redesign assessments but the exam regulations require written take-home work in many courses and don't allow oral checks without a formal change.",
+    "real_problem": "The fraud cases are not spread across the college: 71% come from 31 course units in three business programmes, almost all taught by part-time lecturers from the field appointed in the last four years. They inherited generic, single-submission take-home essays that can be copy-pasted together or bought from an essay mill, and nobody ever taught them how to design an assignment that can't be, or how to run a short oral authenticity check. The usual suspects are already in place and not working: the regulations have allowed an oral authenticity conversation since 2006 (used nine times), the detection software has been running all year with its settings fixed in September, sanctions were tightened last year and students already sign an honesty statement. Where lecturers use staged drafts, personal or local briefs and oral checks (nursing, IT), cases are near zero and the few cases that do arise hold up on appeal.",
     "root_cause_types": [
-      "process",
-      "expectations",
       "skill"
     ],
-    "is_training_the_lever": "partly",
-    "need_statement": "The problem is assessment design and policy, not detection skill. The exam regulations and plagiarism policy need updating so lecturers can use oral checks, in-class work and assignments that can't simply be copied or bought; lecturers then need support redesigning their own assessments, and students need to be taught how to quote and reference. Detector training on its own would increase false accusations."
+    "is_training_the_lever": "yes",
+    "need_statement": "About 45 part-time lecturers teaching the 31 most affected course units in Business Management, Communication Management and Office Management need to be able to redesign their own assignments so they can't simply be copied or bought (staged drafts, briefs tied to the student's own internship or a local case, in-class components) and to run a fair ten-minute oral authenticity check under the existing art. 41bis. Train them hands-on, with the nursing and IT pioneers, before the second semester. More detection, more rules, tougher sanctions or a student e-learning module would treat a skill gap as a discipline problem, and training all 600 lecturers would bury the 45 who need it."
   },
   "hidden_facts": [
     {
-      "id": "appeals",
-      "fact": "Of 212 plagiarism fraud cases this year, 61% were dismissed or overturned on appeal for lack of evidence.",
-      "unlocks_when": "The player asks how fraud cases end, what the exam board sees, or whether detection actually holds up.",
-      "reveal_line": "We had 212 cases. 61% didn't survive. 'The software says 43% similarity' turns out not to be evidence. Who knew. Well, the lawyers knew.",
+      "id": "concentration",
+      "fact": "151 of the 212 fraud cases (71%) come from 31 course units in Business Management, Communication Management and Office Management; 27 of those 31 units are taught by part-time lecturers from the field appointed in the last four years. Units with staged drafts or an oral component produced 4 cases between them.",
+      "unlocks_when": "The player asks where the cases come from: which programmes, courses or lecturers, or for a breakdown of the case data.",
+      "reveal_line": "I've only ever seen the total. Let me ask the exam board secretary for the breakdown... Oh. Thirty-one course units. That is not 'exploding'. That is a neighbourhood.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "data:kpi"
       ],
-      "data_doc": "212 suspected plagiarism fraud cases. Upheld: 83. Dismissed or overturned on appeal: 129 (61%). Most common reason for dismissal: flagged passages were correctly quoted and referenced.",
-      "data_source": "Exam board report, academic year to date"
+      "data_doc": "212 suspected plagiarism cases, academic year to date. By programme: Business Management 74, Communication Management 49, Office Management 28, all other 19 programmes 61. The 151 cases in the three business programmes come from 31 course units; 27 of these are taught by part-time lecturers appointed 2003-2007. Assessment format of all units with cases: single final take-home submission 192 cases; staged drafts or oral component 4 cases; other 16.",
+      "data_source": "Exam board case register, broken down by course unit and lecturer contract"
     },
     {
-      "id": "false_positives",
-      "fact": "Students writing in Dutch as a second language are flagged by the detection software about three times as often as native speakers, and correctly quoted passages count towards the similarity score.",
-      "unlocks_when": "The player asks who gets flagged, about fairness, or about the detection software's reliability.",
-      "reveal_line": "The student council sent us an analysis. Students who write in Dutch as a second language get flagged three times as often. That is not a sentence I wanted to read.",
+      "id": "appeals",
+      "fact": "61% of fraud cases are dismissed on appeal, mostly because a similarity score is not evidence and bought papers match nothing. Of the 83 upheld cases, 64 had draft versions or a record of an oral conversation on file.",
+      "unlocks_when": "The player asks how fraud cases end, what the exam board sees, or what makes a case hold up.",
+      "reveal_line": "129 of 212 didn't survive appeal. The ones that did mostly had drafts or a conversation on file. 'The software says 43%' does not impress the ombudsperson. Or me, frankly.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "data:kpi",
-        "frontline"
-      ],
-      "data_doc": "Share of papers above the 25% similarity threshold: students writing in Dutch as a first language 9%; as a second language 27%. In the default settings, text between quotation marks and the reference list count towards the score.",
-      "frontline_line": "The software flagged three of my best students last term. All three learned Dutch as adults. They lean on standard phrases and quote their sources properly, so the score goes red. Think about that.",
-      "data_source": "Student council analysis of detection reports"
-    },
-    {
-      "id": "take_home",
-      "fact": "About 70% of course assessments are take-home written assignments, many with the same topic every year.",
-      "unlocks_when": "The player asks how students are assessed, what kind of assignments are affected, or about assessment design.",
-      "reveal_line": "Most of our assessment is take-home writing. Reports, reflections, essays. Often the same assignment as last year, and the year before. It was efficient. It was.",
-      "weight": 3,
-      "critical": true,
-      "found_at": [
-        "data:process",
         "call"
       ],
-      "data_doc": "Assessment types across 640 course units. Take-home written assignment as main assessment: 70%. In-class or oral: 22%. Other: 8%. Assignment unchanged for three years or more: 48% of take-home units.",
-      "data_source": "Course sheets audit"
+      "data_doc": "212 cases. Upheld: 83. Dismissed or overturned on appeal: 129 (61%). Main reasons for dismissal: similarity report only, no other evidence (71); flagged passages correctly referenced (22); suspected purchased paper, no match found (31); other (5). Upheld cases with drafts or a recorded oral conversation on file: 64 of 83.",
+      "data_source": "Exam board report, academic year to date"
     },
     {
       "id": "regulations",
-      "fact": "The exam regulations require a written product for many courses and don't allow an oral follow-up conversation unless announced in the course sheet a year ahead.",
-      "unlocks_when": "The player asks what stops lecturers from changing assessments, or about the rules and regulations.",
-      "reveal_line": "Lecturers can't just add an oral check. It has to be in the course sheet, approved a year ahead. The regulations are... thorough.",
-      "weight": 2,
-      "critical": false,
+      "fact": "Since September 2006, art. 41bis of the exam regulations lets any lecturer hold a short oral 'authenticity conversation' about any written assignment, without announcing it in the course sheet. It has been used nine times in a year by 600 lecturers.",
+      "unlocks_when": "The player asks what the rules already allow, whether lecturers may check authenticity orally, or whether a policy change is needed.",
+      "reveal_line": "Ah. Yes. Art. 41bis. I chaired that working group. Lecturers may ask any student to explain their paper, no notice needed. It's been used nine times. Nine. I've had more fire drills.",
+      "weight": 3,
+      "critical": true,
       "found_at": [
         "data:policy",
         "call"
       ],
-      "data_doc": "Assessment form must be stated in the course sheet, approved by the education council before the start of the academic year. Art. 41: oral follow-up only if foreseen in the course sheet.",
-      "data_source": "Exam regulations, art. 34"
+      "data_doc": "Art. 41bis (in force since 1 September 2006): for any written assignment, the examiner may invite the student to a short oral conversation to verify authorship. Prior mention in the course sheet is not required. Recorded uses, academic year 2006-2007: 9 (Nursing 5, Applied IT 3, Business Management 1).",
+      "data_source": "Exam regulations, art. 41bis, and exam board log"
     },
     {
-      "id": "lecturers_want",
-      "fact": "A staff survey shows most lecturers want help redesigning assessments and feel detection 'turns them into police'.",
-      "unlocks_when": "The player asks what lecturers themselves want or how they feel about it.",
-      "reveal_line": "The survey was clear. They don't want to be detectives. They want time and help to change their assignments. And maybe a holiday.",
+      "id": "false_positives",
+      "fact": "The detection software (Naspeur) has run on every uploaded paper since last year. After the student council showed second-language writers were flagged three times as often, ICT changed the settings in September to exclude quotes and reference lists; the gap closed, but cases kept rising.",
+      "unlocks_when": "The player asks about the detection software: how it is used, how reliable or fair it is, or whether making it compulsory would help.",
+      "reveal_line": "The software isn't the issue, it already checks almost everything uploaded. There was an unpleasant analysis about second-language students; ICT fixed the settings in September. The flags got fairer. The cases didn't go down.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:process",
+        "call"
+      ],
+      "data_doc": "Naspeur similarity checks, academic year to date: 11,840 papers checked (94% of take-home submissions uploaded to the learning platform). Settings changed 15 September: quotes and reference lists excluded. Flag rate above 25% before/after: first-language writers 9% / 7%; second-language writers 27% / 8%. Suspected purchased papers with a match found: 0.",
+      "data_source": "ICT service, Naspeur usage report"
+    },
+    {
+      "id": "sanctions",
+      "fact": "Sanctions were already tightened last year (zero for the whole course unit instead of the assignment) and every student signs an honesty statement with each submission since 2005. Cases rose 40% anyway.",
+      "unlocks_when": "The player asks what the college has already tried against plagiarism: sanctions, policy, student awareness.",
+      "reveal_line": "Tougher sanctions? We did that last year. And the students sign an honesty declaration with every paper. They sign it very honestly.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:policy"
+      ],
+      "data_doc": "Plagiarism policy, revised June 2006: proven plagiarism leads to zero for the whole course unit (previously: the assignment). Honesty statement mandatory on every submission since 2005. Suspected cases: 2005-2006: 151; 2006-2007 to date: 212.",
+      "data_source": "Plagiarism policy and exam board annual figures"
+    },
+    {
+      "id": "induction_gap",
+      "fact": "The basic teaching qualification for new lecturers covers lecturing, rubrics and grading, but nothing on designing assessments or checking authorship. Part-timers inherit the course sheet and the assignment from their predecessor and often ask colleagues how to write an assignment that can't be bought.",
+      "unlocks_when": "The player asks how new or part-time lecturers learn to design assessments, what training they've had, or who wrote the assignments in the affected courses.",
+      "reveal_line": "New lecturers do the basic teaching qualification. It covers... lecturing. And grading. Designing an assignment? I suppose we assumed that came with the job.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "data:training",
+        "call"
+      ],
+      "frontline_line": "The part-timers come to me every semester. Lovely people, real experience, they run marketing departments. They got last year's essay question in a folder and a login. One asked me, very sincerely, how you write an assignment that a website can't sell. Nobody ever showed them.",
+      "data_doc": "Basic teaching qualification (BKO), 6 sessions: 1 Lecturing large groups; 2 Activating teaching methods; 3 Using the learning platform; 4 Rubrics and grading; 5 Feedback; 6 Student guidance. Assessment design: not included. Participation of part-time lecturers appointed 2003-2007: 41 of 52.",
+      "data_source": "Educational development unit, BKO programme and attendance"
+    },
+    {
+      "id": "tried_and_failed",
+      "fact": "Two part-timers tried an authenticity conversation after a suspicious paper; with no idea what to ask, they asked general questions, the student coped, and both cases collapsed. They won't try again.",
+      "unlocks_when": "The player asks the frontline whether lecturers ever check authorship themselves, or what happens when they suspect a bought paper.",
+      "reveal_line": "I believe one or two tried the oral conversation. I don't know how it went.",
       "weight": 2,
       "critical": false,
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "Detector training? I didn't become a lecturer to be a detective. Give me two afternoons to redesign my assignments and I'll fix my own course."
+      "frontline_line": "Two of the part-timers tried the oral thing. Asked 'so, tell me about your paper'. The kid had read it on the train, did fine, case closed. You have to ask about choices, drafts, the bit they cut. Nobody told them that. Now they say orals don't work."
     },
     {
       "id": "pioneers",
-      "fact": "A handful of lecturers in the nursing and IT programmes already redesigned assessments around in-class work, oral defences and assignments tied to the student's own internship, with almost no fraud cases.",
+      "fact": "Lecturers in nursing and IT redesigned their assessments after a two-afternoon workshop from the educational development unit in 2005: staged drafts, briefs tied to the student's own internship, short oral checks. They have almost no cases, and the ones they have hold up.",
       "unlocks_when": "The player asks whether anyone is already doing it differently, or about good practice inside the college.",
-      "reveal_line": "Nursing and IT have a few pioneers. In-class writing, oral defences, assignments built on the student's own internship. Hardly any cases. Hardly any noise either.",
+      "reveal_line": "Nursing and IT. They did a workshop with our educational developers two years ago and changed everything. Drafts, internship-based assignments, short orals. Hardly any cases. Hardly any noise either.",
       "weight": 2,
       "critical": false,
       "found_at": [
         "frontline",
         "call"
       ],
-      "frontline_line": "Nursing and IT already changed their assessments. In-class writing, a short oral defence, assignments about your own internship that no essay website can sell you. They barely have cases. Nobody asked them to present it."
+      "frontline_line": "Nursing and IT went through a redesign workshop in 2005. Drafts, a ten-minute oral, assignments about your own internship that no essay website can sell you. They barely have cases. Nobody asked them to show the business programmes."
+    },
+    {
+      "id": "take_home",
+      "fact": "About 70% of course assessments are take-home written work across the college, in nursing and IT as much as elsewhere; the difference is design. In the three business programmes, 81% of take-home units are a single generic final essay unchanged for three years or more.",
+      "unlocks_when": "The player asks how students are assessed, what kind of assignments are affected, or about assessment design.",
+      "reveal_line": "Most of our assessment is take-home writing, everywhere. Nursing too. But in the business programmes it's often one final essay, same topic as last year, and the year before. Efficient. It was.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:process",
+        "call"
+      ],
+      "data_doc": "Take-home written work as main assessment: all programmes 70%; Nursing 72%; Applied IT 68%; Business, Communication and Office Management 74%. Of take-home units with drafts or an oral component: Nursing 85%, Applied IT 77%, the three business programmes 9%. Single final essay unchanged for three years or more: business programmes 81%, college average 48%.",
+      "data_source": "Course sheets audit"
     }
   ],
   "volunteered_facts": [
     "Fraud cases have 'exploded' and the exam board is overloaded.",
+    "The college already bought detection software last year; she thinks it should simply be compulsory.",
+    "She sees it as a matter of student honesty and enforcement, not of teaching.",
     "Second semester starts in February."
   ],
   "constraints": {
-    "budget": "Professional development budget of about 30,000 euro; lecturer time is the scarce resource.",
-    "deadline": "Second semester in February; exam regulations can only change for next academic year.",
-    "audience": "600 lecturers across 22 programmes; many part-time with jobs in the field.",
-    "schedule": "Teaching loads are high; professional development happens in two 'education days' a year.",
+    "budget": "Professional development budget of about 30,000 euro; lecturer time, especially part-timer time, is the scarce resource.",
+    "deadline": "Second semester in February; course sheets for next academic year are due in May.",
+    "audience": "600 lecturers across 22 programmes; about 45 part-time lecturers teach the most affected course units. Part-timers have jobs in the field and are paid per teaching hour.",
+    "schedule": "Teaching loads are high; professional development happens on two 'education days' a year, which many part-timers can't attend.",
     "languages": "Dutch, some English-taught programmes.",
     "data_available": [
-      "Fraud case files and appeal outcomes",
+      "Fraud case register with course unit and lecturer",
+      "Appeal outcomes",
       "Detection software reports",
-      "Staff survey on plagiarism and assessment",
-      "Student council analysis of flags",
+      "Exam regulations and exam board log",
+      "Basic teaching qualification programme",
       "Course sheets with assessment types"
     ],
     "data_not_available": [
@@ -146,77 +189,86 @@
   },
   "dependencies": [
     {
-      "who": "Exam board and education council",
-      "concern": "Own the exam regulations; changes follow the annual governance cycle.",
-      "if_ignored": "Redesigned assessments are not allowed until the rules change."
+      "who": "Exam board",
+      "concern": "Overloaded and convinced the answer is tougher sanctions and compulsory detection.",
+      "if_ignored": "They keep pushing enforcement and treat redesign as going soft."
+    },
+    {
+      "who": "Programme heads of Business, Communication and Office Management",
+      "concern": "Own the course units, teaching assignments and the part-timers' hours.",
+      "if_ignored": "The part-timers never get released for the workshop and nothing changes in the 31 units."
+    },
+    {
+      "who": "Part-time lecturers' contracts (HR)",
+      "concern": "Part-timers are paid per teaching hour; development time isn't in their contract.",
+      "if_ignored": "The people who need it most can't come, or come unpaid and resentful."
+    },
+    {
+      "who": "Educational development unit",
+      "concern": "Two people who ran the 2005 workshop for nursing and IT; capacity is limited.",
+      "if_ignored": "No one to run it, or it becomes a lecture instead of hands-on redesign."
     },
     {
       "who": "Student council",
-      "concern": "Has evidence of unfair flagging and will escalate it.",
-      "if_ignored": "A discrimination story in the press."
-    },
-    {
-      "who": "Legal / ombudsperson",
-      "concern": "Fraud procedures and appeals; similarity scores don't hold as evidence.",
-      "if_ignored": "More cases lost on appeal and more distrust."
+      "concern": "Will object to treating all 9,000 students as suspects and still remembers the flagging analysis.",
+      "if_ignored": "A fight about compulsory detection that distracts from the real fix."
     },
     {
       "who": "Legal service (privacy)",
-      "concern": "Uploading student work to the vendor's database abroad is a question under the 1992 privacy law, and students were never asked.",
-      "if_ignored": "The software itself may become the scandal."
-    },
-    {
-      "who": "Programme heads",
-      "concern": "Own course sheets and workload.",
-      "if_ignored": "Redesign stays a hobby of pioneers."
+      "concern": "Compulsory upload of every paper to the vendor's database abroad is a question under the 1992 privacy law.",
+      "if_ignored": "Making detection compulsory could become the scandal."
     }
   ],
   "measurement": {
     "traps": [
-      "Number of lecturers trained on the detection software.",
-      "Number of fraud cases detected: going up looks like success but means more unfair accusations.",
-      "Similarity scores as a measure of anything."
+      "Completion rate of the student honesty e-learning.",
+      "Share of papers run through the detection software.",
+      "Number of fraud cases detected: going up looks like success.",
+      "Number of lecturers 'trained', counted across all 600."
     ],
     "gold_plan": {
-      "baseline": "Share of assessments vulnerable to copying or buying (generic, take-home, unchanged for years), fraud cases and appeal outcomes, and flag rates by language background.",
-      "behaviour": "Lecturers redesign assessments: in-class components, oral checks, assignments tied to the student's own work or internship, recorded in course sheets; first-years are taught quoting and referencing.",
-      "leading_indicators": "Number of course sheets changed for next year; lecturers using a shared redesign toolkit.",
-      "business_metric": "Fraud cases and appeals, exam board workload, and student perception of fairness.",
-      "collection": "Course sheet audit, exam board statistics, student council survey."
+      "baseline": "Cases and appeal outcomes per course unit; assessment design of the 31 affected units (single submission, unchanged for years); art. 41bis uses per programme.",
+      "behaviour": "The targeted part-timers hand in a redesigned assignment for the second semester (drafts, personal or local brief, in-class part) and run authenticity conversations with a question guide when they suspect fraud.",
+      "leading_indicators": "Number of the 31 units with a redesigned assignment by February; art. 41bis uses and their outcomes; course sheets changed for next year by May.",
+      "business_metric": "Suspected cases in the 31 units, share of cases upheld on appeal, and exam board workload.",
+      "collection": "Exam board case register by course unit, art. 41bis log, course sheet audit, short check-in with the part-timers after the first semester round."
     }
   },
   "concepts": {
-    "conventional": "Plagiarism-detector training for all 600 lecturers.",
-    "solid": "Stop treating the similarity score as a verdict, propose a plagiarism and assessment policy change through the exam board for next year, and run assessment redesign clinics per programme with the pioneers, starting with the most vulnerable courses. Short term: guidance for lecturers on how to read a similarity report (quotes and references excluded) and what to do when they suspect fraud, plus a referencing module for first-years.",
+    "conventional": "Make detection compulsory, roll out an academic-honesty e-learning to all 9,000 students, and toughen sanctions.",
+    "solid": "A hands-on assessment redesign workshop (two afternoons or evenings, paid) for the roughly 45 part-time lecturers teaching the 31 most affected units, run by the educational development unit with the nursing and IT pioneers: each lecturer brings their own assignment and leaves with a redesigned one (staged drafts, internship or local-case brief, in-class part) ready for February, plus practice running a ten-minute authenticity conversation under art. 41bis with a question guide. No regulation change, no new software, no student e-learning needed.",
     "next_level_examples": [
-      "The pioneers become an 'assessment design studio': lecturers bring one assignment and leave with a redesigned version, co-designed with students.",
-      "Make process the default: students hand in outlines, drafts and a short oral defence, and are graded on how they got there, not just the product.",
-      "Use the detection software as a teaching tool: students run their own drafts through it and learn to quote properly before anything counts."
+      "Pair each part-timer with a nursing or IT pioneer for one semester: one redesign, one co-held oral check.",
+      "Rehearse authenticity conversations with student council volunteers playing the suspect, so lecturers learn which questions expose a bought paper.",
+      "Build a small library of 'unbuyable' assignment patterns from the pioneers and add an assessment-design session to the basic teaching qualification so the next intake of part-timers doesn't need rescuing."
     ],
     "also_valid": [
-      "A short session on reading similarity reports correctly is fine as part of redesign support, not as the main response."
+      "A one-page guide on reading similarity reports, as a side note to the redesign workshop.",
+      "Starting with the ten units with the most cases if not all 45 can be released before February."
     ],
     "red_flags": [
-      "Detector training as the main response.",
-      "Relying on similarity scores as evidence.",
-      "Ignoring the bias against non-native writers and students who quote correctly.",
-      "Banning internet sources outright without changing assessment."
+      "Saying this isn't a training problem and recommending policy or regulation changes that already exist.",
+      "Making detection compulsory or buying more software.",
+      "A student honesty e-learning or tougher sanctions as the main response.",
+      "Training all 600 lecturers in the same thing.",
+      "Detector training as the main response."
     ]
   },
   "defence_objections": [
-    "Stop relying on the software? The exam board will say we've given up on academic integrity.",
-    "Oral defences for every course? Half my colleagues will call it unworkable and the other half will call it a fad.",
-    "Change the regulations? That's a year of committees, and I have an exam board drowning now."
+    "Only the part-timers in three programmes? The other 555 will feel accused of nothing and the 45 will feel accused of everything.",
+    "They're paid per teaching hour and run companies in the daytime. You want two afternoons from them before February?",
+    "And the exam board? They want sanctions. If I come back with 'a workshop', they'll say we've gone soft."
   ],
-  "question_you_didnt_ask": "How many of those fraud cases actually hold up?",
+  "question_you_didnt_ask": "Which courses do the fraud cases actually come from, and who teaches them?",
   "actor_notes": [
-    "Ilse already doubts the software but asks for training because the exam board is overwhelmed; she is relieved when the player challenges the premise with evidence.",
-    "She values nuance: players who say 'just trust the students' without addressing integrity lose trust, as do players who treat students as cheaters.",
-    "Low risk appetite because of governance and academic culture; a phased plan (pilot programmes now, regulation change next year) lowers resistance.",
-    "She reveals the false-positive analysis with visible discomfort."
+    "Ilse genuinely believes this is about student honesty and enforcement; she has only seen the total number of cases and does not know the breakdown by course unit (that is in the data, not in her head).",
+    "She chaired the art. 41bis change and is visibly embarrassed when asked what the rules already allow; she won't raise it herself.",
+    "She resists 'train all 600' and 'it's a policy problem'; she warms up when the player shows the concentration and the appeal evidence, and asks for something targeted and doable before February.",
+    "She values nuance: players who say 'just trust the students' lose trust, as do players who treat students or part-timers as cheaters or incompetents.",
+    "Low risk appetite: a targeted pilot with the pioneers, using rules that already exist, is far easier for her to sell than anything that needs committees."
   ],
   "flavour_lines": [
-    "We spent two years teaching students to quote their sources. Now the software punishes them for it.",
+    "We wrote a beautiful article 41bis. It has been used nine times. I've had more fire drills.",
     "The detection software is 98% accurate, according to the detection software's brochure."
   ]
 }

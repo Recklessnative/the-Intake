@@ -31,13 +31,14 @@
   "opening_message": "Our field technicians are resisting the new work-order software on the handhelds. Adoption is stuck at 55%. I'd like a computer skills bootcamp for all 320 of them, something with a 'digital mindset' angle. The board reviews the programme in March.",
   "surface_ask": "A computer skills and mindset bootcamp for 320 field technicians.",
   "gold": {
-    "real_problem": "The technicians can use the handheld; it doesn't fit their work. The software needs a GPRS connection to close a job, and there is no signal in basements and rural cabins, so jobs can't be closed on site; and the safety department still requires the paper permit form because the handheld's version wasn't validated. Technicians do double work and fall back on paper. Their resistance is rational, and IT chose the system without field input.",
+    "real_problem": "The technicians can use the handheld perfectly well: the pilot team passed the proficiency check and the same technicians close nearly every job on it where there is signal. It doesn't fit the work. The software needs a live GPRS connection to close a job and there is none in basements and rural cabins; meter administration still demands the signed carbon-copy job sheet and safety still demands the paper permit, so every job is entered twice; and the depot jobs-per-day norm, which feeds the team premium, was never adjusted, so using the handheld costs a technician money. Falling back on paper is the rational choice. 'Resistance' is the label a programme gives to its own design gaps.",
     "root_cause_types": [
       "system",
-      "process"
+      "process",
+      "incentive"
     ],
-    "is_training_the_lever": "partly",
-    "need_statement": "Adoption is blocked by the lack of offline use and a duplicate safety form, not by computer skills. Getting the software to store jobs offline and sync later, and getting the digital permit validated, are the levers; learning can help through field champions and short how-tos for the workarounds."
+    "is_training_the_lever": "no",
+    "need_statement": "Adoption is blocked by connectivity, duplicate paper demands and a productivity norm that punishes the handheld, not by skills or mindset; any training for the 320 technicians would change nothing. The levers sit with IT and the supplier (offline store-and-forward mode), meter administration and safety (accept the handheld record, validate the electronic permit) and operations (a realistic jobs-per-day norm during the transition). L&D's role is to decline the bootcamp, bring those owners and the field into one redesign with the technicians, and help Thomas tell the board an honest story with adoption split by route type."
   },
   "hidden_facts": [
     {
@@ -55,31 +56,60 @@
     },
     {
       "id": "double_paper",
-      "fact": "The safety department still requires the paper work permit, because the handheld's electronic permit was never validated. Technicians fill in both.",
-      "unlocks_when": "The player asks what technicians still do on paper, about safety procedures, or why they fall back on old methods.",
-      "reveal_line": "Safety still wants the paper permit. The electronic one is 'under review'. Since June. So yes, technically they fill in both.",
+      "fact": "Meter administration still requires the signed carbon-copy job sheet for every job, because its billing system can't read the handheld's records; the safety department also still requires the paper permit because the electronic one was never validated. Technicians enter every job twice.",
+      "unlocks_when": "The player asks what technicians still do on paper, what happens to a job after it is closed, or why they fall back on old methods.",
+      "reveal_line": "Well. Meter administration still wants the yellow carbon copy. Their billing system and our system don't, ehm, talk yet. And safety still wants the paper permit; the electronic one is 'under review'. Since June. So yes, technically they do everything twice.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline",
+        "data:process"
+      ],
+      "data_doc": "Job close-out procedure, rev. 3. Step 4: technician closes the work order on the handheld. Step 5: technician hands the signed carbon-copy job sheet (yellow copy) to the depot clerk for meter administration; invoices are only raised on the yellow copy. Step 6: paper work permit (SP-07) filed with the depot safety officer. Electronic permit: under review since June.",
+      "data_source": "Field operations procedure FO-12, job close-out",
+      "frontline_line": "I close it on the handheld, then I fill in the yellow carbon copy because billing won't invoice without it, then the paper permit because safety wants that too. Same job three times. Then they say we 'resist'."
+    },
+    {
+      "id": "skills_fine",
+      "fact": "The usage data shows it is coverage, not skill: technicians close 94% of jobs on the handheld at addresses with GPRS signal and 12% at addresses without, and many of the 'non-users' are the same people on mixed routes. Forms take 3.1 minutes on average, the same as the pilot group.",
+      "unlocks_when": "The player asks who uses the handhelds and who doesn't, whether non-users differ from users, or for usage by location.",
+      "reveal_line": "Interesting, actually. Where there's signal they close nearly everything on it. Same people. I'd assumed it was the older guys.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Jobs closed on handheld, last quarter, by GPRS coverage at job address: covered 94%, no coverage 12%. Average form completion time 3.1 min (pilot group 3.0). Technicians with both covered and uncovered jobs: 71% of all technicians. Non-users by route type: rural 48%, city basement 31%, other 21%.",
+      "data_source": "Work-order system usage report, by job address"
+    },
+    {
+      "id": "pilot_passed",
+      "fact": "The pilot ran with 12 technicians from the city-centre depot, which has full GPRS coverage and no basements on its routes. All 12 passed the handheld proficiency check and adoption in the pilot was 97%. The pilot was never run on a rural or basement route.",
+      "unlocks_when": "The player asks how the pilot went, who was in it, or whether technicians were ever tested on the handheld.",
+      "reveal_line": "The pilot was a triumph. Twelve technicians, all passed the proficiency check, 97% adoption. City-centre depot. Very good coverage there. We... didn't get round to a rural depot. The timeline, you understand.",
+      "weight": 2,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Mobile Workforce pilot, city-centre depot, 12 technicians, 6 weeks. Proficiency check: 12 of 12 passed (average score 91%). Jobs closed on handheld: 97%. Route profile: urban, street-level, full GPRS coverage. Rural and basement pilot: postponed (planning).",
+      "data_source": "Mobile Workforce pilot evaluation report"
+    },
+    {
+      "id": "job_norm",
+      "fact": "Depots plan and score technicians on jobs per day, and the quarterly team premium depends on it. The norm was set for paper. Closing a job on the handheld adds 6 to 10 minutes on mixed routes (walking out to find signal, retries, then the carbon copy anyway), so a technician who uses it diligently does about one job fewer a day and drags the team premium down.",
+      "unlocks_when": "The player asks how technicians are measured or paid, what the handheld does to their day, or whether using it costs them anything.",
+      "reveal_line": "Jobs per day? That's operations, not my programme. The norm is... from before the handhelds, I suppose. Nobody told me it was linked to a premium.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "frontline",
         "data:policy"
       ],
-      "data_doc": "Paper permit mandatory. Digital permit status: under review since June.",
-      "frontline_line": "Safety still wants the paper permit. So I fill in the handheld and the paper. Same thing twice. Then they say we 'resist'.",
-      "data_source": "Safety procedure SP-07, work permits for gas and high-voltage jobs"
-    },
-    {
-      "id": "skills_fine",
-      "fact": "In the system's own usage data, technicians who use the handheld complete forms as fast as the pilot group; the 45% who don't use it are mostly on basement and rural routes.",
-      "unlocks_when": "The player asks who uses the handhelds and who doesn't, or whether the non-users differ from users.",
-      "reveal_line": "Interesting, actually. The users are fast. The non-users are mostly the rural and city-basement teams. I'd assumed it was the older guys.",
-      "weight": 3,
-      "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
-      "data_doc": "Users (55%) complete forms in 3.1 min on average (pilot group: 3.0). Non-users by route type: rural 48%, city basement 31%, other 21%.",
-      "data_source": "Work-order system usage report"
+      "data_doc": "Depot productivity norm: 8 jobs per technician per day (set 2004). Quarterly team premium: paid when the depot average reaches 95% of norm. Norm review linked to Mobile Workforce rollout: not scheduled.",
+      "data_source": "Field operations productivity and premium rules 2007",
+      "frontline_line": "The norm is eight jobs a day, set when it was all paper. With the handheld I walk up out of the basement, wave it at the sky, wait, retry, then do the carbon copy anyway. That's a job less by the evening. And the team premium is jobs per day. So who's resisting what?"
     },
     {
       "id": "no_field_input",
@@ -123,7 +153,8 @@
   ],
   "volunteered_facts": [
     "Adoption is 55% after six months.",
-    "The board reviews the Mobile Workforce programme in March."
+    "The board reviews the Mobile Workforce programme in March.",
+    "The pilot went 'extremely well', which is why he is so puzzled by the resistance."
   ],
   "constraints": {
     "budget": "Change management budget of about 80,000 euro in the programme.",
@@ -148,9 +179,19 @@
       "if_ignored": "Double paperwork stays and adoption can't pass the paper ceiling."
     },
     {
+      "who": "Meter administration (billing)",
+      "concern": "Raises invoices only from the yellow carbon copy; accepting the handheld record means changing their own procedure.",
+      "if_ignored": "Every job stays double-entered and the handheld remains extra work."
+    },
+    {
       "who": "IT and the software supplier",
       "concern": "Offline mode is planned for a later release and is a contract change.",
-      "if_ignored": "40% of jobs remain impossible to close on the handheld."
+      "if_ignored": "Jobs at uncovered addresses remain impossible to close on the handheld."
+    },
+    {
+      "who": "Operations and depot managers",
+      "concern": "Own the jobs-per-day norm and the quarterly team premium.",
+      "if_ignored": "Using the handheld keeps costing technicians money, and they keep choosing paper."
     },
     {
       "who": "Union and Marleen",
@@ -170,46 +211,51 @@
   ],
   "measurement": {
     "traps": [
-      "Bootcamp attendance and satisfaction.",
-      "Adoption rate alone: can be forced up by mandate while work quality drops.",
+      "Bootcamp attendance and satisfaction, or any training completion figure.",
+      "Adoption rate alone: it can be forced up by mandate while technicians still fill in the carbon copy behind it.",
       "Ranking individual technicians by handheld usage."
     ],
     "gold_plan": {
-      "baseline": "Adoption and job close-out times split by route type (urban, basement, rural), plus share of jobs with duplicate paper permits.",
-      "behaviour": "Jobs closed on the handheld on site; paper permits no longer used once the electronic one is validated.",
-      "leading_indicators": "Help desk tickets by type, offline-mode usage once available, champion sessions held per depot.",
-      "business_metric": "Time from job completion to administrative close, backlog, and safety permit audit results.",
-      "collection": "Handheld logs aggregated per depot and route type, permit audits by the safety department, monthly depot review."
+      "baseline": "Jobs closed on the handheld split by GPRS coverage and route type, minutes from job end to administrative close, share of jobs with a duplicate carbon copy or paper permit, and jobs per day per depot.",
+      "behaviour": "Jobs closed on the handheld on site, including uncovered addresses once offline mode exists; carbon copies and paper permits no longer produced once the handheld record is accepted.",
+      "leading_indicators": "Offline sync volume, depots where meter administration invoices from the handheld record, permit validation milestone, help desk tickets about signal and sync.",
+      "business_metric": "Time from job completion to invoice, work-order backlog, jobs per day against an adjusted norm, and safety permit audit results.",
+      "collection": "Handheld logs aggregated per depot and route type (never per person, agreed with the works council), billing lead times from meter administration, permit audits by the safety department, a monthly depot review with technicians present."
     }
   },
   "concepts": {
-    "conventional": "A computer skills and mindset bootcamp for all 320 technicians.",
-    "solid": "Fix the blockers first: push offline mode (store jobs, sync at the depot or when signal returns) and the electronic permit validation, then appoint one technician champion per depot with short how-tos for the remaining workarounds. Report adoption per route type to the board.",
+    "conventional": "A computer skills and 'digital mindset' bootcamp for all 320 technicians.",
+    "solid": "No training. Decline the bootcamp and redirect: get IT and the supplier to bring forward offline store-and-forward mode, get meter administration to invoice from the handheld record and drop the carbon copy, push safety to validate the electronic permit, and have operations freeze or adjust the jobs-per-day norm during the transition. L&D runs the field-led workshops that turn these into requirements, keeps the change honest, and reports adoption to the board split by coverage and route type.",
     "next_level_examples": [
-      "Invite Marleen to lead the field redesign: her workaround becomes the requirements for offline mode, and she becomes the face of the fix.",
-      "Reframe the board KPI from 'adoption' to 'time to close a job', so the programme is judged on the work rather than the tool.",
-      "Run a 'ride along' week where IT and the programme office spend a day in basements with technicians before any training is designed."
+      "Invite Marleen to lead the field redesign: her carbon-copy-plus-SMS workaround becomes the requirements for offline mode, and she becomes the face of the fix.",
+      "Reframe the board KPI from 'adoption' to 'time from job to invoice', so the programme is judged on the work rather than the tool, and give Thomas the pilot-versus-rural comparison as his March story: the technicians aren't the problem, the coverage is.",
+      "Run a ride-along week where IT, meter administration and the programme office spend a day in basements with technicians before anyone designs anything."
     ],
     "also_valid": [
-      "Short targeted coaching for the few teams with real skill gaps, alongside the system fixes."
+      "A one-page job aid on offline sync once that release ships, handed out at the Monday depot meeting; a job aid, not a course.",
+      "A small facilitated session between meter administration and two depots to agree what the handheld record must contain for invoicing."
     ],
     "red_flags": [
-      "A 'digital mindset' bootcamp.",
-      "Treating older technicians as the problem.",
-      "Mandating usage while the paper permit remains required.",
-      "Ignoring the safety department."
+      "A 'digital mindset' bootcamp or any computer skills training for the technicians.",
+      "Calling it resistance or treating older technicians as the problem.",
+      "Mandating usage while the carbon copy and paper permit remain required.",
+      "Ignoring the jobs-per-day norm and the team premium.",
+      "Ignoring the safety department or meter administration."
     ]
   },
   "defence_objections": [
+    "No training at all? I have 80,000 euro of change budget and a board in March. What do I show them, a sync log?",
     "Tell the board the software needs fixing? That's my programme you're describing.",
-    "Put Marleen in charge of anything? She's a union delegate. She'll negotiate every screen.",
-    "Change the KPI three months before the review? The board will think we're moving the goalposts."
+    "Touch the productivity norm? Operations will say I'm lowering the bar to rescue my handhelds.",
+    "Put Marleen in charge of anything? She's a union delegate. She'll negotiate every screen."
   ],
-  "question_you_didnt_ask": "Where are the technicians standing when they switch on the handheld?",
+  "question_you_didnt_ask": "Do the same technicians use the handheld when they have signal?",
   "actor_notes": [
-    "Thomas believes it's a mindset problem; play his surprise when the usage data shows it's about routes, not age.",
+    "Thomas believes it's resistance and mindset; play his genuine surprise when the data shows it's about coverage and paperwork, not age or skill.",
+    "He volunteers that the pilot went well but only admits it was a city-only pilot if the player asks who was in it or where it ran.",
+    "He doesn't know about the jobs-per-day norm and the team premium; that is operations' territory. If the player brings it up, he is shocked and slightly relieved.",
     "He's defensive about the handhelds but honest when asked factual questions.",
-    "Medium risk appetite: bold ideas that make him look good to the board are welcome; anything that implies the system failed triggers pushback.",
+    "Medium risk appetite: bold ideas that make him look good to the board are welcome; anything that implies the system or his pilot failed triggers pushback. He resists 'no training' at first because the budget is earmarked for change, and comes round if the player gives him something concrete to show in March.",
     "Consultancy jargon from the player doesn't cost patience with him; it's his language. Vague questions still do."
   ],
   "flavour_lines": [

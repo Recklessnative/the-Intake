@@ -4,7 +4,7 @@
   "sector": "Legal services",
   "tier": 2,
   "tier_label": "Root cause hidden behind politics",
-  "title": "The Red Pen That Never Comes Back",
+  "title": "So What for the Client?",
   "briefing": {
     "headline": "Junior lawyers in a Belgian law firm: what you should know before the call",
     "points": [
@@ -31,72 +31,84 @@
   "opening_message": "Good afternoon. Our partners complain, unanimously for once, that our young colleagues cannot write. Memos, contract drafts, letters to clients: everything needs rewriting. I would like a writing training for all 22 junior associates. Legal writing, structure, concision. Preferably by someone with a reputation. In January, when the hours are calmer.",
   "surface_ask": "A legal writing course for all 22 junior associates.",
   "gold": {
-    "real_problem": "Partners rewrite junior drafts themselves, often late at night, and almost never return them with comments, so juniors never learn what was wrong. Each partner wants a different structure and the firm has no house style. Juniors are judged on billable hours recorded, so rereading and restructuring a draft feels like time they cannot afford, and partners write off much of the drafting time anyway. The one department where a partner reviews drafts in short sit-downs has hardly any rewriting. The writing gap is real but small; the feedback and incentive system keeps it in place.",
+    "real_problem": "The rewriting is not a firm-wide problem. It sits almost entirely with the seven corporate juniors hired since autumn 2005. Until mid-2005 a senior associate ran a 'memo clinic' in which every new junior learned to turn legal research into client advice: the answer in the first paragraph, risks graded, a recommendation the client can act on. Geert, who heads corporate, scrapped it to save non-billable hours ('they learn by doing, as I did'); Anne Lambrecht kept teaching it informally in litigation. The post-2005 corporate juniors were trained in academic writing at university and again by last year's professor seminar, so they write research papers: facts, law, discussion, and the answer on page four. They get written comments ('So what for the client?') and know the 2006 model memo, but nobody ever showed them how to do it. The usual suspects are cleared: the bonus counts hours recorded, not billed; these juniors spend more time per memo, not less; and the partners agreed one memo structure in 2006.",
     "root_cause_types": [
-      "expectations",
-      "incentive",
-      "process",
-      "skill"
+      "skill",
+      "expectations"
     ],
-    "is_training_the_lever": "partly",
-    "need_statement": "Juniors need regular, specific feedback on their own drafts and one agreed standard for what a good memo looks like; partners need a reason to give that feedback and juniors need permission to spend time on quality. A short writing module helps only if partners agree on the standard and review drafts with the junior."
+    "is_training_the_lever": "yes",
+    "need_statement": "The seven corporate juniors hired since 2005 need to be able to turn their research into client advice: answer first, risks graded, a clear recommendation, in the firm's 2006 model memo, and to act on a partner's comment without guessing. They need hands-on practice on their own files with someone who can show them how, not a general legal writing lecture for all 22."
   },
   "hidden_facts": [
     {
       "id": "write_offs",
-      "fact": "Time records show 31% of junior drafting hours are written off across the firm: 44% in the corporate department, 12% in litigation.",
-      "unlocks_when": "The player asks what the rewriting costs, whether time records show it, or whether some departments have less of a problem.",
-      "reveal_line": "Write-offs on drafting? I would have to look. ... 31% overall. Corporate 44. Litigation 12. Well. Litigation has simpler documents.",
+      "fact": "Write-offs on junior drafting are concentrated in one group: the seven corporate juniors hired since autumn 2005 have 53% of their drafting hours written off. The two corporate juniors hired before 2005 are at 13%, the other departments at 11 to 16%. The firm-wide average of 24% hides this.",
+      "unlocks_when": "The player asks for write-off or rewriting data broken down by department, by junior or by year of hire.",
+      "reveal_line": "Write-offs by junior? I would have to ask finance. ... Corporate is high, yes. The recent ones. Well. Corporate documents are complex.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "data:kpi"
       ],
-      "data_doc": "Junior associates, drafting hours recorded vs billed, last 12 months. Firm: 31% written off. Corporate: 44%. Tax: 33%. Employment: 28%. Litigation: 12%.",
+      "data_doc": "Junior associates, drafting hours recorded vs billed, last 12 months. Firm: 24% written off. Corporate, hired autumn 2005 or later (7): 53%. Corporate, hired before 2005 (2): 13%. Tax (4): 16%. Employment (4): 14%. Litigation (5): 11%. Highest single document type: client advice memos, corporate, 61%.",
       "data_source": "Time recording system, write-off report"
     },
     {
       "id": "no_feedback",
-      "fact": "Partners rewrite drafts themselves and send the final version to the client. Juniors rarely get their draft back with comments; they often find out what changed only by comparing their version with what the client received.",
-      "unlocks_when": "The player asks what happens to a draft after a junior hands it in, or how juniors get feedback.",
-      "reveal_line": "What happens to the draft? The partner improves it. It goes to the client. ... Do they get it back? I suppose they can see the final version in the file.",
+      "fact": "Since 2006 drafts come back to the junior with written comments; that rule is followed. The comments to the recent corporate juniors are consistent ('Where is the answer?', 'So what for the client?', 'Too academic') but the juniors do not know how to fix it. They reread and restructure for hours and produce a longer version of the same research memo.",
+      "unlocks_when": "The player asks what happens to a draft after a junior hands it in, what the comments say, or what the junior does with them.",
+      "reveal_line": "They get their draft back. With comments. I write 'So what?' in the margin. Quite often. And the next draft has two more pages of case law. It is as if they think I am asking for more evidence.",
       "weight": 3,
       "critical": true,
       "found_at": [
         "call",
         "frontline"
       ],
-      "frontline_line": "Feedback? I send a draft at eight. At two in the morning a partner sends the client something completely different. I find out what I did wrong by putting the two side by side. In Word. With the compare function. That's my mentor."
+      "frontline_line": "I get the comments. Every time. 'So what for the client?' I know it's wrong. I just don't know what right looks like. I spent my whole degree being told never to give an answer before you've shown the reasoning. So I add more reasoning."
+    },
+    {
+      "id": "memo_clinic",
+      "fact": "From 1999 to mid-2005 a senior associate, Marleen Wuyts, ran a 'memo clinic' for every new junior: six two-hour sessions on turning research into client advice, on their own files. When she left, Geert, as head of corporate, decided not to replace it to save non-billable hours. Juniors hired since then got only the bar courses and, last year, a one-day professor seminar on academic legal method. Anne kept doing it informally in litigation.",
+      "unlocks_when": "The player asks how juniors used to learn to write memos here, what induction or internal training new juniors get, or why the older juniors write better.",
+      "reveal_line": "There was a little in-house thing, yes. Marleen's clinic. When she left I... we decided they learn by doing. As I did. It was a hundred non-billable hours a year, you understand. Tempus fugit.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Internal training for junior associates. 1999-2005: 'Memo clinic' (M. Wuyts), 6 x 2 hours in the first three months, on the junior's own files: question, short answer, risks, recommendation. Last run: spring 2005. Not continued (decision head of corporate, June 2005). 2006: one-day seminar 'Legal writing: method and style' (external, law professor), outline: facts, applicable law, doctrine, discussion, conclusion. Rating 4.6/5.",
+      "data_source": "Training file, junior associates 1999-2007"
     },
     {
       "id": "four_styles",
-      "fact": "Each partner expects a different structure: one wants the conclusion first, one wants facts and law first in academic style, one wants bullet points, one wants English throughout. There is no house style or model memo, and juniors are told to 'just know' each partner's taste. Rereading a draft feels unaffordable because it isn't billable.",
-      "unlocks_when": "The player asks what a good memo looks like here, whether there is a house style, or how juniors decide how much time to spend on a draft.",
+      "fact": "The 'every partner wants a different style' story is out of date. In 2006 the partners adopted a one-page model memo (question, short answer, risks, recommendation, then analysis) and the corporate partners use it and comment in the same terms. The juniors know the template; they put their research in the 'short answer' box.",
+      "unlocks_when": "The player asks whether there is a house style or template, whether partners want different things, or what a good memo looks like here.",
       "reveal_line": "A house style? Every partner has his own standards. That's rather the charm of the profession.",
       "weight": 3,
       "critical": false,
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "I work for four partners. One wants the answer in the first line. One wants three pages of facts before the answer. One wants bullets. One wants it in English even when the client is from Aalst. And rereading? If I reread it, I can't bill it, and if I bill it, he writes it off. So you send it and pray."
+      "frontline_line": "Four styles? That was before my time. Since the model memo they all want the same thing: answer on top. I have the template open on my screen right now. The box says 'Short answer'. Mine is eleven lines long and still doesn't answer anything. Knowing what they want isn't my problem. Doing it is."
     },
     {
       "id": "hours_target",
-      "fact": "Juniors have a target of 1,800 billable hours a year. Their bonus is based on hours recorded, and non-billable time for know-how and training is capped at 50 hours.",
-      "unlocks_when": "The player asks how juniors are evaluated, about targets or bonuses, or how much time they have for learning.",
-      "reveal_line": "Our young colleagues have an 1,800-hour target. Like everywhere. Training counts as non-billable, up to 50 hours. That's quite generous.",
+      "fact": "The billable target is not the cause. Juniors' bonus is based on hours recorded, not hours billed, so write-offs do not cost them anything; since 2006 rereading and reworking a draft may be recorded on the file. The recent corporate juniors record 9 hours on an average advice memo against 5 for the others: they are spending more time, not rushing.",
+      "unlocks_when": "The player asks how juniors are evaluated or paid, whether the billable target or write-offs put pressure on them, or how much time they spend on a draft.",
+      "reveal_line": "Our young colleagues have an 1,800-hour target. Like everywhere. But the bonus counts what they record, not what we bill. If I write it off, that's my problem, not theirs. Believe me, they are not short of hours on these memos.",
       "weight": 2,
       "critical": false,
       "found_at": [
         "call",
         "data:policy"
       ],
-      "data_doc": "Junior associates: target 1,800 billable hours per year. Bonus: based on billable hours recorded against target. Non-billable allowance (know-how, internal training): maximum 50 hours per year. Feedback: annual evaluation by the supervising partner.",
-      "data_source": "Associate handbook, remuneration and evaluation"
+      "data_doc": "Junior associates: target 1,800 billable hours per year. Bonus: based on billable hours recorded against target; write-offs by the partner do not affect the junior's bonus. Since September 2006: time spent rereading or reworking a draft is recorded on the client file. Non-billable allowance (know-how, internal training): maximum 50 hours per year. Average hours recorded per client advice memo, last 12 months: corporate juniors hired 2005 or later 9.1; all other juniors 5.2.",
+      "data_source": "Associate handbook, remuneration and evaluation; time records per document type"
     },
     {
       "id": "litigation_partner",
-      "fact": "Anne Lambrecht, the litigation partner, reviews every junior draft in a 20-minute sit-down the same day. Her juniors' drafts rarely need rewriting. The other partners say she 'has time because litigation is slower'.",
+      "fact": "Anne Lambrecht, the litigation partner, still does what the memo clinic did: in a junior's first months she sits with each draft for twenty minutes and makes them say the answer out loud before they write a word. Her juniors' drafts rarely need rewriting. The other partners say she 'has time because litigation is slower'.",
       "unlocks_when": "The player asks whether any partner or department does it differently, or whether some juniors write better than others.",
       "reveal_line": "Anne sits with her juniors and goes through every draft. Twenty minutes. It's charming. She has the time; litigation is a slower rhythm.",
       "weight": 2,
@@ -105,11 +117,11 @@
         "call",
         "frontline"
       ],
-      "frontline_line": "The litigation juniors are fine. Anne sits with them for twenty minutes and goes through the draft with a pen. We call it the confessional. They all want to be in it."
+      "frontline_line": "The litigation juniors are fine. Anne sits with them and says 'Tell me the answer in one sentence. Out loud. Now write that down first.' We call it the confessional. I'd sell a kidney to be in it."
     },
     {
       "id": "turnover",
-      "fact": "Five of the firm's last fourteen juniors left within their first two years; three said in exit talks that they 'never knew what they were doing wrong'.",
+      "fact": "Three of the corporate juniors hired since 2005 have already left or asked to move; in exit talks two said they got comments but 'never learned how to write what the partner wanted'.",
       "unlocks_when": "The player asks about turnover, why juniors leave, or what exit talks say.",
       "reveal_line": "Some leave, yes. That's the profession. Some go to in-house jobs. Better hours. Less... red.",
       "weight": 2,
@@ -118,18 +130,19 @@
         "data:org",
         "call"
       ],
-      "data_doc": "Junior associates hired 2003-2005: 14. Left within two years: 5. Reasons given at exit talk: 'no feedback' or 'never knew what was wrong' (3), salary (1), relocation (1).",
+      "data_doc": "Corporate junior associates hired since autumn 2005: 10. Left or asked to transfer: 3. Reasons given at exit talk: 'got comments but never learned how to write what the partner wanted' (2), relocation (1). Other departments, same period: 1 departure (salary).",
       "data_source": "HR file, junior associate turnover"
     }
   ],
   "volunteered_facts": [
     "A one-day legal writing seminar with a law professor ran last year; the juniors rated it 4.6 out of 5.",
-    "Partners spend 'their evenings' correcting drafts."
+    "Partners spend 'their evenings' correcting drafts.",
+    "The juniors are 'very hard-working'; nobody can say they don't put in the hours."
   ],
   "constraints": {
     "budget": "About 20,000 euro; the partners would rather pay for a well-known name than for 'consultants'.",
     "deadline": "January, before the annual evaluations in March.",
-    "audience": "22 junior associates in five departments; 14 partners, who decide everything together.",
+    "audience": "22 junior associates in five departments (corporate 9, litigation 5, tax 4, employment 4); 14 partners, who decide everything together.",
     "schedule": "Juniors bill from early morning to late evening; anything during office hours eats into their target, anything after hours is resented.",
     "languages": "Dutch, French and English; the bar courses are in the junior's language of registration.",
     "data_available": [
@@ -145,68 +158,72 @@
   "dependencies": [
     {
       "who": "The partners' meeting",
-      "concern": "Any change to targets, write-offs or a house style needs agreement from 14 partners who each run their own way.",
-      "if_ignored": "The course runs and each partner keeps rewriting in his own style."
+      "concern": "Geert wants a firm-wide course because it blames nobody; narrowing it to his own department's recent juniors makes the 2005 decision visible to his partners.",
+      "if_ignored": "The money goes to a course for all 22 and the seven who need help get one day of what they already had."
     },
     {
       "who": "Anne Lambrecht, litigation partner",
-      "concern": "Her practice is the proof that review works, but she won't want to be held up as the example against her partners.",
+      "concern": "She is the living version of the old clinic and the obvious coach, but she won't want to be held up as the example against her partners or lose her own billable time.",
       "if_ignored": "The best internal model is never used."
     },
     {
       "who": "The bar",
-      "concern": "Traineeship rules require a supervising lawyer to actually supervise, and bar courses already cover some writing.",
-      "if_ignored": "The course duplicates the bar's and nobody asks what supervision means."
+      "concern": "Traineeship rules require a supervising lawyer to actually supervise, and bar courses already cover legal method.",
+      "if_ignored": "The course duplicates the bar's and the professor seminar."
     },
     {
       "who": "Finance partner",
-      "concern": "Owns the billable targets and the 50-hour non-billable cap.",
-      "if_ignored": "Juniors have no time to apply anything they learn."
+      "concern": "Owns the 50-hour non-billable cap that clinic sessions would count against.",
+      "if_ignored": "Juniors are told to attend and then reminded of their target."
     }
   ],
   "measurement": {
     "traps": [
       "Satisfaction with the course, which was already 4.6 last year.",
-      "Partners' general impression that 'writing has improved'.",
-      "Billable hours per junior, which rewards speed over quality."
+      "Firm-wide write-offs, where the seven are diluted among 22.",
+      "Hours spent per memo, which these juniors already push up."
     ],
     "gold_plan": {
-      "baseline": "Share of junior drafting hours written off, per department, over the last 12 months.",
-      "behaviour": "Drafts returned to the junior with comments or a short review talk, logged on a sample of files.",
-      "leading_indicators": "Number of drafts reviewed with the junior per month; drafts that go to the client with only minor changes.",
-      "business_metric": "Write-offs on junior drafting hours and junior turnover within two years.",
-      "collection": "Monthly write-off report from time records, a simple tick box in the file on whether the draft was reviewed, exit and annual talks."
+      "baseline": "Write-off rate and hours per advice memo for the seven corporate juniors hired since 2005, against the other juniors, over the last 12 months; plus a sample of their current memos scored on a short checklist.",
+      "behaviour": "Their memos have a short answer that actually answers, graded risks and a recommendation, scored blind by a partner on the same checklist before and after.",
+      "leading_indicators": "Share of their drafts going to the client with only minor changes; 'So what?' comments per draft.",
+      "business_metric": "Write-offs on the seven juniors' drafting hours moving toward the 11-16% of the other groups, and corporate junior departures.",
+      "collection": "Monthly write-off report by junior from time records, a monthly sample of three memos per junior scored on the checklist, exit and annual talks."
     }
   },
   "concepts": {
-    "conventional": "A one- or two-day legal writing course for all 22 juniors, with a known professor.",
-    "solid": "A short writing workshop using the juniors' own anonymised drafts, after the partners agree one model memo and house style. Partners return each draft with comments or a 15-minute review, with that review time recorded as non-billable training outside the 50-hour cap. Pilot in corporate, where write-offs are highest.",
+    "conventional": "A one- or two-day legal writing course with a well-known professor for all 22 juniors.",
+    "solid": "Bring back the memo clinic for the seven corporate juniors hired since 2005: five or six short sessions over two months on their own anonymised files and the 2006 model memo, practising 'short answer, risks, recommendation', with each rewrite checked against the same checklist the partners use. Coach is Anne or a former clinic lead; scored before and after.",
     "next_level_examples": [
-      "Make Anne's 'confessional' the firm standard in one department, framed as recovering written-off hours rather than as being nice to juniors.",
-      "Put partners in the room: a session where partners mark the same draft separately, discover they disagree, and agree a house style on the spot.",
-      "Show the partners the write-off numbers in euros: what the evening rewriting costs them per year, against twenty minutes of review."
+      "'Rewrite the rewrite': each junior gets a memo a partner rewrote overnight, writes the short answer first, then compares with the partner's version and explains the difference out loud.",
+      "Anne runs the clinic with one corporate partner co-teaching, so the corporate comments and the clinic speak the same language, and the clinic becomes induction for every new intake again.",
+      "Show Geert the 53% write-off for these seven in euros against the cost of six two-hour sessions: the clinic pays for itself before the March evaluations."
     ],
     "also_valid": [
-      "A writing course for juniors is acceptable if it is built on a partner-agreed standard and followed by real draft reviews."
+      "Including the two tax juniors with above-average write-offs, if the data shows they have the same pattern.",
+      "Making the clinic part of the induction for future juniors in all departments, as long as the seven come first."
     ],
     "red_flags": [
-      "A writing course alone as the answer.",
-      "Framing the juniors as poor writers without looking at feedback.",
-      "Ignoring the billable-hour target and the write-offs.",
+      "A general writing course for all 22 juniors.",
+      "Teaching concision, grammar or academic legal method: they already write long, careful research.",
+      "Redesigning the billable target or write-off system as the main answer.",
+      "A house-style project: the model memo already exists.",
       "Measuring success by course satisfaction."
     ]
   },
   "defence_objections": [
-    "You want me to tell fourteen partners they need to change how they work? I have to have lunch with them. Every day.",
-    "Twenty minutes per draft, per junior, per partner? That's hours of non-billable time. Who pays for that?",
-    "A house style? My partners have been writing for thirty years. You'd have an easier time agreeing on the Pope."
+    "Only my department? You realise what my partners will say over lunch. Every day.",
+    "Six sessions of two hours, for seven people, non-billable? That's eighty-four hours. Marleen's clinic was exactly what I cut.",
+    "Anne teaching my juniors? She will enjoy that far too much."
   ],
-  "question_you_didnt_ask": "What happens to a draft after the junior hands it in?",
+  "question_you_didnt_ask": "Which juniors' drafts get rewritten, and how did the ones who don't learn to write a memo here?",
   "actor_notes": [
-    "Geert believes the problem is the juniors and that his own drafting is exemplary; he becomes defensive if partners are criticised directly.",
-    "He reveals the lack of feedback only when asked about what happens to a draft, and frames it as partners being generous with their evenings.",
-    "He dismisses Anne's approach until the player connects it to the write-off numbers; money moves him more than development.",
-    "His risk appetite is low: anything that needs a partners' meeting vote triggers a defence round. A pilot in one department is the move he can accept."
+    "Geert believes the problem is 'the juniors' and asks for all 22 because a firm-wide course blames nobody, least of all corporate, which he heads.",
+    "He reveals that he scrapped Marleen's memo clinic only when asked how juniors used to learn or what induction they get, and frames it as a sensible saving.",
+    "He says comments are given and is a little hurt if the player assumes partners give no feedback; if pressed on targets, he points out the bonus counts recorded hours.",
+    "If asked about a house style he plays it down as partner taste; he does not mention the 2006 model memo himself.",
+    "Money moves him more than development: the write-off numbers per junior and the clinic's cost against them are what change his mind.",
+    "His risk appetite is low: a clinic for the seven, piloted before March, is the move he can accept; anything needing a partners' vote triggers a defence round."
   ],
   "flavour_lines": [
     "Our young colleagues have excellent degrees. They write like their thesis supervisors. That's the problem.",
