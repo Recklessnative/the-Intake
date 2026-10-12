@@ -11,7 +11,9 @@
   const TOUCH = { total: 10, call: 5, corridor: 2, callback: 3 };
   // Hard mode: fewer questions, no case file, no Mieke, a 150-word memo.
   const HARD = { total: 6, call: 4, corridor: 2, callback: 2, words: 150 };
-  const budget = () => (state.hard ? HARD : TOUCH);
+  // One case: a single tier-1 request in about ten minutes, for a first look or a lunch break.
+  const ONE = { total: 7, call: 4, corridor: 1, callback: 2 };
+  const budget = () => (state.hard ? HARD : state.one ? ONE : TOUCH);
   const touchpoints = card => card.difficulty !== 0 && card.hiddenFacts.some(f => f.foundAt.some(x => x !== 'call'));
   const DATA_KINDS = { kpi: 'KPIs and reports', org: 'Org chart and roles', process: 'Process and systems', policy: 'Policies and targets', training: 'Past training' };
   const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
@@ -34,7 +36,7 @@
     'Somebody needs a course. Somebody always needs a course.'
   ];
 
-  const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, board: null, academy: null, team: null };
+  const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, one: false, board: null, academy: null, team: null };
 
   // ---------- screens and panes ----------
   function show(id) {
@@ -97,11 +99,12 @@
     return SHAPES[(n - 3) % SHAPES.length];
   }
   function weekNumber() {
-    return scoreHistory().weeks.filter(w => w.requests.length && w.id !== state.weekId).length + 1;
+    return scoreHistory().weeks.filter(w => w.requests.length && !w.one && w.id !== state.weekId).length + 1;
   }
   // Fill the shape: unplayed cards first, no sector twice.
   function pickWeek(n) {
     if (state.hard) return pickHardWeek();
+    if (state.one) return pickOneCase();
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const fresh = list => list.slice().sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const cards = [], days = [];
@@ -127,6 +130,13 @@
     pool.forEach(c => { if (out.length < Team.JUNIORS.length && !out.some(x => x.sector === c.sector)) out.push(c); });
     pool.forEach(c => { if (out.length < Team.JUNIORS.length && !out.includes(c)) out.push(c); });
     return out;
+  }
+  // One case: a tier-1 request with touchpoints, unplayed first.
+  function pickOneCase() {
+    const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
+    const pool = state.pool.filter(c => c.difficulty === 1 && touchpoints(c)).sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
+    const card = pool[0] || state.pool.find(c => c.difficulty >= 1);
+    return { cards: [card], days: [0] };
   }
   // Hard mode: three full cases, the hardest there are, one a day.
   function pickHardWeek() {
@@ -209,16 +219,19 @@
   }
 
   $('btn-start').onclick = () => startWeek(false);
+  $('btn-one').onclick = () => startWeek(false, true);
+  $('btn-full-week').onclick = () => startWeek(false);
   $('btn-hard').onclick = () => {
     if (!window.confirm('Hard mode: three tough cases, 6 questions each, no case file, no Mieke, and a memo of at most 150 words. Only a hard-mode week can be posted to LinkedIn. Clock in?')) return;
     startWeek(true);
   };
-  async function startWeek(hard) {
+  async function startWeek(hard, one) {
     if (readSave() && !window.confirm('Start a new week? Your saved week will be dropped.')) return;
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
     if (!(await claimRun())) return;
     dropSave();
     state.hard = !!hard;
+    state.one = !hard && !!one;
     document.body.classList.toggle('hard', state.hard);
     state.weekId = 'w' + Date.now();
     state.weekNo = weekNumber();
@@ -229,12 +242,12 @@
     state.results = [];
     state.charged = false;
     state.board = null;
-    state.academy = state.hard ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
-    const recall = state.hard || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
+    state.academy = state.hard || state.one ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
+    const recall = state.hard || state.one || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
-    state.team = teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
+    state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
     state.run = null;
-    if (!state.hard && !seenIntro()) intro(cubicle); else cubicle();
+    if (!state.hard && !state.one && !seenIntro()) intro(cubicle); else cubicle();
   }
 
   // ---------- the cold open: plays once before your first week, and from the title screen ----------
@@ -274,7 +287,7 @@
     next();
   }
   $('btn-watch-intro').onclick = () => intro(() => show('s-title'));
-  $('btn-again').onclick = () => startWeek(state.hard);
+  $('btn-again').onclick = () => startWeek(state.hard, state.one);
 
   // The boot screen: the intro lines appear while the progress bar runs and move on by
   // themselves. Log on is there from the start: nobody has to read the cubicle to work.
@@ -321,7 +334,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -346,9 +359,10 @@
     state.days = s.days || cards.map(() => 0);
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
+    state.one = !!s.one;
     state.board = s.board || null;
     state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
-    state.academy = s.academy || (s.hard ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
+    state.academy = s.academy || (s.hard || s.one ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
     state.standup = s.standup || null;
     document.body.classList.toggle('hard', state.hard);
     state.index = s.index;
@@ -1104,7 +1118,7 @@
   staplyLabel();
   // Wallpapers unlock with the best title you have finished a week with.
   function wallpaperLevel() {
-    return scoreHistory().weeks.filter(w => w.done).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
+    return scoreHistory().weeks.filter(w => w.done && !w.one).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
   }
   Retro.setLevel(wallpaperLevel());
   // The promotion comes with a new PC: Doors Aero. IT says so once.
@@ -1799,9 +1813,9 @@
   };
 
   $('btn-next').onclick = () => {
-    if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else toBoard();
+    if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard();
   };
-  const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : 'Friday: the board room');
+  const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.
   function bestLine(w) {
@@ -1821,7 +1835,11 @@
     $('end-score').textContent = score + ' / 100';
     $('end-board').hidden = !br;
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
-    $('end-note').textContent = 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
+    $('end-note').textContent = state.one ? 'One case: ' + state.cards[0].stakeholder.name + '. A full week has three or four requests, a Monday stand-up and the board room on Friday, and it is where you can earn a promotion.'
+      : 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
+    $('end-eyebrow').textContent = state.one ? 'One case, done' : 'End of the week';
+    $('btn-again').textContent = state.one ? 'Another case' : 'Another week';
+    $('btn-full-week').hidden = !state.one;
     const before = wallpaperLevel();
     recordWeek(score, title, br ? { decision: br.decision, total: br.points.total } : null);
     const after = wallpaperLevel();
@@ -1829,15 +1847,15 @@
     if (after > before) setTimeout(() => toast('New wallpaper unlocked: ' + Retro.WALLPAPERS[after].name + '. Start menu, Display properties.', 'info'), 1500);
     // Promotion to team lead: a week of 64+ with every diagnosis at 15+, or the week 4 tender.
     const h = scoreHistory(), w = thisWeek(h);
-    const promoted = !state.hard && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
+    const promoted = !state.hard && !state.one && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
     if (promoted) { h.promoted = { week: state.weekNo, at: Date.now() }; keepScores(h); applyStyle(); }
     $('end-team').hidden = !state.team;
     if (state.team) {
       const t = Team.score(state.team);
       $('end-team').textContent = 'Your team: ' + t.total + '/' + t.of + ' for your reviews' + (t.reviewed < state.team.drafts.length ? ', with ' + (state.team.drafts.length - t.reviewed) + ' draft(s) sent out unreviewed.' : '.') + ' It does not change your title, but Darren reads it.';
     }
-    $('end-memo').hidden = state.hard;
-    if (!state.hard) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
+    $('end-memo').hidden = state.hard || state.one;
+    if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
     shareCard(score, title);
     show('s-end');
   }
@@ -2022,10 +2040,10 @@
       : def.every(d => d === 'strong' || d === 'adapted') ? 'Held my ground in every defence round, or changed the plan for a good reason.' : 'Survived the defence round, mostly.';
     const br = state.board && state.board.result;
     const board = br ? { approved: 'The board approved my pitch.', pilot: 'The board approved my pitch as a pilot.', rejected: 'The board rejected my pitch. Next week.' }[br.decision] : '';
-    return { avg, title, hard: state.hard, found, of, line: best ? best.line : '', defence, board };
+    return { avg, title, hard: state.hard, one: state.one, found, of, line: best ? best.line : '', defence, board };
   }
   function shareText(d) {
-    return 'I just finished a ' + (d.hard ? 'HARD MODE ' : '') + 'week of THE INTAKE as a ' + d.title + ' (' + d.avg + '/100). ' +
+    return (d.one ? 'I just tried one case of THE INTAKE and came out as a ' : 'I just finished a ' + (d.hard ? 'HARD MODE ' : '') + 'week of THE INTAKE as a ') + d.title + ' (' + d.avg + '/100). ' +
       (d.of ? 'I found ' + d.found + ' of ' + d.of + ' hidden facts. ' : '') + d.defence + (d.board ? ' ' + d.board : '') +
       (d.line ? '\nMy best line: "' + d.line + '"' : '') + '\nThink you ask better questions? ' + GAME_URL;
   }
@@ -2101,7 +2119,7 @@
   }
   function thisWeek(h) {
     let w = h.weeks.find(x => x.id === state.weekId);
-    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined }; h.weeks.push(w); }
+    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined }; h.weeks.push(w); }
     return w;
   }
   function recordScore(r, total, pts, g) {
@@ -2147,7 +2165,7 @@
     const all = h.weeks.flatMap(w => w.requests);
     if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
     const best = all.reduce((a, b) => (b.total > a.total ? b : a));
-    const done = h.weeks.filter(w => w.done && !w.hard);
+    const done = h.weeks.filter(w => w.done && !w.hard && !w.one);
     if (done.length > 1) {
       const bars = ' ▁▂▃▄▅▆▇█';
       para('\nYour weeks so far: ' + done.map(w => bars[Math.max(1, Math.round(w.avg / 100 * 8))]).join('') + '  (' + done[0].avg + ' → ' + done[done.length - 1].avg + ')');
@@ -2157,7 +2175,7 @@
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
       const head = document.createElement('h3');
-      head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
+      head.textContent = '=== ' + (w.hard ? 'HARD MODE week of ' : w.one ? 'One case, ' : 'Week of ') + fmt(w.started) + (w.done ? ' · ' + w.title + ' · ' + w.avg + '/100' + (w.board ? ' · board: ' + w.board.decision + ' ' + w.board.total + '/100' : '') : ' · in progress') + ' ===';
       box.appendChild(head);
       if (w.team) para('Team reviews: ' + w.team.total + '/' + w.team.of + ' (' + w.team.reviewed + ' of ' + w.team.of / 10 + ' drafts reviewed)', 'muted');
       if (w.standup && w.standup.of) para('Monday stand-up: recalled ' + w.standup.got + ' of ' + w.standup.of, 'muted');
@@ -2196,7 +2214,7 @@
       if (r.wi === lastWeek) return;
       lastWeek = r.wi;
       if (i) sv.appendChild(mk('line', { x1: (xs(i) + xs(i - 1)) / 2, x2: (xs(i) + xs(i - 1)) / 2, y1: T, y2: H - B, class: 'wk' }));
-      sv.appendChild(mk('text', { x: xs(i), y: H - B + 16, class: 'ax' }, (r.w.hard ? 'Hard ' : 'Wk ') + (r.wi + 1)));
+      sv.appendChild(mk('text', { x: xs(i), y: H - B + 16, class: 'ax' }, (r.w.hard ? 'Hard ' : r.w.one ? 'One ' : 'Wk ') + (r.wi + 1)));
     });
     if (reqs.length > 1) sv.appendChild(mk('polyline', { points: reqs.map((r, i) => xs(i) + ',' + ys(r.x.total)).join(' '), class: 'trend' }));
     reqs.forEach((r, i) => {
