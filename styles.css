@@ -803,3 +803,6 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .su-q { margin: 4px 0 0; }
 .su-answer { background: #eef6ee; border-left: 3px solid #2e7d32; padding: 6px 10px; }
 .su-answer p { margin: 2px 0; }
+.su-answer .su-right { color: #2e7d32; font-weight: bold; }
+.su-answer .su-wrong { color: #a23b2c; font-weight: bold; }
+.su-why { color: #a23b2c; font-size: 12px; margin: 0; min-height: 1em; }
