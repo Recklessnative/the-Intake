@@ -330,6 +330,8 @@
             </div>
             <label><span id="b-why-label">Why it fixes the cause</span><input id="b-why" maxlength="200" autocomplete="off"></label>
             <label>It is not…<input id="b-not" maxlength="160" autocomplete="off" placeholder="What you are deliberately not doing"></label>
+            <p class="hint">Who owns each cause? Learning fixes what is ours; the rest goes to whoever can change it.</p>
+            <div id="owners" class="owners"></div>
           </section>
 
           <section class="bstep" data-step="risks">
@@ -362,7 +364,7 @@
           <p class="muted">No case board this week: one page, four headings, in your own words. About 600 characters is plenty. <button type="button" id="btn-memo4-board" class="ghost">I want the case board back</button></p>
           <label>Need: what is really going on, and is learning the lever?<textarea name="need" rows="4" maxlength="900"></textarea></label>
           <label>Measure: how will we know it worked?<textarea name="measure" rows="3" maxlength="700"></textarea></label>
-          <label>Concept: what will you do, and what not?<textarea name="concept" rows="4" maxlength="900"></textarea></label>
+          <label>Concept: what will you do, what not, and who owns each part of the fix?<textarea name="concept" rows="4" maxlength="900"></textarea></label>
           <label>Risks: who could block it, and what you do about them<textarea name="risks" rows="3" maxlength="700"></textarea></label>
           <div class="row"><button type="submit" class="primary">Send it to them</button> <span id="memo4-count" class="muted"></span></div>
         </form>
@@ -382,7 +384,7 @@
           <h3>3. Concept card</h3>
           <label>The big idea<textarea name="idea" rows="2" maxlength="700"></textarea></label>
           <label>Format and rhythm<textarea name="format" rows="2" maxlength="600"></textarea></label>
-          <label>Why it fixes the root cause<textarea name="why" rows="2" maxlength="600"></textarea></label>
+          <label>Why it fixes the root cause, and who owns each part of the fix<textarea name="why" rows="2" maxlength="600"></textarea></label>
           <label>What it deliberately is not<textarea name="not" rows="1" maxlength="400"></textarea></label>
           <label>Risks and dependencies, each with a mitigation<textarea name="risks" rows="3" maxlength="900"></textarea></label>
           <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<textarea name="flag" rows="1" maxlength="400"></textarea></label>
@@ -423,7 +425,7 @@
             <label id="bet-exit-label" hidden>If it doesn't work, how do you back out?
               <textarea name="exit" rows="2" maxlength="400" placeholder="A pilot with one team, a stop rule, a cap on scope or budget..."></textarea>
             </label>
-            <p class="fine">Right-sized beats bold: the score rewards a concept as bold as this client can take, plus one step with a way back.</p>
+            <p class="fine">Right-sized beats bold: the smallest thing that would work, as bold as this client can take. One step further only with a way back that names a first step and when you would stop.</p>
             <button type="submit" class="primary">Send it</button>
           </form>
         </div>

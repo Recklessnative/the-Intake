@@ -185,7 +185,7 @@
   },
   "concepts": {
     "conventional": "ITIL Foundation training and exams for all 40 first- and second-line staff.",
-    "solid": "No ITIL course. Amend the contract so reopens link to the original ticket and the provider is measured on first-time fix and reopen rate. Fix the three recurring problems with infrastructure. Have second line write knowledge base articles for the top 30 issues, and give agents a short briefing on each. Drop the one-call-back closure rule.",
+    "solid": "No ITIL course. Dirk takes the contract change to procurement and legal at the review clause: reopens link to the original ticket, and the provider is measured on first-time fix and reopen rate. Infrastructure fixes the three recurring problems. Second-line team leads write knowledge base articles for the top 30 issues as the recognised experts, and the works council hears that this is not a step towards outsourcing. Dirk drops the one-call-back closure rule. Our part is small: a short briefing for agents on each new article.",
     "next_level_examples": [
       "Sit a second-line engineer at the service desk one day a week to write articles live from real calls, as a recognised expert role rather than a handover.",
       "A joint weekly reopen review between provider team leader and second line, picking the top three causes and owning one fix each.",

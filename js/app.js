@@ -1112,6 +1112,9 @@
   const STEPS = ['diagnose', 'lever', 'measure', 'concept', 'risks', 'memo'];
   const STEP_NAMES = { diagnose: 'Diagnose', lever: 'Lever', measure: 'Measure', concept: 'Concept', risks: 'Risks', memo: 'Send' };
   const TAG_NAMES = { skill: 'skill or knowledge', process: 'process or workflow', system: 'tools and systems', incentive: 'incentives and targets', expectations: 'expectations and culture', environment: 'the work environment' };
+  // Who fixes each cause: us (the learning team), the stakeholder, or someone the player names.
+  const OWNER_BY = [['us', 'Us (learning)'], ['client', 'the client'], ['other', 'Someone else']];
+  const ownerText = (o, r) => !o || !o.by ? '(no owner)' : o.by === 'us' ? 'us, the learning team' : o.by === 'client' ? r.card.stakeholder.name + ' (the client)' : (o.who || 'someone else');
   const LEVER_NAMES = { yes: 'Learning fixes this', partly: 'Partly', no: 'Not a learning problem' };
   const RUNGS = [['baseline', 'Baseline'], ['behaviour', 'Behaviour'], ['metric', 'Business metric'], ['collect', 'Collection']];
   const DECOYS = ['Facilities management', 'Marketing', 'Procurement', 'The sustainability team', 'External auditors', 'Internal communications', 'The canteen committee'];
@@ -1128,7 +1131,7 @@
       step: 'diagnose', locked: false, feedback: '',
       evidence: [], tags: [], problem: '', lever: '', leverWhy: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
-      idea: '', formats: [], why: '', not: '', tiles, risks: [], flag: ''
+      idea: '', formats: [], why: '', not: '', owners: {}, tiles, risks: [], flag: ''
     };
   }
 
@@ -1245,6 +1248,7 @@
       l.appendChild(inp);
       mit.appendChild(l);
     });
+    renderOwners();
     if (b.step === 'memo') memo(boardWriteup());
     const fb = $('board-feedback');
     fb.hidden = !b.feedback;
@@ -1253,6 +1257,37 @@
     $('board-next').textContent = b.step === 'memo' ? 'Send it to them' : b.locked ? 'Next: ' + STEP_NAMES[next] : 'Lock it in';
     $('board-next').disabled = false;
   }
+  function renderOwners() {
+    const r = state.run, b = board(), box = $('owners');
+    b.owners = b.owners || {};
+    box.innerHTML = '';
+    const off = b.locked && b.step === 'concept';
+    b.tags.forEach(t => {
+      const o = b.owners[t] = b.owners[t] || { by: '', who: '' };
+      const row = document.createElement('div'); row.className = 'owner-row';
+      const lab = document.createElement('span'); lab.textContent = cap(TAG_NAMES[t]) + ':';
+      const chips = document.createElement('div'); chips.className = 'chips';
+      OWNER_BY.forEach(([k, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.dataset.owner = k;
+        btn.textContent = k === 'client' ? r.card.stakeholder.name.split(' ')[0] : label;
+        btn.setAttribute('aria-pressed', o.by === k);
+        btn.disabled = off;
+        btn.onclick = () => { o.by = k; renderOwners(); saveSoon(); };
+        chips.appendChild(btn);
+      });
+      row.append(lab, chips);
+      if (o.by === 'other') {
+        const inp = document.createElement('input');
+        inp.maxLength = 80; inp.placeholder = 'Who? A team, a role or a name'; inp.value = o.who; inp.disabled = off;
+        inp.setAttribute('aria-label', 'Who owns ' + TAG_NAMES[t]);
+        inp.oninput = () => { o.who = inp.value; saveSoon(); };
+        row.appendChild(inp);
+      }
+      box.appendChild(row);
+    });
+  }
+
   // The one-pager the stakeholder will read, assembled from the steps.
   function memo(w) {
     const box = $('memo');
@@ -1270,7 +1305,7 @@
     };
     section('The need', [['The real problem:', w.problem], ['Causes:', w.tags.map(t => TAG_NAMES[t]).join(', ')], ['Learning as the lever:', (LEVER_NAMES[w.lever] || '') + '. ' + w.leverWhy], ['You told me:', w.evidence.map(e => '"' + short(e, 120) + '"').join(' ')]]);
     section('How we will know', w.rungs.map(x => [x.label + ':', x.text]));
-    section('The concept', [['Big idea:', w.idea], ['Format:', w.formats.join(', ')], ['Why it works:', w.why], ['It is not:', w.not]]);
+    section('The concept', [['Big idea:', w.idea], ['Format:', w.formats.join(', ')], ['Why it works:', w.why], ['It is not:', w.not], ['Who owns what:', (w.owners || []).map(o => cap(TAG_NAMES[o.tag]) + ': ' + ownerText(o, r)).join('; ')]]);
     section('What could block it', w.risks.map((x, i) => [(i + 1) + '. ' + x.who + ':', x.mitigation]));
   }
   function toggle(list, v, max) { const i = list.indexOf(v); if (i >= 0) list.splice(i, 1); else if (list.length < max) list.push(v); }
@@ -1297,6 +1332,7 @@
     }
     if (step === 'lever' && (!b.lever || b.leverWhy.trim().length < 5)) return 'Choose an answer and say why in one line.';
     if (step === 'measure' && RUNGS.filter(([k]) => b.rungs[k].text.trim()).length < 2) return 'Fill in at least two rungs of the ladder.';
+    if (step === 'concept' && b.tags.some(t => !(b.owners || {})[t] || !b.owners[t].by || (b.owners[t].by === 'other' && b.owners[t].who.trim().length < 2))) return 'Say who owns each cause. If it is someone else, name them.';
     if (step === 'concept' && (b.idea.trim().length < 15 || (!b.formats.length && (b.fade || 1) < 2))) return (b.fade || 1) < 2 ? 'Write the big idea and pick at least one format.' : 'Write the big idea in one sentence.';
     if (step === 'risks' && (b.risks.length < 2 || b.risks.some(x => x.mitigation.trim().length < 5))) return 'Pick two blockers and say how you handle each.';
     return '';
@@ -1321,6 +1357,14 @@
       const want = String(r.card.learningIsTheAnswer || '').toLowerCase();
       if (!LEVER_NAMES[want]) return '';
       return want === b.lever ? 'Mieke: Agreed, ' + LEVER_NAMES[want].toLowerCase() + '.' : 'Mieke: I would have said "' + LEVER_NAMES[want].toLowerCase() + '". Keep that in mind for the concept.';
+    }
+    if (step === 'concept') {
+      // Learning cannot fix a contract, a process or a target. Only flag it; the examiner decides the rest.
+      const ours = b.tags.filter(t => t !== 'skill' && b.owners[t] && b.owners[t].by === 'us');
+      const routed = b.tags.filter(t => t !== 'skill' && b.owners[t] && b.owners[t].by !== 'us');
+      if (ours.length) return 'Mieke: ' + cap(listText(ours.map(t => TAG_NAMES[t]))) + ' on our plate? We can help design it, but someone at ' + (r.card.stakeholder.org || 'their side') + ' has to own the change. Who signs it off?';
+      if (routed.length) return 'Mieke: Good, you are not fixing what we do not own. Make sure ' + listText([...new Set(routed.map(t => ownerText(b.owners[t], r)))]) + ' actually agree' + (routed.length > 1 ? '' : 's') + ' before you send it.';
+      return '';
     }
     if (step === 'risks') {
       const real = b.risks.filter(x => b.tiles.some(t => t.who === x.who && t.real)).map(x => x.who);
@@ -1360,7 +1404,7 @@
     return {
       kind: 'board', tags: b.tags.slice(), evidence: b.evidence.map(quote), problem: b.problem, lever: b.lever, leverWhy: b.leverWhy,
       rungs: RUNGS.map(([k, label]) => ({ label, text: b.rungs[k].text, ev: quote(b.rungs[k].ev) })),
-      idea: b.idea, formats: b.formats.slice(), why: b.why, not: b.not, risks: b.risks.map(x => Object.assign({}, x)), flag: b.flag
+      idea: b.idea, formats: b.formats.slice(), why: b.why, not: b.not, owners: b.tags.map(t => Object.assign({ tag: t }, (b.owners || {})[t])), risks: b.risks.map(x => Object.assign({}, x)), flag: b.flag
     };
   }
 
@@ -1396,6 +1440,7 @@
         'Formats: ' + (w.formats.join(', ') || '(none)'),
         'Why it fixes the root cause: ' + w.why,
         'What it is not: ' + w.not,
+        'Who owns each cause: ' + ((w.owners || []).map(o => TAG_NAMES[o.tag] + ': ' + ownerText(o, state.run)).join('; ') || '(not said)'),
         'RISKS AND DEPENDENCIES (top two, most dangerous first)',
         ...w.risks.map((x, i) => (i + 1) + '. ' + x.who + ': ' + x.mitigation),
         'Flagged as risky strat: ' + (w.flag || '(not flagged)')
@@ -1489,13 +1534,13 @@
     const r = state.run, w = r.writeup;
     wait(r.card.stakeholder.name + ' is reading your concept. You can hear sighing, or possibly typing.');
     const p = Prompts.reaction(r.card);
-    try {
-      r.reaction = await Gemini.json({
-        system: p.system, schema: p.schema,
-        turns: [{ role: 'user', text: 'The write-up, quoted as data:\n"""\n' + writeupText(w) + '\n"""' }]
-      });
-    } catch (e) { toast(e.message); phase('write'); Desktop.layout('write', 'w-write'); return; }
-    r.reaction.boldness = Math.max(0, Math.min(3, r.reaction.boldness | 0));
+    // Three readings, merged to the median like the examiner: one reading decides the defence round.
+    const runs = await Promise.allSettled([0, 1, 2].map(() => Gemini.json({
+      system: p.system, schema: p.schema,
+      turns: [{ role: 'user', text: 'The write-up, quoted as data:\n"""\n' + writeupText(w) + '\n"""' }]
+    })));
+    r.reaction = Scoring.boldness(runs.filter(x => x.status === 'fulfilled').map(x => x.value));
+    if (!r.reaction) { const e = runs.find(x => x.status === 'rejected'); toast(e ? e.reason.message : 'No reaction came back.'); phase('write'); Desktop.layout('write', 'w-write'); return; }
     const gap = Math.max(0, Math.min(3, r.reaction.boldness - (r.card.riskAppetite | 0)));
     if (gap > 0) defence(r.reaction.objections.slice(0, gap)); else judge();
   }
@@ -1539,7 +1584,10 @@
       'WRITE-UP:', '"""', writeupText(r.writeup), '"""',
       '',
       'DEFENCE ROUND:',
-      r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)'
+      r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)',
+      '',
+      'WAY BACK (if it does not work, how do you back out?):',
+      r.bet && (r.bet.exit || '').trim() ? '"""' + r.bet.exit.trim() + '"""' : '(none given)'
     ].join('\n');
     // Three examiner runs side by side, merged to the median: one run can swing a dimension by a level.
     const runs = await Promise.allSettled([0, 1, 2].map(() => Gemini.json({ system: p.system, schema: p.schema, maxTokens: p.maxTokens, turns: [{ role: 'user', text: material }] })));
@@ -1552,7 +1600,7 @@
 
   const clamp4 = Scoring.clamp4;
   const points = g => { const r = state.run; return Scoring.points(r.card, r, g); };
-  const sizing = (r, g) => Scoring.sizing(r.card, r.bet, r.reaction, g.defenceOutcome);
+  const sizing = (r, g) => Scoring.sizing(r.card, r.bet, r.reaction, g.defenceOutcome, g.wayBack);
 
   function scorecard(g, replay) {
     const r = state.run;
@@ -1584,7 +1632,7 @@
       const model = modelAnswer(r.card, k);
       if (model) {
         const d = document.createElement('details'); d.className = 'model';
-        const sm = document.createElement('summary'); sm.textContent = k === 'nextLevel' ? 'A bolder version that would still fit' : 'Compare with a model answer';
+        const sm = document.createElement('summary'); sm.textContent = k === 'nextLevel' ? 'Bolder options, if this client could take them (not needed for full marks)' : 'Compare with a model answer';
         const t = document.createElement('p'); t.textContent = model;
         d.append(sm, t); a.appendChild(d);
       }
@@ -1601,9 +1649,9 @@
           : 'real blockers picked, ' + Math.round(bs.risks * 2) + ' of 2.');
         a.appendChild(n);
       }
-      if (k === 'nextLevel' && pts.fit < 12) {
+      if (k === 'nextLevel' && clamp4(g.fit.score) < 4) {
         const n = document.createElement('div'); n.className = 'ev';
-        n.textContent = 'Not counted: the concept has to fit the need first.';
+        n.textContent = 'Counts as far as the concept fits the need: ' + clamp4(g.fit.score) + ' of 4 for fit.';
         a.appendChild(n);
       }
       const b = document.createElement('td');
@@ -1628,6 +1676,11 @@
       ev.textContent = r.card.stakeholder.name.split(' ')[0] + "'s appetite for risk: " + lvl(sz.a) + '. You guessed ' + lvl(sz.bet.appetite) + '. '
         + 'Your concept read as ' + sz.b + ' (' + BOLD[sz.b].toLowerCase() + '); you called it ' + (sz.bet.bold == null ? '?' : sz.bet.bold) + '.';
       a.append(name, ev);
+      if (g.wayBack && (sz.bet.exit || '').trim()) {
+        const wb = document.createElement('div'); wb.className = 'ev';
+        wb.textContent = 'Your way back: ' + { concrete: 'concrete, it names a first step and when you would stop.', vague: 'vague. Name a small first step and the result or date that makes you stop.', none: 'not one the examiner could use.' }[g.wayBack];
+        a.appendChild(wb);
+      }
       if (r.reaction && r.reaction.acceptReply && sz.d <= 0) { const q = document.createElement('div'); q.className = 'ev'; q.textContent = '"' + r.reaction.acceptReply + '"'; a.appendChild(q); }
       const b = document.createElement('td'); b.className = 'pts'; b.textContent = sz.read ? '+' + sz.read : '';
       tr.append(a, b); rows.appendChild(tr);
@@ -2135,7 +2188,7 @@
     diagnosis: 'Ask why one more time before you name the need, and quote what they said.',
     measurement: 'Get a baseline number on the call, and name the business metric that should move.',
     fit: 'Check your concept against the cause you found. If the cause is a process, a course will not fix it.',
-    nextLevel: 'Size the concept to the client: ask how much risk they can take, go at most one step further, and say how you back out if it fails.',
+    nextLevel: 'Propose the smallest thing that would move the metric. Ask how much risk they can take, and if you go further, name a first step and when you would stop.',
     risks: 'Name one dependency outside learning (IT, the works council, a manager) and how you handle it.',
     pitch: 'In the defence, answer the objection first, then add your evidence. Do not restate your memo.'
   };
@@ -2310,6 +2363,7 @@
     b.formats = ['Practice or simulation', 'Manager routine'];
     b.why = '(test) It tackles ' + listText(b.tags.map(t => TAG_NAMES[t])) + '.';
     b.not = 'Not a generic course for everyone.';
+    b.owners = Object.fromEntries(b.tags.map(t => [t, t === 'skill' ? { by: 'us', who: '' } : { by: 'other', who: '(test) ' + (((card.dependencies || [])[0] || {}).who || 'Operations') }]));
     b.risks = b.tiles.filter(t => t.real).slice(0, 2).map(t => ({ who: t.who, mitigation: '(test) ' + (((card.dependencies || []).find(d => d.who === t.who) || {}).concern || 'Involve them early.') }));
     b.step = 'memo'; b.locked = false; b.feedback = '';
     renderBoard();

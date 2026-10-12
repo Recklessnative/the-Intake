@@ -59,10 +59,12 @@
       measurementPlan: m,
       measurementTraps: list((raw.measurement || {}).traps),
       calibration: {
-        strong: list(k.next_level_examples)[0] ? `${k.solid} Plus: ${list(k.next_level_examples)[0]}` : k.solid,
+        // The solid answer is the 4: right-sized means the smallest thing that works, not the boldest.
+        strong: k.solid,
         passable: [k.solid ? 'Targets the right group but without measurement baseline or dependencies.' : '', list(k.also_valid)[0] || ''].filter(Boolean).join(' '),
         weak: k.conventional
       },
+      nextLevelExamples: list(k.next_level_examples),
       alsoValid: list(k.also_valid),
       redFlags: list(k.red_flags),
       briefing: !raw.briefing ? null

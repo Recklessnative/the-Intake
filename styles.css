@@ -240,6 +240,10 @@ label.check input { width: auto; }
 .chips button, .ev-card { font-size: 13px; padding: 4px 10px; min-height: 30px; border-radius: 14px; background: #fff; border-color: #7f9db9; }
 .chips button[aria-pressed="true"], .ev-card[aria-pressed="true"] { background: #dbe8fb; border-color: var(--title-a); box-shadow: inset 0 0 0 1px var(--title-a); font-weight: 700; }
 .chips.big button { font-size: 14px; padding: 8px 14px; }
+.owners { display: grid; gap: 6px; }
+.owner-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.owner-row > span { min-width: 11em; font-size: 13px; }
+.owner-row input { flex: 1 1 12em; min-width: 0; }
 .ev-pool { display: flex; flex-direction: column; gap: 6px; }
 .ev-card { text-align: left; border-radius: 4px; font-style: italic; }
 .ladder { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 0 8px; align-items: end; }
