@@ -1,0 +1,212 @@
+{
+  "id": "airport-ground-handling",
+  "schema_version": 1,
+  "sector": "Aviation ground handling",
+  "tier": 1,
+  "tier_label": "Real skill gap, open stakeholder",
+  "title": "Bigger Plane, Same Habits",
+  "briefing": {
+    "headline": "Ramp handling at a regional airport: what you should know before the call",
+    "points": [
+      "A ground handler loads and unloads aircraft for airlines that do not have their own staff at the airport: bags, cargo, mail, pushback.",
+      "Each departure gets a loading instruction from the airline's load control; the actual load must match it, because it feeds the weight and balance on the load sheet the captain signs.",
+      "Airlines audit their handlers against the handling contract and can impose penalties for delays the handler causes.",
+      "Ramp agents in Belgium work under a sector agreement on shifts and overtime; training on rest days needs the works council's blessing."
+    ]
+  },
+  "stakeholder": {
+    "name": "Dirk Vandamme",
+    "role": "Station Manager",
+    "org": "Kempair Handling NV, the ground handler at Kempen Regional Airport, with 62 ramp agents serving charter and cargo flights",
+    "voice": "Former ramp agent who worked his way up. Talks in radio shorthand ('copy', 'roger that', 'negative'). Proud of his people, allergic to paperwork, thinks in minutes and turnaround times.",
+    "patience": 4,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Bjorn Lenaerts",
+    "role": "Ramp agent, early shift, eight years in",
+    "voice": "Laconic, ear defenders round his neck, talks while watching the apron. Loyal to the new kids, unimpressed by head office."
+  },
+  "opening_message": "Morning. Medisol Airways sent us an official letter: three load discrepancies and two delays in September, all on our ramp. Their quality manager lands here for an audit in six weeks. I want all 62 ramp agents through the loading course again before she does. The trainer from Zaventem can do Saturdays. Can you set it up? Roger?",
+  "surface_ask": "Send all 62 ramp agents through the generic one-day loading course again before the airline audit.",
+  "gold": {
+    "real_problem": "In May, Medisol replaced the Boeing 737-300 on its charter rotation with the larger 737-800, which has a different hold layout and compartment numbering on the loading instruction. The loading course never covered the 800 and has no practical part. Nineteen seasonal starters learned the job from a CD-ROM and three buddy shifts, and the senior lead who used to check every hold on the early shift moved to cargo in August. On top of that, last-minute changes are fixed on the stand and never reported to the airline's load control, because getting through on the phone takes longer than closing the doors.",
+    "root_cause_types": [
+      "skill",
+      "process",
+      "environment"
+    ],
+    "is_training_the_lever": "partly",
+    "need_statement": "Early-shift ramp agents, especially the seasonal starters, need hands-on practice reading the 737-800 loading instruction and loading that aircraft, plus a hold check before doors close and a quick, expected way to report last-minute changes. That is a short type-specific practical module at the aircraft and a reporting fix, not the generic course for all 62."
+  },
+  "hidden_facts": [
+    {
+      "id": "all_on_the_800",
+      "fact": "All five September events were on Medisol 737-800 departures between 06:00 and 07:30. Other airlines and the cargo flights had none.",
+      "unlocks_when": "The player asks for the details of the five events: which flights, which aircraft, which times or which shifts.",
+      "reveal_line": "Let me pull the list... huh. All five on the Medisol 800, all before half past seven. I hadn't put them next to each other like that.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Load discrepancies: 07/09 MSL411 B737-800 dep 06:10; 14/09 MSL415 B737-800 dep 06:40; 22/09 MSL411 B737-800 dep 06:10. Handling delays: 18/09 MSL417 B737-800 dep 07:25 (+19 min); 27/09 MSL411 B737-800 dep 06:10 (+12 min). Other airlines and cargo: 0 handling events.",
+      "data_source": "Station occurrence log, September"
+    },
+    {
+      "id": "type_change",
+      "fact": "Medisol switched its rotation from the 737-300 to the 737-800 in May. Nobody at Kempair received type-specific training for the 800; the airline sent a PDF of the hold diagram.",
+      "unlocks_when": "The player asks what changed this year: aircraft, airlines, schedules or procedures.",
+      "reveal_line": "Changed? Medisol went from the 300 to the 800 in May. Same airline, same suitcases, bigger plane. They mailed us a PDF with the hold drawing. Negative on anything else.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call"
+      ]
+    },
+    {
+      "id": "seasonal_starters",
+      "fact": "19 of the 62 ramp agents started in May on seasonal contracts that were extended to March. Their training was the CD-ROM loading module and three buddy shifts.",
+      "unlocks_when": "The player asks who the ramp agents are, how long they've been there, or how new people are trained.",
+      "reveal_line": "We took on nineteen for the summer and kept them for the winter charters. They did the CD-ROM and three shifts with a buddy. Same as always.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Ramp agents: 62. Permanent: 43 (average tenure 9 years). Seasonal, started May, extended to 31 March: 19. Early shift roster: 11 of 16 agents are seasonal.",
+      "data_source": "Staff list and shift roster, ramp"
+    },
+    {
+      "id": "lead_moved",
+      "fact": "Rudi Claes, the senior early-shift lead who checked every hold before the doors closed, moved to the cargo shed in August. The early shift is now led by a lead with two years' experience.",
+      "unlocks_when": "The player asks who supervises the early shift, who checks the load, or what happened in August or September.",
+      "reveal_line": "Rudi ran the early shift for fifteen years. He went to cargo in August, his back. Now it's Wouter. Good kid. Two years in.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "frontline"
+      ],
+      "frontline_line": "Rudi used to crawl into every hold before the doors shut. Since he's in the cargo shed, nobody does. Wouter's doing three stands at once."
+    },
+    {
+      "id": "lmc_unreported",
+      "fact": "When late bags arrive or a hold fills up, agents move bags between compartments and close the doors without telling load control. Medisol's central load control is a phone number abroad with a ten-minute wait, and the doors close in four.",
+      "unlocks_when": "The player asks what happens when the load changes at the last minute, how agents report changes, or how they reach load control.",
+      "reveal_line": "Last-minute changes? You shift them to the back hold and close up. Who are you going to call?",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Twelve late bags and hold one is full? You put them in four and close the doors. You're supposed to phone load control in Málaga. Ten minutes on hold with the guitar music. The doors close in four. So nobody calls. The kids don't even know you're supposed to."
+    },
+    {
+      "id": "course_content",
+      "fact": "The one-day loading course was last updated in 2004. It covers the 737-300, Fokker 50 and MD-80, ends with a multiple-choice test, and has no practical part at an aircraft.",
+      "unlocks_when": "The player asks what the loading course contains, when it was last updated, or how competence is assessed.",
+      "reveal_line": "The course? Classroom, slides, a test with crosses. It's a good course. It's from 2004, but planes don't change that much. Well.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training"
+      ],
+      "data_doc": "Loading Principles, 1 day, classroom. Last revision March 2004. Aircraft covered: B737-300, F50, MD-80. Assessment: 30 multiple-choice questions, pass mark 70%. Practical assessment: none.",
+      "data_source": "Training catalogue, ramp"
+    }
+  ],
+  "volunteered_facts": [
+    "Medisol is the station's biggest client: 14 charter departures a week this winter.",
+    "The handling contract allows Medisol to charge penalties for delays caused by the handler."
+  ],
+  "constraints": {
+    "budget": "About 12,000 euro in the station training budget; the external trainer costs 900 euro per Saturday.",
+    "deadline": "Medisol's quality audit in six weeks.",
+    "audience": "62 ramp agents (19 seasonal), 4 shift leads.",
+    "schedule": "Early shift 04:30-12:30, late shift 12:00-22:00. Peak waves at 06:00 and 14:00; agents can be spared between waves, mostly around 09:00-11:00, when an aircraft often stands empty on the apron.",
+    "languages": "Dutch; six agents are more comfortable in French. Airline documents are in English.",
+    "data_available": [
+      "Station occurrence log (discrepancies, delays, damage)",
+      "Turnaround times per flight",
+      "Training records per agent",
+      "Shift rosters"
+    ],
+    "data_not_available": [
+      "Any record of last-minute changes made on the stand",
+      "Medisol's own load control logs"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "Medisol quality manager",
+      "concern": "Wants evidence that the handler fixed the cause, not a stack of course certificates.",
+      "if_ignored": "The audit finds the same errors and the penalty clause kicks in."
+    },
+    {
+      "who": "Medisol load control",
+      "concern": "Owns the loading instruction and the reporting channel for last-minute changes.",
+      "if_ignored": "Agents keep moving bags without telling anyone and the load sheet stays wrong."
+    },
+    {
+      "who": "Works council and union delegate",
+      "concern": "Saturday training on rest days is overtime under the sector agreement.",
+      "if_ignored": "The Saturday plan is blocked or doubles in cost."
+    },
+    {
+      "who": "Prevention advisor",
+      "concern": "Practice in a real hold means manual handling and apron safety rules for trainees.",
+      "if_ignored": "The practical module is stopped on its first morning."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Counting agents who passed the course or the multiple-choice test.",
+      "On-time performance for the whole station, which is driven by weather, air traffic control and late incoming aircraft.",
+      "Assuming fewer reported last-minute changes means fewer problems."
+    ],
+    "gold_plan": {
+      "baseline": "Load discrepancies and handling-caused delays per 100 Medisol 737-800 departures, split by shift, over the last three months.",
+      "behaviour": "A hold check against the loading instruction before doors close, observed by the shift lead on a sample of departures.",
+      "leading_indicators": "Last-minute changes reported to load control per week (this should go up at first); observed loading checks passed.",
+      "business_metric": "Load discrepancies and handling-caused delays on Medisol departures, and penalty euros charged under the contract.",
+      "collection": "Station occurrence log, a one-page observation sheet per departure, load control's change log shared by Medisol."
+    }
+  },
+  "concepts": {
+    "conventional": "The generic one-day loading course for all 62 agents on Saturdays.",
+    "solid": "A short practical module on the 737-800 at a parked aircraft between waves, for the early shift first, using the real loading instruction. Add a hold check before doors close by the lead, and agree with Medisol a fast way to report last-minute changes. Update the course for the 800 later.",
+    "next_level_examples": [
+      "Pair each seasonal starter with Rudi for two mornings: borrow him back from cargo as an on-stand coach, without asking his back to lift a single bag.",
+      "Agree with Medisol a radio or SMS route to report last-minute changes, with a one-line card in every tug, and invite their quality manager to see it in use at the audit.",
+      "Build a laminated 737-800 hold card, in Dutch and French, from the airline's PDF, tested with the starters before printing."
+    ],
+    "also_valid": [
+      "Keeping a shortened classroom refresher for everyone, if the main effort goes to type-specific practice on the early shift and the reporting fix."
+    ],
+    "red_flags": [
+      "The 2004 course for all 62 as the answer.",
+      "Treating it as carelessness or a discipline problem.",
+      "Ignoring the last-minute change reporting gap.",
+      "Measuring success by certificates shown to the auditor."
+    ]
+  },
+  "defence_objections": [
+    "Training on a parked aircraft? That aircraft belongs to Medisol. I can't just walk thirty people through it without asking.",
+    "If I only train the early shift, the late shift will ask why they're not good enough. Or why they're too good. Either way, coffee machine talk.",
+    "The auditor will ask for training records. Copy that. What do I put in her hand if it's not the course certificate?"
+  ],
+  "question_you_didnt_ask": "Which flights, which aircraft and which shift were the five events on?",
+  "actor_notes": [
+    "Dirk is open and cooperative: he answers reasonable questions honestly, but reveals a hidden fact only when its unlock condition is met.",
+    "He respects anyone who asks to go out on the apron or watch a turnaround; that earns trust fast.",
+    "He has never put the five events side by side and is genuinely surprised when the player gets him to do it.",
+    "He does not know agents skip reporting last-minute changes; that only comes from the floor. If the player brings it up, he says 'negative, they know the procedure' and then goes quiet."
+  ],
+  "flavour_lines": [
+    "Bags don't care about the course. They go where the kid with the bags puts them.",
+    "We're a regional airport. Our rush hour is two aircraft and a pigeon."
+  ]
+}

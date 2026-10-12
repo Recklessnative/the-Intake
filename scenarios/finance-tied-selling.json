@@ -11,7 +11,7 @@
       "Belgian retail bank, about 600 personal bankers in 180 branches selling consumer loans and mortgages.",
       "Banks may offer a loan bundled with their own insurance at a discount, as long as the customer can take each product separately and the discount is transparent. Making the loan conditional on the bank's own insurance is tied selling ('koppelverkoop') and is not allowed.",
       "For credit-linked insurance such as debt balance and fire insurance, the customer is free to pick another insurer; the lender may only require that the cover meets its conditions.",
-      "The FSMA supervises conduct of business; Ombudsfin handles customer complaints; consumer organisations run mystery shopping in branches.",
+      "The CBFA (banking, finance and insurance commission) supervises conduct of business; Ombudsfin handles customer complaints; consumer organisations run mystery shopping in branches.",
       "The legal framing in this card is simplified for play. Check with compliance or legal before using it as real guidance."
     ]
   },
@@ -69,7 +69,7 @@
       ],
       "data_doc": "Loans count 1 point; bank insurance sold with a loan counts 2 points towards the branch bonus.",
       "frontline_line": "Insurance with a loan counts double for the branch. My manager has a little chart. It's very motivating. For him.",
-      "data_source": "Branch target scheme 2026"
+      "data_source": "Branch target scheme 2007"
     },
     {
       "id": "pre_ticked",
@@ -106,7 +106,7 @@
       "found_at": [
         "data:kpi"
       ],
-      "data_doc": "Complaints about linked insurance. 2025: 38. 2026 to date: 117. Most frequent theme: 'not allowed to switch to another insurer'.",
+      "data_doc": "Complaints about linked insurance. 2006: 38. 2007 to date: 117. Most frequent theme: 'not allowed to switch to another insurer'.",
       "data_source": "Ombudsfin and internal complaints"
     },
     {
@@ -127,7 +127,7 @@
   ],
   "constraints": {
     "budget": "Covered by the network's training budget, about 40,000 euro.",
-    "deadline": "Before the magazine article next month, and before a likely FSMA follow-up.",
+    "deadline": "Before the magazine article next month, and before a likely CBFA follow-up.",
     "audience": "600 personal bankers across 180 branches.",
     "schedule": "Branch hours are full; at most 30 minutes a week of non-selling time per banker.",
     "languages": "Dutch and French.",
@@ -159,7 +159,7 @@
       "if_ignored": "The tool keeps steering every customer into the bundle."
     },
     {
-      "who": "DPO and works council",
+      "who": "Legal (privacy) and works council",
       "concern": "Using mystery-shop results or quote logs per banker is employee monitoring.",
       "if_ignored": "Measurement per person gets blocked or turns into a blame tool."
     },
@@ -185,7 +185,7 @@
     }
   },
   "concepts": {
-    "conventional": "A gamified credit refresher e-learning for all 600 bankers.",
+    "conventional": "A fun, interactive credit refresher on CD-ROM for all 600 bankers.",
     "solid": "A short module on the bundling versus tying rule and free choice of insurer, plus a branch-level conversation practice in the weekly team huddle, paired with fixing the double-counting target and the pre-ticked quote tool. Measure with a repeat mystery shop.",
     "next_level_examples": [
       "Turn the mystery-shop transcripts (anonymised) into the training: bankers listen to real 'only with our insurance' moments and rewrite the conversation.",

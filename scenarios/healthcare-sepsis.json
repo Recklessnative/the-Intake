@@ -152,12 +152,12 @@
       "if_ignored": "Half of the escalation conversation never changes."
     },
     {
-      "who": "DPO",
+      "who": "Privacy officer (1992 privacy law)",
       "concern": "Patient file data and any tracking of individual doctors' response times are sensitive.",
       "if_ignored": "The measurement plan gets stopped, or becomes a blame tool."
     },
     {
-      "who": "IT / EHR team",
+      "who": "IT / electronic patient record team",
       "concern": "Owns the delayed electronic early warning module for 4B and 5A.",
       "if_ignored": "Two wards keep running without an alert."
     },
@@ -176,7 +176,7 @@
     "traps": [
       "E-learning completion and quiz scores; knowledge is already high.",
       "Sepsis mortality: lagging, rare per ward and confounded.",
-      "Tracking named doctors' response times, which creates a DPO problem and a culture war."
+      "Tracking named doctors' response times, which creates a privacy problem and a culture war."
     ],
     "gold_plan": {
       "baseline": "Median time from first abnormal early warning score to doctor review, split by day and night, from the existing audit.",

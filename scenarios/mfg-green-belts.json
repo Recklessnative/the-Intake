@@ -81,7 +81,7 @@
     },
     {
       "id": "yellow_belts",
-      "fact": "Three team leads completed a Yellow Belt in 2024. Every one of their improvement projects stalled within two months for lack of time and a sponsor.",
+      "fact": "Three team leads completed a Yellow Belt in 2006. Every one of their improvement projects stalled within two months for lack of time and a sponsor.",
       "unlocks_when": "The player asks what was tried before or whether anyone already has Lean training.",
       "reveal_line": "Three of them did Yellow Belt last year. Nice certificates. The projects died in the drawer. No time.",
       "weight": 2,
@@ -91,7 +91,7 @@
         "call"
       ],
       "data_doc": "Lean Yellow Belt completed by 3 team leads. Linked improvement projects: 3 opened, 0 closed, status 'on hold - no capacity'.",
-      "data_source": "Training records, 2024"
+      "data_source": "Training records, 2006"
     },
     {
       "id": "audience_profile",

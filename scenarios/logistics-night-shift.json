@@ -28,8 +28,8 @@
     "role": "Agency reach-truck driver, week four on nights",
     "voice": "Polite, careful, worried about his contract. Speaks simple Dutch mixed with English. Opens up when he feels safe."
   },
-  "opening_message": "We need a safety refresher for everyone. Three near-misses with reach trucks last month, one guy nearly lost a foot. Problem is they have no time. Can it be 15 minutes? On their phones maybe? The insurer is breathing down my neck.",
-  "surface_ask": "A 15-minute mobile safety refresher for all 220 staff.",
+  "opening_message": "We need a safety refresher for everyone. Three near-misses with reach trucks last month, one guy nearly lost a foot. Problem is they have no time. Can it be 15 minutes? On the PC in the break room maybe, or a DVD in the canteen? The insurer is breathing down my neck.",
+  "surface_ask": "A 15-minute safety refresher on the break-room PC (or a DVD) for all 220 staff.",
   "gold": {
     "real_problem": "Near-misses cluster on the night shift between 2:00 and 4:00 and mostly involve agency reach-truck drivers in their first six weeks. They get a 20-minute video induction with no practical on this site's narrow aisles, there is no supervisor on the floor after 1:00, and a per-case night bonus introduced four months ago rewards rushing.",
     "root_cause_types": [
@@ -126,16 +126,16 @@
     },
     {
       "id": "phones_banned",
-      "fact": "Phones are banned on the warehouse floor for safety reasons; they stay in canteen lockers.",
-      "unlocks_when": "The player asks how or where people would access a mobile module, or about devices and connectivity.",
-      "reveal_line": "On their phones... ah. Phones are banned on the floor. Safety rule. My rule, actually.",
+      "fact": "The 'kiosk' is one old PC in the canteen, shared by about 85 night staff in a single 30-minute break. Phones are banned on the floor and stay in the lockers, so during the shift nobody can be reached except over the shift lead's radio; shift changes are sent by SMS, in Dutch.",
+      "unlocks_when": "The player asks how or where people would take a PC module, when they have a break, or how night staff are reached and informed.",
+      "reveal_line": "The PC in the break room... ah. It's one PC. Eighty-five people, one thirty-minute break. That's, er, twenty seconds each. And phones are banned on the floor, so we can't send them anything during the shift either. My rule, actually.",
       "weight": 1,
       "critical": false,
       "found_at": [
         "call",
         "frontline"
       ],
-      "frontline_line": "Phones? No, phones are in the locker. Strict rule. You get sent home."
+      "frontline_line": "The computer in the canteen? It is for the planning. One computer, everybody wants coffee. Phones are in the locker, strict rule, you get sent home. The SMS with the shifts is in Dutch, I ask a colleague to translate."
     }
   ],
   "volunteered_facts": [
@@ -146,7 +146,7 @@
     "budget": "Around 15,000 euro from the site budget.",
     "deadline": "Insurer audit in eight weeks.",
     "audience": "220 staff; about 85 on nights, of whom roughly 35 are agency drivers who rotate often.",
-    "schedule": "Three shifts, 24/5. No slack time in the shift plan; any training time costs pick capacity.",
+    "schedule": "Three shifts, 24/5. No spare time in the shift plan; any training time costs pick capacity. One 30-minute break per night shift.",
     "languages": "Dutch and French on day shift; many agency workers on nights speak Romanian or Polish and limited Dutch.",
     "data_available": [
       "Near-miss and incident log with time, location and badge number",
@@ -188,7 +188,7 @@
   ],
   "measurement": {
     "traps": [
-      "Completion rate of the refresher.",
+      "Completion rate of the refresher on the break-room PC.",
       "Raw near-miss counts: small numbers, and better reporting after training can make them go up, which is a good sign, not a failure.",
       "Using impact sensor data to rank or punish individuals."
     ],
@@ -201,8 +201,8 @@
     }
   },
   "concepts": {
-    "conventional": "A 15-minute mobile safety module for all 220 staff.",
-    "solid": "Target the people at risk: a site-specific practical sign-off for every new agency driver before nights, a buddy for their first shifts, five-minute toolbox talks at the start of each night shift in their own language, and a fix for the supervision gap after 1:00.",
+    "conventional": "A 15-minute safety refresher on the break-room PC or a DVD for all 220 staff.",
+    "solid": "Target the people at risk: a site-specific practical sign-off for every new agency driver before nights, a buddy for their first shifts, five-minute toolbox talks at the start of each night shift in their own language (with key points on the notice board and the shift lead's radio), and a fix for the supervision gap after 1:00.",
     "next_level_examples": [
       "A 'first six weeks' route: no solo nights in week one, an experienced permanent driver as 'night captain' with a zero-incident bonus, and hotspot floor markings drawn from the near-miss map.",
       "Rework the night bonus to be quality and safety adjusted, piloted with the works council, so the incentive stops paying for speed alone.",
@@ -212,7 +212,7 @@
       "A short refresher for everyone is acceptable as a hygiene step if the main investment goes to new agency drivers on nights."
     ],
     "red_flags": [
-      "A mobile module, when phones are banned on the floor.",
+      "A 15-minute module on one canteen PC (or a DVD) for everyone, when nights have one PC and one short break.",
       "The same refresher for everyone.",
       "Blaming agency workers as careless.",
       "Using impact sensors to punish individuals without consultation."
@@ -226,7 +226,7 @@
   "question_you_didnt_ask": "What changed four months ago?",
   "actor_notes": [
     "Sofie genuinely cares about her people and is relieved when someone takes the problem seriously.",
-    "She proposed phones herself and only realises the ban when the player asks about access. Play that moment of mild embarrassment.",
+    "She proposed the break-room PC herself and only realises it's one PC for a whole shift, with phones banned on the floor, when the player asks about access. Play that moment of mild embarrassment.",
     "She defends the bonus at first because pick rate made her look good to head office; she concedes when shown the timing.",
     "If the player blames agency workers, she gets defensive on their behalf: 'they're thrown in at the deep end'."
   ],

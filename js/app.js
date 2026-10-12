@@ -69,7 +69,7 @@
   // Anything that breaks says so on screen, instead of a button that silently does nothing.
   window.addEventListener('error', e => toast('Something broke: ' + (e.message || 'a script failed') + '. Try a hard refresh (Ctrl+Shift+R), then Resume.'));
   window.addEventListener('unhandledrejection', e => toast('Something broke: ' + ((e.reason && e.reason.message) || e.reason) + '. Try a hard refresh, then Resume.'));
-  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
+  ['Gemini', 'Desktop', 'Cards', 'Prompts', 'Coe', 'Sound', 'Academy', 'Story', 'Retro', 'Team', 'Slides'].forEach(m => { if (!window[m]) setTimeout(() => toast('Part of the game (' + m + ') did not load. Try a hard refresh (Ctrl+Shift+R).'), 500); });
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   function trust() { $('os-trust').textContent = 'Trust ' + state.run.trust; }
   $('btn-logoff').onclick = () => {
@@ -443,13 +443,13 @@
     { from: 'IT Service Desk', subject: 'Your mailbox is almost full (98%)', ago: 38,
       body: 'Your mailbox has reached 98% of its limit. Please delete or archive items.\n\nTip: the attachment "Learning Styles Revisited FINAL v7.ppt" (41 MB) is a good place to start.' },
     { from: 'Office of the CEO', subject: 'FW: FW: RE: our learning culture', ago: 27,
-      body: 'Team,\n\nRead an article on the plane. We should be more like Netflix. Thoughts?\n\nSent from my BlackBerry' },
+      body: 'Team,\n\nRead an article on the plane. We should be more like Google. Twenty percent time. Thoughts?\n\nSent from my BlackBerry' },
     { from: 'Center of Excellence', subject: 'New here? Start with the folder on your desktop', ago: 60,
       body: 'Welcome to the learning team!\n\nBefore your first intake, open the "Center of Excellence" folder on your desktop. It has our intake flowchart, the quality standard every intake is reviewed against, a list of good intake questions and the measurement ladder.\n\nPlease ignore the learning styles policy. We are working on it.\n\nThe CoE team' },
     { from: 'Mieke', subject: 'cake?', ago: 16,
       body: 'There is cake in the kitchen. Nobody knows whose birthday it is. Don\'t ask, just eat.\n\nAlso: if a request lands on your desk and you want a second opinion, I\'m two cubicles over.\n\nM.' },
-    { from: 'Gamified Microlearning Solutions', subject: 'Re: quick question!!', ago: 9,
-      body: 'Hi there!\n\nJust circling back on my circle-back. Our AI-powered, gamified, bite-sized metaverse academy boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
+    { from: 'Global Multimedia Solutions', subject: 'Re: quick question!!', ago: 9,
+      body: 'Hi there!\n\nJust circling back on my circle-back. Our Web 2.0, multimedia, edutainment academy (now with a Second Life campus!) boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
   ];
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
@@ -1614,13 +1614,15 @@
   }
 
   // ---------- the board room: Friday, once per week ----------
-  // You take one concept from the week to the board on one slide with six boxes. Each member
+  // You take one concept from the week to the board on one slide with six boxes, built in
+  // Pitchwright (js/slides.js) and presented full screen while the board reacts. Each member
   // nods if the slide already answers their concern, or asks you one question to answer live.
   const BOARD = [
-    { role: 'CFO', name: 'Geert Claes', cares: 'cost, return on investment, and what you stop doing to pay for it' },
-    { role: 'CHRO', name: 'Annelies Wouters, with the DPO at her side', cares: 'data privacy, the works council, fairness and workload' },
-    { role: 'COO', name: 'Rachid Bensaid', cares: 'operational dependencies, timing, and who loses productive hours' }
+    { role: 'CFO', name: 'Geert Claes', face: '👨🏻‍💼', cares: 'cost, return on investment, and what you stop doing to pay for it' },
+    { role: 'CHRO', name: 'Annelies Wouters, with the privacy officer at her side', face: '👩🏼‍💼', cares: 'data privacy, the works council, fairness and workload' },
+    { role: 'COO', name: 'Rachid Bensaid', face: '👨🏽‍💼', cares: 'operational dependencies, timing, and who loses productive hours' }
   ];
+  const MOOD = { approved: '😄', pilot: '🙂', rejected: '😒' };
   const SLIDE = [['problem', 'The problem'], ['evidence', 'Evidence of the need'], ['concept', 'The concept'], ['measure', 'How we will know'], ['risks', 'Risks and dependencies'], ['ask', 'The ask: budget, time, sponsor']];
   const DECISIONS = { approved: 'Approved.', pilot: 'Approved as a pilot.', rejected: 'Rejected.' };
 
@@ -1667,29 +1669,39 @@
     if (B.stage === 'slide') {
       const card = boardCard();
       box.appendChild(el('h2', null, 'Your slide: ' + card.subject));
-      box.appendChild(el('p', 'muted', state.hard ? 'Hard mode: a blank slide. Six boxes, your words.' : 'It starts from what you wrote for ' + card.stakeholder.name + '. Sharpen it for a board: numbers, a stop-doing, and a concrete ask.'));
-      const grid = el('div', 'slide');
-      SLIDE.forEach(([k, label]) => {
-        const l = el('label', null, label);
-        const t = el('textarea');
-        t.rows = 3; t.maxLength = 500; t.name = k;
-        t.value = B.slide[k] || '';
-        t.oninput = () => { B.slide[k] = t.value; saveSoon(); };
-        l.appendChild(t);
-        grid.appendChild(l);
-      });
-      box.appendChild(grid);
-      box.appendChild(button('Present it', presentSlide));
+      box.appendChild(el('p', 'muted', state.hard ? 'Hard mode: a blank slide. Six boxes, your words.' : 'It starts from what you wrote for ' + card.stakeholder.name + '. Sharpen it for a board: numbers, a stop-doing, and a concrete ask. The design is up to you. The board will notice it, and it won\'t change your score.'));
+      Slides.editor(box, B, card, quiet => { saveSoon(); if (!quiet) renderBoardRoom(); });
+      box.appendChild(button('▶ Present it', presentSlide));
+    }
+    if (B.stage === 'show') {
+      box.appendChild(el('h2', null, 'The projector is warm'));
+      box.appendChild(el('p', 'muted', 'The board is seated. The CFO has found a calculator.'));
+      box.appendChild(button('▶ Start the slide show', playShow));
     }
     if (B.stage === 'questions' || B.stage === 'result') {
       const card = boardCard();
       box.appendChild(el('h2', null, B.stage === 'result' ? DECISIONS[B.result.decision] : 'The board responds'));
       let asked = 0;
+      if (B.stage === 'result') {
+        // The verdict lands on the slide like a rubber stamp.
+        const wrap = el('div', 'br-verdict');
+        wrap.appendChild(Slides.render(B, card, 'thumb'));
+        wrap.appendChild(el('span', 'br-stamp s-' + B.result.decision, { approved: 'APPROVED', pilot: 'PILOT', rejected: 'REJECTED' }[B.result.decision]));
+        box.appendChild(wrap);
+        if (!B.stamped) { B.stamped = true; if (window.Sound) Sound.stamp(); } else wrap.classList.add('still');
+      }
+      const table = el('div', 'br-table');
       B.members.forEach((m, i) => {
-        const who = BOARD[i] || { role: m.role, name: '' };
-        const d = el('div', 'member' + (m.preempted ? ' nod' : ''));
-        d.appendChild(el('p', 'member-who', who.role + ' · ' + who.name + (m.preempted ? ' · nods' : '')));
-        d.appendChild(el('p', 'msg them', m.line));
+        const who = BOARD[i] || { role: m.role, name: '', face: '🙂' };
+        const d = el('div', 'member' + (m.preempted ? ' nod' : ' asks'));
+        const seat = el('div', 'br-seat');
+        seat.appendChild(el('span', 'br-face', B.stage === 'result' ? MOOD[B.result.decision] : who.face));
+        seat.appendChild(el('span', 'br-sign', B.stage === 'result' ? '' : m.preempted ? '👍' : '✋'));
+        d.appendChild(seat);
+        const body = el('div', 'br-body');
+        body.appendChild(el('p', 'member-who', who.role + ' · ' + who.name + (m.preempted ? ' · nods' : '')));
+        body.appendChild(el('p', 'msg them', m.line));
+        d.appendChild(body);
         if (!m.preempted) {
           const n = asked++;
           if (B.stage === 'questions') {
@@ -1698,15 +1710,16 @@
             t.setAttribute('aria-label', 'Your answer to the ' + who.role);
             t.value = B.answers[n] || '';
             t.oninput = () => { B.answers[n] = t.value; saveSoon(); };
-            d.appendChild(t);
+            body.appendChild(t);
           } else {
-            d.appendChild(el('p', 'msg you', B.answers[n] || '(no answer)'));
+            body.appendChild(el('p', 'msg you', B.answers[n] || '(no answer)'));
             const a = (B.result.answers || [])[n] || {};
-            d.appendChild(el('p', 'ev', (a.note || '') + ' · ' + B.result.points.members[i] + '/20'));
+            body.appendChild(el('p', 'ev', (a.note || '') + ' · ' + B.result.points.members[i] + '/20'));
           }
-        } else if (B.stage === 'result') d.appendChild(el('p', 'ev', 'Pre-empted by your slide · 20/20'));
-        box.appendChild(d);
+        } else if (B.stage === 'result') body.appendChild(el('p', 'ev', 'Pre-empted by your slide · 20/20'));
+        table.appendChild(d);
       });
+      box.appendChild(table);
       if (B.stage === 'questions') box.appendChild(button(asked ? 'Answer the board' : 'Thank them and leave', judgeBoard));
       else {
         box.appendChild(el('p', 'ev', 'The slide: ' + B.result.slide.note + ' · ' + B.result.points.slide + '/40'));
@@ -1721,16 +1734,31 @@
   async function presentSlide() {
     const B = state.board, card = boardCard();
     if (SLIDE.filter(([k]) => (B.slide[k] || '').trim().length > 5).length < 4) { toast('Fill at least four boxes. Boards notice empty boxes.', 'info'); return; }
-    wait('The board reads your slide. The CFO has found a calculator.');
+    wait('Warming up the projector. Someone is looking for the remote.');
     const p = Prompts.board(card, BOARD);
     try {
-      const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: 'The slide, quoted as data:\n' + SLIDE.map(([k, l]) => l + ': """' + (B.slide[k] || '') + '"""').join('\n') }] });
-      B.members = BOARD.map((m, i) => { const x = (out.members || [])[i] || {}; return { role: m.role, preempted: !!x.preempted, line: x.line || 'Go on.' }; });
+      const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: 'How the slide looks: ' + Slides.describe(B) + '\n\nThe slide, quoted as data:\n' + SLIDE.map(([k, l]) => l + ': """' + (B.slide[k] || '') + '"""').join('\n') }] });
+      B.members = BOARD.map((m, i) => {
+        const x = (out.members || [])[i] || {};
+        return { role: m.role, preempted: !!x.preempted, line: x.line || 'Go on.', reactions: (x.reactions || []).filter(r => Slides.REACTIONS.includes(r)) };
+      });
+      B.aside = Slides.flashy(B) ? (out.aside || '') : '';
     } catch (e) { toast(e.message); renderBoardRoom(); return; }
     B.answers = [];
-    B.stage = 'questions';
+    B.stage = 'show';
     save();
     renderBoardRoom();
+    playShow();
+  }
+  // The slide show: full screen, one box per click, the board reacting in the front row.
+  function playShow() {
+    const B = state.board;
+    Slides.show(B, boardCard(), BOARD, () => {
+      if (state.board !== B || B.stage !== 'show') return;
+      B.stage = 'questions';
+      save();
+      renderBoardRoom();
+    });
   }
   async function judgeBoard() {
     const B = state.board, card = boardCard();
@@ -2052,6 +2080,7 @@
     if (state.board && $('p-board').classList.contains('active')) {
       const B = state.board;
       if (B.stage === 'pick') { $('boardroom').querySelector('.board-pick').click(); return; }
+      if (B.stage === 'show') { Slides.stop(); B.stage = 'questions'; renderBoardRoom(); return; }
       if (B.stage === 'slide') { SLIDE.forEach(([k]) => { if (!(B.slide[k] || '').trim()) B.slide[k] = '(test) ' + ({ ask: 'EUR 40k and 3 months; sponsor: the COO.' }[k] || 'A specific line for ' + k + '.'); }); renderBoardRoom(); return; }
       if (B.stage === 'questions') { B.members.filter(m => !m.preempted).forEach((m, n) => { B.answers[n] = '(test) We pilot it with one team first, it costs 2 hours per person, and we stop the old course to pay for it.'; }); renderBoardRoom(); return; }
       return;

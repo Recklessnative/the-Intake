@@ -150,11 +150,52 @@
     [0, 0.14, 0.42, 0.56].forEach(d => voice(c, g, 93, t + d, 0.07, 0.5, 'square'));
   }
 
+  // Pitchwright: a burst of filtered noise, shaped. Used for the projector and the stamp.
+  function noise(c, out, t, len, freq, q, gain, type) {
+    const n = c.createBufferSource(), b = c.createBuffer(1, Math.ceil(c.sampleRate * len), c.sampleRate), d = b.getChannelData(0);
+    for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+    n.buffer = b;
+    const f = c.createBiquadFilter(), g = c.createGain();
+    f.type = type || 'bandpass'; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    n.connect(f); f.connect(g); g.connect(out);
+    n.start(t);
+    return f;
+  }
+  // The slide projector advancing: a mechanical clack.
+  function click() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.01;
+    noise(c, c.destination, t, 0.04, 2400, 3, 0.25);
+    noise(c, c.destination, t + 0.06, 0.06, 700, 2, 0.2);
+  }
+  // A transition: a soft swoosh that rises.
+  function whoosh() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.01;
+    const f = noise(c, c.destination, t, 0.6, 300, 1.2, 0.12);
+    f.frequency.exponentialRampToValueAtTime(3200, t + 0.5);
+  }
+  // The board's decision: a rubber stamp on paper.
+  function stamp() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.25;
+    noise(c, c.destination, t, 0.12, 180, 0.8, 0.6, 'lowpass');
+    noise(c, c.destination, t, 0.05, 1500, 1, 0.2);
+  }
+
   function toggle() {
     on = !on;
     try { window.localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, online, sms, toggle, get on() { return on; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, toggle, get on() { return on; } };
 })();
