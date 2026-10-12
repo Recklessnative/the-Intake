@@ -3,7 +3,7 @@
   "schema_version": 1,
   "sector": "Internal IT",
   "tier": 3,
-  "tier_label": "Mostly not a training problem",
+  "tier_label": "Hard case: the obvious diagnosis is wrong",
   "title": "Closed, Reopened, Closed",
   "briefing": {
     "headline": "An internal IT helpdesk after outsourcing: what you should know before the call",

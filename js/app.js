@@ -1333,7 +1333,7 @@
     const hits = w.tags.filter(t => gold.includes(t)).length, extra = w.tags.length - hits;
     const tags = gold.length ? Math.max(0, Math.min(1, (hits - 0.5 * extra) / Math.min(gold.length, 3))) : 0;
     const order = { no: 0, partly: 1, yes: 2 }, want = String(r.card.learningIsTheAnswer || '').toLowerCase();
-    const lever = want in order ? [1, 0.5, 0][Math.abs(order[want] - order[w.lever])] : 0.5;
+    const lever = want in order ? [1, 0.25, 0][Math.abs(order[want] - order[w.lever])] : 0.5;
     const b = r.board, pool = evidencePool();
     const cited = new Set(b.evidence.flatMap(id => (pool.find(x => x.id === id) || { facts: [] }).facts));
     const critical = r.card.hiddenFacts.filter(f => f.critical).map(f => f.id);

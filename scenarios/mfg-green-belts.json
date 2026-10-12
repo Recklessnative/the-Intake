@@ -3,7 +3,7 @@
   "schema_version": 1,
   "sector": "Manufacturing",
   "tier": 1,
-  "tier_label": "Real skill gap, open stakeholder",
+  "tier_label": "Open stakeholder, cause still to find",
   "title": "Twenty-Two Green Belts",
   "briefing": {
     "headline": "Running a factory floor: what you should know before the call",
@@ -28,26 +28,27 @@
     "role": "Night-shift team lead, line 3",
     "voice": "Tired, honest, a bit ironic. Says what the plant manager won't. Switches to short sentences when annoyed."
   },
-  "opening_message": "Hi. Corporate wants OEE from 61 to 70 percent by next year. I want all 22 team leads through a Lean Six Sigma Green Belt. The provider quoted 4,800 a head and the budget is approved. Can you organise it before the summer shutdown? Concretely: dates, provider, done.",
-  "surface_ask": "A Lean Six Sigma Green Belt certification for all 22 team leads.",
+  "opening_message": "Hi. Corporate wants OEE from 61 to 70 percent by next year. All 22 team leads did their Green Belt last year and since then, nothing. It didn't stick. I want them through it again, a refresher with the same provider. 4,800 a head, budget approved. Can you organise it before the summer shutdown? Concretely: dates, provider, done.",
+  "surface_ask": "A Green Belt refresher for all 22 team leads, because the first round 'didn't stick'.",
   "gold": {
-    "real_problem": "Team leads lose most of their shift firefighting and have no daily management routine. Shift handovers are a two-minute shout at the machine, so the same problems repeat shift after shift, and half of all downtime is logged as 'Other', so nobody knows which stops to attack.",
+    "real_problem": "The team leads can do improvement work: all 22 passed the Green Belt exam in 2006 and their course projects delivered. Since then not one project has been opened, because nobody gives them time (they firefight about 70% of the shift), nobody picks or reviews projects (the course ideas sit in a binder in Marc's office), and their targets count tonnes, absence and safety, so an hour spent on a project only shows up as lower output. Half of all downtime coded 'Other' means nobody can even point them at the right stops. Ghent runs the same course with the same provider and closes projects every month, because it has the routine Brabant lacks.",
     "root_cause_types": [
-      "skill",
       "process",
+      "expectations",
+      "incentive",
       "system"
     ],
-    "is_training_the_lever": "partly",
-    "need_statement": "Team leads need to run a short structured shift start and handover, log stops properly and do simple root cause on the top stops of their line. That is a practised floor routine plus a fix to downtime coding, not a project-based statistics certificate."
+    "is_training_the_lever": "no",
+    "need_statement": "Team leads do not need to learn Green Belt again; they need the conditions to use it. That means protected project time, a monthly sponsor routine where Marc and the engineers pick projects from the downtime data and review progress, project results counted in team lead targets, and downtime coding that shows which stops matter. L&D's part is designing and facilitating that routine and coaching Marc and the engineers as sponsors, not booking a course."
   },
   "hidden_facts": [
     {
       "id": "other_code",
-      "fact": "48% of downtime minutes in the MES are coded 'Other'.",
-      "unlocks_when": "The player asks where OEE losses come from, what data exists on downtime, or what the biggest losses are.",
+      "fact": "48% of downtime minutes in the MES are coded 'Other', so nobody can point a project at the stops that matter.",
+      "unlocks_when": "The player asks where OEE losses come from, what data exists on downtime, or how projects get chosen.",
       "reveal_line": "Honestly? Half of it is coded 'Other'. 'Other' is our most reliable machine. It stops every day.",
-      "weight": 3,
-      "critical": true,
+      "weight": 2,
+      "critical": false,
       "found_at": [
         "data:kpi"
       ],
@@ -56,48 +57,73 @@
     },
     {
       "id": "firefighting",
-      "fact": "Team leads spend roughly 70% of a shift firefighting: chasing forklifts, covering absences, hunting for missing pallets.",
-      "unlocks_when": "The player asks what a team lead's day looks like, how they spend their time, or whether anyone observed them.",
-      "reveal_line": "They run around. Forklift missing, someone sick, wrong board grade. If you find one sitting down, take a photo.",
-      "weight": 2,
-      "critical": false,
+      "fact": "Team leads spend roughly 70% of a shift firefighting: chasing forklifts, covering absences, hunting for missing pallets. There is no protected time for project work and no floater to cover the line.",
+      "unlocks_when": "The player asks what a team lead's day looks like, when they would work on projects, or whether anyone observed them.",
+      "reveal_line": "They run around. Forklift missing, someone sick, wrong board grade. If you find one sitting down, take a photo. Project time? There's no such column on the rota.",
+      "weight": 3,
+      "critical": true,
       "found_at": [
         "frontline",
         "call"
       ],
-      "frontline_line": "Lean projects? I spend my shift finding forklifts and people. If someone's sick, I'm on the machine myself."
+      "frontline_line": "Projects? I spend my shift finding forklifts and people. If someone's sick, I'm on the machine myself. My project hour is called 'after the shift, unpaid'."
     },
     {
-      "id": "handover",
-      "fact": "Shift handover is verbal, about two minutes, at the machine. Night shift problems routinely repeat on day shift.",
-      "unlocks_when": "The player asks about handovers, communication between shifts, or why problems recur.",
-      "reveal_line": "Handover? The night guy shouts something over the corrugator and goes home. Then day shift discovers the same jam at nine.",
-      "weight": 2,
+      "id": "line3_project",
+      "fact": "During the 2006 course Dariusz's project on line 3 cut changeover time from 48 to 33 minutes. Nobody owned the new standard after the certificate; within three months changeovers were back at 50 minutes. He knows exactly how to do it again; nobody has asked.",
+      "unlocks_when": "The player asks a team lead about the Green Belt course, what they did with it, or whether it worked.",
+      "reveal_line": "Line 3 changeovers went from 48 to 33 minutes on the course. Then nobody asked about it again.",
+      "weight": 3,
       "critical": true,
       "found_at": [
         "frontline"
       ],
-      "frontline_line": "Handover is me shouting over the corrugator at six in the morning. Day shift finds the same jam at nine. Every week."
+      "frontline_line": "Refresher? I don't need a refresher. I took changeovers on line 3 from 48 minutes to 33. Then I went back on nights, nobody checked the standard sheet, and it fell off the machine. Literally. It's under the corrugator. We're back at 50."
     },
     {
-      "id": "yellow_belts",
-      "fact": "Three team leads completed a Yellow Belt in 2006. Every one of their improvement projects stalled within two months for lack of time and a sponsor.",
-      "unlocks_when": "The player asks what was tried before or whether anyone already has Lean training.",
-      "reveal_line": "Three of them did Yellow Belt last year. Nice certificates. The projects died in the drawer. No time.",
-      "weight": 2,
-      "critical": false,
+      "id": "green_belt_2006",
+      "fact": "All 22 team leads passed the Green Belt exam in autumn 2006, average score 81%. Nineteen of the 22 course projects hit their target during the course. Since the certificates: zero new projects opened.",
+      "unlocks_when": "The player asks what was tried before, how the team leads did on the course, or what 'didn't stick' actually means.",
+      "reveal_line": "Oh, they passed. All of them. Good scores, nice projects, nice certificates. Then nothing. That's what I mean by didn't stick.",
+      "weight": 3,
+      "critical": true,
       "found_at": [
         "data:training",
         "call"
       ],
-      "data_doc": "Lean Yellow Belt completed by 3 team leads. Linked improvement projects: 3 opened, 0 closed, status 'on hold - no capacity'.",
-      "data_source": "Training records, 2006"
+      "data_doc": "Lean Six Sigma Green Belt, cohort Sept-Nov 2006: 22 enrolled, 22 passed. Average exam score 81% (pass mark 70%). Course projects: 22 submitted, 19 met target (examples: changeover line 3 -31%, glue waste line 5 -18%). Improvement projects registered since certification: 0.",
+      "data_source": "Training records and provider report, 2006"
+    },
+    {
+      "id": "no_sponsor",
+      "fact": "Nobody picks or reviews improvement projects. The 40-odd project ideas from the course sit in a binder in Marc's office; there is no project review meeting and no named sponsor. Marc 'assumed they would just do it'.",
+      "unlocks_when": "The player asks who chooses the projects, who follows them up, or what happened after the course ended.",
+      "reveal_line": "Who picks the projects? Concretely... they do. I assumed they'd just do it. There's a binder with ideas. It's on my shelf. It's a good binder.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call"
+      ]
+    },
+    {
+      "id": "targets",
+      "fact": "Team lead annual targets are tonnes per shift, absenteeism and safety. Improvement projects appear nowhere, and an hour spent on one shows up as lower tonnage on that shift's report.",
+      "unlocks_when": "The player asks how team leads are evaluated, what their targets or bonus are, or what they get for finishing a project.",
+      "reveal_line": "Their targets? Tonnes, absence, accidents. Projects aren't in there, no. Why would they be? They're... ah.",
+      "weight": 2,
+      "critical": true,
+      "found_at": [
+        "data:policy",
+        "call"
+      ],
+      "data_doc": "Team lead annual objectives 2007: 1) Tonnes per shift vs. plan (50%). 2) Absenteeism of own crew (25%). 3) Lost-time accidents (25%). No other objectives.",
+      "data_source": "HR, team lead objectives template 2007"
     },
     {
       "id": "audience_profile",
       "fact": "All team leads were promoted from operator, average 14 years on the floor. Several are far more comfortable speaking than writing, and four are more at home in Polish than in Dutch.",
       "unlocks_when": "The player asks about the team leads' background, experience, language or how they learn best.",
-      "reveal_line": "They're operators who got promoted. Excellent on a machine. Give them a 60-page workbook and you've lost them.",
+      "reveal_line": "They're operators who got promoted. Excellent on a machine. And they passed the exam, which surprised the provider more than me.",
       "weight": 1,
       "critical": false,
       "found_at": [
@@ -109,21 +135,22 @@
     },
     {
       "id": "sister_plant",
-      "fact": "The corporate Lean office already has a daily management standard (tier boards, 10-minute shift starts) running at the sister plant in Ghent. Marc never rolled it out because he 'didn't want corporate posters on my walls'.",
-      "unlocks_when": "The player asks what corporate or other plants already offer, or whether a standard exists.",
-      "reveal_line": "Ghent has their boards and their little meetings. Corporate keeps sending me the folder. I don't need posters to run a plant.",
+      "fact": "The sister plant in Ghent sent its team leads on the same Green Belt course with the same provider and closed 31 projects this year. The difference is the routine: a protected two-hour project block per team lead per week covered by a floater, a monthly project review chaired by the plant manager, and project savings counted in team lead objectives. Corporate has sent Marc the folder; he 'didn't want corporate posters on my walls'.",
+      "unlocks_when": "The player asks what other plants do, whether the same course works elsewhere, or whether corporate already has a standard.",
+      "reveal_line": "Ghent? Same course, same provider. They have their review meeting and their Friday project hours. Corporate keeps sending me the folder. I don't need posters to run a plant.",
       "weight": 3,
       "critical": false,
       "found_at": [
         "call",
         "frontline"
       ],
-      "frontline_line": "Ghent has those boards and a ten-minute meeting at shift start. My cousin works there. He says it works. Don't tell Marc I said so."
+      "frontline_line": "My cousin is a team lead in Ghent. Same course as me. He gets two hours a week off the line for his project, and the plant manager asks him about it every month. He's on his fourth. Don't tell Marc I said so."
     }
   ],
   "volunteered_facts": [
     "OEE is 61% across 6 lines; corporate target is 70%.",
-    "Budget of about 105,000 euro is approved for the certification."
+    "All 22 team leads did a Green Belt in 2006.",
+    "Budget of about 105,000 euro is approved for the refresher."
   ],
   "constraints": {
     "budget": "About 105,000 euro approved, earmarked for 'team lead development'.",
@@ -145,17 +172,17 @@
   "dependencies": [
     {
       "who": "Works council",
-      "concern": "Training outside shift hours counts as overtime under the plant agreement.",
-      "if_ignored": "Sessions get blocked or become expensive overtime."
+      "concern": "Protected project time and any change to team lead objectives must go past the works council; project work after the shift counts as overtime under the plant agreement.",
+      "if_ignored": "Project hours get blocked, or quietly become unpaid evenings."
     },
     {
       "who": "HR and the sector collective agreement",
-      "concern": "A formal certification can trigger a pay-scale discussion for team leads.",
-      "if_ignored": "22 Green Belts arrive with 22 requests for a raise."
+      "concern": "Team lead objectives and variable pay are set on an HR template and partly framed by the sector collective agreement; adding project results to targets needs HR on board.",
+      "if_ignored": "Projects stay 'extra', and an hour on a project keeps costing a team lead tonnes on his review."
     },
     {
       "who": "Corporate Lean office",
-      "concern": "Owns the daily management standard and is proud of it; feels ignored by this plant.",
+      "concern": "Owns the project review routine running in Ghent and is proud of it; feels ignored by this plant.",
       "if_ignored": "No support, or a turf fight about whose method wins."
     },
     {
@@ -171,47 +198,50 @@
   ],
   "measurement": {
     "traps": [
-      "Counting certificates earned.",
+      "Counting refresher certificates or exam scores: they already passed, with 81%.",
       "Using plant-wide OEE alone: lagging, and confounded by orders, maintenance and raw material.",
-      "Satisfaction scores after a classroom week."
+      "Satisfaction scores after another classroom week."
     ],
     "gold_plan": {
-      "baseline": "Share of downtime coded 'Other' and unplanned downtime minutes per line, measured over the last 8 weeks.",
-      "behaviour": "Shift start and handover held to the standard, checked with short layered audits by the plant manager and engineers.",
-      "leading_indicators": "Share of stops correctly coded; top three stops per line with a named owner and an action.",
-      "business_metric": "Unplanned downtime minutes and OEE on pilot lines compared with the other lines.",
-      "collection": "Weekly MES export, a one-page audit checklist on the floor, pilot lines versus comparison lines."
+      "baseline": "Improvement projects opened and closed since the 2006 certificates (zero), hours of protected project time per team lead (zero), share of downtime coded 'Other' and unplanned downtime minutes per line over the last 8 weeks.",
+      "behaviour": "Monthly project review held with Marc in the chair; each team lead uses the protected weekly project block; project standards checked at the line three months after closing.",
+      "leading_indicators": "Projects opened, closed and still holding after three months; share of stops correctly coded; protected hours actually taken versus planned.",
+      "business_metric": "Unplanned downtime and changeover minutes on pilot lines compared with the other lines, then OEE.",
+      "collection": "Project register reviewed monthly, weekly MES export, rota showing protected hours, pilot lines versus comparison lines."
     }
   },
   "concepts": {
-    "conventional": "Send all 22 team leads on the external Green Belt course.",
-    "solid": "A daily management programme on the floor: short sessions on running a shift start, handover and simple root cause, followed by coaching at the line. Fix the downtime codes with IT. Keep one or two Green Belts for process engineers who will actually do statistical projects.",
+    "conventional": "Send all 22 team leads on the Green Belt refresher.",
+    "solid": "No refresher. Set up a project sponsor routine instead: a monthly review where Marc and the engineers pick projects from the downtime data and follow them up, two protected project hours per team lead per week covered by a floater, and project results added to team lead objectives with HR. Fix the 'Other' coding with IT. L&D designs the routine, facilitates the first reviews and coaches Marc and the engineers as sponsors; most of the refresher budget goes back or funds the floater.",
     "next_level_examples": [
-      "Borrow, don't invent: pilot the Ghent daily management standard on two lines, with team leads visiting Ghent to see it run, then pilot team leads coach the next wave.",
-      "Move part of the certification budget to fixing MES coding and run an 'Other hunt' where lines compete to shrink the 'Other' share.",
-      "Green Belts only for the engineers, paired with team leads so each project has someone on the floor who owns it."
+      "Borrow, don't invent: copy Ghent's review routine on two lines, with Marc sitting in on one Ghent review, and restart Dariusz's line 3 changeover project as the visible first win.",
+      "Turn the binder into a project board: Marc picks the first five from the course ideas and the MES data at the first review, each with a named sponsor and a date.",
+      "Spend the L&D effort on the sponsors, not the belts: a half-day for Marc and the engineers on choosing and reviewing projects, then coaching at their first three reviews."
     ],
     "also_valid": [
-      "A smaller, practical Lean basics programme combined with a handover standard, if it is practised on the floor and measured on downtime."
+      "A short project-selection and sponsoring session for Marc and the engineers, if it comes with the protected time and the target change."
     ],
     "red_flags": [
-      "Green Belt for all 22 as proposed.",
-      "Classroom-only delivery that pulls team leads off the floor for days.",
+      "Green Belt refresher for all 22 as proposed.",
+      "Any re-certification, advanced belt or Black Belt for team leads.",
+      "Ignoring protected time, sponsorship or targets.",
       "Ignoring the 'Other' coding problem.",
-      "Measuring success by certificates."
+      "Measuring success by certificates or exam scores."
     ]
   },
   "defence_objections": [
-    "Corporate asked for Green Belts. If I go back with 'a board and some meetings', I look soft.",
-    "A pilot on two lines means twenty team leads wait. They'll feel passed over and tell me so at the coffee machine.",
-    "You want my team leads to go and learn from Ghent? Those people think we're cowboys."
+    "Corporate approved 105,000 for team lead development. If I send it back, I never see it again.",
+    "A monthly meeting to pick projects? I run a plant, not a debating club.",
+    "Two hours a week off the floor for 22 team leads? Who runs the corrugator, you?",
+    "You want me to copy Ghent? Those people think we're cowboys."
   ],
-  "question_you_didnt_ask": "What's actually inside 'Other'?",
+  "question_you_didnt_ask": "What happened to their projects after they passed the exam?",
   "actor_notes": [
     "Marc is open and cooperative: answer any reasonable question honestly, but only reveal a hidden fact when its unlock condition is met.",
-    "He warms up to anyone who asks to see the floor or the data. Proposals to 'go and watch a shift' earn trust.",
-    "If the player says Green Belt is wrong without evidence, he pushes back. If they show the 'Other' and handover facts, he concedes with a grunt.",
-    "He never volunteers the Ghent standard; it is a slight embarrassment."
+    "He genuinely believes the course 'didn't stick' and that a second round will fix it. He does not see that nobody, himself included, ever asked for a project.",
+    "He warms up to anyone who asks to see the floor, the data or the old projects. Proposals to 'go and watch a shift' earn trust.",
+    "If the player says the refresher is wrong without evidence, he pushes back. If they show the exam results, the binder and the targets, he concedes with a grunt and a 'so it's me, then'.",
+    "He never volunteers the Ghent routine or the binder on his shelf; both are a slight embarrassment."
   ],
   "flavour_lines": [
     "We make boxes. Very good boxes. Slowly.",

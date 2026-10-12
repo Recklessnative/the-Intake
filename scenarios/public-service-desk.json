@@ -3,7 +3,7 @@
   "schema_version": 1,
   "sector": "Public sector",
   "tier": 3,
-  "tier_label": "Mostly not a training problem",
+  "tier_label": "Hard case: the obvious diagnosis is wrong",
   "title": "Something With a Smile",
   "briefing": {
     "headline": "Local government service desks in Flanders: what you should know before the call",
