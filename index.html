@@ -18,6 +18,7 @@
       <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
       <button id="btn-resume" class="primary" hidden></button>
       <button id="btn-start" class="primary">Clock in</button>
+      <button id="btn-one" class="ghost">Try one case (about 10 minutes)</button>
       <button id="btn-hard" class="ghost">Hard mode</button>
       <button id="btn-settings" class="ghost">Gemini key</button>
       <p id="runs-left" class="fine"></p>
@@ -536,7 +537,7 @@
   <!-- End of run -->
   <section id="s-end" class="screen">
     <div class="panel narrow">
-      <p class="eyebrow">End of the week</p>
+      <p class="eyebrow" id="end-eyebrow">End of the week</p>
       <h2 id="end-title"></h2>
       <p id="end-score" class="score-total"></p>
       <p id="end-board" class="end-board" hidden></p>
@@ -559,6 +560,7 @@
       </div>
       <p class="fine">Every request is kept in <b>My scores</b> on the desktop.</p>
       <button id="btn-again" class="primary">Another week</button>
+      <button id="btn-full-week" class="ghost" hidden>Clock in for a full week</button>
     </div>
   </section>
 

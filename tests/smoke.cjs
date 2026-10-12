@@ -531,9 +531,34 @@ async function followUp() {
   await p.waitForSelector('.team-result');
   const h3 = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.slice(-1)[0].team);
   if (!h3 || h3.reviewed !== 2 || h3.of !== 30) throw new Error('team score not recorded: ' + JSON.stringify(h3));
-  // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
+  // One case: a single tier-1 request, no stand-up, module, team or board room, and it is not a week.
   await p.goto('http://localhost:8765/?debug=1');
   p.on('dialog', d => d.accept().catch(() => {}));
+  const weeksBefore = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.filter(w => w.requests.length).length);
+  await p.click('#btn-one');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const os = await p.evaluate(() => { const s = window.__intake.state; return { one: s.one, tiers: s.cards.map(c => c.difficulty), q: s.run.questionsLeft, standup: !!s.standup, academy: !!s.academy, team: !!s.team }; });
+  if (!os.one || os.tiers.join() !== '1' || os.q !== 7 || os.standup || os.academy || os.team) throw new Error('one case wrong: ' + JSON.stringify(os));
+  await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open');
+  await p.click('#btn-debug'); await p.click('#btn-leads-done');
+  await p.waitForSelector('#w-write.open');
+  await p.click('#btn-debug');
+  if (await p.isVisible('#memo4-form')) await p.click('#memo4-form button[type=submit]'); else await p.click('#board-next');
+  await bet();
+  await p.waitForSelector('#p-defence.active, #p-score.active');
+  if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
+  await p.waitForSelector('#p-score.active');
+  if ((await p.textContent('#btn-next')) !== 'Done for today') throw new Error('one case offers more requests');
+  await p.click('#btn-next');
+  await p.waitForSelector('#s-end.active');
+  if (!(await p.isVisible('#btn-full-week')) || (await p.textContent('#end-eyebrow')) !== 'One case, done' || await p.isVisible('#end-memo')) throw new Error('one-case end screen wrong');
+  const oh = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.filter(w => w.requests.length));
+  if (!(await p.textContent('#share-text')).startsWith('I just tried one case')) throw new Error('one-case share text says week');
+  if (oh.length !== weeksBefore + 1 || !oh.at(-1).one) throw new Error('one case not recorded as one case');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-one.png' });
+  console.log('one case', await p.textContent('#end-score'));
+  // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
+  await p.goto('http://localhost:8765/?debug=1');
   await p.click('#btn-hard');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   const hs = await p.evaluate(() => ({ hard: window.__intake.state.hard, tiers: window.__intake.state.cards.map(c => c.difficulty), q: window.__intake.state.run.questionsLeft, brief: document.getElementById('briefing-points').children.length }));
