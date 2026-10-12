@@ -15,8 +15,8 @@ return [
 
     // Free runs per player on your key. A browser token and an IP address each count.
     'free_runs'      => 3,
-    // Gemini calls one run may make (a full week is about 15 to 45).
-    'calls_per_run'  => 60,
+    // Gemini calls one run may make (a full week is about 25 to 55, with three examiner runs per request).
+    'calls_per_run'  => 70,
     // A week counts as played at its first scorecard, or once it used this many calls.
     'charge_after_calls' => 15,
     // Hard stop for the whole site per day, whatever happens.

@@ -228,7 +228,7 @@
           card.questionHint ? 'The question that unlocks most here: ' + card.questionHint + ' (use it for questionNotAsked if the player never asked anything like it).' : '',
           '',
           'Score each dimension 0 to 4 with these anchors:',
-          'diagnosis: 0 = took the request at face value; 2 = found part of the problem; 4 = named the real gap, the right root cause type, and correctly judged whether learning is the lever.',
+          'diagnosis: 0 = took the request at face value; 2 = found part of the problem, or a real cause that is not the main one; 4 = named the real gap, who it is about and the right root cause type. Two things are scored separately in code, so leave them out of this score: how many hidden facts the player found, and whether learning is the lever.',
           'measurement: 0 = completions or satisfaction only; 2 = a behaviour or a business metric but no baseline or no feasible collection; 4 = baseline, behaviour, business metric and a collection plan that uses data this stakeholder really has.',
           'fit: 0 = does not address the root cause; 2 = partly addresses it or ignores a key constraint; 4 = tackles the root cause within budget, deadline and audience realities.',
           'nextLevel: 0 = the conventional answer; 2 = a sensible improvement on it; 4 = a genuinely better way than standard practice that would plausibly work here, at a size this organisation can take. Novelty that would not work scores 0.',
@@ -237,6 +237,7 @@
           '',
           'defenceOutcome: "none" if there was no defence round; "strong" if the answers held the concept with reasoning or a de-risking step; "adapted" if they conceded a valid objection and changed the plan for a stated reason (this is good practice, not weakness); "weak" if they kept it but did not really answer; "retreat" if they dropped the bold part without a reason.',
           'For every score give a short quote of the player\'s own words as evidence (or "nothing relevant").',
+          'leverCall: what the write-up itself says about whether training or learning is the lever: "yes", "partly", "no", or "unclear" if it never takes a position. Report the player\'s call, right or wrong.',
           'questionNotAsked: the one question that would have changed the most, phrased as the player could have asked it.',
           'verdict: two sentences in the stakeholder\'s voice reacting to how this went. Dry humour is allowed.'
         ].join('\n'),
@@ -248,6 +249,7 @@
           risks: S({ score: INT, evidence: STR }),
           pitch: S({ score: INT, evidence: STR }),
           defenceOutcome: { type: 'string', enum: ['none', 'strong', 'adapted', 'weak', 'retreat'] },
+          leverCall: { type: 'string', enum: ['yes', 'partly', 'no', 'unclear'] },
           questionNotAsked: STR,
           verdict: STR
         }),
