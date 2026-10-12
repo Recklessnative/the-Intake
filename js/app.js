@@ -274,8 +274,8 @@
   $('btn-watch-intro').onclick = () => intro(() => show('s-title'));
   $('btn-again').onclick = () => startWeek(state.hard);
 
-  // The boot screen: the intro lines appear while the progress bar runs; they move on by
-  // themselves, or faster with the button. Logging on opens the desktop.
+  // The boot screen: the intro lines appear while the progress bar runs and move on by
+  // themselves. Log on is there from the start: nobody has to read the cubicle to work.
   function cubicle() {
     show('s-cubicle');
     let i = 0;
@@ -285,7 +285,6 @@
       void line.offsetWidth;
       line.textContent = CUBICLE[i];
       line.classList.add('in');
-      $('btn-sit').textContent = i === CUBICLE.length - 1 ? 'Log on' : 'Go on';
     };
     const next = () => {
       clearTimeout(cubicle.t);
@@ -293,8 +292,8 @@
     };
     say();
     cubicle.t = setTimeout(next, 4200);
+    $('btn-sit').textContent = 'Log on';
     $('btn-sit').onclick = () => {
-      if (i < CUBICLE.length - 1) { next(); return; }
       clearTimeout(cubicle.t);
       Sound.chime();
       startRequest();
@@ -412,17 +411,19 @@
     mailbox();
     contacts();
     // Calm Monday: the week's first request opens on the inbox alone (with the CoE mail on top
-    // if there is a module); the case file and notes join when you open the request.
+    // if the module is due now); the case file and notes join when you open the request.
+    // In the very first week the request comes first and the module waits until request 2.
     const calm = state.index === 0 && r.phase === 'inbox' && !r.readMail.current;
-    selectMail(calm && state.academy && !state.academy.done ? state.run.mails.find(m => m.academy) : calm ? null : state.run.mails.find(m => m.current));
+    const moduleNow = state.academy && !state.academy.started && r.phase === 'inbox' && state.index === (state.weekNo === 1 ? 1 : 0);
+    selectMail(moduleNow ? state.run.mails.find(m => m.academy) : calm && state.weekNo === 1 ? state.run.mails.find(m => m.current) : calm ? null : state.run.mails.find(m => m.current));
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
-    if (calm) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
+    if (calm && state.weekNo !== 1) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
     if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
     step(Story.day(state.weekNo, state.days[state.index] || 0) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
     // Monday morning: this week's CoE Academy module waits on top, until you start it.
-    if (state.academy && !state.academy.started && state.index === 0 && r.phase === 'inbox') openAcademy();
+    if (moduleNow) openAcademy();
     if (r.phase !== 'inbox') callWindow();
     renderLeads();
     if (r.phase === 'call') { phase('call'); Desktop.layout('call', 'w-call'); }
@@ -559,23 +560,11 @@
     const box = $('briefing');
     const ul = $('briefing-points');
     ul.innerHTML = '';
-    box.querySelectorAll('p, .coe-tips').forEach(p => p.remove());
+    box.querySelectorAll('p').forEach(p => p.remove());
     if (!b) { $('briefing-head').textContent = 'No case file for this one. Ask.'; return; }
     $('briefing-head').textContent = b.headline;
     if (b.text) { const p = document.createElement('p'); p.textContent = b.text; box.appendChild(p); }
     b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-    const tips = academyTips();
-    if (tips.length) {
-      const d = document.createElement('div');
-      d.className = 'coe-tips';
-      const h = document.createElement('b');
-      h.textContent = 'CoE Academy tips this week';
-      d.appendChild(h);
-      const u = document.createElement('ul');
-      tips.forEach(t => { const li = document.createElement('li'); li.textContent = t; u.appendChild(li); });
-      d.appendChild(u);
-      box.appendChild(d);
-    }
   }
 
   $('btn-call').onclick = () => {
@@ -737,6 +726,7 @@
   function afterCall() {
     const r = state.run;
     if (r.phase !== 'call') return;
+    if (r.laterText) { const t = r.laterText; r.laterText = null; setTimeout(() => Retro.sms(t[0], t[1]), 2500); }
     if (touchpoints(r.card) && r.questionsLeft > 0) toInvestigate(); else toWriteup();
   }
   function toWriteup() {
@@ -947,10 +937,6 @@
     if (state.run) mailbox();
   }
   $('btn-team').onclick = () => openApp('w-team');
-  function academyTips() {
-    const A = state.academy;
-    return A && A.done ? Academy.MODULES.find(m => m.id === A.id).tips : [];
-  }
 
   // ---------- Mieke, the colleague two cubicles over ----------
   function miekeSays(text, who, replay) {
@@ -1054,8 +1040,11 @@
     if (state.hard) return;
     const n = (state.weekNo - 1) * 3 + state.index;
     const t = TEXTS[n % TEXTS.length];
-    Retro.sms(t[0], t[1]);
-    const ping = !state.index ? ['Mieke', 'Morning! Do the CoE module first, it is short. Then open the request. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
+    // Monday morning gets one ping, not two: the first text waits until the first call ends.
+    if (state.index) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    const moduleFirst = state.academy && !state.academy.started && state.index === (state.weekNo === 1 ? 1 : 0);
+    const ping = moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
+      : !state.index ? ['Mieke', 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
     setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
   }
   // Staply turns up at most once per request, and never in hard mode.

@@ -75,8 +75,8 @@ async function retro() {
   await p.waitForSelector('#phone:not([hidden])');
   if (await p.$('#w-phone, #phone .titlebar')) throw new Error('the phone should not be a window');
   await p.click('#phone-keys [data-k="2"]');
-  if (!(await p.textContent('#phone-screen')).includes('Messages 1/1')) throw new Error('texts have no page counter');
-  if (!(await p.textContent('#phone-screen')).includes('Mum')) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
+  if (!(await p.textContent('#phone-screen')).match(/Messages 1\/[12]/)) throw new Error('texts have no page counter');
+  if (!(await p.textContent('#phone-screen')).match(/Mum|Network/)) throw new Error('no text on the brick phone: ' + await p.textContent('#phone-screen'));
   await p.click('#phone-keys [data-k="back"]'); await p.click('#phone-keys [data-k="1"]');
   if (!(await p.$('#phone-screen canvas.ph-snake'))) throw new Error('Snake did not start');
   await p.click('#phone-keys [data-k="8"]'); await p.waitForTimeout(600);
@@ -113,7 +113,7 @@ async function academy() {
   const score = await p.textContent('.ac-score');
   if (score !== '3 of 4 right' || await p.$$eval('.ac-tips li', l => l.length) !== 3) throw new Error('academy end wrong: ' + score);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/academy-tips.png' });
-  if (!(await p.textContent('#briefing')).includes('CoE Academy tips')) throw new Error('tips not pinned to the case file');
+  if ((await p.textContent('#briefing')).includes('CoE Academy tips')) throw new Error('tips should not be pinned to the case file any more');
   await p.click('#ac-close');
   if (await p.isVisible('#w-academy')) throw new Error('Back to work did not close the module');
   await visible('#w-inbox');
@@ -191,10 +191,15 @@ async function followUp() {
   let req = -1;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
-    if (n === 0) { while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit'); }
+    if (n === 0) {
+      // Log on is one click from the first line of the boot screen.
+      if ((await p.textContent('#btn-sit')) !== 'Log on') throw new Error('boot screen makes you read before logging on');
+      await p.click('#btn-sit'); await p.waitForSelector('#s-desk.active');
+    }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
+    if (n === 1) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module comes after the first case
     // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
     const inbox = await p.textContent('#mail-rows');
     if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
@@ -208,10 +213,11 @@ async function followUp() {
       const first = await p.evaluate(() => window.__intake.state);
       const shape = first.cards.map(c => c.difficulty).join(' ');
       if (shape !== '0 0 1' || first.days.join('') !== '013') throw new Error('week 1 shape wrong: ' + shape + ' / ' + first.days);
-      // Calm Monday: the inbox and the module only; the CoE folder waits on the desktop.
+      // Calm Monday, request first: the inbox with the request open; the module waits until
+      // request 2 and the CoE folder waits on the desktop.
       if (await p.evaluate(() => document.getElementById('w-coe').classList.contains('open'))) throw new Error('CoE folder should not open by itself any more');
-      if (!MOBILE && (await p.isVisible('#w-case') || await p.isVisible('#w-notes'))) throw new Error('calm Monday: case file and notes should wait');
-      await academy();
+      if (await p.isVisible('#w-academy')) throw new Error('week 1 should start with the request, not the module');
+      if (!(await p.isVisible('#btn-call'))) throw new Error('the request is not open on the first Monday');
       if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coe"]'); } else await p.click('.desk-icon[data-app="w-coe"]');
       await visible('#w-coe');
       if (!(await p.$('#coe-doc svg.flow'))) throw new Error('flowchart missing');
@@ -270,8 +276,8 @@ async function followUp() {
     if (req === 0) {
       const f = await p.textContent('#found');
       if (!/^[1-9]\d* \/ \d+$/.test(f)) throw new Error('found-facts counter did not move: ' + f);
-      await retro();
     }
+    if (req === 1) await retro();                    // the first text arrives after the first call
     await p.click('#btn-hangup');
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }

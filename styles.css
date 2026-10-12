@@ -511,8 +511,6 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
   .ac-hero { width: 140px; }
   .ac-stage { margin: 6px; padding: 10px 12px; }
 }
-.coe-tips { margin-top: 8px; padding: 6px 10px; background: #eef8f4; border-left: 3px solid #2e7d6b; font-size: 13px; }
-.coe-tips ul { margin: 4px 0 0; padding-left: 18px; }
 .quick-debrief { border-top: 1px solid #c8d3e4; padding-top: 8px; font-style: italic; }
 .draft { padding-left: 22px; }
 .draft li { margin: 3px 0; }
