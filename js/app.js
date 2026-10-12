@@ -468,6 +468,14 @@
       mails.push(Object.assign({ read: !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
       Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
     }
+    // The week after the promotion, IT explains the new PC.
+    let aeroNews = false;
+    try { aeroNews = !!localStorage.getItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
+    if (aeroNews) {
+      const sub = 'Your new PC (Doors Aero)';
+      mails.push({ from: 'IT Service Desk', subject: sub, read: !!r.readMail[sub], day: 0, at: 7 * 60 + 58,
+        body: 'Dear team lead,\n\nCongratulations on your promotion. As agreed with HR, team leads get the new PC. It runs Doors Aero: glass windows, a round start button and roughly 40% more shine.\n\nThe old look is in Display properties if you miss it. Your files are where you left them. Your coffee mug is not our department.\n\nIT Service Desk\n(Do not reply. Nobody will.)' });
+    }
     // This week's CoE Academy module arrives first thing Monday.
     if (state.academy) {
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
@@ -1053,6 +1061,11 @@
     return scoreHistory().weeks.filter(w => w.done).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
   }
   Retro.setLevel(wallpaperLevel());
+  // The promotion comes with a new PC: Doors Aero. IT says so once.
+  function applyStyle() {
+    if (Retro.setAero(!!scoreHistory().promoted)) { try { localStorage.setItem('intake-aero-news', '1'); } catch (e) { /* storage blocked */ } }
+  }
+  applyStyle();
   $('btn-wait-snake').onclick = () => Retro.showPhone('snake');
   $('btn-phone').onclick = () => openApp('w-phone');
 
@@ -1569,6 +1582,7 @@
   }
 
   function endRun() {
+    try { localStorage.removeItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
     const avg = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));
     // The board is the week's headline: your title weighs the board as much as the requests.
     const br = state.board && state.board.result;
@@ -1587,7 +1601,7 @@
     // Promotion to team lead: a week of 64+ with every diagnosis at 15+, or the week 4 tender.
     const h = scoreHistory(), w = thisWeek(h);
     const promoted = !state.hard && !h.promoted && (state.weekNo >= 4 || (score >= 64 && w.requests.length && w.requests.every(x => (x.pts.diagnosis || 0) >= 15)));
-    if (promoted) { h.promoted = { week: state.weekNo, at: Date.now() }; keepScores(h); }
+    if (promoted) { h.promoted = { week: state.weekNo, at: Date.now() }; keepScores(h); applyStyle(); }
     $('end-team').hidden = !state.team;
     if (state.team) {
       const t = Team.score(state.team);
@@ -2012,9 +2026,10 @@
     const q = new URLSearchParams(window.location.search);
     if (!q.has('promote')) return;
     const h = scoreHistory();
-    if (q.get('promote') === '0') { delete h.promoted; keepScores(h); toast('Test mode: promotion taken back.', 'info'); return; }
+    if (q.get('promote') === '0') { delete h.promoted; keepScores(h); applyStyle(); toast('Test mode: promotion taken back.', 'info'); return; }
     h.promoted = { week: 0, at: Date.now(), test: true };
     keepScores(h);
+    applyStyle();
     toast('Test mode: you are team lead. Start a new week to meet Bart, Priya and Jens.', 'info');
   })();
   $('btn-debug').onclick = () => {

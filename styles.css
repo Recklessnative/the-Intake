@@ -621,3 +621,62 @@ body.has-team #start-menu .team-only { display: block; }
 .tray-phone { position: relative; min-height: 0; padding: 2px 6px; background: transparent; border: 0; color: #fff; font-size: 16px; box-shadow: none; }
 .tray-badge { position: absolute; top: -4px; right: -2px; min-width: 15px; padding: 0 3px; border-radius: 8px; background: #d0362a; color: #fff; font: bold 10px/15px Tahoma, sans-serif; }
 .tray-badge[hidden] { display: none; }
+
+/* ---------- Doors Aero: the team lead's new PC (body.aero) ----------
+   Glass frames over the wallpaper, a dark glass taskbar, a round start orb, glossy buttons.
+   Everything inside a window stays as it is; only the frame and the shell change. */
+.display-style { display: flex; gap: 8px; margin: 4px 0 12px; }
+.style-pick { font-weight: normal; }
+.style-pick.on { box-shadow: inset 0 0 0 2px var(--title-a); font-weight: 700; }
+.style-pick.locked { opacity: .65; }
+body.aero {
+  --win: #f5f7fa; --title-a: #2a7cc7; --title-b: #6fb4ec; --field-line: #a7b8cc; --you: #dceefc;
+  font-family: "Segoe UI", Tahoma, Verdana, system-ui, sans-serif;
+}
+body.aero .win { background: rgba(156, 196, 232, .52); -webkit-backdrop-filter: blur(9px) saturate(1.4); backdrop-filter: blur(9px) saturate(1.4);
+  border: 1px solid rgba(20, 40, 70, .75); border-radius: 8px; padding: 0 7px 7px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), 0 10px 32px rgba(0, 20, 50, .45); }
+body.aero .win::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 46%; border-radius: 8px 8px 0 0; pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.08) 60%, transparent); }
+body.aero .win:not(.focused) { background: rgba(200, 214, 230, .5); border-color: rgba(60, 70, 90, .5); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 6px 18px rgba(0,0,0,.25); }
+body.aero .titlebar, body.aero .win:not(.focused) .titlebar { position: relative; height: 30px; padding: 0 0 0 4px; background: transparent; color: #0b1a2e;
+  font-weight: normal; font-size: 13px; text-shadow: 0 0 8px #fff, 0 0 4px #fff, 0 0 2px #fff; }
+body.aero .win:not(.focused) .titlebar { color: #46536a; }
+body.aero .win-body { position: relative; background: var(--win); border: 1px solid rgba(20, 40, 70, .55); box-shadow: 0 0 0 1px rgba(255,255,255,.6); }
+body.aero .titlebar .tb { width: 27px; height: 19px; align-self: flex-start; margin-top: 1px; border: 1px solid rgba(20, 40, 70, .7); border-radius: 0; color: #fff;
+  font-size: 12px; font-weight: 700; text-shadow: 0 0 2px #000, 0 0 5px #0b2a4a; background: linear-gradient(rgba(220,235,250,.75), rgba(150,185,220,.55) 48%, rgba(40,80,130,.6) 52%, rgba(90,160,220,.6)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.5); }
+body.aero .titlebar .tb:first-of-type { border-radius: 0 0 0 5px; }
+body.aero .titlebar .tb.close { width: 44px; border-radius: 0 0 5px 0; background: linear-gradient(#e8a493, #d0573a 48%, #b8341a 52%, #e0724f); }
+body.aero .titlebar .tb:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 0 8px rgba(120, 210, 255, .9); }
+body.aero .titlebar .tb.close:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 0 10px rgba(255, 120, 80, .9); }
+
+body.aero .taskbar { height: 40px; background: linear-gradient(rgba(70, 90, 120, .72), rgba(10, 16, 28, .9) 50%, rgba(0, 4, 12, .94));
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-top: 1px solid rgba(255,255,255,.35); box-shadow: 0 -1px 0 rgba(0,0,0,.6); }
+body.aero .start-btn { width: 52px; height: 46px; margin: -8px 4px 0 6px; padding: 0; border-radius: 50%; font-size: 0; color: transparent; text-shadow: none; flex: none;
+  border: 1px solid rgba(0, 20, 40, .9);
+  background: radial-gradient(circle at 50% 28%, rgba(255,255,255,.9), rgba(255,255,255,.15) 38%, transparent 42%),
+    radial-gradient(circle at 50% 95%, #8af06a, #2b9f45 45%, #0b4f6e 75%, #062a46);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 12px rgba(80, 200, 255, .5); position: relative; }
+body.aero .start-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 13px; height: 20px; transform: translate(-50%, -45%); border-radius: 2px;
+  background: linear-gradient(135deg, #fff, #cfefff); box-shadow: 0 0 6px rgba(255,255,255,.9); }
+body.aero .start-btn:hover { box-shadow: 0 0 0 2px rgba(255,255,255,.5), 0 0 18px rgba(120, 230, 255, .9); }
+body.aero .task { height: 30px; color: #fff; border: 1px solid rgba(0,0,0,.8); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+  background: linear-gradient(rgba(255,255,255,.22), rgba(255,255,255,.06) 50%, rgba(0,0,0,.15) 52%, rgba(255,255,255,.08)); }
+body.aero .task.active { background: linear-gradient(rgba(150, 210, 255, .55), rgba(60, 140, 220, .35) 50%, rgba(20, 80, 160, .45) 52%, rgba(90, 180, 255, .4)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 0 6px rgba(100, 190, 255, .6); }
+body.aero .tray { background: transparent; border-left: 1px solid rgba(255,255,255,.15); }
+body.aero .start-menu { bottom: 40px; border: 1px solid rgba(0, 10, 25, .85); border-radius: 8px; overflow: hidden;
+  background: rgba(20, 34, 54, .82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+body.aero .start-head { background: transparent; text-shadow: 0 0 6px rgba(120, 200, 255, .8); }
+body.aero .start-menu button { background: #fff; border-radius: 0; }
+body.aero .start-menu button:hover { background: linear-gradient(#eaf6fd, #bfe2fa); color: #0b1a2e; box-shadow: inset 0 0 0 1px #7ac0ea; }
+
+/* :where keeps these as weak as the base button rule, so every styled button keeps its own look. */
+:where(body.aero) button { border: 1px solid #707070; border-radius: 3px; background: linear-gradient(#f2f2f2, #ebebeb 48%, #dddddd 52%, #cfcfcf); }
+:where(body.aero) button:hover { border-color: #3c7fb1; background: linear-gradient(#eaf6fd, #d9f0fc 48%, #bee6fd 52%, #a7d9f5); box-shadow: none; }
+:where(body.aero) input, :where(body.aero) textarea, :where(body.aero) select { border-color: var(--field-line); border-radius: 2px; }
+:where(body.aero) input:focus, :where(body.aero) textarea:focus { border-color: #3d95d6; box-shadow: 0 0 0 2px rgba(80, 170, 240, .25); outline: none; }
+body.aero .im-pop { background: linear-gradient(rgba(255,255,255,.92), rgba(220, 238, 252, .92)); border-color: rgba(30, 70, 120, .6); border-radius: 8px; }
+body.aero .im-pop-bar { background: linear-gradient(rgba(120, 190, 240, .9), rgba(40, 120, 200, .9)); }
+body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
+@media (max-width: 899px) { body.aero .win { padding: 0 3px 3px; } body.aero .start-btn { width: 44px; height: 40px; margin-top: -2px; } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { body.aero .win { background: rgba(140, 180, 220, .92); } body.aero .taskbar { background: linear-gradient(#3a4a63, #0a1220); } }

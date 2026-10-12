@@ -60,7 +60,7 @@ async function retro() {
   await p.click('#phone-keys [data-k="back"]');
   await start('w-display');
   const wp = await p.$$eval('#display-grid .wp', l => l.map(b => b.className));
-  if (wp.length !== 5 || wp.filter(c => c.includes('locked')).length !== 4 || !wp[0].includes(' on')) throw new Error('wallpapers wrong: ' + wp);
+  if (wp.length !== 6 || wp.filter(c => c.includes('locked')).length !== 5 || !wp[0].includes(' on')) throw new Error('wallpapers wrong: ' + wp);
   await p.click('#display-grid .wp >> nth=2');
   if (!(await p.textContent('#toast')).includes('Locked')) throw new Error('locked wallpaper did not explain');
   if (!(await p.evaluate(() => document.getElementById('desktop').style.backgroundImage)).includes('svg')) throw new Error('no wallpaper painted');
@@ -366,8 +366,12 @@ async function followUp() {
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   // The team: after a promotion, two own requests and three junior drafts with one flaw each.
   if (!(await p.$('#scores .charts svg')) || !(await p.textContent('#scores .weak-spot')).includes('weak spot')) throw new Error('score charts missing');
+  if (await p.evaluate(() => document.body.classList.contains('aero'))) throw new Error('Doors Aero before the promotion');
   await p.goto('http://localhost:8765/?debug=1&promote=1');
   if (!(await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).promoted))) throw new Error('?promote=1 did not promote');
+  // The promotion comes with Doors Aero: glass windows, the Aero Aurora wallpaper and a word from IT.
+  const aero = await p.evaluate(() => ({ on: document.body.classList.contains('aero'), wp: localStorage.getItem('intake-wallpaper') }));
+  if (!aero.on || aero.wp !== 'aurora') throw new Error('promotion did not switch to Doors Aero: ' + JSON.stringify(aero));
   p.once('dialog', d => d.accept().catch(() => {}));
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
@@ -376,6 +380,16 @@ async function followUp() {
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
   await p.click('#mail-rows tr:has-text("drafts for your review")');
   await p.click('#btn-team');
+  await visible('#w-team');
+  if (!(await p.textContent('#mail-rows')).includes('Your new PC (Doors Aero)')) throw new Error('IT did not announce Doors Aero');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/aero.png' });
+  // Display properties keeps the old look one click away.
+  await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-display"]');
+  await p.click('#display-style .style-pick:has-text("Classic")');
+  if (await p.evaluate(() => document.body.classList.contains('aero'))) throw new Error('Doors Classic did not switch back');
+  await p.click('#display-style .style-pick:has-text("Aero")');
+  if (!(await p.evaluate(() => document.body.classList.contains('aero')))) throw new Error('Doors Aero did not switch on again');
+  await p.click('.task:has-text("My team")');
   await visible('#w-team');
   await p.click('#btn-team-send');
   if (!(await p.textContent('#toast')).includes('line with the problem')) throw new Error('team send without a pick should explain');

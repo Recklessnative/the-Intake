@@ -18,17 +18,57 @@
     { id: 'autumn', name: 'Autumn Road', level: 3, svg: SVG_HEAD + `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c36b"/><stop offset=".6" stop-color="#f08a4b"/><stop offset="1" stop-color="#7a3b1d"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#s)"/><circle cx="1150" cy="380" r="90" fill="#fff3c4" opacity=".8"/><path d="M0 640 L1600 600 L1600 1000 L0 1000Z" fill="#5b2c14"/><path d="M760 620 L840 620 L1250 1000 L350 1000Z" fill="#3a3a3a"/><path d="M797 640 L803 640 L820 1000 L780 1000Z" fill="#f2d16b" opacity=".8"/><g fill="#b4441c"><circle cx="200" cy="520" r="120"/><circle cx="380" cy="560" r="90"/><circle cx="1350" cy="520" r="130"/><circle cx="1500" cy="580" r="90"/></g><g fill="#3d1e0e"><rect x="195" y="600" width="14" height="60"/><rect x="1345" y="610" width="14" height="60"/></g></svg>` },
     { id: 'skyline', name: 'Night Skyline', level: 4, svg: SVG_HEAD + `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050b2b"/><stop offset="1" stop-color="#2b2f7a"/></linearGradient></defs><rect width="1600" height="1000" fill="url(#s)"/><g fill="#fff">${Array.from({ length: 60 }, (_, i) => `<circle cx="${(i * 263) % 1600}" cy="${(i * 137) % 520}" r="${i % 3 ? 1.5 : 2.5}" opacity="${.4 + (i % 5) / 10}"/>`).join('')}</g><g fill="#0b0f26">${[[0, 640, 140], [130, 560, 110], [230, 700, 120], [340, 480, 90], [420, 620, 160], [570, 520, 100], [660, 660, 140], [790, 420, 80], [860, 600, 150], [1000, 540, 110], [1100, 680, 130], [1220, 470, 100], [1310, 600, 160], [1460, 540, 140]].map(([x, y, w]) => `<rect x="${x}" y="${y}" width="${w}" height="${1000 - y}"/>`).join('')}</g><g fill="#ffd86b" opacity=".75">${Array.from({ length: 70 }, (_, i) => `<rect x="${20 + (i * 97) % 1560}" y="${560 + (i * 53) % 400}" width="8" height="12"/>`).join('')}</g></svg>` }
   ];
+  WALLPAPERS.push(
+    // Doors Aero (team lead only): sky glass, light rays, bubbles and a glossy green swoosh.
+    { id: 'aurora', name: 'Aero Aurora', level: 0, aero: true, svg: SVG_HEAD + `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a6fb8"/><stop offset=".5" stop-color="#36b4d8"/><stop offset="1" stop-color="#bff0e4"/></linearGradient><linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f24a"/><stop offset=".5" stop-color="#4fbf2a"/><stop offset="1" stop-color="#1d7a17"/></linearGradient><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><radialGradient id="bu" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".25" stop-color="#e8fbff" stop-opacity=".35"/><stop offset=".85" stop-color="#9fe6ff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></radialGradient><radialGradient id="sun" cx=".78" cy=".12" r=".45"><stop offset="0" stop-color="#fffbe0" stop-opacity=".9"/><stop offset="1" stop-color="#fffbe0" stop-opacity="0"/></radialGradient><filter id="b"><feGaussianBlur stdDeviation="10"/></filter></defs><rect width="1600" height="1000" fill="url(#s)"/><rect width="1600" height="1000" fill="url(#sun)"/><g fill="url(#r)" filter="url(#b)"><path d="M1250 0 L1340 0 L900 1000 L700 1000Z"/><path d="M1380 0 L1430 0 L1200 1000 L1080 1000Z"/><path d="M1100 0 L1160 0 L520 1000 L420 1000Z"/></g><path d="M-100 760 C 300 600, 800 700, 1100 640 S 1500 560, 1700 600 L1700 1000 L-100 1000Z" fill="url(#g)"/><path d="M-100 760 C 300 600, 800 700, 1100 640 S 1500 560, 1700 600 L1700 640 C 1500 610, 1200 690, 1000 700 S 400 680, -100 800Z" fill="url(#gl)"/><g fill="none" stroke="#fff" stroke-linecap="round" opacity=".55"><path d="M-50 860 C 400 700, 1000 900, 1650 700" stroke-width="10"/><path d="M-50 900 C 450 760, 1050 960, 1650 760" stroke-width="4"/></g>${[[220, 380, 70], [340, 250, 38], [520, 470, 26], [980, 300, 54], [1120, 470, 30], [1420, 420, 82], [760, 200, 20], [1300, 220, 24], [140, 560, 22]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#bu)" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>`).join('')}</svg>` }
+  );
   const UNLOCK = ['', 'Course Builder', 'Learning Consultant', 'Learning Strategist', 'Board Whisperer'];
-  let level = 0;
+  let level = 0, aero = false;
+  const open = w => w.level <= level && (!w.aero || aero);
   function wallpaper(id) {
-    const w = WALLPAPERS.find(x => x.id === id && x.level <= level) || WALLPAPERS[0];
+    const w = WALLPAPERS.find(x => x.id === id && open(x)) || WALLPAPERS[0];
     $('desktop').style.backgroundImage = svg(w.svg);
     $('desktop').style.backgroundSize = 'cover';
     $('desktop').style.backgroundPosition = 'center bottom';
     return w;
   }
   function setLevel(n) { level = Math.max(0, n | 0); wallpaper(store.get('intake-wallpaper', 'hill')); renderDisplay(); }
+  // Doors Aero: the glossy new look, unlocked by the promotion to team lead. Returns true the
+  // first time, so the game can say so.
+  function setAero(unlocked) {
+    aero = !!unlocked;
+    let fresh = false;
+    if (aero && !store.get('intake-aero-seen')) {
+      store.set('intake-aero-seen', '1');
+      store.set('intake-style', 'aero');
+      store.set('intake-wallpaper', 'aurora');
+      fresh = true;
+    }
+    document.body.classList.toggle('aero', aero && store.get('intake-style', 'aero') === 'aero');
+    wallpaper(store.get('intake-wallpaper', 'hill'));
+    renderDisplay();
+    return fresh;
+  }
   function renderDisplay() {
+    const styles = $('display-style');
+    if (styles) {
+      styles.innerHTML = '';
+      const cur = document.body.classList.contains('aero') ? 'aero' : 'classic';
+      [['classic', 'Doors Classic'], ['aero', 'Doors Aero']].forEach(([id, name]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'style-pick' + (cur === id ? ' on' : '') + (id === 'aero' && !aero ? ' locked' : '');
+        b.textContent = id === 'aero' && !aero ? '🔒 ' + name : name;
+        b.setAttribute('aria-pressed', String(cur === id));
+        b.onclick = () => {
+          if (id === 'aero' && !aero) { toastFn('Locked. Doors Aero comes with the new PC you get as team lead.', 'info'); return; }
+          store.set('intake-style', id);
+          document.body.classList.toggle('aero', id === 'aero');
+          renderDisplay();
+        };
+        styles.appendChild(b);
+      });
+    }
     const box = $('display-grid');
     if (!box) return;
     box.innerHTML = '';
@@ -36,18 +76,19 @@
     WALLPAPERS.forEach(w => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'wp' + (w.level > level ? ' locked' : '') + (w.id === cur && w.level <= level ? ' on' : '');
+      const locked = !open(w);
+      b.className = 'wp' + (locked ? ' locked' : '') + (w.id === cur && !locked ? ' on' : '');
       const thumb = document.createElement('span');
       thumb.className = 'wp-thumb';
       thumb.style.backgroundImage = svg(w.svg);
       const label = document.createElement('span');
       label.className = 'wp-name';
-      label.textContent = w.level > level ? '🔒 ' + w.name : w.name;
+      label.textContent = locked ? '🔒 ' + w.name : w.name;
       b.append(thumb, label);
-      b.title = w.level > level ? 'Unlocks when you finish a week as ' + UNLOCK[w.level] : 'Use ' + w.name;
+      b.title = !locked ? 'Use ' + w.name : w.aero ? 'Comes with Doors Aero, when you are team lead' : 'Unlocks when you finish a week as ' + UNLOCK[w.level];
       b.setAttribute('aria-label', b.title);
       b.onclick = () => {
-        if (w.level > level) { toastFn('Locked. Finish a week as ' + UNLOCK[w.level] + ' to unlock ' + w.name + '.', 'info'); return; }
+        if (locked) { toastFn(w.aero ? 'Locked. ' + w.name + ' comes with Doors Aero, when you are team lead.' : 'Locked. Finish a week as ' + UNLOCK[w.level] + ' to unlock ' + w.name + '.', 'info'); return; }
         store.set('intake-wallpaper', w.id);
         wallpaper(w.id);
         renderDisplay();
@@ -281,5 +322,5 @@
     renderPhone();
   }
 
-  window.Retro = { WALLPAPERS, setLevel, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, showPhone, hidePhone, phoneOpen, staply, staplyOn, setStaply, init, resetStaply: () => seen.clear() };
+  window.Retro = { WALLPAPERS, setLevel, setAero, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, showPhone, hidePhone, phoneOpen, staply, staplyOn, setStaply, init, resetStaply: () => seen.clear() };
 })();
