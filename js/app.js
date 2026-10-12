@@ -929,7 +929,8 @@
       S.done = true;
       const h = scoreHistory(), w = thisWeek(h);
       h.recall = h.recall || {};
-      S.items.forEach(i => { if (i.rated) h.recall[i.card] = i.rated; });
+      const now = Date.now();
+      S.items.forEach(i => { if (i.rated) Standup.record(h.recall, i, now); });
       w.standup = { got, of };
       keepScores(h);
       save();
@@ -2212,8 +2213,8 @@
     const S = state.standup;
     if (S && !S.done && $('w-standup').classList.contains('open') && !$('w-standup').classList.contains('minimised')) {
       const it = S.items[S.at];
-      if (it && it.answer == null) it.answer = '(test) ' + it.real.split('.')[0] + '.';
-      else if (it) { it.rated = 'got'; S.at++; }
+      if (it && it.answer == null) { it.answer = '(test) ' + (it.hint || it.real.split('.')[0] + '?'); it.call = it.lever; }
+      else if (it) { it.same = true; it.rated = 'got'; S.at++; }
       save(); openStandup();
       return;
     }

@@ -400,16 +400,21 @@ async function followUp() {
   if (await p.isVisible('#w-academy')) throw new Error('the module should not open on top of the stand-up');
   await p.click('#su-reveal');
   if (await p.$('.su-answer')) throw new Error('stand-up revealed the answer before any recall');
-  await p.fill('#standup textarea', 'Agency drivers on nights, no supervisor, and a bonus that rewards rushing.');
+  await p.fill('#standup textarea', 'Which shifts and which drivers are behind the damage?');
   await p.click('#su-reveal');
-  if (!(await p.textContent('.su-answer')).includes('What it was:')) throw new Error('stand-up did not show the real problem');
+  if (await p.$('.su-answer')) throw new Error('stand-up revealed the answer without a lever call');
+  const lever = await p.evaluate(() => window.__intake.state.standup.items[0].lever);
+  await p.click('.su-call [data-call="' + (lever === 'no' ? 'yes' : 'no') + '"]');
+  await p.click('#su-reveal');
+  const ans = await p.textContent('.su-answer');
+  if (!ans.includes('The question that opened it up') || !ans.includes('✗ You said')) throw new Error('stand-up reveal wrong: ' + ans);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/standup.png' });
-  await p.click('.su-rate [data-rate="partly"]');
+  await p.click('.su-same [data-same="yes"]');
   while (!(await p.$('#su-done'))) await p.click('#btn-debug');
   await p.click('#su-done');
   if (await p.isVisible('#w-standup')) throw new Error('stand-up did not close');
   const rec = await p.evaluate(() => { const h = JSON.parse(localStorage.getItem('intake-scores')); return { r: h.recall, w: h.weeks[h.weeks.length - 1].standup }; });
-  if (!rec.w || rec.w.of !== w2.su.length || rec.r[w2.su[0]] !== 'partly') throw new Error('stand-up not recorded: ' + JSON.stringify(rec));
+  if (!rec.w || rec.w.of !== w2.su.length || rec.r[w2.su[0]].streak !== 0 || !rec.r[w2.su[0]].seen) throw new Error('stand-up not recorded: ' + JSON.stringify(rec));
   // The module is still there, from the mail or the desktop.
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); } else await p.click('.desk-icon[data-app="w-academy"]');
   await visible('#w-academy');
