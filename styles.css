@@ -250,6 +250,10 @@ label.check input { width: auto; }
 .ladder label { margin: 6px 0; }
 .ladder select { margin: 6px 0; font: inherit; font-size: 12px; padding: 5px; border: 1px solid var(--field-line); background: #fff; max-width: 100%; }
 #mitigations label { margin-top: 10px; }
+.board-why { margin: 8px 0 0; color: #a00; font-size: 13px; }
+.board-why:empty { display: none; }
+#owners.flash { animation: flash 1.6s ease-out; border-radius: 4px; }
+@keyframes flash { 0%, 40% { background: #ffffa0; box-shadow: 0 0 0 4px #ffffa0; } 100% { background: transparent; box-shadow: none; } }
 .feedback { margin: 12px 0 0; padding: 10px 12px; background: #ffffe1; border: 1px solid #c9b458; border-radius: 4px; }
 .memo { background: #fff; border: 1px solid var(--field-line); padding: 14px 18px; font-family: "Times New Roman", Georgia, serif; font-size: 15px; box-shadow: 2px 2px 0 #d6d2c2; }
 .memo-head { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-family: Tahoma, sans-serif; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
@@ -675,6 +679,11 @@ button.link { background: none; border: 0; padding: 0; min-height: 0; color: #0b
   .st-balloon { margin: 0; padding: 8px 10px; font-size: 12px; }
   .st-balloon::after { display: none; }
   .im-pop { width: min(230px, 70vw); top: 8px; left: 8px; right: auto; bottom: auto; }
+  /* Pop-ups sit below the window's title bar, so you can always see where you are. */
+  .staply { top: 40px; }
+  .im-pop { top: 40px; }
+  /* Taskbar buttons keep a word next to the icon; the row scrolls sideways if it must. */
+  .task { flex: none; max-width: 110px; padding: 0 8px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (max-width: 899px) { .handset { right: 50%; margin-right: -100px; top: 60px; transform: none; } .handset.pickup { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .handset.pickup { animation: none; } }
@@ -847,3 +856,12 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .drill-link { display: block; margin-top: 4px; font-size: 12px; }
 .drill-checks input { width: auto; flex: none; margin: 3px 0 0; }
 .drill-checks label { display: inline; flex: 1; text-align: left; margin: 0; font-weight: normal; }
+/* Scorecard: one thing to work on up top; why each score folds away. */
+.score-focus { margin: 6px 0 12px; padding: 8px 12px; background: #ffffe1; border: 1px solid #c9b458; border-radius: 4px; font-weight: 600; }
+.score-table details.why { margin-top: 4px; font-size: 13px; }
+.score-table details.why > summary { cursor: pointer; color: var(--title-a); }
+.score-table details.why .ev { margin-top: 4px; }
+details.fine > summary { cursor: pointer; color: var(--title-a); }
+/* From the case file straight to the call, while the request is still in the inbox. */
+.case-call { display: none; margin-top: 10px; }
+#desktop[data-phase="inbox"] .case-call { display: inline-block; }

@@ -15,12 +15,12 @@ async function bet() {
   if (!betChecked) {
     betChecked = true;
     await p.click('#bet-form button[type=submit]');
-    if (!(await p.textContent('#toast')).includes('Pick both')) throw new Error('bet sent without picks');
+    if (!(await p.textContent('#bet-why')).includes('Pick both')) throw new Error('bet sent without picks');
     await p.click('#bet-form [data-bet="bold"] [data-v="3"]');
     await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');
     if (!(await p.isVisible('#bet-exit-label'))) throw new Error('bold bet asks no way back');
     await p.click('#bet-form button[type=submit]');
-    if (!(await p.textContent('#toast')).includes('way back')) throw new Error('bold bet sent without a way back');
+    if (!(await p.textContent('#bet-why')).includes('way back')) throw new Error('bold bet sent without a way back');
     await p.fill('#bet-form [name=exit]', 'Pilot on one shift; stop if near-misses do not drop.');
   } else if (await p.isVisible('#btn-debug')) {
     await p.click('#btn-debug');
@@ -192,9 +192,9 @@ async function followUp() {
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
   });
   await p.goto('http://localhost:8765/');
-  await p.click('#btn-start');                      // no key -> settings
-  await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
-  await p.click('#btn-start');
+  await p.click('#btn-start'); await p.waitForSelector('#s-settings.active');   // no key -> settings, which says why
+  if (!(await p.textContent('#settings-intro')).includes('needs a Gemini API key') || (await p.textContent('#btn-save-key')) !== 'Save and clock in') throw new Error('key screen does not say a key is needed');
+  await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');   // ...and Save clocks you in
   // The cold open: 2007, AI years away. Click through it once.
   await p.waitForSelector('#s-intro.active');
   for (let i = 0; i < 5; i++) await p.click('#s-intro', { position: { x: 20, y: 20 } });
@@ -212,7 +212,10 @@ async function followUp() {
       await p.click('#btn-sit'); await p.waitForSelector('#s-desk.active');
     }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
-    if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
+    // The very first request: nothing else in the inbox is unread. Later, the new request is.
+    const unread = await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length);
+    if (n === 0 ? unread !== 0 : unread < 1) throw new Error('unread mail wrong on request ' + (n + 1) + ': ' + unread);
+    if (n === 0 && (await p.textContent('#mail-rows')).includes('CoE Academy')) throw new Error('module mail should wait until the module is due');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
     if (n === 1) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module comes after the first case
     // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
@@ -233,6 +236,9 @@ async function followUp() {
       if (await p.evaluate(() => document.getElementById('w-coe').classList.contains('open'))) throw new Error('CoE folder should not open by itself any more');
       if (await p.isVisible('#w-academy')) throw new Error('week 1 should start with the request, not the module');
       if (!(await p.isVisible('#btn-call'))) throw new Error('the request is not open on the first Monday');
+      // The inbox alone: the case file is the attachment, no toast sends you elsewhere.
+      if (await p.isVisible('#w-case') || await p.isVisible('#w-notes')) throw new Error('first request should open the inbox alone');
+      if (await p.isVisible('#toast') && (await p.textContent('#toast')).includes('New here')) throw new Error('the CoE toast is back');
       if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coe"]'); } else await p.click('.desk-icon[data-app="w-coe"]');
       await visible('#w-coe');
       if (!(await p.$('#coe-doc svg.flow'))) throw new Error('flowchart missing');
@@ -253,7 +259,8 @@ async function followUp() {
       if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
       await p.click('[data-mail="delete"]');
       await p.click('#mail-rows tr:has-text("❗")');
-      if (!MOBILE) await visible('#w-case');
+      await p.click('#mail-attach');
+      await visible('#w-case');
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
     }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
@@ -262,7 +269,7 @@ async function followUp() {
       const r = await p.evaluate(() => window.__intake.state.run);
       if (r.card.difficulty !== 0 || r.questionsLeft !== 10 || r.patience !== 5) throw new Error('first full case is not a starter: ' + r.card.id);
     }
-    await p.click('#btn-call');
+    await p.click(MOBILE && req === 0 ? '#case-call' : '#btn-call');   // on a phone the case file is in front: call from there
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
     // Each question shows how it landed, with the reason, as soon as the answer is back.
@@ -298,9 +305,11 @@ async function followUp() {
     }
     if (req === 1) await retro();                    // the first text arrives after the first call
     await p.click('#btn-hangup');
+    if (req === 0) await p.waitForFunction(() => localStorage.getItem('intake-texts'));   // the first text arrives after the first call
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
-    if (req === 0) {
+    if (req === 0 && await p.isVisible('#staply')) throw new Error('no Staply on the very first request');
+    if (req === 2) {
       // Staply turns up on the case board with confidently bad advice.
       await p.waitForSelector('#staply:not([hidden])');
       if (!(await p.textContent('#staply')).includes('learning styles')) throw new Error('Staply said the wrong thing: ' + await p.textContent('#staply'));
@@ -336,7 +345,10 @@ async function followUp() {
     if (req === 0 && !(await p.textContent('#score-rows')).includes('Hidden facts found')) throw new Error('diagnosis parts missing');
     if (req === 0) {
       // The scorecard teaches: next level, model answers, and one hindsight question.
-      if (!(await p.textContent('#score-rows')).includes('Next level: Name the cause')) throw new Error('no next-level line');
+      // The part with the most points left comes first, with its next level; the table does not repeat it.
+      const focus = await p.textContent('#score-focus'), rowsText = await p.textContent('#score-rows');
+      if (!focus.startsWith('Work on this next: ')) throw new Error('no work-on-this-next line');
+      if (!(focus + rowsText).includes('Name the cause in one line.') || (focus.includes('Name the cause') && rowsText.includes('Next level: Name the cause'))) throw new Error('next-level line missing or repeated');
       if ((await p.$$('#score-rows details.model')).length < 4) throw new Error('model answers missing');
       await p.fill('#redo-q', 'Which shifts and which people were involved?');
       await p.click('#redo-form button');
