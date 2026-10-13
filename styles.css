@@ -833,3 +833,17 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .plan button { justify-self: start; }
 .plan[hidden] { display: none; }
 .pocket-steps li, .pocket-plans li { margin: 3px 0; }
+
+/* Measurement drill: sort the measures, then write the stop rule */
+.drill-tiles { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+.drill-tiles li { padding: 4px 6px; border-left: 3px solid transparent; }
+.drill-tiles li.ok { border-left-color: #2e7d32; background: #eef6ee; }
+.drill-tiles li.no { border-left-color: #a23b2c; background: #fbeeea; }
+.drill-text { display: block; margin-bottom: 4px; }
+.drill-why { margin: 4px 0 0; font-size: 12px; color: #4a4a4a; }
+.drill-score { font-weight: bold; margin: 0; }
+.drill-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.drill-checks li { display: flex; gap: 6px; align-items: flex-start; }
+.drill-link { display: block; margin-top: 4px; font-size: 12px; }
+.drill-checks input { width: auto; flex: none; margin: 3px 0 0; }
+.drill-checks label { display: inline; flex: 1; text-align: left; margin: 0; font-weight: normal; }
