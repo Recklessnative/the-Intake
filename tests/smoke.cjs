@@ -591,6 +591,41 @@ async function followUp() {
   if (oh.length !== weeksBefore + 1 || !oh.at(-1).one) throw new Error('one case not recorded as one case');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-one.png' });
   console.log('one case', await p.textContent('#end-score'));
+  // The morning call: a weekend is closed; a weekday is three questions, the lever, the need, the reveal.
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-17');
+  await p.click('#btn-morning'); await p.waitForSelector('#s-morning.active #mc-one');
+  if (!(await p.textContent('#morning')).includes('no. 6 rings on Monday')) throw new Error('weekend morning call wrong: ' + await p.textContent('#morning'));
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-14');
+  const callsBefore = calls;
+  await p.click('#btn-morning'); await p.waitForSelector('#s-morning.active #mc-input');
+  if (!(await p.textContent('.mc-top')).includes('Morning call no. 3')) throw new Error('morning call number wrong: ' + await p.textContent('.mc-top'));
+  for (let i = 0; i < 3; i++) {
+    await p.fill('#mc-input', 'What changed when the numbers dipped, question ' + (i + 1) + '?'); await p.press('#mc-input', 'Enter');
+    await p.waitForFunction(n => document.querySelectorAll('.mc-log .msg.you').length === n, i + 1);
+  }
+  const mcCard = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-morning')).card);
+  if (calls - callsBefore !== 3) throw new Error('morning call used ' + (calls - callsBefore) + ' Gemini calls');
+  await p.waitForSelector('#mc-reveal');
+  await p.click('#mc-reveal');
+  if (!(await p.textContent('.board-why')).includes('Make the call first')) throw new Error('reveal without a lever call');
+  await p.click('[data-lever="partly"]');
+  await p.fill('#mc-need', 'Night shift newcomers never get shown the routine.');
+  await p.click('#mc-reveal'); await p.waitForSelector('.mc-verdict');
+  await p.check('#mc-best');
+  const mcShare = await p.textContent('#mc-share-text');
+  if (!mcShare.startsWith('THE INTAKE · Morning call no. 3') || !mcShare.includes('My best question') || mcShare.includes('Night shift')) throw new Error('morning share text wrong: ' + mcShare);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/morning.png', fullPage: true });
+  const mh = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).mornings);
+  if (!mh || mh.length !== 1 || mh[0].no !== 3 || mh[0].card !== mcCard) throw new Error('morning call not recorded: ' + JSON.stringify(mh));
+  // Coming back the same day shows the reveal again, not a fresh call.
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-14');
+  await p.click('#btn-morning'); await p.waitForSelector('.mc-verdict');
+  // ...and the full case is the same stakeholder, as one case.
+  await p.click('#mc-full');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const mf = await p.evaluate(() => ({ one: window.__intake.state.one, ids: window.__intake.state.cards.map(c => c.id) }));
+  if (!mf.one || mf.ids.join() !== mcCard) throw new Error('full case is not the morning card: ' + JSON.stringify(mf) + ' vs ' + mcCard);
+  console.log('morning call', mcShare.split('\n')[1]);
   // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
   await p.goto('http://localhost:8765/?debug=1');
   await p.click('#btn-hard');

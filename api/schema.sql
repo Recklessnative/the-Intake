@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS intake_runs (
   calls       INT          NOT NULL DEFAULT 0,    -- Gemini calls made in this run
   counted     TINYINT      NOT NULL DEFAULT 0,    -- 1 once its first scorecard was shown
   started_at  INT UNSIGNED NOT NULL,
+  cap         INT          NULL,                  -- set for a morning call: its own call limit; NULL for a week
   INDEX (token),
   INDEX (ip_hash)
 );

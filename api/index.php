@@ -1,6 +1,6 @@
 <?php
 // THE INTAKE backend: run cap, unlock codes and a Gemini proxy that keeps the key on the server.
-// One file, no framework, PHP 7.4+ with PDO. Called as index.php?action=status|start|played|unlock|gemini.
+// One file, no framework, PHP 7.4+ with PDO. Called as index.php?action=status|start|morning|played|unlock|gemini.
 
 declare(strict_types=1);
 
@@ -80,8 +80,9 @@ function runsLeft(array $p): int {
     $c = config();
     $free = (int)$c['free_runs'];
     $bonus = (int)$p['bonus_runs'];
-    $byToken = (int)one('SELECT COUNT(*) FROM intake_runs WHERE token = ? AND (counted = 1 OR calls >= ?)', [$p['token'], chargeAfter()]);
-    $byIp = (int)one('SELECT COUNT(*) FROM intake_runs WHERE ip_hash = ?', [ipHash()]);
+    // Morning calls (cap set) are not weeks and never count here.
+    $byToken = (int)one('SELECT COUNT(*) FROM intake_runs WHERE token = ? AND cap IS NULL AND (counted = 1 OR calls >= ?)', [$p['token'], chargeAfter()]);
+    $byIp = (int)one('SELECT COUNT(*) FROM intake_runs WHERE ip_hash = ? AND cap IS NULL', [ipHash()]);
     $left = $free + $bonus - $byToken;
     if ($bonus === 0) $left = min($left, $free * 3 - $byIp);
     return max(0, $left);
@@ -118,13 +119,28 @@ try {
         $p = player($in['token'] ?? null);
         $left = runsLeft($p);
         // A week this browser started but never played on stays its week: hand it back.
-        $open = one('SELECT id FROM intake_runs WHERE token = ? AND counted = 0 AND calls < ? AND started_at > ? ORDER BY started_at DESC LIMIT 1',
+        $open = one('SELECT id FROM intake_runs WHERE token = ? AND cap IS NULL AND counted = 0 AND calls < ? AND started_at > ? ORDER BY started_at DESC LIMIT 1',
             [$p['token'], chargeAfter(), time() - 6 * 3600]);
         if ($open) ok(['token' => $p['token'], 'runId' => $open, 'runsLeft' => $left]);
         if ($left <= 0) fail(402, 'No free runs left.', ['token' => $p['token'], 'runsLeft' => 0, 'capped' => true]);
         $run = newId();
         q('INSERT INTO intake_runs (id, token, ip_hash, calls, counted, started_at) VALUES (?, ?, ?, 0, 0, ?)', [$run, $p['token'], ipHash(), time()]);
         ok(['token' => $p['token'], 'runId' => $run, 'runsLeft' => $left]);
+    }
+
+    // The morning call: one small run per browser per day, with its own call cap. It is free and
+    // never uses up a week; an IP gets a few a day (an office shares one), and daily_calls still applies.
+    if ($action === 'morning') {
+        $cfg = config();
+        $p = player($in['token'] ?? null);
+        $since = strtotime('today');
+        $mine = one('SELECT id FROM intake_runs WHERE token = ? AND cap IS NOT NULL AND started_at >= ? ORDER BY started_at DESC LIMIT 1', [$p['token'], $since]);
+        if ($mine) ok(['token' => $p['token'], 'runId' => $mine]);
+        $byIp = (int)one('SELECT COUNT(*) FROM intake_runs WHERE ip_hash = ? AND cap IS NOT NULL AND started_at >= ?', [ipHash(), $since]);
+        if ($byIp >= (int)($cfg['mornings_per_ip'] ?? 10)) fail(429, 'This network has had its morning calls for today. Come back tomorrow, or use your own Gemini key.', ['token' => $p['token']]);
+        $run = newId();
+        q('INSERT INTO intake_runs (id, token, ip_hash, calls, counted, started_at, cap) VALUES (?, ?, ?, 0, 0, ?, ?)', [$run, $p['token'], ipHash(), time(), (int)($cfg['calls_per_morning'] ?? 5)]);
+        ok(['token' => $p['token'], 'runId' => $run]);
     }
 
     // The week's first scorecard was shown: from now on it counts as played.
@@ -160,7 +176,8 @@ try {
         $run = q('SELECT * FROM intake_runs WHERE id = ?', [$runId])->fetch();
         if (!$run) fail(403, 'Unknown run.');
         if (time() - (int)$run['started_at'] > 6 * 3600) fail(403, 'This run has expired. Start a new week.');
-        if ((int)$run['calls'] >= (int)$cfg['calls_per_run']) fail(429, 'This run has used all its Gemini calls.');
+        $cap = $run['cap'] !== null ? (int)$run['cap'] : (int)$cfg['calls_per_run'];
+        if ((int)$run['calls'] >= $cap) fail(429, $run['cap'] !== null ? 'That was today\'s morning call. A new one rings tomorrow.' : 'This run has used all its Gemini calls.');
 
         $day = date('Y-m-d');
         $today = one('SELECT calls FROM intake_daily WHERE day = ?', [$day]);

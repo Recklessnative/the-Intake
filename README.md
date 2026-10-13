@@ -37,10 +37,11 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `js/coe.js` | The Center of Excellence folder on the desktop: intake flowchart, pocket card (saveable), quality standard, good questions, measurement ladder |
 | `js/sound.js` | The Doors OS startup chime and a ding, synthesised with Web Audio (no audio files); mute in the start menu |
 | `js/prompts.js` | The roles: stakeholder (in character), Mieke the colleague (coaching, sees only what the player sees), reaction (boldness + objections), examiner (scorecard) |
+| `js/morning.js` | The morning call: one date-seeded stakeholder a day, three questions, the lever and the need, the reveal and a share line |
 | `js/app.js` | The loop and the scoring |
 | `scenarios/*.json` | Scenario cards; `scenarios/index.json` lists the ones in play |
 | `api/index.php` | Backend: run cap, unlock codes, and a Gemini proxy that keeps the key on the server |
-| `api/schema.sql`, `api/new-code.sql`, `api/upgrade-1.sql` | Database tables, a template for creating an unlock code, and the one change for databases made before weeks were charged at the first scorecard |
+| `api/schema.sql`, `api/new-code.sql`, `api/upgrade-1.sql`, `api/upgrade-2.sql` | Database tables, a template for creating an unlock code, and the changes for older databases (weeks charged at the first scorecard; the morning call's own call cap) |
 
 Every window has a desktop icon (on phones, use the start menu). A player's first week opens with two **starter cases** (cards with `"tier": 0`: an open stakeholder, one clear cause, 10 questions and extra patience) and opens the Center of Excellence folder on the flowchart; later weeks leave the starters out. Every finished request is kept in **My scores.txt** on the desktop (in this browser, key `intake-scores`).
 
@@ -59,6 +60,8 @@ A **week** is three or four full cases from Monday to Thursday, plus the board r
 **Doors Aero.** The office PC runs Doors Classic, the blue-and-beige look every office still had in 2007. The promotion to team lead comes with the new PC: glass window frames, a dark glass taskbar, a round start orb, glossy buttons and the Aero Aurora wallpaper (the Frutiger Aero look of the time). IT explains it in a mail that week, and Display properties switches back to Classic if you prefer. All of it is `body.aero` in `styles.css`; `Retro.setAero` in `js/retro.js` handles the unlock.
 
 **CoE Academy** (`js/academy.js`): each normal week assigns one of six modules, which waits on top of the desk on Monday morning (in the very first week it waits until the second request, so the game starts with a request; from week 2 the Monday stand-up comes first and the module waits on the desk icon): *Ask before you make*, *Is training the answer?*, *How will you know?*, *Who can say no*, *Read the proposal like a reviewer* and *One slide for the board*. Each module has four multiple-choice questions with instant feedback, then three things to look out for in your cases. The tips are not pinned to the case files: remembering them is part of the practice. Modules are scored in code with no Gemini call. They never count toward the week's score, but My scores.txt keeps the result. Hard mode has no module.
+
+**The morning call** (`js/morning.js`, "Today's call" on the title screen): the small daily version, about three minutes, Monday to Friday. Everyone gets the same stakeholder on the same day: the card is picked by a seeded shuffle of the deck from the call number, which counts working days from Monday 12 October 2026, and the game date is a 2007 weekday from 3 September on. You get three free-text questions (one Gemini call each, tagged good, ok or weak like on the real call), then make the lever call and write the real problem in one sentence. The reveal is checked in code from the card: the lever call, the real need next to what you wrote, the facts the call could have found and the question that opens it up. The share line says how you played, never the answer, so a colleague can play the same call. "Take the full case" plays that stakeholder as a one-case run. There are no streaks or points: the screen says how many calls you took this month, and `intake-scores` keeps them under `mornings`. Coming back the same day shows your reveal again (`intake-morning`); at the weekend the office is closed. On the backend a morning call is its own small run (`calls_per_morning`, the same run all day for one browser, at most `mornings_per_ip` a day per IP) and never uses up a free week. Test it on another date with `?morning=2026-10-14`.
 
 **Try one case** (title screen): a single tier-1 request in about ten minutes, for a first look or a lunch break. 7 questions (4 on the first call, 1 at the coffee machine, a callback of 2), the case board or memo that fits your experience, the full scorecard, then done: no stand-up, CoE module, team or board room. It lands in My scores as "One case", stand-ups can bring it back later, and it does not count as a week, a title for wallpapers, or toward the promotion.
 
@@ -94,7 +97,7 @@ Scoring per request, out of 100, the same way on the case board, in a memo and i
 
 **yannickwillems.be (shared hosting with PHP and MySQL):**
 
-1. In your hosting panel, create a MySQL database and user. Run `api/schema.sql` once (phpMyAdmin, Import).
+1. In your hosting panel, create a MySQL database and user. Run `api/schema.sql` once (phpMyAdmin, Import). A database made before the morning call also needs `api/upgrade-2.sql`, once.
 2. Copy `api/config.sample.php` to `intake-config.php` **one folder above your web root** (next to `public_html`, not inside it) and fill in the Gemini key, database details, a long random `ip_salt`, and the free runs per player. If your host won't let you write there, save it as `api/config.php` instead; the `.htaccess` in `api/` blocks downloads of it.
 3. Upload `index.html`, `styles.css`, `js/`, `scenarios/` and `api/` over FTP to a subfolder, for example `public_html/the-intake/`.
 4. In the uploaded `js/config.js`, set `api: 'api/index.php'` and, if you like, `donateUrl` to your donation page.
@@ -102,7 +105,7 @@ Scoring per request, out of 100, the same way on the case board, in a memo and i
 
 To let the GitHub Pages version use the same backend, set `api` in `js/config.js` to the full URL (`https://yannickwillems.be/the-intake/api/index.php`); `https://recklessnative.github.io` is already in `allowed_origins`.
 
-**Unlock codes:** edit and run `api/new-code.sql`. Each code grants a number of extra runs and can be redeemed by a set number of players. **Safety limits** in the config: `calls_per_run` stops a runaway run, and `daily_calls` closes the game for the day before the bill can surprise you.
+**Unlock codes:** edit and run `api/new-code.sql`. Each code grants a number of extra runs and can be redeemed by a set number of players. **Safety limits** in the config: `calls_per_run` stops a runaway run, `calls_per_morning` and `mornings_per_ip` do the same for the morning call, and `daily_calls` closes the game for the day before the bill can surprise you.
 
 The backend stores a salted hash of each IP address (never the IP itself), a random browser token, and run counts. A week counts against the browser token only once it was played (its first scorecard, or `charge_after_calls` Gemini calls); starting a week again before that hands back the same week. Every week started also counts against the IP, which may start three times as many, so colleagues behind one office IP can still play.
 
