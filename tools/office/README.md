@@ -12,7 +12,7 @@ python3 scene.py hub 1920 1080 256           # the floor from above -> out/hub_1
 python3 scene.py mask 1920 1080              # one flat colour per place -> out/mask_1920.png
 python3 scene.py walk 960 540 16 1 310       # the walk-in, 310 frames at 25 fps -> out/walk/
 python3 scene.py still 960 540 16 1,165,310  # a few walk-in frames, to check the camera path
-python3 scene.py shot mieke 1600 900 96          # a close-up (mieke or darren) -> out/shot_mieke.png
+python3 scene.py shot mieke 1600 900 96          # a close-up (mieke, darren, bart, priya, jens, canteen, board) -> out/shot_mieke.png
 python3 scene.py shotmask mieke 1600 900         # its click mask, one colour per thing you can find
 python3 scene.py stand 960 540 16           # standing up from your monitor, 105 frames -> out/stand/
 python3 scene.py standstill 640 360 8 1,50,105  # a few stand-up frames
@@ -23,7 +23,7 @@ python3 post.py ../..                        # hub.webp, mask.png, glows, js/off
 On four CPU cores the hub takes about 20 minutes the walk-in about two hours and the stand-up about 45 minutes.
 
 `scene.py` builds everything from boxes, cylinders and text in code: the lift, reception and the
-SYNERGIX sign, two rows of cubicles (yours, Bart's and Mieke's in front), the glass board room, Darren's
+SYNERGIX sign, two rows of cubicles (yours, Bart's and Mieke's in front, Priya's, an empty one and Jens's behind), the glass board room, Darren's
 office with blinds, the kitchenette with the broken coffee machine and the canteen TV, a foosball table,
 and a rainy street outside. Places that can be clicked carry a `hot=` tag; `mask` mode renders each
 tag in its own flat colour, and `post.py` turns that into the hit mask and the hover glows. Walls and

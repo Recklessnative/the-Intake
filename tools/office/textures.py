@@ -167,3 +167,100 @@ for i, (a, b_) in enumerate(days):
 d.text((360, 330), 'September 2007', font=font('LiberationSerif-Italic.ttf', 24), fill=(120, 110, 90))
 im.save(f'{OUT}/planner.png')
 print('close-up textures ok')
+
+# ---------- more close-ups: Bart, Priya, Jens, the canteen, the board room ----------
+def paper(w, h, bg=(250, 250, 246)):
+    im = Image.new('RGB', (w, h), bg); return im, ImageDraw.Draw(im)
+
+def f(n, s): return font(n, s)
+blue, red, green, ink = (30, 60, 160), (200, 20, 30), (30, 140, 60), (40, 40, 50)
+
+# Bart: a client mail, printed and framed. The project was cancelled three weeks later.
+im, d = paper(400, 300)
+d.rectangle([0, 0, 400, 30], fill=(10, 70, 200)); d.text((10, 5), 'Doors Mail - Message', font=f('LiberationSans-Bold.ttf', 16), fill='white')
+d.text((16, 44), 'From: J. Peeters\nDate: 14 March 2006\nSubject: RE: proposal', font=f('LiberationSans-Regular.ttf', 16), fill=ink, spacing=4)
+d.text((200, 190), 'We are FULLY', font=f('LiberationSans-Bold.ttf', 40), fill=ink, anchor='mm')
+d.text((200, 238), 'ON BOARD! :)', font=f('LiberationSans-Bold.ttf', 40), fill=ink, anchor='mm')
+im.save(f'{OUT}/onboard.png')
+# Bart: his risk register. Every row LOW, in green highlighter.
+im, d = paper(420, 594)
+d.text((24, 24), 'RISK REGISTER  ·  Halvorsen pitch', font=f('LiberationSans-Bold.ttf', 20), fill=ink)
+for i in range(9):
+    y = 80 + i * 52
+    d.line([(24, y), (396, y)], fill=(180, 180, 180), width=2)
+    d.rectangle([40, y + 14, 40 + random.randint(140, 220), y + 24], fill=(150, 150, 155))
+    d.rectangle([300, y + 8, 390, y + 38], fill=(150, 240, 120)); d.text((345, y + 23), 'LOW', font=f('LiberationSans-Bold.ttf', 20), fill=ink, anchor='mm')
+y = 80 + 6 * 52
+d.line([(30, y + 20), (290, y + 22)], fill=blue, width=4); d.text((60, y + 34), "they won't", font=f('LiberationSans-Italic.ttf', 22), fill=blue)
+im.save(f'{OUT}/riskreg.png')
+note('pizzanote', ['FOR THE', 'TEAM!!'], (255, 226, 80), 90)
+
+# Priya: the chart pinned to her wall, and the small print under it.
+im, d = paper(480, 360)
+d.text((24, 18), 'Q3 COMPLETION RATE', font=f('LiberationSans-Bold.ttf', 26), fill=ink)
+for i, v in enumerate((71, 84, 92, 98)):
+    x = 40 + i * 105; d.rectangle([x, 300 - v * 2, x + 70, 300], fill=(40, 110, 200) if i < 3 else (240, 140, 20))
+d.text((420, 90), '98%', font=f('LiberationSans-Bold.ttf', 44), fill=(240, 140, 20), anchor='mm')
+d.text((24, 316), '* of those who started', font=f('LiberationSans-Regular.ttf', 13), fill=(120, 120, 120))
+im.save(f'{OUT}/chart98.png')
+im, d = paper(200, 200, (235, 235, 230))
+d.ellipse([10, 10, 190, 190], outline=ink, width=6); d.text((100, 100), '41:07', font=f('LiberationMono-Bold.ttf', 40), fill=ink, anchor='mm')
+im.save(f'{OUT}/stopwatch.png')
+im, d = paper(300, 200, (255, 255, 255))
+d.text((14, 10), 'Cactus: watering log', font=f('LiberationSans-Bold.ttf', 20), fill=ink)
+for i, t in enumerate(('03/08  20 ml', '17/08  20 ml', '31/08  20 ml', '14/09  due')):
+    d.text((20, 50 + i * 34), t, font=f('LiberationMono-Bold.ttf', 20), fill=ink)
+im.save(f'{OUT}/cactuslog.png')
+note('pinknote', ['Measure', 'what', 'matters?', '- M.'], (255, 150, 190), 64)
+
+# Jens: a storyboard for a game nobody ordered.
+im, d = paper(640, 400)
+d.text((20, 12), 'FIRE SAFETY: THE GAME!!', font=f('LiberationSans-BoldItalic.ttf', 30), fill=red)
+for i in range(6):
+    x, y = 20 + (i % 3) * 205, 60 + (i // 3) * 165
+    d.rectangle([x, y, x + 190, y + 140], outline=ink, width=3)
+    cx, cy = x + 60 + i * 9, y + 70
+    d.ellipse([cx - 10, cy - 34, cx + 10, cy - 14], outline=ink, width=3); d.line([(cx, cy - 14), (cx, cy + 20)], fill=ink, width=3)
+    d.line([(cx, cy + 20), (cx - 12, cy + 50)], fill=ink, width=3); d.line([(cx, cy + 20), (cx + 12, cy + 50)], fill=ink, width=3)
+    if i > 1: d.polygon([(x + 140, y + 130), (x + 150, y + 80 - i * 6), (x + 162, y + 110), (x + 172, y + 70 - i * 6), (x + 182, y + 130)], fill=(240, 120, 20))
+d.text((440, 372), 'client asked for: a poster', font=f('LiberationSans-Italic.ttf', 18), fill=blue)
+im.save(f'{OUT}/storyboard.png')
+im, d = paper(600, 400, (250, 248, 236))
+d.line([(300, 0), (300, 400)], fill=(190, 180, 160), width=4)
+d.text((30, 30), 'COURSE IDEAS', font=f('LiberationSans-Bold.ttf', 34), fill=ink)
+d.text((30, 110), '1. Serious game!!', font=f('LiberationSans-BoldItalic.ttf', 32), fill=blue)
+d.text((330, 40), '2. serious game', font=f('LiberationSans-BoldItalic.ttf', 32), fill=blue)
+d.text((350, 90), '(again)', font=f('LiberationSans-Italic.ttf', 28), fill=blue)
+d.text((330, 200), '3. ask Mieke', font=f('LiberationSans-Italic.ttf', 26), fill=(150, 150, 160))
+d.line([(326, 218), (520, 214)], fill=blue, width=3)
+im.save(f'{OUT}/ideas.png')
+
+# The canteen: the dishes rota, the microwave, the water cooler, someone's lunch.
+im, d = paper(420, 300)
+d.text((210, 30), 'AFWAS / VAISSELLE', font=f('LiberationSans-Bold.ttf', 30), fill=ink, anchor='mm')
+for i, wk in enumerate(range(36, 41)):
+    y = 70 + i * 44
+    d.line([(20, y), (400, y)], fill=(170, 170, 170), width=2)
+    d.text((30, y + 10), 'Week ' + str(wk), font=f('LiberationSans-Regular.ttf', 22), fill=ink)
+    d.text((200, y + 10), 'DARREN', font=f('LiberationSans-Bold.ttf', 22), fill=ink)
+    d.rectangle([350, y + 8, 378, y + 34], outline=ink, width=2)
+im.save(f'{OUT}/rota.png')
+note('fishnote', ['FISH =', 'WRITTEN', 'WARNING', '- HR'], (252, 252, 248), 62, red)
+note('soupnote', ['Please do', 'not refill', 'with soup.'], (252, 252, 248), 58, ink)
+note('lunchnote', ['JENS.', 'DO NOT', 'EAT.'], (255, 226, 80), 80)
+im, d = paper(300, 200, (245, 245, 245))
+d.text((150, 80), 'GMS', font=f('LiberationSans-BoldItalic.ttf', 70), fill=(200, 30, 40), anchor='mm')
+d.text((150, 150), 'Learning that moves', font=f('LiberationSans-Italic.ttf', 22), fill=(80, 80, 80), anchor='mm')
+im.save(f'{OUT}/gmsmug.png')
+
+# The board room: the flipchart from the last board, the projector note.
+im, d = paper(400, 560)
+d.text((200, 50), 'HALVORSEN', font=f('LiberationSans-Bold.ttf', 46), fill=blue, anchor='mm')
+d.text((200, 160), 'GO', font=f('LiberationSans-Bold.ttf', 90), fill=green, anchor='mm')
+d.ellipse([110, 100, 290, 220], outline=green, width=6)
+d.text((200, 290), 'NO GO', font=f('LiberationSans-Bold.ttf', 60), fill=(150, 150, 150), anchor='mm')
+for i in range(3): d.text((90 + i * 90, 400), 'X', font=f('LiberationSans-Bold.ttf', 60), fill=red, anchor='mm')
+d.text((200, 500), 'Board 31/08', font=f('LiberationSans-Italic.ttf', 28), fill=ink, anchor='mm')
+im.save(f'{OUT}/flipchart.png')
+note('projnote', ['Remote:', "Darren's", 'drawer.', 'Darren:', 'Frankfurt.'], (255, 226, 80), 54)
+print('more close-up textures ok')

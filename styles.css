@@ -928,33 +928,41 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 @media (prefers-reduced-motion: reduce) { .daybreak { animation-duration: 2.4s; } }
 
 /* ---------- the office floor (js/office.js) ----------
-   The floor opens in a window like everything else on this PC: blue title bar, beige frame,
-   the render in a sunken picture well, yellow tooltip labels, plain grey buttons, a status bar. */
-.screen.office { flex-direction: column; padding: 14px 16px 18px;
-  background:
-    radial-gradient(ellipse 90% 45% at 30% 105%, var(--hill) 60%, transparent 61%),
-    radial-gradient(ellipse 80% 40% at 85% 110%, var(--hill-dark) 60%, transparent 61%),
-    radial-gradient(ellipse 30% 8% at 70% 22%, rgba(255,255,255,.7), transparent),
-    radial-gradient(ellipse 22% 6% at 25% 15%, rgba(255,255,255,.6), transparent),
-    linear-gradient(var(--sky-top), var(--sky) 70%); }
-.screen.office.active { display: flex; justify-content: flex-start; align-items: center; }
-.office-win { width: min(1212px, 100%, (100vh - 190px) * 16 / 9 + 12px); display: flex; flex-direction: column; gap: 6px; padding: 0 3px 6px;
-  color: var(--ink); background: var(--win); border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0;
-  box-shadow: 3px 4px 14px rgba(0,0,0,.35); }
-.office-win > .titlebar { margin: 0 -3px; cursor: default; }
-.office-win-icon { font-size: 14px; text-shadow: none; }
-.office-status { order: 9; padding: 0 3px; }
-.office-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 3px 4px; font-size: 12px;
-  border: 1px solid; border-color: #aca899 #fff #fff #aca899; }
-.office-when { margin: 0; padding-right: 12px; font-weight: 700; border-right: 1px solid #aca899; }
-.office-line { margin: 0; flex: 1; min-width: 0; color: var(--muted); }
-.office-notebook { min-height: 0; padding: 2px 10px; font-size: 12px; }
-.office-stage { position: relative; width: 100%; aspect-ratio: 16 / 9; user-select: none; -webkit-user-select: none;
-  border: 2px solid; border-color: #7a7a7a #fff #fff #7a7a7a; background: #000; }
+   You have stood up: the render fills the screen. On top of it sit the PC's own controls:
+   a blue taskbar with the places, a tray with the notebook and the clock, a yellow balloon tip,
+   tooltip labels and small dialog windows. */
+.screen.office { position: relative; flex-direction: column; padding: 0; overflow: hidden; background: #0b0f16; }
+.screen.office.active { display: flex; justify-content: center; align-items: center; height: 100vh; }
+.office-stage { position: relative; width: min(100vw, (100vh - 36px) * 16 / 9); aspect-ratio: 16 / 9; margin-bottom: 36px;
+  user-select: none; -webkit-user-select: none; }
 .office-pic { display: block; width: 100%; height: 100%; }
 .office-stage > picture { position: relative; display: block; width: 100%; height: 100%; }   /* positioned, so it paints over the weather behind it */
 .office-glow { position: absolute; pointer-events: none; opacity: 0; transition: opacity .18s ease; mix-blend-mode: screen; }
 .office-glow.on { opacity: 1; }
+/* The taskbar: places on the left, the tray on the right. */
+.office-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; display: flex; align-items: stretch; height: 36px;
+  background: linear-gradient(#3a80f3, var(--task-a) 15%, var(--task-a) 85%, var(--task-b)); }
+.office-list { flex: 1; min-width: 0; display: flex; gap: 3px; align-items: center; padding: 0 6px; overflow: hidden; }
+/* Like the real taskbar, buttons shrink and cut their text short when there are many. */
+.office-list button { flex: 0 1 auto; min-width: 44px; max-width: 190px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0; height: 28px; min-height: 0;
+  padding: 0 12px; text-align: left; color: #fff; font-size: 12px; line-height: 1.1; border: 1px solid #1e48b0; border-radius: 3px;
+  background: linear-gradient(#5b9bf8, #3c81f3 45%, #2f6fe6); box-shadow: inset 1px 1px 0 rgba(255,255,255,.35); text-shadow: 0 1px 0 rgba(0,0,0,.25); }
+.office-list button:hover { background: linear-gradient(#6faaff, #4d8ff8 45%, #3a7cf0); box-shadow: inset 1px 1px 0 rgba(255,255,255,.45); }
+.office-list button b, .office-list button span { max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.office-list button span { font-size: 10px; color: #dbe7ff; }
+.office-list button.primary { background: linear-gradient(#2a5fd4, #1e4fc0 50%, #1a45ae); box-shadow: inset 1px 1px 2px rgba(0,0,0,.45); }
+.office-list button:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
+.office-tray { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 10px; color: #fff; font-size: 12px;
+  background: linear-gradient(#1aa2f6, var(--tray) 15%, var(--tray) 85%, #0b6fcb); border-left: 1px solid #0c4fa8; box-shadow: inset 1px 0 0 rgba(255,255,255,.25); }
+.office-notebook { min-height: 0; height: 24px; padding: 0 8px; font-size: 12px; color: #fff; border-color: transparent; background: transparent; }
+.office-notebook:hover { border-color: rgba(255,255,255,.5); box-shadow: none; background: rgba(255,255,255,.12); }
+.office-when { white-space: nowrap; }
+/* The balloon tip above the tray. */
+.office-line { position: absolute; right: 14px; bottom: 48px; z-index: 4; max-width: min(360px, calc(100% - 28px)); margin: 0; padding: 8px 12px;
+  font-size: 12px; color: #000; background: #ffffe1; border: 1px solid #000; border-radius: 8px; box-shadow: 2px 2px 4px rgba(0,0,0,.35); }
+.office-line::after { content: ""; position: absolute; right: 40px; bottom: -11px; border: 10px solid transparent; border-bottom: 0; border-right: 0; border-top-color: #000; }
+.office-line::before { content: ""; position: absolute; right: 41px; bottom: -9px; z-index: 1; border: 9px solid transparent; border-bottom: 0; border-right: 0; border-top-color: #ffffe1; }
+.office-line:empty { display: none; }
 .office-rain { position: absolute; pointer-events: none;
   -webkit-mask: url(media/office/window-mask.png) center / 100% 100% no-repeat; mask: url(media/office/window-mask.png) center / 100% 100% no-repeat;
   background:
@@ -980,11 +988,6 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .office-card-head .tb { flex: none; }
 .office-face { font-size: 14px; text-shadow: none; }
 .office-card-title { font-weight: 700; }
-.office-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 0 3px; }
-.office-list button { display: flex; flex-direction: column; align-items: flex-start; gap: 0; text-align: left; padding: 4px 12px; }
-.office-list button span { font-size: 11px; color: var(--muted); }
-.office-list button.primary { border-width: 2px; border-color: #003c74; box-shadow: inset 0 0 0 1px #6b95d6; }
-.office-list button.primary:hover { box-shadow: inset 0 0 0 2px #f8b636; }
 .screen.office.no-pic .office-stage { display: none; }
 .office-stage.looking > .office-tag, .office-stage.looking > .office-glow { display: none; }
 .office-look { position: absolute; inset: 0; z-index: 2; overflow: hidden; background: #000; }
@@ -994,13 +997,17 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .office-tag.fresh::before, .office-list button.fresh b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin: 0 5px 1px 0; border: 1px solid #8a5a00; border-radius: 50%; background: #ffb52e; vertical-align: middle; }
 .office-list button.fresh b::after { margin: 0 0 2px 6px; }
 @media (max-width: 700px) {
-  .screen.office { padding: 6px; }
-  .office-when { border-right: 0; flex: 1; }
-  .office-line { order: 3; flex-basis: 100%; }
+  .screen.office.active { height: auto; min-height: 100vh; justify-content: flex-start; }
+  .office-stage { width: 100%; margin-bottom: 0; }
   .office-tag { display: none; }
+  .office-line { position: static; max-width: none; margin: 10px 10px 0; border-radius: 6px; }
+  .office-line::before, .office-line::after { display: none; }
+  .office-bar { position: static; flex-direction: column; height: auto; width: 100%; margin-top: 10px; }
+  .office-list { flex-direction: column; align-items: stretch; gap: 4px; padding: 8px; overflow: visible; }
+  .office-list button { flex: none; max-width: none; height: auto; min-height: 36px; padding: 6px 12px; font-size: 14px; }
+  .office-list button span { font-size: 12px; }
+  .office-tray { justify-content: space-between; height: 36px; border-left: 0; }
   .office-card, .office-card.left, .office-card.right { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 16px; width: auto; transform: none; }
-  .office-list { flex-direction: column; }
-  .office-list button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .office-rain { animation: none; } }
 

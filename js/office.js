@@ -22,7 +22,9 @@
   const saveData = () => !!(navigator.connection && navigator.connection.saveData);
 
   // ---------- the hit mask: one grey level per place ----------
-  const ORDER = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window'];
+  // The mask's place ids, in tools/office/post.py order; ORDER is how the taskbar lists them.
+  const IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen'];
+  const ORDER = ['desk', 'mieke', 'bart', 'priya', 'jens', 'darren', 'meeting', 'canteen', 'tv', 'coffee'];
   function loadMask() {
     if (mask) return;
     const img = new Image();
@@ -42,7 +44,7 @@
     const r = stage.getBoundingClientRect();
     const x = Math.floor((ev.clientX - r.left) / r.width * maskW), y = Math.floor((ev.clientY - r.top) / r.height * maskH);
     if (x < 0 || y < 0 || x >= maskW || y >= maskH) return null;
-    const id = ORDER[Math.round(mask[(y * maskW + x) * 4] / 32) - 1];
+    const id = IDS[Math.round(mask[(y * maskW + x) * 4] / 20) - 1];
     return id && current && current.spots[id] ? id : null;
   }
 
@@ -52,16 +54,14 @@
     if (s.dataset.built) return;
     s.dataset.built = '1';
     s.innerHTML = '';
-    const head = el('header', 'office-head');
-    const when = el('p', 'office-when'); when.id = 'office-when';
+    // The render fills the screen; the controls on top of it are the PC's own: a taskbar with the
+    // places, a tray with the notebook and the clock, and a balloon tip for what is going on.
+    const when = el('span', 'office-when'); when.id = 'office-when';
     const line = el('p', 'office-line'); line.id = 'office-line';
     const nb = el('button', 'office-notebook'); nb.id = 'office-notebook'; nb.type = 'button'; nb.hidden = true;
     nb.onclick = () => notebook();
-    head.append(when, line, nb);
-    // One window, like everything else on this PC: a title bar, the picture in a sunken frame, a status bar.
-    const win = el('div', 'office-win');
-    const bar = el('div', 'titlebar');
-    bar.append(el('span', 'office-win-icon', '🏢'), el('span', 'tt', 'Synergix e-Learning Solutions: 3rd floor'));
+    const tray = el('div', 'office-tray');
+    tray.append(nb, when);
     const stage = el('div', 'office-stage'); stage.id = 'office-stage';
     const pic = el('picture');
     const src = el('source'); src.media = '(max-width: 900px)'; src.srcset = MEDIA + 'hub-960.webp';
@@ -97,10 +97,9 @@
     stage.appendChild(card);
     // The same places as a list: for phones, keyboards and screen readers.
     const list = el('nav', 'office-list'); list.id = 'office-list'; list.setAttribute('aria-label', 'Where to go');
-    const status = el('div', 'office-status');
-    status.append(head);
-    win.append(bar, status, stage, list);
-    s.append(win);
+    const bar = el('div', 'office-bar');
+    bar.append(list, tray);
+    s.append(stage, line, bar);
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-office').classList.contains('active')) { const c = $('office-card'); if (c && !c.hidden) closeCard(); else if (looking) closeLook(); } });
     loadMask();
   }
@@ -234,6 +233,7 @@
       const b = el('button', (sp.primary ? 'primary' : '') + (fresh(sp) ? ' fresh' : '')); b.type = 'button'; b.dataset.spot = id;
       b.append(el('b', null, sp.label));
       if (sp.sub || sp.look) b.append(el('span', null, sp.sub || (fresh(sp) ? 'Something new to look at' : 'Have a closer look')));
+      b.title = sp.label + (sp.sub ? ': ' + sp.sub : '');
       b.onclick = () => go(id);
       list.appendChild(b);
     });
