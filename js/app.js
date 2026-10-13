@@ -408,18 +408,31 @@
     };
     state.run.mieke.push({ who: 'them', text: MIEKE_HELLO });
     openRequest();
-    if (state.index) Sound.ding();
+    if (state.index && !mondayFirst()) Sound.ding();
     // A new day says good morning, unless the module is already waiting on top with its own hello.
-    if (state.index && state.days[state.index] !== state.days[state.index - 1] && mondayFirst() !== 'module') toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
+    if (state.index && state.days[state.index] !== state.days[state.index - 1]) dayBreak(dayOf(state.index - 1), dayOf(state.index));
     retroMorning();
     save();
   }
 
+  // Between two days: a breath. You go home, you come back. Click to skip.
+  function dayBreak(from, to) {
+    const d = document.createElement('div');
+    d.className = 'daybreak'; d.id = 'daybreak'; d.setAttribute('role', 'status');
+    const home = state.weekNo === 1 && state.index === 1 ? 'You go home. Your first case is done.' : 'You go home.';
+    [from + ', 17:40. ' + home, to + ', 08:57. The coffee machine is still broken.'].forEach(t => { const p = document.createElement('p'); p.textContent = t; d.appendChild(p); });
+    const f = document.createElement('p'); f.className = 'fine'; f.textContent = 'Click to skip'; d.appendChild(f);
+    const end = () => d.remove();
+    d.onclick = end;
+    document.body.appendChild(d);
+    setTimeout(end, 3000);
+  }
   // Draw the desk for the current request, at whatever step it is (also after a resume).
   function openRequest() {
     const r = state.run;
     const card = r.card;
     show('s-desk');
+    deskIcons();
     tick(0);
     $('notes').value = r.notes || '';
     $('chat-log').innerHTML = '';
@@ -486,7 +499,8 @@
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
     // Your very first request: everything else is already read, so the one bold line is the request.
     const today = state.days[state.index] || 0, fresh = firstEver();
-    const mails = FILLER.map(f => Object.assign({ read: fresh || !!r.readMail[f.subject], day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    const seen = sub => { if (fresh) r.readMail[sub] = true; return !!r.readMail[sub]; };
+    const mails = FILLER.map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
@@ -494,8 +508,8 @@
     // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
     if (!state.hard) {
       const sm = Story.storyMail(state.weekNo);
-      mails.push(Object.assign({ read: fresh || !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
-      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: fresh || !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
+      mails.push(Object.assign({ read: seen(sm.subject), day: 0, at: 8 * 60 + 12, story: true }, sm));
+      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: seen(n.subject), at: 7 * 60 + 31 + i }, n)));
     }
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
@@ -505,8 +519,9 @@
       mails.push({ from: 'IT Service Desk', subject: sub, read: !!r.readMail[sub], day: 0, at: 7 * 60 + 58,
         body: 'Dear team lead,\n\nCongratulations on your promotion. As agreed with HR, team leads get the new PC. It runs Doors Aero: glass windows, a round start button and roughly 40% more shine.\n\nThe old look is in Display properties if you miss it. Your files are where you left them. Your coffee mug is not our department.\n\nIT Service Desk\n(Do not reply. Nobody will.)' });
     }
-    // This week's CoE Academy module arrives first thing Monday (in week 1, with request 2, when it is due).
-    if (state.academy && state.index >= (state.weekNo === 1 ? 1 : 0)) {
+    // This week's CoE Academy module arrives first thing Monday (in week 1 on Thursday, when it is due).
+    if (state.academy && state.index >= (state.weekNo === 1 ? 2 : 0)) {
+      unlock('w-academy');
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
       const subject = 'Assigned to you: ' + m.title + ' (' + m.minutes + ' min)';
       mails.push({ from: 'CoE Academy', subject, academy: true, day: 0, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
@@ -614,6 +629,7 @@
     phase('call');
     Desktop.layout('call', 'w-call');
     $('chat-input').focus();
+    hint('call');
   };
   function callWindow() {
     const r = state.run;
@@ -759,7 +775,8 @@
   function afterCall() {
     const r = state.run;
     if (r.phase !== 'call') return;
-    if (r.laterText) { const t = r.laterText; r.laterText = null; setTimeout(() => Retro.sms(t[0], t[1]), 2500); }
+    // In week 1 the text arrives without a ring: a badge on the phone, nothing more.
+    if (r.laterText) { const t = r.laterText; r.laterText = null; setTimeout(() => Retro.sms(t[0], t[1], state.weekNo === 1), 2500); }
     if (touchpoints(r.card) && r.questionsLeft > 0) toInvestigate(); else toWriteup();
   }
   function toWriteup() {
@@ -780,6 +797,8 @@
     if (!r.board) r.board = newBoard(r);
     renderBoard();
     Desktop.layout('write', 'w-write');
+    unlock('w-write');
+    hint('write');
   }
 
   // ---------- follow-up: data requests, the coffee machine, one callback ----------
@@ -798,6 +817,8 @@
     phase('investigate');
     renderLeads();
     Desktop.layout('investigate', 'w-leads');
+    unlock('w-leads', 'w-write');
+    hint('leads');
   }
   function renderLeads() {
     const r = state.run, card = r.card, on = r.phase === 'investigate', fl = card.frontline;
@@ -969,7 +990,7 @@
     if (state.hard) return null;
     if (state.standup && !state.standup.done && state.index === 0) return 'standup';
     const A = state.academy;
-    if (A && !A.started && !state.standup && state.index === (state.weekNo === 1 ? 1 : 0)) return 'module';
+    if (A && !A.started && !state.standup && state.index === (state.weekNo === 1 ? 2 : 0)) return 'module';
     return null;
   }
   function openStandup() {
@@ -1019,6 +1040,29 @@
     if (state.run) mailbox();
   }
   $('btn-team').onclick = () => openApp('w-team');
+
+  // ---------- the desk grows: icons turn up when you first need them ----------
+  const DESK_START = ['w-inbox', 'w-case', 'w-notes', 'w-call', 'w-mieke', 'w-coe'];
+  function deskUnlocked() {
+    let got = [];
+    try { got = JSON.parse(localStorage.getItem('intake-desk') || '[]'); } catch (e) { /* storage blocked */ }
+    return got;
+  }
+  function deskIcons() {
+    const h = scoreHistory();
+    // Someone who has finished a week (or played older versions) gets the whole desk at once.
+    const all = (h.weeks || []).reduce((n, w) => n + (w.requests || []).length, 0) >= 3;
+    const open = DESK_START.concat(deskUnlocked());
+    document.querySelectorAll('.desk-icon').forEach(b => b.classList.toggle('locked', !all && !open.includes(b.dataset.app)));
+  }
+  function unlock(...ids) {
+    const got = deskUnlocked();
+    const fresh = ids.filter(id => !got.includes(id) && !DESK_START.includes(id));
+    if (!fresh.length) return;
+    try { localStorage.setItem('intake-desk', JSON.stringify(got.concat(fresh))); } catch (e) { /* storage blocked */ }
+    deskIcons();
+    fresh.forEach(id => { const b = document.querySelector('.desk-icon[data-app="' + id + '"]'); if (b && !b.classList.contains('locked')) { b.classList.add('fresh'); setTimeout(() => b.classList.remove('fresh'), 4000); } });
+  }
 
   // ---------- Mieke, the colleague two cubicles over ----------
   const MIEKE_HELLO = 'Morning. Shout if you want a second pair of eyes.';
@@ -1136,34 +1180,28 @@
     // Monday morning gets one ping, not two: the first text waits until the first call ends.
     // The module morning gets one ping too: the text waits until the call ends.
     const moduleFirst = mondayFirst() === 'module';
-    if (state.index && !moduleFirst) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
-    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Morning again! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.'), 1200); return; }
+    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
     const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
-      : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
+      : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Morning! Before the next request: your first CoE module. It is short, and it does not count. Then the request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
       : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
+    if (moduleFirst || mondayFirst() === 'standup') { miekePing(ping[1]); return; }
     setTimeout(() => { if (ping[0] === 'Mieke') miekePing(ping[1]); Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'); }, 1200);
   }
   // Mieke's tour of the desk, in speech bubbles. On a phone the desk icons are hidden, so the
   // tour is shorter and points at the start menu and the taskbar instead.
   const TOUR_DESK = [
-    { text: 'Welcome to Synergix! I am Mieke, two cubicles over. Darren wanted to show you around himself, but he is at the airport. Again. So you get me. Two minutes, promise.' },
-    { target: '.desk-icon[data-app="w-inbox"]', text: 'Doors Mail. Requests from clients land here. Your first one is already waiting, of course.' },
-    { target: '.desk-icon[data-app="w-case"]', text: 'The case file: what we know before the call. Who they are, what they asked for, what they think the problem is. It is also the paperclip on the request mail.' },
-    { target: '.desk-icon[data-app="w-call"]', text: 'The phone. You call the client back and ask your questions. You only get a few, and their patience runs out. Good questions dig up hidden facts. Bad ones dig up a course nobody needs.' },
-    { target: '.desk-icon[data-app="w-notes"]', text: 'My notes. Write down what you hear. Your memory is not as good as you think. Neither is mine.' },
-    { target: '.desk-icon[data-app="w-leads"]', text: 'Follow-up. After the call you can ask for data, catch someone from the work floor at the coffee machine, or call the client back once.' },
-    { target: '.desk-icon[data-app="w-write"]', text: 'The case board. This is where you write it up: the real problem, whether training is even the answer, how you will know it worked, and your plan.' },
+    { text: 'Welcome to Synergix! I am Mieke, two cubicles over. Darren wanted to show you around himself, but he is at the airport. Again. So you get me. One minute, promise.' },
+    { target: '.desk-icon[data-app="w-inbox"]', text: 'Doors Mail. Requests from clients land here. Your first one is already waiting, of course. The case file is the paperclip on it.' },
     { target: '.desk-icon[data-app="w-mieke"]', text: 'And me. Stuck? Click my coffee cup. I have time for a few questions per request, and I only know what you have seen so far.' },
-    { target: '.desk-icon[data-app="w-coe"]', text: 'The Center of Excellence. The intake flowchart, good questions, the measurement ladder. Steal from it. Everybody does.' },
-    { target: '.desk-icon[data-app="w-scores"]', text: 'My scores. Every request gets graded, and you can see how you are doing over time. Nobody aces the first one.' },
-    { target: '#btn-startmenu', text: 'Everything is also in the start menu, and open windows sit in the taskbar. If the desk gets messy: start, then Tidy the windows. You can replay this tour from there too.' },
-    { target: '#w-inbox', text: 'That is it. Your request is open in the inbox. Read it, then call them back. Ask before you make. That is the whole job, really.', last: true }
+    { target: '#btn-startmenu', text: 'Everything is also in the start menu. The rest of the desk I will show you when you need it, not before. New icons turn up as you go.' },
+    { target: '#w-inbox', text: 'That is it. Read the request, then call them back. Ask before you make. That is the whole job, really.', last: true }
   ];
   const TOUR_PHONE = [
     TOUR_DESK[0],
     { target: '#w-inbox', text: 'Your inbox. Requests from clients land here. Your first one is already waiting, of course.' },
-    { target: '#btn-startmenu', text: 'Everything else is in the start menu: the case file, your notes, me (stuck? ask me, I have time for a few questions per request), the Center of Excellence with the intake flowchart, and your scores. You can replay this tour from there too.' },
+    { target: '#btn-startmenu', text: 'Everything else is in the start menu: the case file, your notes and me (stuck? ask me, I have time for a few questions per request). The rest I will show you when you need it.' },
     { target: '#task-buttons', text: 'Open windows sit down here in the taskbar. Tap one to bring it back.' },
     { target: '#w-inbox', text: 'That is it. Read the request, open the case file, then call them back. Ask before you make. That is the whole job, really.', last: true }
   ];
@@ -1176,10 +1214,22 @@
     Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, () => { if (after) miekePing(after); });
   }
   $('btn-tour').onclick = () => miekeTour(false);
-  // Staply turns up at most once per request, never in hard mode, and not on your very first request.
+  // Mieke explains each part of the desk once, the first time you need it, in one bubble that
+  // does not block anything. Not in hard mode: she is on holiday.
+  const HINTS = {
+    call: { target: '#w-call .meters', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
+    leads: { target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
+    write: { target: '#board-steps', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
+    scores: { target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' }
+  };
+  function hint(k) {
+    if (state.hard || !HINTS[k] || told('hint-' + k)) return;
+    setTimeout(() => { if (!Tour.open) Tour.hint(HINTS[k]); }, 500);
+  }
+  // Staply turns up at most once per request, never in hard mode, and not before the last request of week 1.
   function staply(trigger) {
     const r = state.run;
-    if (state.hard || !r || r.staply || firstEver()) return;
+    if (state.hard || !r || r.staply || (state.weekNo === 1 && state.index < 2)) return;
     if (Retro.staply(trigger)) r.staply = trigger;
   }
   const staplyLabel = () => { $('btn-staply').textContent = Retro.staplyOn() ? '📎 Staply: on' : '📎 Staply: off'; };
@@ -1245,6 +1295,7 @@
   function renderBoard() {
     const r = state.run, b = board();
     $('board').hidden = b.mode !== 'board';
+    $('btn-memo-mode').hidden = firstEver();
     $('write-form').hidden = b.mode !== 'memo';
     $('memo4-form').hidden = b.mode !== 'memo4';
     $('hard-form').hidden = b.mode !== 'hard';
@@ -1729,6 +1780,8 @@
     if (!replay) {
       state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g);
+      unlock('w-scores', 'w-drill', 'bin');
+      hint('scores');
       r.phase = 'score';
       r.grade = g;
       save();

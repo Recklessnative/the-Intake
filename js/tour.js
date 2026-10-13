@@ -5,7 +5,7 @@
 // icons), the bubble points at `alt` with `altText`, or sits in the middle with no spotlight.
 (function () {
   const $ = id => document.getElementById(id);
-  let steps = [], i = 0, done = null, root = null;
+  let steps = [], i = 0, done = null, root = null, tip = false;
 
   function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -30,15 +30,17 @@
     root = el('div', 'tour');
     root.id = 'tour';
     root.setAttribute('role', 'dialog');
-    root.setAttribute('aria-modal', 'true');
+    if (tip) root.classList.add('tip'); else root.setAttribute('aria-modal', 'true');
     root.setAttribute('aria-label', 'Mieke shows you around');
     document.body.appendChild(root);
     document.addEventListener('keydown', keys, true);
+    document.addEventListener('pointerdown', outside, true);
     window.addEventListener('resize', place);
     return root;
   }
   function close(finished) {
     document.removeEventListener('keydown', keys, true);
+    document.removeEventListener('pointerdown', outside, true);
     window.removeEventListener('resize', place);
     if (root) root.remove();
     root = null;
@@ -46,10 +48,12 @@
     done = null;
     if (d) d(finished);
   }
+  // A tip does not block the desk: clicking anywhere else puts it away.
+  function outside(ev) { if (tip && root && !ev.target.closest('.tour-bubble')) close(true); }
   function keys(ev) {
     if (!root) return;
     if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(false); return; }
-    if (!root.querySelector('.tour-bubble')) return;
+    if (!root.querySelector('.tour-bubble') || tip) return;
     if (ev.key === 'ArrowRight') { ev.preventDefault(); ev.stopPropagation(); go(1); }
     else if (ev.key === 'ArrowLeft') { ev.preventDefault(); ev.stopPropagation(); go(-1); }
   }
@@ -85,26 +89,27 @@
     const b = el('div', 'tour-bubble');
     b.setAttribute('aria-live', 'polite');
     const head = el('div', 'tour-head');
-    head.append(avatar(), el('b', null, 'Mieke'), el('span', 'tour-count', (i + 1) + ' of ' + steps.length));
+    head.append(avatar(), el('b', null, 'Mieke'));
+    if (steps.length > 1) head.appendChild(el('span', 'tour-count', (i + 1) + ' of ' + steps.length));
     const target = visible(s.target) || visible(s.alt);
     const text = !visible(s.target) && visible(s.alt) && s.altText ? s.altText : s.text;
     const p = el('p', 'tour-text', text);
     p.id = 'tour-text';
     const row = el('div', 'row');
     if (i) { const back = el('button', null, 'Back'); back.type = 'button'; back.onclick = () => go(-1); row.appendChild(back); }
-    const next = el('button', 'primary', s.last ? (s.cta || 'Let\'s go') : 'Next');
+    const next = el('button', 'primary', tip ? 'Got it' : s.last ? (s.cta || 'Let\'s go') : 'Next');
     next.type = 'button'; next.id = 'tour-next';
     next.onclick = () => go(1);
     row.appendChild(next);
     const skip = el('button', 'link', 'Skip the tour');
     skip.type = 'button'; skip.id = 'tour-skip';
     skip.onclick = () => close(false);
-    if (!s.last) row.appendChild(skip);
+    if (!s.last && !tip) row.appendChild(skip);
     b.append(head, p, row);
     r.append(spot, b);
     r.dataset.target = target ? (target.id || target.dataset.app || '') : '';
     place();
-    next.focus();
+    if (!tip) next.focus();
   }
   function go(d) {
     const n = i + d;
@@ -155,9 +160,16 @@
 
   // start(steps, { call: true }) rings first; done(finished) runs when the tour closes.
   function start(list, opts, onDone) {
-    steps = list; i = 0; done = onDone || null;
+    if (root) close(false);
+    steps = list; i = 0; done = onDone || null; tip = false;
     if (opts && opts.call) ring(() => show());
     else { build(); show(); }
   }
-  window.Tour = { start, close: () => close(false), get open() { return !!root; } };
+  // One bubble at the moment something is first used; it does not block the desk.
+  function hint(step, onDone) {
+    if (root) close(false);
+    steps = [Object.assign({ last: true }, step)]; i = 0; done = onDone || null; tip = true;
+    build(); show();
+  }
+  window.Tour = { start, hint, close: () => close(false), get open() { return !!root; } };
 })();

@@ -20,7 +20,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);
   await p.click('#btn-hangup');
-  await p.click('#btn-memo-mode');
+  await p.evaluate(() => document.getElementById('btn-memo-mode').click());   // the memo-mode link is hidden on the very first request
   for (const n of ['gap', 'idea']) await p.fill(`#write-form [name=${n}]`, 'x');
   await p.click('#write-form button[type=submit]');
   await p.click('#bet-form [data-bet="bold"] [data-v="0"]'); await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');

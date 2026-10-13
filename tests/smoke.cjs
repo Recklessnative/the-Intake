@@ -101,6 +101,12 @@ async function retro() {
   if (MOBILE) await p.click('.task:has-text("Call")');
 }
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
+// Mieke explains a part of the desk the first time you use it, in one bubble that does not block.
+async function tip(what) {
+  await p.waitForSelector('.tour.tip', { timeout: 3000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });
+  await p.click('#tour-next');
+  if (await p.$('.tour')) throw new Error('hint for ' + what + ' did not close');
+}
 async function academy() {
   await visible('#w-academy');
   if (!(await p.textContent('#academy')).includes('Ask before you make')) throw new Error('week 1 module is not "Ask before you make"');
@@ -132,6 +138,7 @@ async function academy() {
 // The follow-up after a first call: a data request, the coffee machine, one callback.
 async function followUp() {
   await p.waitForSelector('#w-leads.open');
+  await tip('Follow-up');
   await visible('#w-leads');
   const r0 = await p.evaluate(() => { const r = window.__intake.state.run; return { left: r.questionsLeft, phase: r.phase }; });
   if (r0.phase !== 'investigate' || r0.left !== 8) throw new Error('follow-up budget wrong: ' + JSON.stringify(r0));
@@ -220,7 +227,9 @@ async function followUp() {
         await p.click('#tour-next');
         if (last) break;
       }
-      if (stops.length !== (MOBILE ? 5 : 12) || (!MOBILE && !stops.includes('w-mieke'))) throw new Error('tour stops wrong: ' + stops);
+      if (stops.length !== 5 || (!MOBILE && !stops.includes('w-mieke'))) throw new Error('tour stops wrong: ' + stops);
+      // Day 1 shows only the icons you need today; the rest turn up when you first need them.
+      if (!MOBILE && (await p.isVisible('.desk-icon[data-app="w-drill"]') || await p.isVisible('.desk-icon[data-app="w-leads"]') || !(await p.isVisible('.desk-icon[data-app="w-coe"]')))) throw new Error('day 1 desk icons wrong');
       if (await p.$('#tour')) throw new Error('tour did not close');
       // It can be replayed from the start menu, without the call; Escape ends it.
       await p.click('#btn-startmenu'); await p.click('#btn-tour');
@@ -233,10 +242,11 @@ async function followUp() {
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     // The very first request: nothing else in the inbox is unread. Later, the new request is.
     const unread = await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length);
-    if (n === 0 ? unread !== 0 : unread < 1) throw new Error('unread mail wrong on request ' + (n + 1) + ': ' + unread);
+    if (n === 0 ? unread !== 0 : n === 1 ? unread !== 0 : unread < 1) throw new Error('unread mail wrong on request ' + (n + 1) + ': ' + unread);
     if (n === 0 && (await p.textContent('#mail-rows')).includes('CoE Academy')) throw new Error('module mail should wait until the module is due');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
-    if (n === 1) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module comes after the first case
+    if (n === 1 && await p.isVisible('#w-academy')) throw new Error('week 1 module should wait until Thursday');
+    if (n === 2) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module waits until Thursday morning
     // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
     const inbox = await p.textContent('#mail-rows');
     if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
@@ -289,6 +299,7 @@ async function followUp() {
       if (r.card.difficulty !== 0 || r.questionsLeft !== 10 || r.patience !== 5) throw new Error('first full case is not a starter: ' + r.card.id);
     }
     await p.click(MOBILE && req === 0 ? '#case-call' : '#btn-call');   // on a phone the case file is in front: call from there
+    if (req === 0) await tip('the call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
     // Each question shows how it landed, with the reason, as soon as the answer is back.
@@ -324,6 +335,7 @@ async function followUp() {
     }
     if (req === 1) await retro();                    // the first text arrives after the first call
     await p.click('#btn-hangup');
+    if (req === 0) await tip('the case board');
     if (req === 0) await p.waitForFunction(() => localStorage.getItem('intake-texts'));   // the first text arrives after the first call
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
@@ -358,6 +370,7 @@ async function followUp() {
     await p.waitForSelector('#p-score.active');
     if (!(await p.textContent('#score-rows')).includes('Your bet:')) throw new Error('scorecard has no bet row');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
+    if (req === 0) await tip('My scores');
     if (req === 0 && examiner !== 3) throw new Error('expected three examiner runs per request, got ' + examiner);
     if (req === 0 && reactions !== 3) throw new Error('expected three boldness readings per request, got ' + reactions);
     if (req === 0 && (!wayBackSeen || !(await p.textContent('#score-rows')).includes('Your way back: vague'))) throw new Error('way back not graded');
