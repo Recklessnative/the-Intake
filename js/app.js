@@ -133,6 +133,8 @@
   }
   // One case: a tier-1 request with touchpoints, unplayed first.
   function pickOneCase() {
+    // From the morning call: that stakeholder's full case.
+    if (state.oneCard) { const card = state.oneCard; state.oneCard = null; return { cards: [card], days: [0] }; }
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const pool = state.pool.filter(c => c.difficulty === 1 && touchpoints(c)).sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const card = pool[0] || state.pool.find(c => c.difficulty >= 1);
@@ -2161,6 +2163,48 @@
     window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(GAME_URL), '_blank', 'noopener');
   };
 
+
+  // ---------- the morning call: one stakeholder a day, three questions ----------
+  let morningRun = null;
+  async function openMorning() {
+    try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
+    const t = Morning.today(), no = Morning.number(t), box = $('morning');
+    show('s-morning');
+    const env = {
+      Gemini, Prompts, Sound, toast, url: GAME_URL, debug: !$('btn-debug').hidden,
+      claim: claimMorning,
+      record: (R, card) => {
+        const h = scoreHistory(), facts = Morning.callFacts(card);
+        h.mornings = (h.mornings || []).filter(m => m.no !== R.no).concat({ no: R.no, at: R.at, card: card.id, found: facts.filter(f => R.revealed.includes(f.id)).length, of: facts.length, lever: R.lever, right: R.lever === card.learningIsTheAnswer, asked: R.asked.map(a => a.quality) }).slice(-120);
+        keepScores(h);
+      },
+      monthCount: () => { const d = new Date(), m = d.getMonth(), y = d.getFullYear(); return (scoreHistory().mornings || []).filter(x => { const a = new Date(x.at); return a.getMonth() === m && a.getFullYear() === y; }).length; },
+      fullCase: card => { state.oneCard = card; startWeek(false, true); },
+      back: () => { show('s-title'); runsLeft(); }
+    };
+    if (!no) { Morning.closed(box, t, env); return; }
+    const card = Morning.cardFor(no, state.pool);
+    const R = Morning.load(no) || Morning.fresh(no, card);
+    Morning.render(box, R, card, env);
+    const input = $('mc-input');
+    if (input) input.focus();
+  }
+  // The morning call runs on your own key, or on a small run of its own on the game server
+  // (it never uses up a free week). No key and no server: the key screen, then straight back here.
+  async function claimMorning() {
+    if (Gemini.key) return true;
+    if (!Gemini.hasBackend) { openSettings(() => openMorning()); return false; }
+    const no = Morning.number(Morning.today());
+    if (!morningRun || morningRun.no !== no) {
+      let r;
+      try { r = await Gemini.backend('morning'); } catch (e) { toast('Could not reach the game server. You can still play on your own Gemini key.'); return false; }
+      if (!r.ok) { toast(r.data.error || 'The game server said no.'); return false; }
+      morningRun = { no, id: r.data.runId };
+    }
+    Gemini.runId = morningRun.id;
+    return true;
+  }
+  $('btn-morning').onclick = () => openMorning();
 
   // ---------- measurement drill: one case, measurement only, no points ----------
   // A drill in progress stays open until it is rated; the icon brings it back instead of a new one.

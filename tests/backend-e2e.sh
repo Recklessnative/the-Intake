@@ -4,7 +4,7 @@ set -euo pipefail
 HERE=$(cd "$(dirname "$0")/.." && pwd)
 T=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$T"' EXIT
-sed -e '/^  INDEX/d' -e 's/ UNSIGNED//' "$HERE/api/schema.sql" | perl -0pe 's/,\s*\n\)/\n)/g' > "$T/s.sql"
+sed -e '/^  INDEX/d' -e 's/ UNSIGNED//' -e 's/ *--.*$//' "$HERE/api/schema.sql" | perl -0pe 's/,\s*\n\)/\n)/g' > "$T/s.sql"
 php -r '$p=new PDO("sqlite:'"$T"'/db.sqlite"); $p->exec(file_get_contents("'"$T"'/s.sql")); $p->exec("INSERT INTO intake_codes VALUES (\"COFFEE-TEST\", 2, 5, \"test\", 0)");'
 cat > "$T/config.php" <<PHP
 <?php return ['gemini_key'=>'K','models'=>['gemini-3.5-flash-lite'],'db_dsn'=>'sqlite:$T/db.sqlite','db_user'=>null,'db_pass'=>null,
