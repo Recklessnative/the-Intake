@@ -938,15 +938,17 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .office-line { margin: 0; color: #c9d4e4; }
 .office-stage { position: relative; width: min(1200px, 100%, (100vh - 150px) * 16 / 9); aspect-ratio: 16 / 9; user-select: none; -webkit-user-select: none; }
 .office-pic { display: block; width: 100%; height: 100%; filter: drop-shadow(0 26px 40px rgba(0,0,0,.55)); }
+.office-stage > picture { position: relative; display: block; width: 100%; height: 100%; }   /* positioned, so it paints over the weather behind it */
 .office-glow { position: absolute; pointer-events: none; opacity: 0; transition: opacity .18s ease; mix-blend-mode: screen; }
 .office-glow.on { opacity: 1; }
-.office-rain { position: absolute; pointer-events: none; opacity: .35;
+.office-rain { position: absolute; pointer-events: none;
   -webkit-mask: url(media/office/window-mask.png) center / 100% 100% no-repeat; mask: url(media/office/window-mask.png) center / 100% 100% no-repeat;
   background:
-    repeating-linear-gradient(104deg, transparent 0 9px, rgba(220,235,255,.35) 9px 10px, transparent 10px 23px),
-    repeating-linear-gradient(98deg, transparent 0 15px, rgba(220,235,255,.22) 15px 16px, transparent 16px 31px);
-  background-size: 120px 180px, 90px 140px; animation: office-rain .9s linear infinite; }
-@keyframes office-rain { to { background-position: -30px 180px, -18px 140px; } }
+    repeating-linear-gradient(104deg, transparent 0 9px, rgba(220,232,245,.5) 9px 10px, transparent 10px 23px),
+    repeating-linear-gradient(98deg, transparent 0 15px, rgba(220,232,245,.3) 15px 16px, transparent 16px 31px),
+    linear-gradient(170deg, #9aa6b2 0%, #7d8995 45%, #5d6772 100%);
+  background-size: 120px 180px, 90px 140px, 100% 100%; animation: office-rain .9s linear infinite; }
+@keyframes office-rain { to { background-position: -30px 180px, -18px 140px, 0 0; } }
 .office-tag { position: absolute; transform: translate(-50%, calc(-100% - 10px)); min-height: 0; padding: 4px 10px; white-space: nowrap;
   font: 700 12px/1.2 Tahoma, Verdana, sans-serif; color: #fff; border: 1px solid rgba(255,255,255,.28); border-radius: 12px;
   background: linear-gradient(rgba(70,92,128,.92), rgba(24,36,58,.92)); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 4px 12px rgba(0,0,0,.45);
@@ -978,6 +980,15 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
   .office-list button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { .office-rain { animation: none; } .office-card { animation: none; } }
+
+/* Standing up from your desk: a film over the page that fades into the floor. */
+.office-film { position: fixed; inset: 0; z-index: 9000; background: #000; opacity: 0; transition: opacity .25s ease; cursor: pointer; }
+.office-film.in { opacity: 1; }
+.office-film.out { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.office-film video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.office-stage.arrive { animation: office-arrive .7s ease-out; }
+@keyframes office-arrive { from { opacity: 0; transform: scale(1.08); filter: blur(4px); } }
+@media (prefers-reduced-motion: reduce) { .office-stage.arrive { animation: none; } }
 
 /* The walk-in film: full bleed, a caption at the bottom, Skip in the corner. */
 .screen.walkin { position: relative; padding: 0; background: #000; overflow: hidden; }

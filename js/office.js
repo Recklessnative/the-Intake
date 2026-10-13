@@ -63,8 +63,7 @@
     img.alt = 'The Synergix office floor from above: reception by the lift, two rows of cubicles, the glass board room, Darren\'s office and the canteen.';
     img.onerror = () => s.classList.add('no-pic');
     pic.append(src, img);
-    stage.appendChild(pic);
-    // Rain on the window band, masked to the glass.
+    // The weather goes behind the picture: the window glass is see-through, the mullions stay in front.
     const w = MAP.spots.window;
     if (w) {
       const rain = el('div', 'office-rain');
@@ -72,6 +71,7 @@
       Object.assign(rain.style, { left: w.rect[0] + '%', top: w.rect[1] + '%', width: (w.rect[2] - w.rect[0]) + '%', height: (w.rect[3] - w.rect[1]) + '%' });
       stage.appendChild(rain);
     }
+    stage.appendChild(pic);
     Object.entries(MAP.spots).forEach(([id, sp]) => {
       if (!sp.tag) return;
       const g = el('img', 'office-glow'); g.alt = ''; g.dataset.spot = id; g.src = MEDIA + 'glow-' + id + '.webp';
@@ -105,6 +105,10 @@
     const sp = current && current.spots[id];
     if (!sp) return;
     if (sp.go) { closeCard(); sp.go(); return; }
+    say(id, sp);
+  }
+  // Open the card for a place, with what it has to say.
+  function say(id, sp) {
     const c = $('office-card');
     c.innerHTML = '';
     const head = el('div', 'office-card-head');
@@ -156,6 +160,7 @@
     untangle();
     const first = document.querySelector('#s-office .office-tag.primary:not([hidden])');
     if (first) first.focus({ preventScroll: true });
+    if (opts.intro) say(opts.intro.at, opts.intro);
   }
 
   // Labels that land on top of each other (the TV and the coffee machine share a wall): the
@@ -222,5 +227,51 @@
     if (p && p.catch) p.catch(() => finish(false));
   }
 
-  window.Office = { init: o => { show = o.show; }, show: showFloor, walkIn, close: closeCard };
+  // ---------- standing up and sitting down ----------
+  // A short film over the page: from your monitor you stand up and the view rises into the floor
+  // picture (stand), or the same shot backwards (sit). `under` swaps the screen beneath while the
+  // last frame is still up, then the film fades away into it. Any key or click skips.
+  function film(name, under, rate) {
+    if (reduced() || saveData() || !document.createElement('video').canPlayType) { under(false); return; }
+    const old = $('office-film');
+    if (old) old.remove();
+    const f = el('div', 'office-film'); f.id = 'office-film'; f.setAttribute('aria-hidden', 'true');
+    const v = el('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.poster = MEDIA + name + '-poster.jpg';
+    [[name + '.webm', 'video/webm'], [name + '.mp4', 'video/mp4']].forEach(([n, t]) => { const so = el('source'); so.src = MEDIA + n; so.type = t; v.appendChild(so); });
+    f.appendChild(v);
+    document.body.appendChild(f);
+    document.body.dataset.film = name + '-playing';
+    let over = false;
+    const finish = played => {
+      if (over) return;
+      over = true;
+      clearTimeout(stall);
+      document.removeEventListener('keydown', key, true);
+      document.body.dataset.film = name + (played ? '-played' : '-failed');
+      under(played);
+      f.classList.add('out');
+      setTimeout(() => f.remove(), 700);
+    };
+    const key = ev => { if (ev.key === 'Escape' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); finish(true); } };
+    document.addEventListener('keydown', key, true);
+    f.addEventListener('click', () => finish(true));
+    const stall = setTimeout(() => { if (!v.currentTime) finish(false); }, 2500);
+    v.querySelectorAll('source')[1].addEventListener('error', () => finish(false));
+    v.addEventListener('ended', () => finish(true));
+    requestAnimationFrame(() => f.classList.add('in'));
+    v.playbackRate = rate || 1;
+    const p = v.play();
+    if (p && p.catch) p.catch(() => finish(false));
+  }
+  // From your desk to the floor.
+  function standUp(opts) {
+    film('stand', played => { showFloor(opts); if (!played) { const st = $('office-stage'); st.classList.remove('arrive'); void st.offsetWidth; st.classList.add('arrive'); } });
+  }
+  // From the floor back to your desk: the same shot backwards, a little quicker.
+  function sitDown(then) { closeCard(); film('sit', () => then(), 1.25); }
+
+  window.Office = { init: o => { show = o.show; }, show: showFloor, standUp, sitDown, walkIn, close: closeCard };
 })();

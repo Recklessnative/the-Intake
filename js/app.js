@@ -2002,6 +2002,7 @@
     'You press the button anyway. It makes a noise like a fax machine and gives you hot water.',
     'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
   ];
+  const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But people talk, the TV talks, even Darren\'s door talks. Have a look around when you want to, then go back to your desk.'
   const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   function miekeFloor() {
     const last = state.results[state.results.length - 1];
@@ -2019,7 +2020,7 @@
     const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
-        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => startRequest(true) },
+        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
       tv: news ? { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: news.subject, text: news.body }
@@ -2028,11 +2029,15 @@
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
-    Office.show({
+    const opts = {
       when: Story.day(state.weekNo, day) + ' · ' + time,
-      line: last ? 'That was the last request of the week. The board is gathering.' : newDay ? 'Morning. Your next request is on your desk.' : 'Back on the floor. The next request is on your desk.',
-      spots
-    });
+      line: last ? 'That was the last request of the week. The board is gathering.' : newDay ? 'Morning. Your next request is on your desk.' : 'You stretch your legs. The next request is on your desk when you are.',
+      spots,
+      // The first time out here, Mieke tells you what the floor is for.
+      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO }
+    };
+    // A new morning starts on the floor; between two requests you stand up from your desk.
+    if (newDay) Office.show(opts); else Office.standUp(opts);
   }
   const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 

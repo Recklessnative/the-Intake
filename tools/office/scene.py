@@ -606,9 +606,9 @@ def hub_camera():
     S.render.film_transparent = True
     S.render.image_settings.color_mode = 'RGBA'
     hide('outside')
-    # The diorama has no street: an overcast sky sits right behind the window band instead.
-    CUR[0] = 'hubsky'
-    box('hubsky', 4.8, 12.6, 0.7, 13.7, 12.65, 2.5, M['sky'], 0)
+    # The diorama has no street: the window glass renders see-through, so the game paints sky and rain
+    # behind the picture and the mullions stay in front of it.
+    S.cycles.film_transparent_glass = True
     # Lights that the ceiling used to hide stay; the cutaway reads like a diorama.
     return cam
 
@@ -713,4 +713,59 @@ elif MODE in ('walk', 'still'):
         S.frame_start, S.frame_end = a, z
         S.render.filepath = os.path.join(OUT, 'walk', '')
         bpy.ops.render.render(animation=True)
+elif MODE in ('stand', 'standstill'):
+    # Between requests: from your monitor you sit back, stand up, step out of the cubicle and the view
+    # rises through the ceiling into the diorama the floor picture shows. The game cross-fades into it.
+    bpy.data.objects['you_crt_screen'].data.materials[0] = img_mat('scr_desk', 'screen_desk.png', 1.2)   # the game was on it
+    cd = bpy.data.cameras.new('eye'); cd.lens = 24; cd.clip_start = 0.02; cd.clip_end = 300
+    cd.dof.use_dof = True; cd.dof.aperture_fstop = 4.0
+    cam = bpy.data.objects.new('eye', cd); S.collection.objects.link(cam); S.camera = cam
+    tgt = bpy.data.objects.new('eye_target', None); S.collection.objects.link(tgt)
+    tr = cam.constraints.new('TRACK_TO'); tr.target = tgt; tr.track_axis = 'TRACK_NEGATIVE_Z'; tr.up_axis = 'UP_Y'
+    cd.dof.focus_object = tgt
+    Y = 4.3 + 1.2
+    SCR = (11.85, Y - 0.62, 0.97)   # the middle of your screen
+    t = Vector(HUB_TARGET)
+    az, el = math.radians(-38), math.radians(36)
+    far = t + Vector((math.sin(-az) * math.cos(el), -math.cos(az) * math.cos(el), math.sin(el))) * 52   # far and long-lensed, so the floor sits like the flat picture
+    KEYS = [  # frame, eye, look-at, lens
+        (1,   (11.85, SCR[1] - 0.27, 0.97), SCR, 24),
+        (12,  (11.85, SCR[1] - 0.45, 0.99), SCR, 24),
+        (30,  (11.85, 4.25, 1.52),    (11.85, Y + 0.3, 1.2), 24),
+        (50,  (11.95, 3.2, 1.62),     (8.5, 6.5, 1.0), 24),
+        (70,  (13.6, 1.0, 2.6),       tuple(t), 30),
+        (105, tuple(far),             tuple(t), 85),
+    ]
+    END = KEYS[-1][0]
+    # Once the street is gone, an overcast sky sits right behind the window band (the picture paints rain there).
+    CUR[0] = 'standsky'
+    box('standsky', 4.8, 12.6, 0.7, 13.7, 12.65, 2.5, M['sky'], 0)
+    for f, e, g, lens in KEYS:
+        cam.location = e; cam.keyframe_insert('location', frame=f)
+        tgt.location = g; tgt.keyframe_insert('location', frame=f)
+        cd.lens = lens; cd.keyframe_insert('lens', frame=f)
+    # Ceiling, front wall and street vanish once the eye leaves the room.
+    def outside_room(f):
+        S.frame_set(f); p = cam.matrix_world.translation
+        return p.z > 2.55 or p.y < -0.4
+    out_at = next(f for f in range(1, END + 1) if outside_room(f))
+    print('leaves the room at frame', out_at)
+    S.render.fps = 25
+    w_, h_ = (int(ARGS[0]), int(ARGS[1])) if len(ARGS) > 1 else (960, 540)
+    samples = int(ARGS[2]) if len(ARGS) > 2 else 16
+    set_res(w_, h_, samples)
+    S.render.image_settings.file_format = 'JPEG'; S.render.image_settings.quality = 92
+    if MODE == 'standstill':
+        frames = [int(x) for x in ARGS[3].split(',')]
+        name = lambda f: os.path.join(OUT, f'stand_still_{f:03d}.jpg')
+    else:
+        a, z = (int(ARGS[3]), int(ARGS[4])) if len(ARGS) > 4 else (1, END)
+        frames = range(a, z + 1)
+        os.makedirs(os.path.join(OUT, 'stand'), exist_ok=True)
+        name = lambda f: os.path.join(OUT, 'stand', f'{f:04d}.jpg')
+    for f in frames:
+        for cname in ('ceiling', 'walkonly', 'walklights', 'outside'): hide(cname, f >= out_at)
+        S.frame_set(f)
+        S.render.filepath = name(f)
+        bpy.ops.render.render(write_still=True)
 print('done', MODE)
