@@ -417,6 +417,8 @@ async function followUp() {
     // Between requests: the office floor. Mieke says one thing, your desk moves you on; after the last request the board room does.
     await p.waitForSelector('#s-office.active');
     if (await p.evaluate(() => document.body.dataset.film) === 'stand-played') stood = true;
+    // Going home comes after you stand up, never on top of the film.
+    if (await p.evaluate(() => !!document.getElementById('daybreak') && /-playing$/.test(document.body.dataset.film || ''))) throw new Error('day break shown during the stand-up film');
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
     if (spots.join(' ') !== (req < 2 ? 'desk* mieke darren tv meeting coffee' : 'meeting* desk mieke darren tv coffee')) throw new Error('office floor places wrong: ' + spots);
     if (req === 0) {

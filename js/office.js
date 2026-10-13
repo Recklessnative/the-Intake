@@ -267,8 +267,9 @@
     if (p && p.catch) p.catch(() => finish(false));
   }
   // From your desk to the floor.
-  function standUp(opts) {
-    film('stand', played => { showFloor(opts); if (!played) { const st = $('office-stage'); st.classList.remove('arrive'); void st.offsetWidth; st.classList.add('arrive'); } });
+  // `between`: anything that happens after you stand and before the floor shows (going home overnight).
+  function standUp(opts, between) {
+    film('stand', played => { showFloor(opts); if (between) between(); if (!played) { const st = $('office-stage'); st.classList.remove('arrive'); void st.offsetWidth; st.classList.add('arrive'); } });
   }
   // From the floor back to your desk: the same shot backwards, a little quicker.
   function sitDown(then) { closeCard(); film('sit', () => then(), 1.25); }
