@@ -2003,22 +2003,58 @@
     'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
   ];
   // ---------- things to find on the floor ----------
-  // No faces: you get to know people by their desks. Each thing turns up from a given floor visit
-  // (`at`), so there is something new most times you stand up. Found things go in your notebook.
+  // No faces: you get to know people by their desks. A place opens from a given floor visit (`from`),
+  // and each thing in it turns up `at` visits later, so there is something new most times you stand up.
+  // Found things go in your notebook.
   const LOOKS = {
-    mieke: { shot: 'mieke', title: 'Mieke\'s desk', who: 'Mieke', note: 'Mieke, from behind her monitor', things: [
+    mieke: { from: 0, shot: 'mieke', title: 'Mieke\'s desk', who: 'Mieke', note: 'Mieke, from behind her monitor', things: [
       { id: 'coe', at: 0, label: 'Red pen', text: 'Her own printed copy of the CoE e-learning, the one she made. Red pen on every page. Page 1: "Too long." Page 14: "Still too long." She marks herself harder than she marks you.' },
       { id: 'phone', at: 0, label: 'Her phone', text: 'A grey phone with a stubby aerial. Snake, high score 4,212. On the back, in her handwriting: "Do not upgrade." IT has tried twice.' },
       { id: 'cds', at: 1, label: 'CD-ROMs', text: 'A spindle of course CD-ROMs, 1998 to 2001. Each has a sticky note: what it was for, and whether anyone did anything differently afterwards. Most say "no idea". One says "yes: the manager asked about it on Monday".' },
       { id: 'photo', at: 2, label: 'Photo frame', text: 'A frame turned towards her chair, away from visitors. On the back, in pencil: "Wednesday choir, Gent, 2005. Front row, of course."' },
       { id: 'cardigan', at: 3, label: 'Cardigan', text: 'The burgundy cardigan lives on her chair all year. Bart borrowed it once for a client visit in February. Neither of them has mentioned it since.' }
     ] },
-    darren: { shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
+    darren: { from: 0, shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
       { id: 'poster', at: 0, label: 'Poster', text: 'SYNERGY. "Alone we are smart. Together we are a steering committee." He ordered six. The other five are still in the box behind the door.' },
       { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.' },
       { id: 'boarding', at: 1, label: 'Boarding passes', text: 'Three boarding passes, Brussels to Frankfurt and back, all seat 2C. On one he has written "GMS = Max??". Max is the avatar that won Global Multimedia Solutions the Brugmann account.' },
       { id: 'charger', at: 2, label: 'Charger', text: 'A charger with nothing on the end. The BlackBerry is wherever Darren is, sending mails that end in "Sent from my BlackBerry".' },
       { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.' }
+    ] },
+    bart: { from: 1, shot: 'bart', title: 'Bart\'s desk', who: 'Bart', note: 'A note on Bart\'s monitor', text: 'Back in 5 min. (Foosball.)\n\nIf it is about the Halvorsen risks: they are fine.', things: [
+      { id: 'pizza', at: 0, label: 'Pizza box', text: 'A pizza box with a sticky note: "FOR THE TEAM!!" There is one slice left. The box is from last Thursday. Bart says it is still fine.' },
+      { id: 'frame', at: 0, label: 'Framed mail', text: 'A client mail from March 2006, printed and framed: "We are FULLY ON BOARD! :)" The project was cancelled three weeks later. He kept the frame.' },
+      { id: 'risk', at: 1, label: 'Risk register', text: 'His risk register for the Halvorsen pitch. Every row says LOW, in green highlighter. Row 7, "client changes their mind", is crossed out. Next to it: "they won\'t".' },
+      { id: 'trophy', at: 2, label: 'Trophy', text: 'Synergix foosball, runner-up, 2006. He had it engraved himself. There were two teams.' },
+      { id: 'tie', at: 3, label: 'Orange tie', text: 'An orange tie on a hook, "for clients". Mieke says it is why they lost the Brugmann account. Bart says it was the avatar.' }
+    ] },
+    canteen: { from: 2, shot: 'canteen', title: 'The canteen', who: 'The canteen', things: [
+      { id: 'lunch', at: 0, label: 'Lunch box', text: 'A plastic lunch box with a note: "JENS. DO NOT EAT." Underneath, smaller: "I know it was you, Bart."' },
+      { id: 'rota', at: 0, label: 'Dishes rota', text: 'AFWAS / VAISSELLE. Weeks 36 to 40: Darren, Darren, Darren, Darren, Darren. None of the boxes are ticked. Nobody remembers who wrote the rota.' },
+      { id: 'mugs', at: 1, label: 'Mugs', text: 'Four mugs. Three have a name on the bottom. The fourth says "GMS: Learning that moves", from a trade fair in Kortrijk. Nobody admits to drinking from it. It is always clean.' },
+      { id: 'microwave', at: 2, label: 'Microwave', text: 'A note on the door: "FISH = WRITTEN WARNING. - HR". There has been exactly one fish. Everyone knows whose.' },
+      { id: 'cooler', at: 3, label: 'Water cooler', text: '"Please do not refill with soup." It is laminated, so it has happened more than once.' }
+    ] },
+    priya: { from: 3, shot: 'priya', title: 'Priya\'s desk', who: 'Priya', note: 'Priya\'s out-of-office, printed', text: 'In a meeting until 10:42.\n\nNot 10:40. 10:42.', things: [
+      { id: 'chart', at: 0, label: 'Chart', text: 'Q3 completion rate: 98%, in orange, pinned at eye level. The small print says "of those who started". Nobody has asked how many started.' },
+      { id: 'notes', at: 0, label: 'Sticky notes', text: 'Twelve sticky notes in a perfect grid: yellow for this week, blue for next, green for done. One pink one does not fit: "Measure what matters? - M." She has not moved it. She has not answered it either.' },
+      { id: 'stopwatch', at: 1, label: 'Stopwatch', text: 'She times meetings. Monday\'s stand-up: 41 minutes 7 seconds. The agenda said 15. The result is in a spreadsheet, with a trend line.' },
+      { id: 'calculator', at: 2, label: 'Calculator', text: 'A graphing calculator from her engineering degree in Leuven, with her name on it in three places. Bart once borrowed it without asking. Once.' },
+      { id: 'cactus', at: 3, label: 'Cactus', text: 'A cactus with a watering log: 20 ml every two weeks, dated and initialled. It is the only plant on the floor that is still alive.' }
+    ] },
+    board: { from: 4, shot: 'board', title: 'The board room', who: 'The board room', things: [
+      { id: 'whiteboard', at: 0, label: 'Whiteboard', text: '"problem? -> cause? -> course?!" Then "WHO asked for this?" in red, and ASK WHY in a green circle. Nobody dares to wipe it, so it has been there since July.' },
+      { id: 'flipchart', at: 0, label: 'Flip chart', text: 'From the last board: HALVORSEN, with GO circled in green and NO GO in grey. Underneath, three red crosses. Mieke says they are the three people who voted no. Darren says they are kisses.' },
+      { id: 'projector', at: 1, label: 'Projector', text: 'A sticky note on top: "Remote: Darren\'s drawer. Darren: Frankfurt." So the board pitches on paper. Mieke says that is a feature.' },
+      { id: 'chair', at: 2, label: 'Head chair', text: 'The chair at the head of the table sits four centimetres higher than the others. Facilities says it is stuck. Nobody has asked facilities to unstick it.' },
+      { id: 'adapters', at: 3, label: 'Adapter box', text: 'A tub of laptop adapters, nine of them. None fit the laptop the board uses. Someone has labelled the tub "SOLUTIONS".' }
+    ] },
+    jens: { from: 5, shot: 'jens', title: 'Jens\'s desk', who: 'Jens', note: 'A note on Jens\'s chair', text: 'At the print shop.\n\nDo NOT look at my storyboard, it is not finished. (It is finished.)', things: [
+      { id: 'storyboard', at: 0, label: 'Storyboard', text: 'FIRE SAFETY: THE GAME!! Six panels, one stick figure, a fire that grows. In the corner, in someone else\'s pen: "client asked for: a poster".' },
+      { id: 'mascots', at: 0, label: 'Clay mascots', text: 'Four clay mascots, one for each course he pitched this year. None of the courses were made. The mascots all have names.' },
+      { id: 'ideas', at: 1, label: 'Notebook', text: 'COURSE IDEAS. 1: "Serious game!!" 2: "serious game (again)". 3: "ask Mieke", crossed out.' },
+      { id: 'headphones', at: 2, label: 'Headphones', text: 'Big studio headphones and a burned CD labelled "animation mix vol. 3". He says he cannot draw without them. The cable reaches exactly as far as Bart\'s desk.' },
+      { id: 'tablet', at: 3, label: 'Drawing tablet', text: 'A drawing tablet he bought himself, because the expense form asked what it was for. He is still working on the answer.' }
     ] }
   };
   function lookState() {
@@ -2032,10 +2068,10 @@
     const out = {}, entries = [];
     let of = 0;
     Object.entries(LOOKS).forEach(([k, L]) => {
-      const things = L.things.filter(t => t.at < st.visits).map(t => ({ id: t.id, label: t.label, text: t.text, fresh: !st.found.includes(k + ':' + t.id) }));
+      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => ({ id: t.id, label: t.label, text: t.text, fresh: !st.found.includes(k + ':' + t.id) }));
       of += L.things.length;
       L.things.forEach(t => { if (st.found.includes(k + ':' + t.id)) entries.push({ who: L.who, label: t.label, text: t.text }); });
-      out[k] = { shot: L.shot, title: L.title, note: L.note, things };
+      if (things.length) out[k] = { shot: L.shot, title: L.title, note: L.note, things };
     });
     return { looks: out, notebook: { entries, of } };
   }
@@ -2075,6 +2111,9 @@
     const L = looks();
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
+    // More places open as the weeks go on: the people you have not met yet are known by their desks.
+    ['bart', 'priya', 'jens', 'canteen'].forEach(k => { if (L.looks[k]) spots[k] = { label: LOOKS[k].title, who: LOOKS[k].who, face: '🔍', text: LOOKS[k].text, look: L.looks[k] }; });
+    if (L.looks.board && !last) spots.meeting.look = L.looks.board;
     const opts = {
       notebook: L.notebook,
       onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },

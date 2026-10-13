@@ -2,7 +2,7 @@
 # Usage: python3 scene.py <mode> [args]   mode = hub | mask | walk | still
 # x runs from the lift (0) to the canteen (18), y from the front aisle (0) to the windows (12).
 import bpy, math, os, sys, json
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEX = os.path.join(HERE, 'tex')
@@ -24,9 +24,10 @@ def coll(name):
 
 CUR = ['room']
 HOT = {}   # object name -> hotspot id
-THING = {}   # object name -> a thing you can find in a close-up
+THING = {}   # object name -> (close-up, a thing you can find in it)
+SHOT = ['mieke']   # the close-up the things being built belong to
 def thing(o, tid):
-    THING[o.name] = tid
+    THING[o.name] = (SHOT[0], tid)
     return o
 
 # ---------- materials ----------
@@ -172,6 +173,12 @@ def cyl(name, x, y, z0, r, h, m, verts=24, hot=None, r2=None):
     bpy.ops.object.shade_smooth()
     if hot: HOT[o.name] = hot
     return link(o)
+
+def turn(o, r):
+    """Rotate a box about its own middle (boxes are built in world coordinates)."""
+    c = sum((Vector(v.co) for v in o.data.vertices), Vector()) / len(o.data.vertices)
+    o.data.transform(Matrix.Translation(-c)); o.location = c; o.rotation_euler = r
+    return o
 
 def ball(name, x, y, z, r, m, sx=1, sy=1, sz=1, hot=None):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=20, ring_count=12, radius=r, location=(x, y, z))
@@ -355,6 +362,7 @@ for i, sx in enumerate((6.69, 7.11)):   # the sleeves hang down either side of t
 box('mieke_papers', 7.6, b - 0.7, 0.745, 7.9, b - 0.48, 0.775, PAPER, 0.002, hot='mieke')
 box('mieke_photo', 7.6, b - 0.3, 0.745, 7.75, b - 0.28, 0.87, mat('frame', (0.15, 0.1, 0.06), 0.4), 0.004, hot='mieke')
 # Things to find at Mieke's desk (close-up 'mieke').
+SHOT[0] = 'mieke'
 thing(bpy.data.objects['mieke_photo'], 'photo'); thing(bpy.data.objects['mieke_cardigan'], 'cardigan')
 pp = bpy.data.objects['mieke_papers']; pp.data.materials[0] = img_mat('coe_redpen', 'coe_redpen.png', 0, 0.6); thing(pp, 'coe')
 thing(box('mieke_phone', 7.18, b - 0.74, 0.745, 7.24, b - 0.62, 0.766, mat('phonegrey', (0.32, 0.34, 0.36), 0.35), 0.006, hot='mieke'), 'phone')
@@ -375,9 +383,24 @@ box('mieke_nameplate_bg', 5.56, ROW1 - 0.75, 1.1, 5.565, ROW1 - 0.35, 1.2, mat('
 text('mieke_nameplate', 'Mieke', 5.555, ROW1 - 0.55, 1.15, 0.07, PAPER, '-x', extrude=0.001, hot='mieke')
 
 # Bart's desk, between yours and Mieke's.
-b = cubicle('bart', 9.3, ROW1)
-crt('bart_crt', 9.25, b - 0.62, 0.745, img_mat('scr_saver', 'screen_saver.png', 1.2))
-box('bart_pizza', 8.5, b - 0.7, 0.745, 8.85, b - 0.35, 0.79, mat('cardboard', (0.6, 0.45, 0.28), 0.8), 0.003)
+H = 'bart'
+b = cubicle('bart', 9.3, ROW1, hot=H)
+crt('bart_crt', 9.25, b - 0.62, 0.745, img_mat('scr_saver', 'screen_saver.png', 1.2), H)
+SHOT[0] = 'bart'
+thing(box('bart_pizza', 8.5, b - 0.7, 0.745, 8.85, b - 0.35, 0.79, mat('cardboard', (0.6, 0.45, 0.28), 0.8), 0.003, hot=H), 'pizza')
+thing(box('bart_pizzanote', 8.6, b - 0.62, 0.79, 8.72, b - 0.5, 0.7905, img_mat('pizzanote', 'pizzanote.png', 0, 0.8), 0, hot=H), 'pizza')
+FRAME = mat('frame', (0.15, 0.1, 0.06), 0.4)
+thing(box('bart_frame', 9.95, b - 0.2, 0.745, 10.3, b - 0.17, 1.0, FRAME, 0.004, hot=H), 'frame')
+thing(plane_img('bart_frame_pic', 10.125, b - 0.2, 0.873, 0.31, 0.22, img_mat('onboard', 'onboard.png', 0, 0.3), '-y', H), 'frame')
+thing(turn(box('bart_risk', 8.35, ROW1 - 0.3, 0.745, 8.6, ROW1 + 0.05, 0.752, img_mat('riskreg', 'riskreg.png', 0, 0.6), 0.001, hot=H), (0, 0, -0.1)), 'risk')
+GOLD = mat('gold', (0.85, 0.62, 0.2), 0.25, metal=1.0)
+thing(box('bart_trophy_base', 10.27, b - 0.62, 0.745, 10.39, b - 0.5, 0.79, mat('blackplastic', (0.02, 0.02, 0.02), 0.4), 0.004, hot=H), 'trophy')
+thing(cyl('bart_trophy_stem', 10.33, b - 0.56, 0.79, 0.012, 0.06, GOLD, 12, hot=H), 'trophy')
+thing(cyl('bart_trophy_cup', 10.33, b - 0.56, 0.85, 0.028, 0.08, GOLD, 24, hot=H, r2=0.055), 'trophy')
+TIE = mat('orangetie', (0.9, 0.35, 0.05), 0.5, bump=0.1, scale=200)
+thing(box('bart_tie', 8.56, b - 0.05, 0.92, 8.64, b - 0.03, 1.3, TIE, 0.003, hot=H), 'tie')
+thing(box('bart_tie_knot', 8.57, b - 0.055, 1.3, 8.63, b - 0.03, 1.35, TIE, 0.004, hot=H), 'tie')
+box('bart_hook', 8.585, b - 0.05, 1.35, 8.615, b - 0.03, 1.38, STEEL, 0, hot=H)
 
 # Yours: monitor off, sticky note, a plant on its last legs, the calendar.
 b = cubicle('you', 11.8, ROW1, hot='desk')
@@ -393,9 +416,43 @@ box('you_mug', 11.2, b - 0.45, 0.745, 11.28, b - 0.37, 0.84, mat('mugwhite', (0.
 box('you_welcome', 11.3, b - 0.75, 0.745, 11.55, b - 0.6, 0.75, PAPER, 0.001, hot='desk')
 
 # Row two: three more desks, one with a screen on.
-cubicle('row2a', 6.8, ROW2); crt('row2a_crt', 6.75, ROW2 + 1.2 - 0.62, 0.745, img_mat('scr_desk', 'screen_desk.png', 1.2))
+# Priya behind Mieke, an empty desk, Jens behind you.
+H = 'priya'
+b = cubicle('row2a', 6.8, ROW2, hot=H); crt('row2a_crt', 6.75, b - 0.62, 0.745, img_mat('scr_desk', 'screen_desk.png', 1.2), H)
+SHOT[0] = 'priya'
+thing(plane_img('priya_chart', 7.55, b - 0.031, 1.15, 0.36, 0.27, img_mat('chart98', 'chart98.png', 0, 0.4), '-y', H), 'chart')
+thing(box('priya_calc', 7.3, b - 0.72, 0.745, 7.39, b - 0.56, 0.758, mat('calcgrey', (0.08, 0.08, 0.09), 0.4), 0.003, hot=H), 'calculator')
+thing(box('priya_calc_scr', 7.31, b - 0.6, 0.758, 7.38, b - 0.57, 0.7585, mat('lcd', (0.55, 0.6, 0.45), 0.3), 0, hot=H), 'calculator')
+thing(cyl('priya_watch', 7.62, b - 0.62, 0.745, 0.035, 0.014, STEEL, 32, hot=H), 'stopwatch')
+thing(cyl('priya_watch_face', 7.62, b - 0.62, 0.759, 0.029, 0.001, img_mat('stopwatch', 'stopwatch.png', 0, 0.3), 32, hot=H), 'stopwatch')
+thing(cyl('priya_cactus_pot', 6.0, b - 0.25, 0.745, 0.05, 0.08, POT, hot=H), 'cactus')
+thing(cyl('priya_cactus', 6.0, b - 0.25, 0.825, 0.03, 0.12, mat('cactus', (0.12, 0.35, 0.12), 0.7, bump=0.3, scale=400), 16, hot=H, r2=0.022), 'cactus')
+thing(turn(box('priya_cactus_log', 6.08, b - 0.33, 0.745, 6.2, b - 0.32, 0.83, img_mat('cactuslog', 'cactuslog.png', 0, 0.6), 0, hot=H), (-0.2, 0, 0.2)), 'cactus')
+NOTE_C = [mat('sticky', (1.0, 0.85, 0.25), 0.7), mat('stickyblue', (0.45, 0.75, 1.0), 0.7), mat('stickygreen', (0.55, 0.95, 0.5), 0.7)]
+for i in range(12):   # a perfect grid of sticky notes, colour by colour, and one that is not hers
+    x, z = 5.75 + (i % 4) * 0.085, 1.27 - (i // 4) * 0.085
+    thing(box(f'priya_note{i}', x, b - 0.034, z, x + 0.07, b - 0.03, z + 0.07, NOTE_C[i // 4], 0, hot=H), 'notes')
+thing(turn(plane_img('priya_pink', 6.38, b - 0.035, 1.05, 0.08, 0.08, img_mat('pinknote', 'pinknote.png', 0, 0.8), '-y', H), (0, 0.25, 0)), 'notes')
 cubicle('row2b', 9.3, ROW2); crt('row2b_crt', 9.25, ROW2 + 1.2 - 0.62, 0.745, SCREEN_OFF)
-cubicle('row2c', 11.8, ROW2); crt('row2c_crt', 11.75, ROW2 + 1.2 - 0.62, 0.745, img_mat('scr_saver', 'screen_saver.png', 1.2))
+H = 'jens'
+b = cubicle('row2c', 11.8, ROW2, hot=H); crt('row2c_crt', 11.75, b - 0.62, 0.745, img_mat('scr_saver', 'screen_saver.png', 1.2), H)
+SHOT[0] = 'jens'
+thing(plane_img('jens_story', 12.35, b - 0.031, 1.17, 0.56, 0.35, img_mat('storyboard', 'storyboard.png', 0, 0.4), '-y', H), 'storyboard')
+thing(turn(box('jens_ideas', 10.85, ROW2 - 0.35, 0.745, 11.25, ROW2 - 0.08, 0.752, img_mat('ideas', 'ideas.png', 0, 0.6), 0.001, hot=H), (0, 0, 0.12)), 'ideas')
+PHONES = mat('headphones', (0.03, 0.03, 0.035), 0.35)
+for i, dx in enumerate((-0.09, 0.09)):
+    c = cyl(f'jens_cup{i}', 12.45 + dx, b - 0.62, 0.745, 0.05, 0.035, PHONES, 24, hot=H); thing(c, 'headphones')
+bpy.ops.mesh.primitive_torus_add(major_radius=0.09, minor_radius=0.008, location=(12.45, b - 0.62, 0.78), rotation=(math.pi / 2, 0, 0))
+band = bpy.context.object; band.name = 'jens_band'; band.data.materials.append(PHONES); HOT[band.name] = H; link(band); thing(band, 'headphones')
+band.scale = (1, 1, 0.6); band.rotation_euler = (math.pi / 2 - 1.35, 0, 0)
+CLAY = [mat('clayred', (0.7, 0.12, 0.08), 0.8), mat('clayblue', (0.1, 0.25, 0.7), 0.8), mat('clayyellow', (0.9, 0.7, 0.1), 0.8), mat('claygreen', (0.15, 0.55, 0.2), 0.8)]
+for i in range(4):   # clay mascots for courses nobody commissioned
+    x = 12.68 + i * 0.07
+    thing(ball(f'jens_clay{i}', x, b - 0.25, 0.775, 0.03, CLAY[i], 1, 1, 1.1, hot=H), 'mascots')
+    thing(ball(f'jens_clayhead{i}', x, b - 0.25, 0.83, 0.02, CLAY[i], hot=H), 'mascots')
+thing(box('jens_tablet', 11.0, b - 0.62, 0.745, 11.34, b - 0.38, 0.757, mat('tablet', (0.05, 0.05, 0.06), 0.35), 0.004, hot=H), 'tablet')
+thing(box('jens_tablet_area', 11.04, b - 0.58, 0.757, 11.3, b - 0.42, 0.7575, mat('tabletarea', (0.12, 0.12, 0.14), 0.6), 0, hot=H), 'tablet')
+thing(turn(box('jens_pen', 11.1, b - 0.66, 0.746, 11.28, b - 0.65, 0.758, PHONES, 0.003, hot=H), (0, 0, 0.3)), 'tablet')
 
 # ---------- meeting room (back left) ----------
 CUR[0] = 'meeting'
@@ -416,9 +473,22 @@ for i, x in enumerate((1.6, 2.5, 3.4)):
 plane_img('meet_board', 2.5, 11.99, 1.5, 2.2, 1.2, img_mat('whiteboard', 'whiteboard.png', 0, 0.3), '-y', H)
 box('meet_board_tray', 1.4, 11.9, 0.88, 3.6, 12, 0.9, TRIM, 0, hot=H)
 box('meet_projector', 2.3, 9.9, 0.76, 2.7, 10.2, 0.86, mat('projgrey', (0.5, 0.5, 0.52), 0.4), 0.01, hot=H)
-box('meet_flip_board', 4.3, 9.0, 0.9, 4.32, 9.75, 1.85, PAPER, 0, hot=H)
-for dy in (9.05, 9.7):
-    box(f'meet_flip_leg{dy}', 4.33, dy - 0.01, 0, 4.35, dy + 0.01, 1.9, TRIM, 0, hot=H)
+SHOT[0] = 'board'
+thing(bpy.data.objects['meet_board'], 'whiteboard')
+thing(box('meet_flip_board', 0.4, 10.9, 0.9, 0.42, 11.65, 1.85, img_mat('flipchart', 'flipchart.png', 0, 0.6), 0, hot=H), 'flipchart')
+for dy in (10.95, 11.6):
+    box(f'meet_flip_leg{dy}', 0.37, dy - 0.01, 0, 0.39, dy + 0.01, 1.9, TRIM, 0, hot=H)
+thing(bpy.data.objects['meet_projector'], 'projector')
+thing(box('meet_projnote', 2.42, 9.98, 0.86, 2.56, 10.12, 0.861, img_mat('projnote', 'projnote.png', 0, 0.8), 0, hot=H), 'projector')
+# Darren's chair at the head of the table, four centimetres higher than the rest.
+LEATHER = mat('leather', (0.06, 0.06, 0.07), 0.35)
+cyl('meet_head_base', 0.62, 10.0, 0.05, 0.3, 0.03, DARKP, 5, hot=H)
+thing(cyl('meet_head_post', 0.62, 10.0, 0.08, 0.025, 0.5, STEEL, 12, hot=H), 'chair')
+thing(box('meet_head_seat', 0.36, 9.74, 0.56, 0.88, 10.26, 0.66, LEATHER, 0.03, hot=H), 'chair')
+thing(box('meet_head_back', 0.3, 9.76, 0.66, 0.38, 10.24, 1.32, LEATHER, 0.03, hot=H), 'chair')
+thing(box('meet_adapters', 3.25, 9.5, 0.76, 3.6, 9.75, 0.84, mat('tub', (0.7, 0.72, 0.75), 0.2), 0.006, hot=H), 'adapters')
+for i, c in enumerate(((0.1, 0.2, 0.6), (0.9, 0.9, 0.9), (0.05, 0.05, 0.05), (0.6, 0.1, 0.1), (0.2, 0.2, 0.22))):
+    thing(box(f'meet_adapter{i}', 3.28 + i * 0.062, 9.56 + (i % 2) * 0.07, 0.8, 3.33 + i * 0.062, 9.66 + (i % 2) * 0.07, 0.855, mat(f'adapter{i}', c, 0.4), 0.004, hot=H), 'adapters')
 text('meet_label', 'BOARD ROOM', 1.8, 7.985, 1.15, 0.12, mat('signdark', (0.15, 0.17, 0.2), 0.4), '-y', hot=H)
 
 # ---------- Darren's office (back right) ----------
@@ -443,6 +513,7 @@ box('dar_lcd_scr', 15.83, 11.045, 0.82, 16.37, 11.05, 1.19, img_mat('scr_desk', 
 plane_img('dar_poster', 14.2, 11.99, 1.55, 0.6, 0.8, img_mat('poster', 'poster.png', 0, 0.2), '-y', H)
 cyl('dar_golf', 16.9, 10.6, 0.78, 0.022, 0.04, mat('golf', (0.95, 0.95, 0.95), 0.3), hot=H)
 # Things to find in Darren's office (close-up 'darren').
+SHOT[0] = 'darren'
 thing(bpy.data.objects['dar_poster'], 'poster')
 for i in range(3):
     o = box(f'dar_pass{i}', 15.25, 10.5, 0.78 + i * 0.002, 15.57, 10.62, 0.781 + i * 0.002, img_mat('boarding', 'boarding.png', 0, 0.5), 0, hot=H)
@@ -476,8 +547,10 @@ box('coffee_front', 15.75, 7.93, 1.2, 16.25, 7.95, 1.55, STEEL, 0, hot=H)
 box('coffee_drip', 15.85, 7.85, 0.92, 16.15, 7.95, 0.96, STEEL, 0.004, hot=H)
 box('coffee_note', 15.8, 7.925, 1.22, 16.2, 7.93, 1.52, img_mat('outoforder', 'outoforder.png', 0, 0.8), 0, hot=H)
 cyl('coffee_cup', 16.0, 7.9, 0.96, 0.035, 0.08, mat('cupwhite', (0.95, 0.95, 0.93), 0.3), hot=H)
-box('cooler_body', 14.4, 7.9, 0, 14.8, 8.3, 1.05, mat('fridge', (0.86, 0.86, 0.84), 0.3), 0.02)
-cyl('cooler_bottle', 14.6, 8.1, 1.05, 0.15, 0.45, mat('bottle', (0.5, 0.75, 0.95), 0.05), 32)
+SHOT[0] = 'canteen'
+thing(box('cooler_body', 14.4, 7.9, 0, 14.8, 8.3, 1.05, mat('fridge', (0.86, 0.86, 0.84), 0.3), 0.02, hot='canteen'), 'cooler')
+thing(cyl('cooler_bottle', 14.6, 8.1, 1.05, 0.15, 0.45, mat('bottle', (0.5, 0.75, 0.95), 0.05), 32, hot='canteen'), 'cooler')
+thing(plane_img('cooler_note', 14.6, 7.897, 0.72, 0.16, 0.16, img_mat('soupnote', 'soupnote.png', 0, 0.8), '-y', 'canteen'), 'cooler')
 # The canteen TV hangs above the counter.
 H = 'tv'
 box('tv_bracket', 16.85, 8.4, 1.95, 17.15, 8.5, 2.15, DARKP, 0, hot=H)
@@ -486,13 +559,23 @@ box('tv_screen', 16.6, 8.045, 1.7, 17.4, 8.05, 2.29, img_mat('tv', 'tv.png', 2.5
 tl = bpy.data.lights.new('tv_glow', 'AREA'); tl.size = 0.8; tl.energy = 6; tl.color = (0.4, 0.5, 1.0)
 to = bpy.data.objects.new('tv_glow', tl); to.location = (17.0, 7.9, 1.95); to.rotation_euler = (-math.pi / 2, 0, 0); coll('lights').objects.link(to)
 # Table and stools.
-cyl('can_table', 15.9, 5.2, 0.72, 0.5, 0.03, mat('worktop', (0.2, 0.2, 0.22), 0.25), 32)
-cyl('can_tleg', 15.9, 5.2, 0, 0.04, 0.72, STEEL)
+H = 'canteen'
+cyl('can_table', 15.9, 5.2, 0.72, 0.5, 0.03, mat('worktop', (0.2, 0.2, 0.22), 0.25), 32, hot=H)
+cyl('can_tleg', 15.9, 5.2, 0, 0.04, 0.72, STEEL, hot=H)
 for i in range(3):
     a = i * 2.1 + 0.4
     x, y = 15.9 + 0.75 * math.cos(a), 5.2 + 0.75 * math.sin(a)
-    cyl(f'can_stool{i}', x, y, 0.45, 0.18, 0.04, mat('stoolred', (0.6, 0.08, 0.06), 0.4), 24)
-    cyl(f'can_stoolleg{i}', x, y, 0, 0.02, 0.45, STEEL)
+    cyl(f'can_stool{i}', x, y, 0.45, 0.18, 0.04, mat('stoolred', (0.6, 0.08, 0.06), 0.4), 24, hot=H)
+    cyl(f'can_stoolleg{i}', x, y, 0, 0.02, 0.45, STEEL, hot=H)
+SHOT[0] = 'canteen'
+thing(box('can_lunch', 15.72, 5.08, 0.75, 15.96, 5.26, 0.83, mat('tupperware', (0.75, 0.8, 0.85), 0.15), 0.01, hot=H), 'lunch')
+thing(box('can_lunchnote', 15.79, 5.12, 0.83, 15.89, 5.22, 0.8305, img_mat('lunchnote', 'lunchnote.png', 0, 0.8), 0, hot=H), 'lunch')
+thing(plane_img('can_rota', 15.83, 7.787, 0.58, 0.24, 0.17, img_mat('rota', 'rota.png', 0, 0.6), '-y'), 'rota')
+thing(plane_img('can_fishnote', 17.52, 7.938, 1.07, 0.12, 0.12, img_mat('fishnote', 'fishnote.png', 0, 0.8), '-y'), 'microwave')
+thing(bpy.data.objects['can_micro_door'], 'microwave'); thing(bpy.data.objects['can_micro'], 'microwave')
+for i, c in enumerate(((0.8, 0.1, 0.1), (0.1, 0.3, 0.7), (0.9, 0.75, 0.2))):
+    thing(cyl(f'can_mug{i}', 16.4 + i * 0.1, 8.05, 0.92, 0.035, 0.09, mat(f'mug{i}', c, 0.3), 24), 'mugs')
+thing(cyl('can_mug_gms', 16.62, 7.95, 0.92, 0.035, 0.09, img_mat('gmsmug', 'gmsmug.png', 0, 0.3), 24), 'mugs')
 
 
 # A foosball table: every agency had one in 2007.
@@ -659,12 +742,12 @@ def hotspot_boxes(cam):
             r[0] = min(r[0], p.x); r[1] = min(r[1], 1 - p.y); r[2] = max(r[2], p.x); r[3] = max(r[3], 1 - p.y)
     return {k: [round(v, 4) for v in r] for k, r in res.items()}
 
-IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window']
+IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen']
 def mask_materials():
     """Every hotspot glows in its own flat colour; the rest is black. One cheap pass."""
     cols = {}
     for i, h in enumerate(IDS):
-        cols[h] = emit_mat('id_' + h, ((i + 1) / 8, 0, 0), 1)
+        cols[h] = emit_mat('id_' + h, ((i + 1) / 16, 0, 0), 1)
     black = emit_mat('id_none', (0, 0, 0), 0)
     for o in S.objects:
         if o.type in ('MESH', 'FONT'):
@@ -751,6 +834,11 @@ elif MODE in ('shot', 'shotmask'):
     SHOTS = {   # eye, look-at, lens
         'mieke': ((7.1, 3.15, 1.62), (6.85, 4.85, 0.8), 24),
         'darren': ((14.6, 9.3, 1.55), (15.55, 11.2, 0.95), 22),
+        'bart': ((9.6, 3.15, 1.62), (9.35, 4.85, 0.8), 24),
+        'priya': ((7.1, 6.55, 1.62), (6.85, 8.25, 0.8), 24),
+        'jens': ((12.1, 6.55, 1.62), (11.85, 8.25, 0.8), 24),
+        'canteen': ((14.5, 4.3, 1.6), (16.4, 7.6, 0.95), 20),
+        'board': ((3.9, 8.4, 1.7), (1.6, 10.8, 1.0), 18),
     }
     name = ARGS[0]
     e, g, lens = SHOTS[name]
@@ -760,13 +848,14 @@ elif MODE in ('shot', 'shotmask'):
     w_, h_ = (int(ARGS[1]), int(ARGS[2])) if len(ARGS) > 2 else (1600, 900)
     set_res(w_, h_, int(ARGS[3]) if len(ARGS) > 3 else 96)
     if MODE == 'shotmask':
-        ids = sorted({t for t in THING.values()})
+        ids = sorted({t for s_, t in THING.values() if s_ == name})
         json.dump(ids, open(os.path.join(OUT, f'shot_{name}_ids.json'), 'w'))
         cols = {t: emit_mat('th_' + t, ((i + 1) / 16, 0, 0), 1) for i, t in enumerate(ids)}
         black = emit_mat('id_none', (0, 0, 0), 0)
         for o in S.objects:
             if o.type in ('MESH', 'FONT'):
-                m = cols.get(THING.get(o.name), black)
+                st = THING.get(o.name)
+                m = cols.get(st[1], black) if st and st[0] == name else black
                 o.data.materials.clear(); o.data.materials.append(m)
         for o in list(S.objects):
             if o.type == 'LIGHT': o.hide_render = True

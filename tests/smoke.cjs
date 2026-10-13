@@ -420,7 +420,8 @@ async function followUp() {
     // Going home comes after you stand up, never on top of the film.
     if (await p.evaluate(() => !!document.getElementById('daybreak') && /-playing$/.test(document.body.dataset.film || ''))) throw new Error('day break shown during the stand-up film');
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
-    if (spots.join(' ') !== (req < 2 ? 'desk* mieke darren tv meeting coffee' : 'meeting* desk mieke darren tv coffee')) throw new Error('office floor places wrong: ' + spots);
+    // A new place opens most visits: Bart's desk on the second, the canteen on the third.
+    if (spots.join(' ') !== ['desk* mieke darren meeting tv coffee', 'desk* mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
     if (req === 0) {
       // First time on the floor: Mieke says what it is for.
       if (!(await p.textContent('#office-card')).includes('This is the floor')) throw new Error('no floor intro from Mieke');
@@ -433,7 +434,7 @@ async function followUp() {
       if (things.join(' ') !== 'coe* phone*') throw new Error('first look at Mieke\'s desk should offer two new things: ' + things);
       await p.click('#office-list button[data-thing="phone"]');
       if (!(await p.textContent('#office-card')).includes('Snake')) throw new Error('the phone says nothing');
-      if (!(await p.textContent('#office-notebook')).includes('1/10')) throw new Error('notebook did not count the find: ' + await p.textContent('#office-notebook'));
+      if (!(await p.textContent('#office-notebook')).includes('1/35')) throw new Error('notebook did not count the find: ' + await p.textContent('#office-notebook'));
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/look.png' });
       await p.click('#office-card button');
       await p.click('#office-list button:has-text("Back to the floor")');

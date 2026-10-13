@@ -9,24 +9,24 @@ OUT = os.path.join(HERE, 'out')
 REPO = sys.argv[1]
 MEDIA = os.path.join(REPO, 'media', 'office')
 os.makedirs(MEDIA, exist_ok=True)
-IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window']
+IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen']
 
 hub = Image.open(os.path.join(OUT, 'hub_1920.png')).convert('RGBA')
 W, H = hub.size
 hub.save(os.path.join(MEDIA, 'hub.webp'), quality=86, method=6)
 hub.resize((W // 2, H // 2), Image.LANCZOS).save(os.path.join(MEDIA, 'hub-960.webp'), quality=84, method=6)
 
-# The mask pass paints hotspot i in linear red (i+1)/8; the PNG stores it sRGB-encoded.
+# The mask pass paints hotspot i in linear red (i+1)/16; the PNG stores it sRGB-encoded.
 def srgb(x): return 12.92 * x if x <= 0.0031308 else 1.055 * x ** (1 / 2.4) - 0.055
 EXPOSURE = 2 ** -0.3   # scene.py sets exposure -0.3, which the mask pass keeps
-levels = np.array([0] + [srgb((i + 1) / 8 * EXPOSURE) * 255 for i in range(len(IDS))])
+levels = np.array([0] + [srgb((i + 1) / 16 * EXPOSURE) * 255 for i in range(len(IDS))])
 red = np.asarray(Image.open(os.path.join(OUT, 'mask_1920.png')).convert('RGB'))[:, :, 0].astype(float)
 diff = np.abs(red[:, :, None] - levels[None, None, :])
 ids = diff.argmin(axis=2)   # 0 = nothing, k = IDS[k-1]
 ids[diff.min(axis=2) > 5] = 0   # anti-aliased edges blend two colours: they belong to nobody
 
-# A small hit mask for the browser: grey value = (id + 1) * 32, sampled by nearest pixel.
-small = Image.fromarray((ids * 32).astype(np.uint8), 'L').resize((480, 270), Image.NEAREST)
+# A small hit mask for the browser: grey value = (id + 1) * 20, sampled by nearest pixel.
+small = Image.fromarray((ids * 20).astype(np.uint8), 'L').resize((480, 270), Image.NEAREST)
 small.save(os.path.join(MEDIA, 'mask.png'), optimize=True)
 
 pct = lambda v, n: round(100 * v / n, 3)
@@ -63,7 +63,7 @@ for k, name in enumerate(IDS, start=1):
 
 # Close-ups (scene.py shot/shotmask): the picture, and where each thing you can find sits on it.
 shots = {}
-for name in ('mieke', 'darren'):
+for name in ('mieke', 'darren', 'bart', 'priya', 'jens', 'canteen', 'board'):
     pic, mpath, ipath = (os.path.join(OUT, f'shot_{name}{x}') for x in ('.png', '_mask.png', '_ids.json'))
     if not (os.path.exists(pic) and os.path.exists(mpath)): continue
     im = Image.open(pic).convert('RGB'); sw, sh = im.size
