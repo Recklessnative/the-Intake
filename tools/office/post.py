@@ -42,7 +42,10 @@ for k, name in enumerate(IDS, start=1):
     rect = [pct(x0, W), pct(y0, H), pct(x1, W), pct(y1, H)]
     if name == 'window':
         # Rain runs only over the glass: the mask becomes a CSS mask image.
-        crop.save(os.path.join(MEDIA, 'window-mask.png'), optimize=True)
+        # CSS masks read alpha, so the glass goes into the alpha channel; slightly grown, the mullions cover the seam.
+        a = crop.filter(ImageFilter.MaxFilter(5))
+        wm = Image.new('LA', crop.size, 255); wm.putalpha(a)
+        wm.save(os.path.join(MEDIA, 'window-mask.png'), optimize=True)
         spots[name] = {'rect': rect}
         continue
     # Hover glow: a warm rim around the object and a faint lift inside it.

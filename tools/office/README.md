@@ -12,11 +12,13 @@ python3 scene.py hub 1920 1080 256           # the floor from above -> out/hub_1
 python3 scene.py mask 1920 1080              # one flat colour per place -> out/mask_1920.png
 python3 scene.py walk 960 540 16 1 310       # the walk-in, 310 frames at 25 fps -> out/walk/
 python3 scene.py still 960 540 16 1,165,310  # a few walk-in frames, to check the camera path
+python3 scene.py stand 960 540 16           # standing up from your monitor, 105 frames -> out/stand/
+python3 scene.py standstill 640 360 8 1,50,105  # a few stand-up frames
 python3 post.py ../..                        # hub.webp, mask.png, glows, js/office-map.js
-./encode.sh ../..                            # walkin.webm, walkin.mp4, walkin-poster.jpg
+./encode.sh ../..                            # walkin, stand and sit (stand backwards): .webm, .mp4, -poster.jpg
 ```
 
-On four CPU cores the hub takes about 20 minutes and the walk-in about two hours.
+On four CPU cores the hub takes about 20 minutes the walk-in about two hours and the stand-up about 45 minutes.
 
 `scene.py` builds everything from boxes, cylinders and text in code: the lift, reception and the
 SYNERGIX sign, two rows of cubicles (yours, Bart's and Mieke's in front), the glass board room, Darren's

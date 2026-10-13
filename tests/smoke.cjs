@@ -221,7 +221,7 @@ async function followUp() {
   if (await p.evaluate(() => document.body.dataset.walkin) !== 'played') throw new Error('the walk-in film did not play: ' + await p.evaluate(() => document.body.dataset.walkin));
   await p.waitForSelector('#s-cubicle.active');
   if ((await p.textContent('#cubicle-line')).startsWith('Your cubicle')) throw new Error('boot repeats the cubicle after the walk-in');
-  let req = -1;
+  let req = -1, stood = false;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
     if (n === 0) {
@@ -416,9 +416,12 @@ async function followUp() {
     await p.click('#btn-next');
     // Between requests: the office floor. Mieke says one thing, your desk moves you on; after the last request the board room does.
     await p.waitForSelector('#s-office.active');
+    if (await p.evaluate(() => document.body.dataset.film) === 'stand-played') stood = true;
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
     if (spots.join(' ') !== (req < 2 ? 'desk* mieke darren tv meeting coffee' : 'meeting* desk mieke darren tv coffee')) throw new Error('office floor places wrong: ' + spots);
     if (req === 0) {
+      // First time on the floor: Mieke says what it is for.
+      if (!(await p.textContent('#office-card')).includes('This is the floor')) throw new Error('no floor intro from Mieke');
       await p.click('#office-list button[data-spot="mieke"]');
       if (!(await p.textContent('#office-card')).includes('If I were you')) throw new Error('Mieke has no tip on the floor');
       await p.click('#office-card button'); await p.waitForSelector('#daybreak', { state: 'detached' });
@@ -429,7 +432,14 @@ async function followUp() {
       } else await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office-mobile.png' });
     }
     await p.click('#office-list button.primary');
+    // Back to the desk: you sit down (a short film), then the next request opens.
+    if (req < 2) {
+      await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
+      if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
+      await p.waitForSelector('#office-film', { state: 'detached' });
+    }
   }
+  if (!stood) throw new Error('you never stood up from your desk: no stand-up film between two requests');
   // Friday: the board room. Pick a concept, the slide comes prefilled from the write-up.
   await p.waitForSelector('#p-board.active .board-pick');
   if (await p.$$eval('.board-pick', l => l.length) !== 3) throw new Error('board pick should list the three full cases');
@@ -561,6 +571,7 @@ async function followUp() {
   // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
   await p.click('#btn-next');
   await p.waitForSelector('#s-office.active'); await p.click('#office-list button.primary');
+  await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
   await p.evaluate(() => { window.__intake.state.weekNo = 3; });
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
   await p.waitForSelector('#memo4-form:not([hidden])');
