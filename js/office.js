@@ -58,6 +58,10 @@
     const nb = el('button', 'office-notebook'); nb.id = 'office-notebook'; nb.type = 'button'; nb.hidden = true;
     nb.onclick = () => notebook();
     head.append(when, line, nb);
+    // One window, like everything else on this PC: a title bar, the picture in a sunken frame, a status bar.
+    const win = el('div', 'office-win');
+    const bar = el('div', 'titlebar');
+    bar.append(el('span', 'office-win-icon', '🏢'), el('span', 'tt', 'Synergix e-Learning Solutions: 3rd floor'));
     const stage = el('div', 'office-stage'); stage.id = 'office-stage';
     const pic = el('picture');
     const src = el('source'); src.media = '(max-width: 900px)'; src.srcset = MEDIA + 'hub-960.webp';
@@ -93,7 +97,10 @@
     stage.appendChild(card);
     // The same places as a list: for phones, keyboards and screen readers.
     const list = el('nav', 'office-list'); list.id = 'office-list'; list.setAttribute('aria-label', 'Where to go');
-    s.append(head, stage, list);
+    const status = el('div', 'office-status');
+    status.append(head);
+    win.append(bar, status, stage, list);
+    s.append(win);
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-office').classList.contains('active')) { const c = $('office-card'); if (c && !c.hidden) closeCard(); else if (looking) closeLook(); } });
     loadMask();
   }
@@ -114,8 +121,9 @@
   function say(id, sp, rect, backLabel) {
     const c = $('office-card');
     c.innerHTML = '';
-    const head = el('div', 'office-card-head');
-    head.append(el('span', 'office-face', sp.face || '•'), el('b', null, sp.who || sp.label));
+    const head = el('div', 'office-card-head titlebar');
+    const x = el('button', 'tb close', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Close'); x.onclick = closeCard;
+    head.append(el('span', 'office-face', sp.face || '•'), el('span', 'tt', sp.who || sp.label), x);
     c.appendChild(head);
     if (sp.title) c.appendChild(el('p', 'office-card-title', sp.title));
     String(sp.text || '').split('\n\n').forEach(t => c.appendChild(el('p', null, t)));
