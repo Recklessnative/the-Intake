@@ -1988,8 +1988,8 @@
     if (state.index + 1 < state.cards.length) {
       state.index++;
       const newDay = state.days[state.index] !== state.days[state.index - 1];
-      if (newDay) dayBreak(dayOf(state.index - 1), dayOf(state.index));
-      floor(newDay);
+      // You stand up first; on a new day you go home after that, and the floor is the next morning.
+      floor(newDay, false, newDay ? () => dayBreak(dayOf(state.index - 1), dayOf(state.index)) : null);
     } else floor(false, true);
   };
 
@@ -2011,7 +2011,7 @@
       : last.total >= 50 ? 'Saw your scorecard. Not bad at all. Not finished either.' : 'Rough one? Everybody\'s first weeks are. Mine involved a CD-ROM.';
     return opener + (f ? '\n\nIf I were you, I would work on ' + f.label.toLowerCase() + ' next. ' + (f.next || '') : '\n\nSame again: ask before you make.');
   }
-  function floor(newDay, last) {
+  function floor(newDay, last, home) {
     const i = state.index, r = state.run;
     const day = state.days[i] || 0;
     const time = last ? '17:10' : newDay || !r ? '08:57' : clockText(r.clock + 40);
@@ -2036,8 +2036,7 @@
       // The first time out here, Mieke tells you what the floor is for.
       intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO }
     };
-    // A new morning starts on the floor; between two requests you stand up from your desk.
-    if (newDay) Office.show(opts); else Office.standUp(opts);
+    Office.standUp(opts, home);
   }
   const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
