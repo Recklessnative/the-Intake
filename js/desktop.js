@@ -117,7 +117,7 @@
     wins().filter(w => w.classList.contains('open')).forEach(w => {
       const b = document.createElement('button');
       b.className = 'task' + (w.classList.contains('focused') && !w.classList.contains('minimised') ? ' active' : '');
-      b.textContent = (w.dataset.icon || '') + ' ' + (w.dataset.task || w.dataset.title);
+      b.textContent = (w.dataset.icon || '') + ' ' + (w.dataset.task || w.dataset.title.split(' - ')[0]);
       b.onclick = () => {
         if (w.classList.contains('focused') && !w.classList.contains('minimised') && wide()) minimise(w.id);
         else open(w.id);

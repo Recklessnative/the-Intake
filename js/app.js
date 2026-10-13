@@ -154,8 +154,15 @@
 
     // ---------- title / settings ----------
   $('btn-settings').onclick = () => openSettings();
-  $('btn-back-title').onclick = () => show('s-title');
-  function openSettings() {
+  $('btn-back-title').onclick = () => { afterKey = null; show('s-title'); };
+  // `then`: what Save goes on to do. Clock in without a key lands here and Save clocks you in.
+  let afterKey = null;
+  function openSettings(then) {
+    afterKey = then || null;
+    $('settings-intro').textContent = then
+      ? 'One step before your first day: the game needs a Gemini API key. It is free and takes a minute. The key stays in this browser and is sent only to Google.'
+      : 'You can play on your own Gemini API key, with no limit on runs. The key stays in this browser and is sent only to Google.';
+    $('btn-save-key').textContent = then ? 'Save and clock in' : 'Save';
     $('in-key').value = Gemini.key;
     $('in-model').value = Gemini.model;
     show('s-settings');
@@ -164,8 +171,9 @@
     const key = $('in-key').value.trim();
     if (!key) { toast('Paste a Gemini API key first.'); return; }
     Gemini.save(key, $('in-model').value.trim(), $('in-remember').checked);
-    show('s-title');
+    const then = afterKey; afterKey = null;
     runsLeft();
+    if (then) then(); else show('s-title');
   };
   $('btn-clear-key').onclick = () => { Gemini.forget(); $('in-key').value = ''; show('s-title'); runsLeft(); };
 
@@ -206,10 +214,10 @@
   $('btn-cap-back').onclick = () => show('s-title');
 
   // Start a week: own key plays freely; otherwise the backend counts the run.
-  async function claimRun() {
+  async function claimRun(retry) {
     Gemini.runId = null;
     if (Gemini.key) return true;
-    if (!Gemini.hasBackend) { openSettings(); return false; }
+    if (!Gemini.hasBackend) { openSettings(retry); return false; }
     let r;
     try { r = await Gemini.backend('start'); } catch (e) { toast('Could not reach the game server. You can still play on your own Gemini key.'); return false; }
     if (r.status === 402) { openCap(); return false; }
@@ -228,7 +236,7 @@
   async function startWeek(hard, one) {
     if (readSave() && !window.confirm('Start a new week? Your saved week will be dropped.')) return;
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
-    if (!(await claimRun())) return;
+    if (!(await claimRun(() => startWeek(hard, one)))) return;
     dropSave();
     state.hard = !!hard;
     state.one = !hard && !!one;
@@ -398,10 +406,9 @@
     };
     state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
     openRequest();
-    // Your very first request: the Center of Excellence folder opens on the flowchart.
-    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) toast('New here? The Center of Excellence folder on your desktop has the intake flowchart.', 'info');
     if (state.index) Sound.ding();
-    if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
+    // A new day says good morning, unless the module is already waiting on top with its own hello.
+    if (state.index && state.days[state.index] !== state.days[state.index - 1] && mondayFirst() !== 'module') toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
     retroMorning();
     save();
   }
@@ -436,6 +443,8 @@
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
     if (calm && state.weekNo !== 1) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
+    // Your very first request: the inbox alone. The case file is the attachment; notes come with the call.
+    if (calm && firstEver()) { Desktop.close('w-case'); Desktop.close('w-notes'); Desktop.focus('w-inbox'); }
     if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
     step(Story.day(state.weekNo, state.days[state.index] || 0) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
@@ -473,8 +482,9 @@
   function mailbox() {
     const r = state.run;
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
-    const today = state.days[state.index] || 0;
-    const mails = FILLER.map(f => Object.assign({ read: !!r.readMail[f.subject], day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    // Your very first request: everything else is already read, so the one bold line is the request.
+    const today = state.days[state.index] || 0, fresh = firstEver();
+    const mails = FILLER.map(f => Object.assign({ read: fresh || !!r.readMail[f.subject], day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
@@ -482,8 +492,8 @@
     // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
     if (!state.hard) {
       const sm = Story.storyMail(state.weekNo);
-      mails.push(Object.assign({ read: !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
-      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
+      mails.push(Object.assign({ read: fresh || !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
+      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: fresh || !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
     }
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
@@ -493,8 +503,8 @@
       mails.push({ from: 'IT Service Desk', subject: sub, read: !!r.readMail[sub], day: 0, at: 7 * 60 + 58,
         body: 'Dear team lead,\n\nCongratulations on your promotion. As agreed with HR, team leads get the new PC. It runs Doors Aero: glass windows, a round start button and roughly 40% more shine.\n\nThe old look is in Display properties if you miss it. Your files are where you left them. Your coffee mug is not our department.\n\nIT Service Desk\n(Do not reply. Nobody will.)' });
     }
-    // This week's CoE Academy module arrives first thing Monday.
-    if (state.academy) {
+    // This week's CoE Academy module arrives first thing Monday (in week 1, with request 2, when it is due).
+    if (state.academy && state.index >= (state.weekNo === 1 ? 1 : 0)) {
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
       const subject = 'Assigned to you: ' + m.title + ' (' + m.minutes + ' min)';
       mails.push({ from: 'CoE Academy', subject, academy: true, day: 0, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
@@ -571,7 +581,8 @@
       toast(MAIL_JOKES[b.dataset.mail], 'info');
     };
   });
-  $('mail-attach').onclick = () => Desktop.open('w-case');
+  $('case-call').onclick = () => $('btn-call').onclick();
+  $('mail-attach').onclick = () => { Desktop.open('w-case', [67, 3, 31, 54]); Desktop.open('w-notes', [67, 60, 31, 33]); Desktop.focus('w-case'); };
 
   // Pre-call context a well-prepared professional would look up first (never the diagnosis).
   function briefing(b) {
@@ -714,6 +725,8 @@
       tick(4);
       if (out.quality === 'weak') r.patience--;
       meters();
+      // The first dot you ever lose says why, once.
+      if (out.quality === 'weak' && r.patience > 0 && !state.hard && !told('patience')) addMsg('sys', 'Patience dropped a dot. That question was vague, leading or jumped to a solution. At zero they find another meeting.');
       save();
       const more = touchpoints(r.card) && r.questionsLeft > 0;
       if (r.patience <= 0) {
@@ -925,7 +938,13 @@
     const A = state.academy;
     if (!A) { toast(state.hard ? 'Hard mode. No e-learning this week. You know what to do.' : 'No module assigned yet. Clock in first.', 'info'); return; }
     Academy.render($('academy'), Academy.MODULES.find(m => m.id === A.id), A, save, (right, of) => {
-      if (right == null) { Desktop.minimise('w-academy'); return; }
+      if (right == null) {
+        Desktop.minimise('w-academy');
+        // Back to work means the request: put it in front of you.
+        const r = state.run;
+        if (r && r.phase === 'inbox') { selectMail(r.mails.find(m => m.current)); Desktop.focus('w-inbox'); }
+        return;
+      }
       A.right = right; A.of = of;
       recordAcademy();
       if (state.run) briefing(state.hard ? null : state.run.card.briefing);
@@ -937,6 +956,13 @@
 
   // What waits on top before this request: the Monday stand-up (weeks 2 and later, when there
   // is something to recall), else the week's CoE module (in week 1 on the second request).
+  // One-off explanations: true if already given, and marks it given.
+  function told(k) {
+    try { if (localStorage.getItem('intake-told-' + k)) return true; localStorage.setItem('intake-told-' + k, '1'); } catch (e) { /* storage blocked */ }
+    return false;
+  }
+  // The first request of your first week: the one moment to show as little as possible.
+  function firstEver() { return !state.hard && state.weekNo === 1 && state.index === 0; }
   function mondayFirst() {
     if (state.hard) return null;
     if (state.standup && !state.standup.done && state.index === 0) return 'standup';
@@ -1095,17 +1121,18 @@
     const n = (state.weekNo - 1) * 3 + state.index;
     const t = TEXTS[n % TEXTS.length];
     // Monday morning gets one ping, not two: the first text waits until the first call ends.
-    if (state.index) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    // The module morning gets one ping too: the text waits until the call ends.
     const moduleFirst = mondayFirst() === 'module';
+    if (state.index && !moduleFirst) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
       : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
-      : !state.index ? ['Mieke', 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
+      : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
     setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
   }
-  // Staply turns up at most once per request, and never in hard mode.
+  // Staply turns up at most once per request, never in hard mode, and not on your very first request.
   function staply(trigger) {
     const r = state.run;
-    if (state.hard || !r || r.staply) return;
+    if (state.hard || !r || r.staply || firstEver()) return;
     if (Retro.staply(trigger)) r.staply = trigger;
   }
   const staplyLabel = () => { $('btn-staply').textContent = Retro.staplyOn() ? '📎 Staply: on' : '📎 Staply: off'; };
@@ -1274,6 +1301,7 @@
     renderOwners();
     if (b.step === 'memo') memo(boardWriteup());
     const fb = $('board-feedback');
+    $('board-why').textContent = '';
     fb.hidden = !b.feedback;
     fb.textContent = b.feedback;
     const next = STEPS[at + 1];
@@ -1408,8 +1436,13 @@
     const b = board();
     if (b.step === 'memo') { submitWriteup(boardWriteup()); return; }
     if (!b.locked) {
+      // Say what is missing next to the button, and take you to it when it is the easy-to-miss owners row.
       const why = missing(b.step);
-      if (why) { toast(why, 'info'); return; }
+      $('board-why').textContent = why || '';
+      if (why) {
+        if (/^Say who owns/.test(why)) { const o = $('owners'); o.classList.remove('flash'); void o.offsetWidth; o.classList.add('flash'); o.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        return;
+      }
       b.locked = true;
       b.feedback = feedbackFor(b.step);
       if (!b.feedback) { b.step = STEPS[STEPS.indexOf(b.step) + 1]; b.locked = false; }
@@ -1420,7 +1453,9 @@
     }
     renderBoard();
     save();
-    $('w-write').querySelector('.win-body').scrollTop = 0;
+    // Mieke's feedback and the Next button sit at the bottom: bring them up. A new step starts at the top.
+    if (b.locked && b.feedback) $('board-next').scrollIntoView({ block: 'end', behavior: 'smooth' });
+    else $('w-write').querySelector('.win-body').scrollTop = 0;
   };
 
   // Facts the player cited on the case board: diagnosis evidence and the measurement rungs.
@@ -1534,7 +1569,8 @@
     r.writeup = w;
     if (w.kind === 'board') r.boardScores = boardScores(r, w);
     r.bet = r.bet || { bold: null, appetite: null, exit: '' };
-    $('bet-intro').textContent = 'Before ' + r.card.stakeholder.name + ' reads it: place your bet.';
+    $('bet-intro').textContent = 'Two clicks before ' + r.card.stakeholder.name + ' reads it. Points go to fit: as bold as they can take, not bolder.';
+    $('bet-why').textContent = '';
     $('bet-appetite-q').textContent = 'How much risk can ' + r.card.stakeholder.name.split(' ')[0] + ' take?';
     renderBet();
     pane('p-bet', 'Request ' + (state.index + 1) + ' · Your bet');
@@ -1559,8 +1595,10 @@
   $('bet-form').onsubmit = ev => {
     ev.preventDefault();
     const b = state.run.bet;
-    if (b.bold == null || b.appetite == null) { toast('Pick both: how bold it is, and how much risk they can take.'); return; }
-    if (b.bold >= 2 && (b.exit || '').trim().length < 10) { toast('A bold concept needs a way back. Say how you back out if it fails.'); return; }
+    const why = b.bold == null || b.appetite == null ? 'Pick both: how bold it is, and how much risk they can take.'
+      : b.bold >= 2 && (b.exit || '').trim().length < 10 ? 'A bold concept needs a way back. Say how you back out if it fails.' : '';
+    $('bet-why').textContent = why;
+    if (why) return;
     sendWriteup();
   };
   async function sendWriteup() {
@@ -1652,6 +1690,10 @@
     }
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
+    // One thing to work on: the part with the most points left on the table, and its next level.
+    const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
+    $('score-focus').hidden = !weakest || weakest.left <= 0;
+    if (weakest && weakest.left > 0) $('score-focus').textContent = 'Work on this next: ' + weakest.label.toLowerCase() + '. ' + (weakest.next || 'Open "Why this score" below and compare with the model answer.');
     const rows = $('score-rows');
     rows.innerHTML = '';
     DIMENSIONS.forEach(([k, label, max]) => {
@@ -1659,31 +1701,34 @@
       const a = document.createElement('td');
       const name = document.createElement('div');
       name.textContent = label;
+      a.appendChild(name);
+      // Teach, not just grade: the next level stays in view; why, the checks and a model answer fold away.
+      if (g[k].next && pts[k] < max && k !== weakest.k) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      const more = document.createElement('details'); more.className = 'why';
+      const ms = document.createElement('summary'); ms.textContent = 'Why this score';
       const ev = document.createElement('div');
       ev.className = 'ev';
       ev.textContent = g[k].evidence;
-      a.append(name, ev);
-      // Teach, not just grade: what the next level looks like, and a model answer to compare with.
-      if (g[k].next) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      more.append(ms, ev);
       const model = modelAnswer(r.card, k);
       if (model) {
         const d = document.createElement('details'); d.className = 'model';
         const sm = document.createElement('summary'); sm.textContent = k === 'nextLevel' ? 'Bolder options, if this client could take them (not needed for full marks)' : 'Compare with a model answer';
         const t = document.createElement('p'); t.textContent = model;
-        d.append(sm, t); a.appendChild(d);
+        d.append(sm, t); more.appendChild(d);
       }
       const bs = r.writeup && r.writeup.kind === 'board' ? r.boardScores : null;
       if (k === 'diagnosis') {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Hidden facts found ' + Math.round(parts.facts * 100) + '% · lever ' + (!parts.call || parts.call === 'unclear' ? 'not called' : ({ 1: 'right', 0.25: 'one step off', 0: 'wrong' }[parts.lever] || 'n/a'));
-        a.appendChild(n);
+        more.insertBefore(n, ev.nextSibling);
       }
       if (bs && (k === 'diagnosis' || k === 'risks')) {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Practice check, no points: ' + (k === 'diagnosis'
           ? 'cause types ' + Math.round(bs.tags * 100) + '%, key evidence cited ' + Math.round(bs.evidence * 100) + '%.'
           : 'real blockers picked, ' + Math.round(bs.risks * 2) + ' of 2.');
-        a.appendChild(n);
+        more.insertBefore(n, ev.nextSibling);
       }
       if (k === 'measurement' && clamp4(g.measurement.score) < 4) {
         const n = document.createElement('button');
@@ -1695,8 +1740,9 @@
       if (k === 'nextLevel' && clamp4(g.fit.score) < 4) {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Counts as far as the concept fits the need: ' + clamp4(g.fit.score) + ' of 4 for fit.';
-        a.appendChild(n);
+        more.insertBefore(n, ev.nextSibling);
       }
+      a.appendChild(more);
       const b = document.createElement('td');
       b.className = 'pts';
       b.textContent = pts[k] + ' / ' + max;
@@ -1718,11 +1764,14 @@
       const ev = document.createElement('div'); ev.className = 'ev';
       ev.textContent = r.card.stakeholder.name.split(' ')[0] + "'s appetite for risk: " + lvl(sz.a) + '. You guessed ' + lvl(sz.bet.appetite) + '. '
         + 'Your concept read as ' + sz.b + ' (' + BOLD[sz.b].toLowerCase() + '); you called it ' + (sz.bet.bold == null ? '?' : sz.bet.bold) + '.';
-      a.append(name, ev);
+      const more = document.createElement('details'); more.className = 'why';
+      const ms = document.createElement('summary'); ms.textContent = 'Why this score';
+      more.append(ms, ev);
+      a.append(name, more);
       if (g.wayBack && (sz.bet.exit || '').trim()) {
-        const wb = document.createElement('div'); wb.className = 'ev';
+        const wb = document.createElement('div'); wb.className = g.wayBack === 'concrete' ? 'ev' : 'next';
         wb.textContent = 'Your way back: ' + { concrete: 'concrete, it names a first step and the result that makes you stop.', vague: 'vague. Name a small first step and the result on behaviour or the business number that makes you stop. A date alone, or a satisfaction score, is not enough.', none: 'not one the examiner could use.' }[g.wayBack];
-        a.appendChild(wb);
+        a.insertBefore(wb, more);
       }
       if (r.reaction && r.reaction.acceptReply && sz.d <= 0) { const q = document.createElement('div'); q.className = 'ev'; q.textContent = '"' + r.reaction.acceptReply + '"'; a.appendChild(q); }
       const b = document.createElement('td'); b.className = 'pts'; b.textContent = sz.read ? '+' + sz.read : '';

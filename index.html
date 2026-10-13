@@ -43,7 +43,8 @@
   <section id="s-settings" class="screen">
     <div class="panel narrow">
       <h2>Your own Gemini key</h2>
-      <p id="settings-intro">You can play on your own Gemini API key, with no limit on runs. Get a free one at Google AI Studio. The key stays in this browser and is sent only to Google.</p>
+      <p id="settings-intro">You can play on your own Gemini API key, with no limit on runs. The key stays in this browser and is sent only to Google.</p>
+      <p><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key at Google AI Studio ↗</a> Sign in, click "Create API key", copy it.</p>
       <label>API key <input id="in-key" type="password" autocomplete="off" placeholder="AIza..."></label>
       <label>Model <input id="in-model" type="text" spellcheck="false"></label>
       <label class="check"><input id="in-remember" type="checkbox"> Remember the key in this browser</label>
@@ -172,6 +173,7 @@
         <div id="briefing" class="briefing">
           <h3 id="briefing-head"></h3>
           <ul id="briefing-points"></ul>
+          <button type="button" id="case-call" class="primary case-call">☎ Call them back</button>
         </div>
       </div>
 
@@ -185,8 +187,8 @@
         <div class="chat-head">
           <div><strong id="chat-who"></strong> <span id="chat-role" class="muted"></span></div>
           <div class="meters">
-            <span>Questions <b id="q-left"></b></span>
-            <span>Patience <b id="patience"></b></span>
+            <span title="Every question you send costs one, good or bad.">Questions <b id="q-left"></b></span>
+            <span title="A vague, leading or solution-first question costs a dot. At zero they hang up.">Patience <b id="patience"></b></span>
             <span>Facts found <b id="found"></b></span>
           </div>
         </div>
@@ -356,6 +358,7 @@
           </section>
 
           <div id="board-feedback" class="feedback" hidden></div>
+          <p id="board-why" class="board-why" role="status"></p>
           <div class="row">
             <button type="button" id="board-next" class="primary">Lock it in</button>
             <button type="button" id="btn-memo-mode" class="ghost">Prefer one long form? (memo mode)</button>
@@ -433,7 +436,8 @@
             <label id="bet-exit-label" hidden>If it doesn't work, how do you back out?
               <textarea name="exit" rows="2" maxlength="400" placeholder="A pilot with one team, a stop rule, a cap on scope or budget..."></textarea>
             </label>
-            <p class="fine">Right-sized beats bold: the smallest thing that would work, as bold as this client can take. One step further only with a way back that names a first step and when you would stop.</p>
+            <details class="fine"><summary>How the bet is scored</summary>Right-sized beats bold: the smallest thing that would work, as bold as this client can take. One step further only with a way back that names a first step and when you would stop. Bolder than they can take, and they push back before they read on.</details>
+            <p id="bet-why" class="board-why" role="status"></p>
             <button type="submit" class="primary">Send it</button>
           </form>
         </div>
@@ -452,6 +456,7 @@
         <div id="p-score" class="pane">
           <h2 id="score-title"></h2>
           <div id="score-total" class="score-total"></div>
+          <p id="score-focus" class="score-focus" hidden></p>
           <table class="score-table"><tbody id="score-rows"></tbody></table>
           <div class="debrief">
             <h3>The question you didn't ask</h3>
