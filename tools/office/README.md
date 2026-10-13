@@ -12,6 +12,8 @@ python3 scene.py hub 1920 1080 256           # the floor from above -> out/hub_1
 python3 scene.py mask 1920 1080              # one flat colour per place -> out/mask_1920.png
 python3 scene.py walk 960 540 16 1 310       # the walk-in, 310 frames at 25 fps -> out/walk/
 python3 scene.py still 960 540 16 1,165,310  # a few walk-in frames, to check the camera path
+python3 scene.py shot mieke 1600 900 96          # a close-up (mieke or darren) -> out/shot_mieke.png
+python3 scene.py shotmask mieke 1600 900         # its click mask, one colour per thing you can find
 python3 scene.py stand 960 540 16           # standing up from your monitor, 105 frames -> out/stand/
 python3 scene.py standstill 640 360 8 1,50,105  # a few stand-up frames
 python3 post.py ../..                        # hub.webp, mask.png, glows, js/office-map.js

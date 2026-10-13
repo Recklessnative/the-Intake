@@ -55,7 +55,9 @@
     const head = el('header', 'office-head');
     const when = el('p', 'office-when'); when.id = 'office-when';
     const line = el('p', 'office-line'); line.id = 'office-line';
-    head.append(when, line);
+    const nb = el('button', 'office-notebook'); nb.id = 'office-notebook'; nb.type = 'button'; nb.hidden = true;
+    nb.onclick = () => notebook();
+    head.append(when, line, nb);
     const stage = el('div', 'office-stage'); stage.id = 'office-stage';
     const pic = el('picture');
     const src = el('source'); src.media = '(max-width: 900px)'; src.srcset = MEDIA + 'hub-960.webp';
@@ -84,15 +86,15 @@
       t.onmouseleave = t.onblur = () => light(null);
       stage.appendChild(t);
     });
-    stage.addEventListener('pointermove', ev => { if (ev.target.classList.contains('office-tag')) return; const id = placeAt(ev, stage); light(id); stage.style.cursor = id ? 'pointer' : ''; });
+    stage.addEventListener('pointermove', ev => { if (looking) return; if (ev.target.classList.contains('office-tag')) return; const id = placeAt(ev, stage); light(id); stage.style.cursor = id ? 'pointer' : ''; });
     stage.addEventListener('pointerleave', () => light(null));
-    stage.addEventListener('click', ev => { if (ev.target.closest('.office-tag, .office-card')) return; const id = placeAt(ev, stage); if (id) go(id); else closeCard(); });
+    stage.addEventListener('click', ev => { if (looking || ev.target.closest('.office-tag, .office-card')) return; const id = placeAt(ev, stage); if (id) go(id); else closeCard(); });
     const card = el('div', 'office-card'); card.id = 'office-card'; card.hidden = true; card.setAttribute('role', 'dialog'); card.setAttribute('aria-live', 'polite');
     stage.appendChild(card);
     // The same places as a list: for phones, keyboards and screen readers.
     const list = el('nav', 'office-list'); list.id = 'office-list'; list.setAttribute('aria-label', 'Where to go');
     s.append(head, stage, list);
-    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-office').classList.contains('active')) closeCard(); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-office').classList.contains('active')) { const c = $('office-card'); if (c && !c.hidden) closeCard(); else if (looking) closeLook(); } });
     loadMask();
   }
   function light(id) {
@@ -105,10 +107,11 @@
     const sp = current && current.spots[id];
     if (!sp) return;
     if (sp.go) { closeCard(); sp.go(); return; }
+    if (sp.look && (MAP.shots || {})[sp.look.shot]) { openLook(id); return; }
     say(id, sp);
   }
   // Open the card for a place, with what it has to say.
-  function say(id, sp) {
+  function say(id, sp, rect, backLabel) {
     const c = $('office-card');
     c.innerHTML = '';
     const head = el('div', 'office-card-head');
@@ -117,13 +120,13 @@
     if (sp.title) c.appendChild(el('p', 'office-card-title', sp.title));
     String(sp.text || '').split('\n\n').forEach(t => c.appendChild(el('p', null, t)));
     const row = el('div', 'row');
-    const back = el('button', null, 'Back to the floor'); back.type = 'button'; back.onclick = closeCard;
+    const back = el('button', null, backLabel || 'Back to the floor'); back.type = 'button'; back.onclick = closeCard;
     row.appendChild(back);
     const main = Object.entries(current.spots).find(([, v]) => v.primary);
-    if (main && main[0] !== id) { const b = el('button', 'primary', main[1].label); b.type = 'button'; b.onclick = () => go(main[0]); row.appendChild(b); }
+    if (main && main[0] !== id && !looking) { const b = el('button', 'primary', main[1].label); b.type = 'button'; b.onclick = () => go(main[0]); row.appendChild(b); }
     c.appendChild(row);
     // Beside the place, inside the picture.
-    const r = (MAP.spots[id] || {}).rect || [40, 40, 60, 60];
+    const r = rect || (MAP.spots[id] || {}).rect || [40, 40, 60, 60];
     const cx = (r[0] + r[2]) / 2;
     c.className = 'office-card ' + (cx > 55 ? 'left' : 'right');
     c.style.left = (cx > 55 ? Math.max(2, r[0] - 1) : Math.min(98, r[2] + 1)) + '%';
@@ -132,11 +135,80 @@
     back.focus();
   }
 
+  // ---------- a closer look: one place, rendered close up, with things to find ----------
+  // spot.look = { shot, title, things: [{ id, label, text, fresh }] }; opts.onFind(shot, id) records a find.
+  let looking = null;
+  function openLook(id) {
+    const sp = current.spots[id], L = sp.look, shot = MAP.shots[L.shot];
+    looking = id;
+    closeCard(); light(null);
+    const stage = $('office-stage');
+    stage.classList.add('looking');
+    let lay = $('office-look');
+    if (!lay) { lay = el('div', 'office-look'); lay.id = 'office-look'; stage.insertBefore(lay, $('office-card')); }
+    lay.innerHTML = '';
+    const img = el('img', 'office-look-pic'); img.alt = L.title; img.src = MEDIA + 'shot-' + L.shot + '.webp';
+    lay.appendChild(img);
+    const back = el('button', 'office-look-back', '← Back to the floor'); back.type = 'button'; back.onclick = closeLook;
+    lay.appendChild(back);
+    L.things.forEach(t => {
+      const m = shot.things[t.id];
+      if (!m) return;
+      const b = el('button', 'office-tag thing' + (t.fresh ? ' fresh' : ''), t.label); b.type = 'button'; b.dataset.thing = t.id;
+      b.style.left = m.tag[0] + '%'; b.style.top = m.tag[1] + '%';
+      b.onclick = () => find(t);
+      lay.appendChild(b);
+    });
+    $('office-line').textContent = L.title + (L.things.some(t => t.fresh) ? ' · something you have not seen before' : '');
+    const list = $('office-list');
+    list.innerHTML = '';
+    L.things.forEach(t => {
+      const b = el('button', t.fresh ? 'fresh' : null); b.type = 'button'; b.dataset.thing = t.id;
+      b.append(el('b', null, t.label)); b.onclick = () => find(t);
+      list.appendChild(b);
+    });
+    const bk = el('button'); bk.type = 'button'; bk.append(el('b', null, 'Back to the floor')); bk.onclick = closeLook; list.appendChild(bk);
+    untangleIn(lay);
+    // Whoever works here still has their line, as a note left on the desk.
+    if (sp.text) say(id, Object.assign({}, sp, { who: sp.look.note || sp.who }), [70, 4, 72, 10], 'Have a look around');
+    else back.focus({ preventScroll: true });
+  }
+  function find(t) {
+    const shot = current.spots[looking].look.shot;
+    const r = (MAP.shots[shot].things[t.id] || {}).rect;
+    say('thing', { face: '🔍', who: t.label, text: t.text }, r, 'Keep looking');
+    if (t.fresh) {
+      t.fresh = false;
+      document.querySelectorAll('#office-look [data-thing="' + t.id + '"], #office-list [data-thing="' + t.id + '"]').forEach(b => b.classList.remove('fresh'));
+      if (current.onFind) current.onFind(shot, t.id);
+    }
+  }
+  // What you have found so far, by whose it is.
+  function notebook() {
+    const N = current.notebook;
+    const text = N.entries.length ? N.entries.map(e => e.who + ' · ' + e.label + '\n' + e.text).join('\n\n')
+      : 'Nothing yet. Have a closer look at people\'s desks between requests.';
+    say('notebook', { face: '📓', who: 'Your notebook', title: N.entries.length + ' of ' + N.of + ' found', text }, [30, 4, 32, 10], 'Close');
+  }
+  function closeLook() {
+    looking = null;
+    closeCard();
+    const lay = $('office-look'); if (lay) lay.remove();
+    $('office-stage').classList.remove('looking');
+    current.intro = null;
+    showFloor(current);
+  }
+
   // opts: { when, line, spots: { id: { label, sub, primary, go } or { label, who, face, title, text } } }
   function showFloor(opts) {
     build();
+    if (looking) { looking = null; const lay = $('office-look'); if (lay) lay.remove(); $('office-stage').classList.remove('looking'); }
     current = opts;
+    const fresh = sp => !!(sp && sp.look && sp.look.things.some(t => t.fresh));
     $('office-when').textContent = opts.when || '';
+    const nb = $('office-notebook');
+    nb.hidden = !opts.notebook || !opts.notebook.of;
+    if (opts.notebook) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of;
     $('office-line').textContent = opts.line || '';
     closeCard();
     light(null);
@@ -145,14 +217,15 @@
       t.hidden = !sp;
       t.textContent = sp ? sp.label : '';
       t.classList.toggle('primary', !!(sp && sp.primary));
+      t.classList.toggle('fresh', fresh(sp));
     });
     const list = $('office-list');
     list.innerHTML = '';
     ORDER.filter(id => opts.spots[id]).sort((a, b) => !!opts.spots[b].primary - !!opts.spots[a].primary).forEach(id => {
       const sp = opts.spots[id];
-      const b = el('button', sp.primary ? 'primary' : null); b.type = 'button'; b.dataset.spot = id;
+      const b = el('button', (sp.primary ? 'primary' : '') + (fresh(sp) ? ' fresh' : '')); b.type = 'button'; b.dataset.spot = id;
       b.append(el('b', null, sp.label));
-      if (sp.sub) b.append(el('span', null, sp.sub));
+      if (sp.sub || sp.look) b.append(el('span', null, sp.sub || (fresh(sp) ? 'Something new to look at' : 'Have a closer look')));
       b.onclick = () => go(id);
       list.appendChild(b);
     });
@@ -165,8 +238,9 @@
 
   // Labels that land on top of each other (the TV and the coffee machine share a wall): the
   // later one moves up until it is clear.
-  function untangle() {
-    const tags = [...document.querySelectorAll('#s-office .office-tag:not([hidden])')];
+  function untangle() { untangleIn(document.querySelector('#office-stage')); }
+  function untangleIn(root) {
+    const tags = [...root.querySelectorAll(':scope > .office-tag:not([hidden])')];
     tags.forEach(t => { t.style.marginTop = ''; });
     const placed = [];
     tags.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top).forEach(t => {
