@@ -936,6 +936,8 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .office-head { width: min(1200px, 100%, (100vh - 150px) * 16 / 9); display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
 .office-when { margin: 0; font: 700 13px/1.2 Tahoma, Verdana, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #ffd27a; }
 .office-line { margin: 0; color: #c9d4e4; }
+.office-notebook { min-height: 0; padding: 4px 10px; font-size: 12px; color: #e9eef6; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.08); }
+.office-card { max-height: 86%; overflow-y: auto; }
 .office-stage { position: relative; width: min(1200px, 100%, (100vh - 150px) * 16 / 9); aspect-ratio: 16 / 9; user-select: none; -webkit-user-select: none; }
 .office-pic { display: block; width: 100%; height: 100%; filter: drop-shadow(0 26px 40px rgba(0,0,0,.55)); }
 .office-stage > picture { position: relative; display: block; width: 100%; height: 100%; }   /* positioned, so it paints over the weather behind it */
@@ -973,6 +975,15 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .office-list button.primary { color: #2b1800; background: linear-gradient(#ffe39a, #f0a01e); border-color: #ffd27a; }
 .office-list button.primary span { color: #5a3a00; }
 .screen.office.no-pic .office-stage { display: none; }
+.office-stage.looking > .office-tag, .office-stage.looking > .office-glow { display: none; }
+.office-look { position: absolute; inset: 0; z-index: 2; border-radius: 6px; overflow: hidden; background: #111a29; animation: office-look .35s ease-out; }
+.office-look-pic { display: block; width: 100%; height: 100%; object-fit: cover; }
+.office-look-back { position: absolute; left: 12px; top: 12px; z-index: 1; color: #fff; border-color: rgba(255,255,255,.35); background: rgba(10,16,28,.72); }
+@keyframes office-look { from { opacity: 0; transform: scale(1.04); } }
+/* Something you have not looked at yet: a small amber dot. */
+.office-tag.fresh::before, .office-list button.fresh b::after { content: ""; display: inline-block; width: 8px; height: 8px; margin: 0 6px 1px 0; border-radius: 50%; background: #ffb52e; box-shadow: 0 0 0 2px rgba(255,181,46,.3); vertical-align: middle; }
+.office-list button.fresh b::after { margin: 0 0 2px 6px; }
+@media (prefers-reduced-motion: reduce) { .office-look { animation: none; } }
 @media (max-width: 700px) {
   .office-tag { display: none; }
   .office-card { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 16px; width: auto; transform: none; }

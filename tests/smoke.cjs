@@ -427,6 +427,17 @@ async function followUp() {
       await p.click('#office-list button[data-spot="mieke"]');
       if (!(await p.textContent('#office-card')).includes('If I were you')) throw new Error('Mieke has no tip on the floor');
       await p.click('#office-card button'); await p.waitForSelector('#daybreak', { state: 'detached' });
+      // Her desk, close up: things to find, each goes in the notebook. Then back to the floor.
+      await p.waitForSelector('#office-look .office-look-pic');
+      const things = await p.$$eval('#office-list button[data-thing]', l => l.map(b => b.dataset.thing + (b.classList.contains('fresh') ? '*' : '')));
+      if (things.join(' ') !== 'coe* phone*') throw new Error('first look at Mieke\'s desk should offer two new things: ' + things);
+      await p.click('#office-list button[data-thing="phone"]');
+      if (!(await p.textContent('#office-card')).includes('Snake')) throw new Error('the phone says nothing');
+      if (!(await p.textContent('#office-notebook')).includes('1/10')) throw new Error('notebook did not count the find: ' + await p.textContent('#office-notebook'));
+      if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/look.png' });
+      await p.click('#office-card button');
+      await p.click('#office-list button:has-text("Back to the floor")');
+      await p.waitForSelector('#office-look', { state: 'detached' });
       if (!MOBILE) {
         await p.hover('.office-tag[data-spot="darren"]');
         if (!(await p.$('.office-glow.on[data-spot="darren"]'))) throw new Error('hover does not light the place');

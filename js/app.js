@@ -2002,7 +2002,50 @@
     'You press the button anyway. It makes a noise like a fax machine and gives you hot water.',
     'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
   ];
-  const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But people talk, the TV talks, even Darren\'s door talks. Have a look around when you want to, then go back to your desk.'
+  // ---------- things to find on the floor ----------
+  // No faces: you get to know people by their desks. Each thing turns up from a given floor visit
+  // (`at`), so there is something new most times you stand up. Found things go in your notebook.
+  const LOOKS = {
+    mieke: { shot: 'mieke', title: 'Mieke\'s desk', who: 'Mieke', note: 'Mieke, from behind her monitor', things: [
+      { id: 'coe', at: 0, label: 'Red pen', text: 'Her own printed copy of the CoE e-learning, the one she made. Red pen on every page. Page 1: "Too long." Page 14: "Still too long." She marks herself harder than she marks you.' },
+      { id: 'phone', at: 0, label: 'Her phone', text: 'A grey phone with a stubby aerial. Snake, high score 4,212. On the back, in her handwriting: "Do not upgrade." IT has tried twice.' },
+      { id: 'cds', at: 1, label: 'CD-ROMs', text: 'A spindle of course CD-ROMs, 1998 to 2001. Each has a sticky note: what it was for, and whether anyone did anything differently afterwards. Most say "no idea". One says "yes: the manager asked about it on Monday".' },
+      { id: 'photo', at: 2, label: 'Photo frame', text: 'A frame turned towards her chair, away from visitors. On the back, in pencil: "Wednesday choir, Gent, 2005. Front row, of course."' },
+      { id: 'cardigan', at: 3, label: 'Cardigan', text: 'The burgundy cardigan lives on her chair all year. Bart borrowed it once for a client visit in February. Neither of them has mentioned it since.' }
+    ] },
+    darren: { shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
+      { id: 'poster', at: 0, label: 'Poster', text: 'SYNERGY. "Alone we are smart. Together we are a steering committee." He ordered six. The other five are still in the box behind the door.' },
+      { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.' },
+      { id: 'boarding', at: 1, label: 'Boarding passes', text: 'Three boarding passes, Brussels to Frankfurt and back, all seat 2C. On one he has written "GMS = Max??". Max is the avatar that won Global Multimedia Solutions the Brugmann account.' },
+      { id: 'charger', at: 2, label: 'Charger', text: 'A charger with nothing on the end. The BlackBerry is wherever Darren is, sending mails that end in "Sent from my BlackBerry".' },
+      { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.' }
+    ] }
+  };
+  function lookState() {
+    try { return Object.assign({ visits: 0, found: [] }, JSON.parse(localStorage.getItem('intake-floor') || '{}')); } catch (e) { return { visits: 0, found: [] }; }
+  }
+  function keepLook(st) { try { localStorage.setItem('intake-floor', JSON.stringify(st)); } catch (e) { /* storage blocked */ } }
+  function looks() {
+    const st = lookState();
+    st.visits++;
+    keepLook(st);
+    const out = {}, entries = [];
+    let of = 0;
+    Object.entries(LOOKS).forEach(([k, L]) => {
+      const things = L.things.filter(t => t.at < st.visits).map(t => ({ id: t.id, label: t.label, text: t.text, fresh: !st.found.includes(k + ':' + t.id) }));
+      of += L.things.length;
+      L.things.forEach(t => { if (st.found.includes(k + ':' + t.id)) entries.push({ who: L.who, label: t.label, text: t.text }); });
+      out[k] = { shot: L.shot, title: L.title, note: L.note, things };
+    });
+    return { looks: out, notebook: { entries, of } };
+  }
+  function found(shot, id) {
+    const st = lookState();
+    if (!st.found.includes(shot + ':' + id)) st.found.push(shot + ':' + id);
+    keepLook(st);
+  }
+
+  const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
   const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   function miekeFloor() {
     const last = state.results[state.results.length - 1];
@@ -2029,7 +2072,12 @@
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
+    const L = looks();
+    spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
+    spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
     const opts = {
+      notebook: L.notebook,
+      onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
       when: Story.day(state.weekNo, day) + ' · ' + time,
       line: last ? 'That was the last request of the week. The board is gathering.' : newDay ? 'Morning. Your next request is on your desk.' : 'You stretch your legs. The next request is on your desk when you are.',
       spots,

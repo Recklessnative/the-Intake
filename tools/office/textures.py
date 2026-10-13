@@ -124,3 +124,46 @@ def note(name, lines, bg, size=60, fg=(30, 30, 40)):
 note('sticky', ['ASK', 'WHY'], (255, 226, 80), 110)
 note('outoforder', ['BUITEN', 'GEBRUIK', 'HORS', 'SERVICE'], (252, 252, 248), 62, (200, 20, 20))
 print('textures ok')
+
+# ---------- close-ups: things you can find on the floor ----------
+# Mieke's phone: the snake game, high score on top. A made-up grey brick, no maker's marks.
+im = Image.new('RGB', (96, 72), (150, 170, 110)); d = ImageDraw.Draw(im)
+pts = [(20, 40), (28, 40), (36, 40), (44, 40), (44, 32), (52, 32), (60, 32)]
+for x, y in pts: d.rectangle([x, y, x + 6, y + 6], fill=(30, 40, 20))
+d.rectangle([74, 50, 79, 55], fill=(30, 40, 20))
+d.text((6, 4), '4212', font=font('LiberationMono-Bold.ttf', 14), fill=(30, 40, 20))
+im.save(f'{OUT}/snake.png')
+
+# Her printed copy of the CoE e-learning, red pen everywhere.
+im = Image.new('RGB', (420, 594), (250, 250, 246)); d = ImageDraw.Draw(im)
+d.text((30, 30), 'CoE e-learning  ·  Module 1 of 6', font=font('LiberationSans-Bold.ttf', 20), fill=(40, 40, 60))
+for i in range(16):
+    y = 80 + i * 26
+    d.rectangle([30, y, 30 + random.randint(250, 360), y + 8], fill=(160, 160, 165))
+red = (200, 20, 30)
+d.text((210, 120), 'Too long.', font=font('LiberationSans-BoldItalic.ttf', 40), fill=red)
+d.line([(30, 250), (390, 262)], fill=red, width=4); d.line([(30, 300), (380, 290)], fill=red, width=4)
+d.ellipse([40, 420, 230, 520], outline=red, width=4)
+d.text((60, 452), 'WHO needs this?', font=font('LiberationSans-Italic.ttf', 22), fill=red)
+im.save(f'{OUT}/coe_redpen.png')
+
+# Darren: boarding passes and his planner.
+im = Image.new('RGB', (420, 160), (245, 245, 240)); d = ImageDraw.Draw(im)
+d.rectangle([0, 0, 420, 34], fill=(20, 60, 140))
+d.text((12, 6), 'BOARDING PASS', font=font('LiberationSans-Bold.ttf', 20), fill='white')
+d.text((14, 48), 'BRU  >  FRA', font=font('LiberationSans-Bold.ttf', 34), fill=(30, 30, 40))
+d.text((14, 100), 'SEAT 2C   GATE A41   07:05', font=font('LiberationMono-Bold.ttf', 18), fill=(60, 60, 70))
+d.line([(300, 40), (300, 160)], fill=(150, 150, 150), width=2)
+d.text((312, 120), 'GMS=Max??', font=font('LiberationSans-Italic.ttf', 18), fill=(30, 60, 160))
+im.save(f'{OUT}/boarding.png')
+im = Image.new('RGB', (640, 420), (248, 244, 230)); d = ImageDraw.Draw(im)
+d.line([(320, 0), (320, 420)], fill=(200, 190, 170), width=3)
+days = [('Mon 3', 'NEW HIRE!!'), ('Tue 4', 'airport'), ('Wed 5', 'airport'), ('Thu 6', ''), ('Fri 7', 'BOARD')]
+for i, (a, b_) in enumerate(days):
+    x, y = (20 if i < 3 else 340), 20 + (i % 3) * 130
+    d.text((x, y), a, font=font('LiberationSans-Bold.ttf', 22), fill=(120, 30, 30))
+    d.line([(x, y + 32), (x + 280, y + 32)], fill=(200, 190, 170), width=2)
+    d.text((x + 10, y + 50), b_, font=font('LiberationSans-BoldItalic.ttf', 34), fill=(30, 50, 140))
+d.text((360, 330), 'September 2007', font=font('LiberationSerif-Italic.ttf', 24), fill=(120, 110, 90))
+im.save(f'{OUT}/planner.png')
+print('close-up textures ok')

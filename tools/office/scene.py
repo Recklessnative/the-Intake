@@ -24,6 +24,10 @@ def coll(name):
 
 CUR = ['room']
 HOT = {}   # object name -> hotspot id
+THING = {}   # object name -> a thing you can find in a close-up
+def thing(o, tid):
+    THING[o.name] = tid
+    return o
 
 # ---------- materials ----------
 M = {}
@@ -340,9 +344,28 @@ cyl('mieke_lampshade', 6.15, b - 0.36, 1.08, 0.11, 0.12, mat('lampgreen', (0.05,
 ball('mieke_bulb', 6.15, b - 0.36, 1.09, 0.035, LAMPWARM, hot='mieke')
 ml = bpy.data.lights.new('mieke_lamp', 'SPOT'); ml.energy = 25; ml.color = (1, 0.72, 0.45); ml.spot_size = 1.6; ml.shadow_soft_size = 0.05
 mo = bpy.data.objects.new('mieke_lamp', ml); mo.location = (6.15, b - 0.36, 1.07); coll('lights').objects.link(mo)
-box('mieke_cardigan', 6.66, ROW1 - 0.46, 0.72, 7.14, ROW1 - 0.37, 1.0, mat('cardigan', (0.25, 0.07, 0.12), 0.95, bump=0.3, scale=300), 0.03, hot='mieke')
+KNIT = mat('cardigan', (0.16, 0.03, 0.06), 0.95, bump=0.3, scale=300)
+cg = box('mieke_cardigan', 6.67, ROW1 - 0.465, 0.66, 7.13, ROW1 - 0.355, 1.0, KNIT, 0.04, hot='mieke')
+sd = cg.modifiers.new('soft', 'SUBSURF'); sd.levels = sd.render_levels = 2
+tx = bpy.data.textures.new('drape', 'CLOUDS'); tx.noise_scale = 0.08
+dp = cg.modifiers.new('drape', 'DISPLACE'); dp.texture = tx; dp.strength = 0.025; dp.mid_level = 0.5
+for i, sx in enumerate((6.69, 7.11)):   # the sleeves hang down either side of the chair back
+    sl = cyl(f'mieke_sleeve{i}', sx, ROW1 - 0.41, 0.5, 0.04, 0.46, KNIT, 16, hot='mieke', r2=0.05)
+    sl.rotation_euler = (0.12, 0.18 * (1 if i else -1), 0); thing(sl, 'cardigan')
 box('mieke_papers', 7.6, b - 0.7, 0.745, 7.9, b - 0.48, 0.775, PAPER, 0.002, hot='mieke')
 box('mieke_photo', 7.6, b - 0.3, 0.745, 7.75, b - 0.28, 0.87, mat('frame', (0.15, 0.1, 0.06), 0.4), 0.004, hot='mieke')
+# Things to find at Mieke's desk (close-up 'mieke').
+thing(bpy.data.objects['mieke_photo'], 'photo'); thing(bpy.data.objects['mieke_cardigan'], 'cardigan')
+pp = bpy.data.objects['mieke_papers']; pp.data.materials[0] = img_mat('coe_redpen', 'coe_redpen.png', 0, 0.6); thing(pp, 'coe')
+thing(box('mieke_phone', 7.18, b - 0.74, 0.745, 7.24, b - 0.62, 0.766, mat('phonegrey', (0.32, 0.34, 0.36), 0.35), 0.006, hot='mieke'), 'phone')
+thing(box('mieke_phone_scr', 7.19, b - 0.715, 0.766, 7.23, b - 0.675, 0.7665, img_mat('snake', 'snake.png', 0.8), 0, hot='mieke'), 'phone')
+thing(cyl('mieke_cds_base', 5.95, b - 0.62, 0.745, 0.065, 0.008, DARKP, 32, hot='mieke'), 'cds')
+thing(cyl('mieke_cds_pin', 5.95, b - 0.62, 0.745, 0.007, 0.12, DARKP, 12, hot='mieke'), 'cds')
+for i in range(14):   # a spindle of old course CD-ROMs, each with a sticky note
+    thing(cyl(f'mieke_cd{i}', 5.95, b - 0.62, 0.755 + i * 0.0045, 0.06, 0.0015, mat('cdsilver', (0.8, 0.82, 0.86), 0.12, metal=1.0), 32, hot='mieke'), 'cds')
+for i in range(4):
+    o = box(f'mieke_cdnote{i}', 5.9, b - 0.69, 0.756 + i * 0.013, 5.96, b - 0.67, 0.7575 + i * 0.013, mat('sticky', (1.0, 0.85, 0.25), 0.7), 0, hot='mieke')
+    o.rotation_euler = (0, 0, 0.6 * i); thing(o, 'cds')
 cyl('mieke_plant_pot', 5.9, ROW1 - 0.55, 0.745, 0.07, 0.11, POT, hot='mieke')
 for i in range(11):
     a = i * 2.4
@@ -419,6 +442,16 @@ box('dar_lcd', 15.8, 11.05, 0.78, 16.4, 11.1, 1.22, DARKP, 0.01, hot=H)
 box('dar_lcd_scr', 15.83, 11.045, 0.82, 16.37, 11.05, 1.19, img_mat('scr_desk', 'screen_desk.png', 1.2), 0, hot=H)
 plane_img('dar_poster', 14.2, 11.99, 1.55, 0.6, 0.8, img_mat('poster', 'poster.png', 0, 0.2), '-y', H)
 cyl('dar_golf', 16.9, 10.6, 0.78, 0.022, 0.04, mat('golf', (0.95, 0.95, 0.95), 0.3), hot=H)
+# Things to find in Darren's office (close-up 'darren').
+thing(bpy.data.objects['dar_poster'], 'poster')
+for i in range(3):
+    o = box(f'dar_pass{i}', 15.25, 10.5, 0.78 + i * 0.002, 15.57, 10.62, 0.781 + i * 0.002, img_mat('boarding', 'boarding.png', 0, 0.5), 0, hot=H)
+    o.rotation_euler = (0, 0, 0.15 * (i - 1)); thing(o, 'boarding')
+thing(box('dar_planner', 16.45, 10.5, 0.78, 16.9, 10.79, 0.8, img_mat('planner', 'planner.png', 0, 0.6), 0.002, hot=H), 'planner')
+thing(box('dar_charger', 15.22, 10.95, 0.78, 15.3, 11.0, 0.81, mat('blackplastic', (0.02, 0.02, 0.02), 0.4), 0.004, hot=H), 'charger')
+thing(box('dar_cable', 15.3, 10.97, 0.78, 15.75, 10.98, 0.785, mat('blackplastic', (0.02, 0.02, 0.02), 0.4), 0, hot=H), 'charger')
+thing(cyl('dar_umbrella', 17.75, 11.75, 0, 0.035, 0.92, mat('navy', (0.03, 0.05, 0.15), 0.6), hot=H), 'umbrella')
+thing(cyl('dar_umbrella_h', 17.75, 11.75, 0.92, 0.012, 0.08, mat('woodhandle', (0.3, 0.15, 0.05), 0.4), hot=H), 'umbrella')
 cyl('dar_plant_pot', 17.6, 9.0, 0, 0.22, 0.45, mat('blackpot', (0.05, 0.05, 0.05), 0.4), hot=H)
 ball('dar_plant', 17.6, 9.0, 1.0, 0.45, LEAF, 1, 1, 1.4, hot=H)
 
@@ -713,6 +746,40 @@ elif MODE in ('walk', 'still'):
         S.frame_start, S.frame_end = a, z
         S.render.filepath = os.path.join(OUT, 'walk', '')
         bpy.ops.render.render(animation=True)
+elif MODE in ('shot', 'shotmask'):
+    # A close-up of one place, for the floor's "look closer" view. ARGS: name w h samples
+    SHOTS = {   # eye, look-at, lens
+        'mieke': ((7.1, 3.15, 1.62), (6.85, 4.85, 0.8), 24),
+        'darren': ((14.6, 9.3, 1.55), (15.55, 11.2, 0.95), 22),
+    }
+    name = ARGS[0]
+    e, g, lens = SHOTS[name]
+    cd = bpy.data.cameras.new('eye'); cd.lens = lens; cd.clip_start = 0.02; cd.clip_end = 200
+    cam = bpy.data.objects.new('eye', cd); S.collection.objects.link(cam); S.camera = cam
+    cam.location = e; look_at(cam, g)
+    w_, h_ = (int(ARGS[1]), int(ARGS[2])) if len(ARGS) > 2 else (1600, 900)
+    set_res(w_, h_, int(ARGS[3]) if len(ARGS) > 3 else 96)
+    if MODE == 'shotmask':
+        ids = sorted({t for t in THING.values()})
+        json.dump(ids, open(os.path.join(OUT, f'shot_{name}_ids.json'), 'w'))
+        cols = {t: emit_mat('th_' + t, ((i + 1) / 16, 0, 0), 1) for i, t in enumerate(ids)}
+        black = emit_mat('id_none', (0, 0, 0), 0)
+        for o in S.objects:
+            if o.type in ('MESH', 'FONT'):
+                m = cols.get(THING.get(o.name), black)
+                o.data.materials.clear(); o.data.materials.append(m)
+        for o in list(S.objects):
+            if o.type == 'LIGHT': o.hide_render = True
+        S.world.node_tree.nodes['Background'].inputs['Strength'].default_value = 0
+        S.view_settings.view_transform = 'Standard'; S.view_settings.look = 'None'
+        S.cycles.use_denoising = False; S.cycles.samples = 4; S.cycles.max_bounces = 0; S.render.filter_size = 0.01
+        S.render.image_settings.file_format = 'PNG'
+        S.render.filepath = os.path.join(OUT, f'shot_{name}_mask.png')
+    else:
+        S.render.image_settings.file_format = 'PNG'
+        S.render.filepath = os.path.join(OUT, f'shot_{name}.png')
+    bpy.ops.render.render(write_still=True)
+
 elif MODE in ('stand', 'standstill'):
     # Between requests: from your monitor you sit back, stand up, step out of the cubicle and the view
     # rises through the ceiling into the diorama the floor picture shows. The game cross-fades into it.

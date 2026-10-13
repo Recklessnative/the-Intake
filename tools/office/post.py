@@ -61,7 +61,29 @@ for k, name in enumerate(IDS, start=1):
     cx = xs[ys < top + 40].mean()
     spots[name] = {'rect': rect, 'tag': [pct(cx, W), max(7.0, pct(top, H))]}   # room for the label above
 
+# Close-ups (scene.py shot/shotmask): the picture, and where each thing you can find sits on it.
+shots = {}
+for name in ('mieke', 'darren'):
+    pic, mpath, ipath = (os.path.join(OUT, f'shot_{name}{x}') for x in ('.png', '_mask.png', '_ids.json'))
+    if not (os.path.exists(pic) and os.path.exists(mpath)): continue
+    im = Image.open(pic).convert('RGB'); sw, sh = im.size
+    im.save(os.path.join(MEDIA, f'shot-{name}.webp'), quality=84, method=6)
+    tids = json.load(open(ipath))
+    lv = np.array([0] + [srgb((i + 1) / 16 * EXPOSURE) * 255 for i in range(len(tids))])
+    rd = np.asarray(Image.open(mpath).convert('RGB'))[:, :, 0].astype(float)
+    df = np.abs(rd[:, :, None] - lv[None, None, :]); ix = df.argmin(axis=2); ix[df.min(axis=2) > 4] = 0
+    things = {}
+    for k, t in enumerate(tids, start=1):
+        m = ix == k
+        m = np.asarray(Image.fromarray(m.astype(np.uint8) * 255).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))) > 0
+        ys, xs = np.nonzero(m)
+        if len(xs) < 30: continue
+        top = ys.min()
+        things[t] = {'rect': [pct(xs.min(), sw), pct(ys.min(), sh), pct(xs.max(), sw), pct(ys.max(), sh)],
+                     'tag': [pct(xs[ys < top + 30].mean(), sw), max(7.0, pct(top, sh))]}
+    shots[name] = {'things': things}
+
 with open(os.path.join(REPO, 'js', 'office-map.js'), 'w') as f:
     f.write('// Generated from the Blender render (office/post.py): where each place sits on the office picture, in % of it.\n')
-    f.write('window.OFFICE_MAP = ' + json.dumps({'w': W, 'h': H, 'spots': spots}, separators=(',', ':')) + ';\n')
+    f.write('window.OFFICE_MAP = ' + json.dumps({'w': W, 'h': H, 'spots': spots, 'shots': shots}, separators=(',', ':')) + ';\n')
 print(json.dumps(spots, indent=1))
