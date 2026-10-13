@@ -39,6 +39,7 @@
   const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, one: false, board: null, academy: null, team: null };
 
   // ---------- screens and panes ----------
+  Office.init({ show: id => show(id) });
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     if (id === 's-title') resumeButton();
@@ -257,7 +258,18 @@
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
     state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
     state.run = null;
-    if (!state.hard && !state.one && !seenIntro()) intro(cubicle); else cubicle();
+    if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
+  }
+  // Your very first morning you walk in: lift, reception, Mieke's desk, your chair, your monitor.
+  // After that, and whenever the film cannot play, the day starts at the boot screen.
+  const WALK_CAPTIONS = [
+    [0.4, 'Monday 3 September 2007, 08:56. Synergix e-Learning Solutions, fourth floor.'],
+    [5.2, 'Two cubicles from yours: Mieke. Lamp on, mail open, cardigan on the chair.'],
+    [9.0, 'Yours. Grey fabric walls, a plant on its last legs, a sticky note that says ASK WHY.']
+  ];
+  function arrive() {
+    if (state.hard || state.one || state.weekNo !== 1 || told('walkin')) { cubicle(); return; }
+    Office.walkIn(played => cubicle(played), WALK_CAPTIONS);
   }
 
   // ---------- the cold open: plays once before your first week, and from the title screen ----------
@@ -301,19 +313,21 @@
 
   // The boot screen: the intro lines appear while the progress bar runs and move on by
   // themselves. Log on is there from the start: nobody has to read the cubicle to work.
-  function cubicle() {
+  function cubicle(walked) {
     show('s-cubicle');
+    // After the walk-in you have already seen the cubicle; the boot screen skips that line.
+    const lines = walked ? CUBICLE.filter(l => !/^Your cubicle/.test(l)) : CUBICLE;
     let i = 0;
     const line = $('cubicle-line');
     const say = () => {
       line.classList.remove('in');
       void line.offsetWidth;
-      line.textContent = CUBICLE[i];
+      line.textContent = lines[i];
       line.classList.add('in');
     };
     const next = () => {
       clearTimeout(cubicle.t);
-      if (i < CUBICLE.length - 1) { i++; say(); cubicle.t = setTimeout(next, 4200); }
+      if (i < lines.length - 1) { i++; say(); cubicle.t = setTimeout(next, 4200); }
     };
     say();
     cubicle.t = setTimeout(next, 4200);
@@ -394,7 +408,7 @@
   };
 
   // ---------- one request ----------
-  function startRequest() {
+  function startRequest(dayShown) {
     const card = state.cards[state.index];
     const prev = state.run;
     state.run = {
@@ -410,7 +424,7 @@
     openRequest();
     if (state.index && !mondayFirst()) Sound.ding();
     // A new day says good morning, unless the module is already waiting on top with its own hello.
-    if (state.index && state.days[state.index] !== state.days[state.index - 1]) dayBreak(dayOf(state.index - 1), dayOf(state.index));
+    if (state.index && !dayShown && state.days[state.index] !== state.days[state.index - 1]) dayBreak(dayOf(state.index - 1), dayOf(state.index));
     retroMorning();
     save();
   }
@@ -1793,6 +1807,7 @@
     // One thing to work on: the part with the most points left on the table, and its next level.
     const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
     $('score-focus').hidden = !weakest || weakest.left <= 0;
+    state.focus = weakest && weakest.left > 0 ? { label: weakest.label, next: weakest.next || '' } : null;
     if (weakest && weakest.left > 0) $('score-focus').textContent = 'Work on this next: ' + weakest.label.toLowerCase() + '. ' + (weakest.next || 'Open "Why this score" below and compare with the model answer.');
     const rows = $('score-rows');
     rows.innerHTML = '';
@@ -1969,8 +1984,56 @@
   };
 
   $('btn-next').onclick = () => {
-    if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard();
+    if (state.hard || state.one) { if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard(); return; }
+    if (state.index + 1 < state.cards.length) {
+      state.index++;
+      const newDay = state.days[state.index] !== state.days[state.index - 1];
+      if (newDay) dayBreak(dayOf(state.index - 1), dayOf(state.index));
+      floor(newDay);
+    } else floor(false, true);
   };
+
+  // ---------- the office floor, between requests ----------
+  // A breath between two requests: you stand up, and the places you could go are lit. Your desk
+  // moves the game on; everyone else says one thing. Nothing here costs a question or a Gemini call.
+  const COFFEE = [
+    'BUITEN GEBRUIK. HORS SERVICE. Somebody has added, in biro: "since 2004".',
+    'Still broken. A second note says facilities "has escalated it". A third note says "to whom?".',
+    'You press the button anyway. It makes a noise like a fax machine and gives you hot water.',
+    'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
+  ];
+  const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  function miekeFloor() {
+    const last = state.results[state.results.length - 1];
+    const f = state.focus;
+    const opener = !last ? 'Morning.' : last.total >= 75 ? 'Saw your scorecard. That was a good one. Do not let it go to your head, Darren will notice and give you three more.'
+      : last.total >= 50 ? 'Saw your scorecard. Not bad at all. Not finished either.' : 'Rough one? Everybody\'s first weeks are. Mine involved a CD-ROM.';
+    return opener + (f ? '\n\nIf I were you, I would work on ' + f.label.toLowerCase() + ' next. ' + (f.next || '') : '\n\nSame again: ask before you make.');
+  }
+  function floor(newDay, last) {
+    const i = state.index, r = state.run;
+    const day = state.days[i] || 0;
+    const time = last ? '17:10' : newDay || !r ? '08:57' : clockText(r.clock + 40);
+    const story = Story.storyMail(state.weekNo);
+    const news = Story.news(state.weekNo, day).slice(-1)[0];
+    const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
+    const spots = {
+      desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
+        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => startRequest(true) },
+      mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
+      darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
+      tv: news ? { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: news.subject, text: news.body }
+        : { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: 'Corporate communications', text: 'A slideshow about the new expense form. Slide 4 of 31. Nobody is watching. The remote has been missing since the Rugby World Cup was announced.' },
+      coffee: { label: 'Coffee machine', who: 'Coffee machine', face: '☕', text: COFFEE[(state.weekNo * 3 + i) % COFFEE.length] },
+      meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
+        : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
+    };
+    Office.show({
+      when: Story.day(state.weekNo, day) + ' · ' + time,
+      line: last ? 'That was the last request of the week. The board is gathering.' : newDay ? 'Morning. Your next request is on your desk.' : 'Back on the floor. The next request is on your desk.',
+      spots
+    });
+  }
   const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.

@@ -209,7 +209,18 @@ async function followUp() {
   if (!(await p.textContent('#intro-lines')).includes('fifteen years away')) throw new Error('intro lines missing');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/intro.png' });
   await p.click('#btn-intro-go');
+  // Your first morning: the walk from the lift to your desk, skippable, then the boot screen.
+  await p.waitForSelector('#s-walkin.active, #s-cubicle.active');
+  if (await p.isVisible('#s-walkin')) {
+    if (!(await p.isVisible('#btn-walkin-skip'))) throw new Error('walk-in has no Skip');
+    await p.waitForFunction(() => { const v = document.querySelector('#s-walkin video'); return !v || v.currentTime > 2 || !document.getElementById('s-walkin').classList.contains('active'); }, null, { timeout: 10000 });
+    if (!MOBILE && await p.isVisible('#s-walkin')) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/walkin.png' });
+    if (await p.isVisible('#btn-walkin-skip')) await p.click('#btn-walkin-skip');
+  }
   await p.waitForSelector('#s-cubicle.active');
+  if (await p.evaluate(() => document.body.dataset.walkin) !== 'played') throw new Error('the walk-in film did not play: ' + await p.evaluate(() => document.body.dataset.walkin));
+  await p.waitForSelector('#s-cubicle.active');
+  if ((await p.textContent('#cubicle-line')).startsWith('Your cubicle')) throw new Error('boot repeats the cubicle after the walk-in');
   let req = -1;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
@@ -403,6 +414,21 @@ async function followUp() {
       if (await p.evaluate(() => window.__intake.state.results.length !== window.__intake.state.index + 1)) throw new Error('scorecard counted twice after resume');
     }
     await p.click('#btn-next');
+    // Between requests: the office floor. Mieke says one thing, your desk moves you on; after the last request the board room does.
+    await p.waitForSelector('#s-office.active');
+    const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
+    if (spots.join(' ') !== (req < 2 ? 'desk* mieke darren tv meeting coffee' : 'meeting* desk mieke darren tv coffee')) throw new Error('office floor places wrong: ' + spots);
+    if (req === 0) {
+      await p.click('#office-list button[data-spot="mieke"]');
+      if (!(await p.textContent('#office-card')).includes('If I were you')) throw new Error('Mieke has no tip on the floor');
+      await p.click('#office-card button'); await p.waitForSelector('#daybreak', { state: 'detached' });
+      if (!MOBILE) {
+        await p.hover('.office-tag[data-spot="darren"]');
+        if (!(await p.$('.office-glow.on[data-spot="darren"]'))) throw new Error('hover does not light the place');
+        await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office.png' });
+      } else await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office-mobile.png' });
+    }
+    await p.click('#office-list button.primary');
   }
   // Friday: the board room. Pick a concept, the slide comes prefilled from the write-up.
   await p.waitForSelector('#p-board.active .board-pick');
@@ -534,6 +560,7 @@ async function followUp() {
   console.log('autofill request', await p.textContent('#score-total'));
   // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
   await p.click('#btn-next');
+  await p.waitForSelector('#s-office.active'); await p.click('#office-list button.primary');
   await p.evaluate(() => { window.__intake.state.weekNo = 3; });
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
   await p.waitForSelector('#memo4-form:not([hidden])');

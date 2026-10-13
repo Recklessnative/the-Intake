@@ -11,6 +11,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   console.log('title:', await p.textContent('#runs-left'));
   await p.click('#btn-start');
   await p.waitForSelector('#s-intro.active'); await p.click('#btn-intro-skip');
+  await p.click('#btn-walkin-skip', { timeout: 6000 }).catch(() => {});   // the first-morning walk-in
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   await p.click('#tour-skip', { timeout: 4000 }).catch(() => {});   // Mieke's first-morning tour
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
