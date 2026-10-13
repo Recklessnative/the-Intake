@@ -986,7 +986,7 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 @media (prefers-reduced-motion: reduce) { .office-look { animation: none; } }
 @media (max-width: 700px) {
   .office-tag { display: none; }
-  .office-card { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 16px; width: auto; transform: none; }
+  .office-card, .office-card.left, .office-card.right { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 16px; width: auto; transform: none; }
   .office-list { flex-direction: column; }
   .office-list button { width: 100%; }
 }
