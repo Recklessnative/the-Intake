@@ -210,6 +210,9 @@ async function followUp() {
       // Log on is one click from the first line of the boot screen.
       if ((await p.textContent('#btn-sit')) !== 'Log on') throw new Error('boot screen makes you read before logging on');
       await p.click('#btn-sit'); await p.waitForSelector('#s-desk.active');
+      // Mieke's pop-up stays in her chat, in place of the generic hello.
+      await p.waitForFunction(() => document.getElementById('mieke-log').textContent.includes('Your first request'));
+      if ((await p.textContent('#mieke-log')).includes('Shout if you want')) throw new Error('Mieke ping stacked under the hello');
     }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
     // The very first request: nothing else in the inbox is unread. Later, the new request is.

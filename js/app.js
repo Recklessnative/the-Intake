@@ -406,7 +406,7 @@
       leg: 'call', legLeft: touchpoints(card) ? budget().call : questionsFor(card), calledBack: false,
       corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: []
     };
-    state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
+    state.run.mieke.push({ who: 'them', text: MIEKE_HELLO });
     openRequest();
     if (state.index) Sound.ding();
     // A new day says good morning, unless the module is already waiting on top with its own hello.
@@ -1021,6 +1021,7 @@
   $('btn-team').onclick = () => openApp('w-team');
 
   // ---------- Mieke, the colleague two cubicles over ----------
+  const MIEKE_HELLO = 'Morning. Shout if you want a second pair of eyes.';
   function miekeSays(text, who, replay) {
     if (!replay) state.run.mieke.push({ who: who || 'them', text });
     const d = document.createElement('div');
@@ -1035,6 +1036,16 @@
     $('mieke-log').appendChild(d);
     if (!replay && (who || 'them') === 'them') Sound.im();
     $('mieke-log').scrollTop = $('mieke-log').scrollHeight;
+  }
+  // A pop-up from Mieke also lands in her chat, so it is still there when you open it.
+  // Her morning ping replaces the generic hello rather than stacking under it.
+  function miekePing(text) {
+    const r = state.run;
+    if (!r || state.hard) return;
+    if (r.mieke.length === 1 && r.mieke[0].text === MIEKE_HELLO) { r.mieke = []; $('mieke-log').innerHTML = ''; }
+    r.mieke.push({ who: 'them', text });
+    miekeSays(text, 'them', true);
+    save();
   }
   function miekeLeft() {
     const n = state.run.miekeLeft;
@@ -1129,7 +1140,7 @@
     const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
       : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
       : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
-    setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
+    setTimeout(() => { if (ping[0] === 'Mieke') miekePing(ping[1]); Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'); }, 1200);
   }
   // Staply turns up at most once per request, never in hard mode, and not on your very first request.
   function staply(trigger) {
@@ -1141,7 +1152,7 @@
   $('btn-staply').onclick = () => { $('start-menu').hidden = true; Retro.setStaply(!Retro.staplyOn()); staplyLabel(); toast(Retro.staplyOn() ? 'Staply is back. He missed you.' : 'Staply is off.', 'info'); };
   Retro.init({
     toast,
-    onStaplyYes: () => { if (!state.hard) setTimeout(() => Retro.im('Mieke', 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.', () => openApp('w-mieke')), 5200); },
+    onStaplyYes: () => { if (!state.hard) setTimeout(() => { const t = 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.'; miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 5200); },
     onStaplyChange: staplyLabel
   });
   staplyLabel();
