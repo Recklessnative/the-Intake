@@ -15,7 +15,7 @@
     defence: { 'w-dialog': [8, 2, 49, 94], 'w-call': [59, 2, 39, 50], 'w-notes': [59, 54, 39, 23], 'w-case': [59, 79, 39, 17] },
     dialog: { 'w-dialog': [14, 4, 72, 90] }
   };
-  const FLOATING = { 'w-mieke': [56, 6, 38, 66], 'w-coe': [12, 4, 66, 88], 'w-scores': [24, 8, 52, 80], 'w-academy': [14, 4, 66, 90], 'w-standup': [18, 14, 46, 72], 'w-display': [22, 10, 50, 70], 'w-team': [12, 3, 62, 92] };
+  const FLOATING = { 'w-mieke': [56, 6, 38, 66], 'w-coe': [12, 4, 66, 88], 'w-scores': [24, 8, 52, 80], 'w-academy': [14, 4, 66, 90], 'w-standup': [18, 14, 46, 72], 'w-drill': [10, 12, 54, 84], 'w-display': [22, 10, 50, 70], 'w-team': [12, 3, 62, 92] };
 
   let z = 10;
   let current = null;

@@ -98,6 +98,7 @@
       <nav id="desk-icons" class="desk-icons" aria-label="Desktop">
         <button type="button" class="desk-icon" data-app="w-coe"><span class="di">🗂</span>Center of Excellence</button>
         <button type="button" class="desk-icon" data-app="w-academy"><span class="di">🎓</span>CoE Academy</button>
+        <button type="button" class="desk-icon" data-app="w-drill"><span class="di">🎯</span>Measurement drill</button>
         <button type="button" class="desk-icon" data-app="w-inbox"><span class="di">✉</span>Doors Mail</button>
         <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
         <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
@@ -203,6 +204,11 @@
       <!-- CoE Academy: this week's e-learning module -->
       <div class="win" id="w-academy" data-title="CoE Academy" data-icon="🎓">
         <div id="academy" class="academy" aria-live="polite"></div>
+      </div>
+
+      <!-- Measurement drill: one case, measurement only -->
+      <div class="win" id="w-drill" data-title="Measurement drill" data-icon="🎯">
+        <div id="drill" class="standup" aria-live="polite"></div>
       </div>
 
       <!-- The Monday stand-up: recall last week's cases before the inbox -->
@@ -490,6 +496,7 @@
         <button data-open="w-mieke">☕ Ask Mieke</button>
         <button data-open="w-coe">🗂 Center of Excellence</button>
         <button data-open="w-academy">🎓 CoE Academy</button>
+        <button data-open="w-drill">🎯 Measurement drill</button>
         <button data-open="w-scores">🏆 My scores</button>
         <button data-open="w-team" class="team-only">👥 My team</button>
         <button data-open="w-phone">📱 My mobile</button>
@@ -580,6 +587,7 @@
 <script src="js/retro.js?v=dev"></script>
 <script src="js/slides.js?v=dev"></script>
 <script src="js/standup.js?v=dev"></script>
+<script src="js/drill.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
 </html>

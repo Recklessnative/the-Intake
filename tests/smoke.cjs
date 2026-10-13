@@ -444,6 +444,28 @@ async function followUp() {
   if (await p.isVisible('#w-standup')) throw new Error('stand-up did not close');
   const rec = await p.evaluate(() => { const h = JSON.parse(localStorage.getItem('intake-scores')); return { r: h.recall, w: h.weeks[h.weeks.length - 1].standup }; });
   if (!rec.w || rec.w.of !== w2.su.length || rec.r[w2.su[0]].streak !== 0 || !rec.r[w2.su[0]].seen) throw new Error('stand-up not recorded: ' + JSON.stringify(rec));
+  // Measurement drill: sort the card's measures, write a stop rule, rate it; no points, kept in My scores.
+  if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-drill"]'); } else await p.click('.desk-icon[data-app="w-drill"]');
+  await visible('#w-drill');
+  await p.click('#drill-check');
+  if (!(await p.textContent('#drill .su-why')).includes('Sort every')) throw new Error('drill let an empty sort through');
+  const bins = await p.evaluate(() => window.__intake.state.drill.R.tiles.map(t => t.bin));
+  if (!bins.includes('works') || !bins.includes('trap')) throw new Error('drill tiles missing a bin: ' + bins);
+  for (let i = 0; i < bins.length; i++) await p.click('.drill-tiles > li:nth-child(' + (i + 1) + ') [data-bin="' + bins[i] + '"]');
+  await p.click('#drill-check');
+  if ((await p.$$eval('.drill-tiles li.ok', l => l.length)) !== bins.length) throw new Error('drill sort not marked right');
+  await p.fill('#drill textarea', 'Pilot with one team. If damage per 1,000 parcels has not dropped by a third by the end of March, we stop.');
+  await p.click('#drill-rule');
+  const ticks = await p.$$eval('.drill-checks input', l => l.map(x => x.checked));
+  if (ticks.length !== 4 || ticks.some(t => !t)) throw new Error('drill rule checks wrong: ' + ticks);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/drill.png' });
+  await p.click('#drill [data-rate="got"]');
+  await p.waitForSelector('#drill-again');
+  const dr = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).drills);
+  if (!dr || dr.length !== 1 || dr[0].right !== bins.length || dr[0].rating !== 'got') throw new Error('drill not recorded: ' + JSON.stringify(dr));
+  await p.click('#drill-again');
+  if (await p.evaluate(() => window.__intake.state.drill.R.rating)) throw new Error('another case did not start a new drill');
+  await p.click('#w-drill .tb.close');
   // The module is still there, from the mail or the desktop.
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); } else await p.click('.desk-icon[data-app="w-academy"]');
   await visible('#w-academy');

@@ -1685,6 +1685,13 @@
           : 'real blockers picked, ' + Math.round(bs.risks * 2) + ' of 2.');
         a.appendChild(n);
       }
+      if (k === 'measurement' && clamp4(g.measurement.score) < 4) {
+        const n = document.createElement('button');
+        n.type = 'button'; n.className = 'link drill-link'; n.id = 'btn-drill-case';
+        n.textContent = '🎯 Practise measurement on this case (about 3 minutes)';
+        n.onclick = () => openDrill(r.card);
+        a.appendChild(n);
+      }
       if (k === 'nextLevel' && clamp4(g.fit.score) < 4) {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Counts as far as the concept fits the need: ' + clamp4(g.fit.score) + ' of 4 for fit.';
@@ -2106,6 +2113,28 @@
   };
 
 
+  // ---------- measurement drill: one case, measurement only, no points ----------
+  // A drill in progress stays open until it is rated; the icon brings it back instead of a new one.
+  async function openDrill(card) {
+    if (card || !state.drill || state.drill.R.rating) {
+      await loadCards();
+      const c = card || Drill.pickCard(scoreHistory(), state.pool, state.drill && state.drill.card.id);
+      if (!c) { toast('No case to drill yet.', 'info'); return; }
+      state.drill = { R: Drill.build(c), card: c };
+    }
+    renderDrill();
+    if (!Desktop.wide()) Retro.hidePhone();
+    Desktop.open('w-drill', Desktop.floating['w-drill']);
+    Desktop.focus('w-drill');
+  }
+  function renderDrill() {
+    const D = state.drill;
+    Drill.render($('drill'), D.R, D.card, () => {}, (R, right, again) => {
+      if (again) { openDrill(); return; }
+      const h = scoreHistory(); Drill.record(h, R, right); keepScores(h);
+    });
+  }
+
   // ---------- my scores: every finished request, kept in this browser ----------
   const SCORES_KEY = 'intake-scores';
   function scoreHistory() {
@@ -2163,6 +2192,11 @@
     para('MY SCORES.TXT');
     para('Kept in this browser only. Nobody else can see it, including your manager.', 'muted');
     const all = h.weeks.flatMap(w => w.requests);
+    const dr = h.drills || [];
+    if (dr.length) {
+      const last = dr.slice(-5), right = last.reduce((a, d) => a + d.right, 0), of = last.reduce((a, d) => a + d.of, 0);
+      para('\nMeasurement drills: ' + dr.length + ' done · last ' + last.length + ': sorted ' + right + ' of ' + of + ' right · stop rule held up ' + last.filter(d => d.rating === 'got').length + ' of ' + last.length + ' times', 'muted');
+    }
     if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
     const best = all.reduce((a, b) => (b.total > a.total ? b : a));
     const done = h.weeks.filter(w => w.done && !w.hard && !w.one);
@@ -2271,6 +2305,7 @@
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
     if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
     if (id === 'w-academy') { openAcademy(); return; }
+    if (id === 'w-drill') { openDrill(); return; }
     if (id === 'w-team' && !state.team) { toast(scoreHistory().promoted ? 'Your team starts on Monday. HR is still "processing".' : 'No team yet. Darren promotes you after a week of 64+ with every diagnosis at 15+, or after the week 4 tender.', 'info'); return; }
     if (id === 'w-team') renderTeam();
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
