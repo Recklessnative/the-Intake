@@ -1137,11 +1137,45 @@
     // The module morning gets one ping too: the text waits until the call ends.
     const moduleFirst = mondayFirst() === 'module';
     if (state.index && !moduleFirst) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
+    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Morning again! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.'), 1200); return; }
     const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
       : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
       : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
     setTimeout(() => { if (ping[0] === 'Mieke') miekePing(ping[1]); Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'); }, 1200);
   }
+  // Mieke's tour of the desk, in speech bubbles. On a phone the desk icons are hidden, so the
+  // tour is shorter and points at the start menu and the taskbar instead.
+  const TOUR_DESK = [
+    { text: 'Welcome to Synergix! I am Mieke, two cubicles over. Darren wanted to show you around himself, but he is at the airport. Again. So you get me. Two minutes, promise.' },
+    { target: '.desk-icon[data-app="w-inbox"]', text: 'Doors Mail. Requests from clients land here. Your first one is already waiting, of course.' },
+    { target: '.desk-icon[data-app="w-case"]', text: 'The case file: what we know before the call. Who they are, what they asked for, what they think the problem is. It is also the paperclip on the request mail.' },
+    { target: '.desk-icon[data-app="w-call"]', text: 'The phone. You call the client back and ask your questions. You only get a few, and their patience runs out. Good questions dig up hidden facts. Bad ones dig up a course nobody needs.' },
+    { target: '.desk-icon[data-app="w-notes"]', text: 'My notes. Write down what you hear. Your memory is not as good as you think. Neither is mine.' },
+    { target: '.desk-icon[data-app="w-leads"]', text: 'Follow-up. After the call you can ask for data, catch someone from the work floor at the coffee machine, or call the client back once.' },
+    { target: '.desk-icon[data-app="w-write"]', text: 'The case board. This is where you write it up: the real problem, whether training is even the answer, how you will know it worked, and your plan.' },
+    { target: '.desk-icon[data-app="w-mieke"]', text: 'And me. Stuck? Click my coffee cup. I have time for a few questions per request, and I only know what you have seen so far.' },
+    { target: '.desk-icon[data-app="w-coe"]', text: 'The Center of Excellence. The intake flowchart, good questions, the measurement ladder. Steal from it. Everybody does.' },
+    { target: '.desk-icon[data-app="w-scores"]', text: 'My scores. Every request gets graded, and you can see how you are doing over time. Nobody aces the first one.' },
+    { target: '#btn-startmenu', text: 'Everything is also in the start menu, and open windows sit in the taskbar. If the desk gets messy: start, then Tidy the windows. You can replay this tour from there too.' },
+    { target: '#w-inbox', text: 'That is it. Your request is open in the inbox. Read it, then call them back. Ask before you make. That is the whole job, really.', last: true }
+  ];
+  const TOUR_PHONE = [
+    TOUR_DESK[0],
+    { target: '#w-inbox', text: 'Your inbox. Requests from clients land here. Your first one is already waiting, of course.' },
+    { target: '#btn-startmenu', text: 'Everything else is in the start menu: the case file, your notes, me (stuck? ask me, I have time for a few questions per request), the Center of Excellence with the intake flowchart, and your scores. You can replay this tour from there too.' },
+    { target: '#task-buttons', text: 'Open windows sit down here in the taskbar. Tap one to bring it back.' },
+    { target: '#w-inbox', text: 'That is it. Read the request, open the case file, then call them back. Ask before you make. That is the whole job, really.', last: true }
+  ];
+  function miekeTour(call, after) {
+    $('start-menu').hidden = true;
+    if (state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
+    if (!state.run || Tour.open) return;
+    Desktop.focus('w-inbox');
+    const phone = !$('desk-icons').offsetParent;
+    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, () => { if (after) miekePing(after); });
+  }
+  $('btn-tour').onclick = () => miekeTour(false);
   // Staply turns up at most once per request, never in hard mode, and not on your very first request.
   function staply(trigger) {
     const r = state.run;

@@ -210,6 +210,22 @@ async function followUp() {
       // Log on is one click from the first line of the boot screen.
       if ((await p.textContent('#btn-sit')) !== 'Log on') throw new Error('boot screen makes you read before logging on');
       await p.click('#btn-sit'); await p.waitForSelector('#s-desk.active');
+      // Mieke calls on your first morning and shows you round the desk.
+      await p.waitForSelector('#tour-answer'); await p.click('#tour-answer');
+      const stops = [];
+      for (let i = 0; i < 20; i++) {
+        stops.push(await p.getAttribute('#tour', 'data-target'));
+        if (i === 1 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/tour.png' });
+        const last = !(await p.$('#tour-skip'));
+        await p.click('#tour-next');
+        if (last) break;
+      }
+      if (stops.length !== (MOBILE ? 5 : 12) || (!MOBILE && !stops.includes('w-mieke'))) throw new Error('tour stops wrong: ' + stops);
+      if (await p.$('#tour')) throw new Error('tour did not close');
+      // It can be replayed from the start menu, without the call; Escape ends it.
+      await p.click('#btn-startmenu'); await p.click('#btn-tour');
+      await p.waitForSelector('#tour-next'); await p.keyboard.press('Escape');
+      if (await p.$('#tour')) throw new Error('Escape did not end the tour');
       // Mieke's pop-up stays in her chat, in place of the generic hello.
       await p.waitForFunction(() => document.getElementById('mieke-log').textContent.includes('Your first request'));
       if ((await p.textContent('#mieke-log')).includes('Shout if you want')) throw new Error('Mieke ping stacked under the hello');
@@ -604,7 +620,8 @@ async function followUp() {
   if (!(await p.textContent('.mc-top')).includes('Morning call no. 3')) throw new Error('morning call number wrong: ' + await p.textContent('.mc-top'));
   for (let i = 0; i < 3; i++) {
     await p.fill('#mc-input', 'What changed when the numbers dipped, question ' + (i + 1) + '?'); await p.press('#mc-input', 'Enter');
-    await p.waitForFunction(n => document.querySelectorAll('.mc-log .msg.you').length === n, i + 1);
+    // Wait for her answer, not just your question: the screen redraws when it arrives.
+    await p.waitForFunction(n => document.querySelectorAll('.mc-log .msg.them').length === n + 1 && !document.querySelector('.mc-ask button[type=submit]:disabled'), i + 1);
   }
   const mcCard = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-morning')).card);
   if (calls - callsBefore !== 3) throw new Error('morning call used ' + (calls - callsBefore) + ' Gemini calls');
