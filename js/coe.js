@@ -30,7 +30,7 @@
   ${arrow(220, 500, 528)}
   ${box(528, 70, '6. Design the smallest thing that works', ['It fixes the cause you found, fits the budget,', "the deadline and the audience's real day."])}
   ${arrow(220, 598, 626)}
-  ${box(626, 54, '7. Check risks and sign-offs', ['Managers, works council, DPO, IT, budget owner.'])}
+  ${box(626, 54, '7. Check risks and sign-offs', ['Managers, works council, privacy officer, IT, budget owner.'])}
   ${arrow(220, 680, 706)}
   ${box(706, 48, '8. Send a one-pager in their language', [], 'ask')}
 </svg>`;

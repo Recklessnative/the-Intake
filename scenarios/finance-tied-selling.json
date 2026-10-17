@@ -16,7 +16,7 @@
     ]
   },
   "stakeholder": {
-    "name": "Bart Verhaegen",
+    "name": "Filip Verhaegen",
     "role": "Head of Retail Network",
     "org": "Meridia Bank, a mid-sized Belgian retail bank",
     "voice": "Jovial, ex-branch manager, talks about 'my bankers' and 'the field'. Thinks compliance is a speed bump. Very proud of his cross-sell numbers. Says 'between us' before saying something he shouldn't.",
@@ -111,7 +111,7 @@
     },
     {
       "id": "cco_vs_network",
-      "fact": "The Chief Compliance Officer wanted the targets changed last year; the retail network, Bart included, blocked it at the executive committee.",
+      "fact": "The Chief Compliance Officer wanted the targets changed last year; the retail network, Filip included, blocked it at the executive committee.",
       "unlocks_when": "The player asks who else is involved, how compliance and the network get along, or why this wasn't fixed earlier.",
       "reveal_line": "Caroline from compliance wanted to change the targets last year. We... had a lively ExCo. I won.",
       "weight": 2,
@@ -123,7 +123,7 @@
   ],
   "volunteered_facts": [
     "600 personal bankers in 180 branches.",
-    "Q4 is the busiest lending quarter; Bart doesn't want selling time lost."
+    "Q4 is the busiest lending quarter; Filip doesn't want selling time lost."
   ],
   "constraints": {
     "budget": "Covered by the network's training budget, about 40,000 euro.",
@@ -209,7 +209,7 @@
   ],
   "question_you_didnt_ask": "What exactly is compliance nagging you about?",
   "actor_notes": [
-    "Bart is likeable and genuinely doesn't see tying as serious; he thinks it's 'just good selling'.",
+    "Filip is likeable and genuinely doesn't see tying as serious; he thinks it's 'just good selling'.",
     "He hides the mystery shop until asked what triggered the request, then reveals it with 'between us'.",
     "His risk appetite is low because the risk is his own reputation and bonus. Framing changes as protecting his network from the article lowers resistance.",
     "If the player lectures him on the law, trust drops; if they help him get ahead of the article, it rises."

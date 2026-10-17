@@ -129,8 +129,8 @@
             { t: '"Risks: none."', why: 'The board will find some for you.' }
           ] }
       ],
-      objectives: ["Name who can block your concept", "Know when the DPO and works council come in", "Write a risk with a mitigation"],
-      tips: ['Name who loses hours, and who signs off on budget.', 'If people or data are recorded, involve the DPO and the works council early.', 'Write each risk as who, what, and what you will do about it.']
+      objectives: ["Name who can block your concept", "Know when the privacy officer and works council come in", "Write a risk with a mitigation"],
+      tips: ['Name who loses hours, and who signs off on budget.', 'If people or data are recorded, involve the privacy officer and the works council early.', 'Write each risk as who, what, and what you will do about it.']
     },
     {
       id: 'spot-the-flaw', art: 'flaw', title: 'Read the proposal like a reviewer', minutes: 5,

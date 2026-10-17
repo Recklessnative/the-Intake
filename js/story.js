@@ -42,9 +42,9 @@
     ['2007-10-24', 'Microsoft buys 1.6% of Facebook for $240 million', 'The deal values the social network, three years old, at $15 billion.', 'HR has blocked Facebook. HR also has a Facebook page.'],
     ['2007-10-26', 'Mac OS X Leopard goes on sale', 'Apple\'s new operating system adds Time Machine backups and Spaces.', 'IT says Doors OS will be supported "until further notice".'],
     ['2007-11-05', 'Google announces Android, an open platform for phones', 'Google and 33 other companies formed the Open Handset Alliance. The first phones are expected next year.', 'Darren wants a mobile learning strategy. He means his BlackBerry.'],
-    ['2007-11-09', 'The iPhone goes on sale in the UK', 'Queues formed outside shops in London for the launch.', 'Mieke still has the phone with Snake on it, and she would like you to know it never crashes.'],
+    ['2007-11-09', 'The iPhone goes on sale in the UK', 'Queues formed outside shops in London for the launch.', 'Mieke still has her grey phone with the stubby aerial, and she would like you to know it never crashes.'],
     ['2007-11-19', 'Amazon launches the Kindle e-book reader', 'The $399 device downloads books over a mobile connection, no computer needed. It sold out in hours.', 'Somebody will ask for the compliance course "on the Kindle" by Friday.'],
-    ['2007-12-13', 'EU leaders sign the Treaty of Lisbon', 'The treaty reforms how the European Union works. It still has to be ratified by all member states.', 'Legal reminds you the GDPR is not a thing yet. Data protection very much is.']
+    ['2007-12-13', 'EU leaders sign the Treaty of Lisbon', 'The treaty reforms how the European Union works. It still has to be ratified by all member states.', 'Legal reminds you that the privacy law covers e-learning too. It has since 1992.']
   ].map(([date, subject, body, ps]) => ({ at: Date.parse(date + 'T07:30:00Z'), subject, body, ps }));
   function news(weekNo, uptoDay) {
     const from = dateOf(weekNo, 0).getTime(), to = dateOf(weekNo, (uptoDay || 0) + 1).getTime();
