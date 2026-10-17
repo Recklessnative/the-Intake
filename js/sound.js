@@ -434,6 +434,31 @@
     amb.out.gain.setTargetAtTime(on && place && !document.hidden ? 1 : 0, t, place ? 0.6 : 0.3);
   }
 
+  // 08:56, every morning: the rain starts, the same shower in the same order, drop for drop.
+  // (STORY.md: one of act 1's hints. The drops come from a fixed seed, so no morning differs.)
+  let dawn = false;
+  function morning() { dawn = true; if (amb && place === 'desk') shower(); }
+  function shower() {
+    dawn = false;
+    const t = amb.c.currentTime, g = amb.bed.rain.gain, full = BED.rain;
+    g.cancelScheduledValues(t); g.setValueAtTime(0, t);
+    g.setValueAtTime(0, t + 0.6); g.linearRampToValueAtTime(full * 0.9, t + 5.5);
+    g.setValueAtTime(full * 0.9, t + 12); g.setTargetAtTime(full * SCENES.desk.bed.rain, t + 12, 4);
+    let seed = 1207;
+    const next = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let k = 0, at = t + 0.6; k < 26; k++) {
+      at += 0.05 + next() * 0.32;
+      const f = 1700 + next() * 3200, pan = next() * 1.6 - 0.8;
+      const c = amb.c, o = c.createOscillator(), v = c.createGain(), p = c.createStereoPanner(), sd = c.createGain();
+      o.frequency.setValueAtTime(f, at); o.frequency.exponentialRampToValueAtTime(f * 0.78, at + 0.03);
+      v.gain.setValueAtTime(0, at); v.gain.linearRampToValueAtTime(0.012 * (0.5 + next() * 0.5), at + 0.001);
+      v.gain.exponentialRampToValueAtTime(0.0001, at + 0.03);
+      p.pan.value = pan; sd.gain.value = 0.5;
+      chain([o, v, p]); p.connect(amb.out); p.connect(sd); sd.connect(amb.verb);
+      o.start(at); o.stop(at + 0.1);
+    }
+  }
+
   // Where you are now: 'desk', 'floor', 'evening', 'board', 'title1' to 'title4', or null for silence.
   function scene(name) {
     const was = amb ? place : null;
@@ -454,6 +479,7 @@
     }
     if (place && place !== was) start(place);
     fade();
+    if (dawn && place === 'desk') shower();
   }
   // For a recording or a test: book the next `seconds` of the current place in one go.
   function preview(seconds) { if (amb) plan(amb.c.currentTime + seconds); }
@@ -467,5 +493,5 @@
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, preview, toggle, get on() { return on; }, get place() { return place; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, preview, morning, toggle, get on() { return on; }, get place() { return place; } };
 })();
