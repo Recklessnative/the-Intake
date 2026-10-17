@@ -221,6 +221,16 @@ label.check input { width: auto; }
 .attach { margin-top: 4px; font-size: 12px; padding: 2px 8px; min-height: 0; }
 .attach[hidden], #mail-actions[hidden] { display: none; }
 .mail-body { white-space: pre-wrap; font-size: 15px; padding: 10px 14px 0; margin: 0 0 12px; font-family: Arial, sans-serif; }
+.mail-body.source { font: 12px/1.45 "Lucida Console", "Courier New", monospace; }
+/* The story in the case file (js/arc.js): a restored scan, and a log from the rival's avatar. */
+.briefing .arc-src { margin-top: 8px; font-size: 11px; color: #555; }
+.briefing .arc-redacted { font-family: "Courier New", monospace; background: #222; color: #ddd; padding: 0 4px; }
+.briefing details.arc-log { margin-top: 10px; border: 1px solid var(--field-line); background: #fff; padding: 4px 8px; }
+.briefing details.arc-log summary { cursor: pointer; font-weight: 700; }
+.briefing .arc-log ol { font: 12px/1.4 "Courier New", monospace; margin: 6px 0; }
+.briefing .arc-log .row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.briefing .arc-log .row button { white-space: normal; text-align: left; }
+
 #mail-actions { padding: 0 14px; }
 
 .briefing { background: #fffef4; border: 1px solid var(--field-line); padding: 10px 14px; flex: 1; }

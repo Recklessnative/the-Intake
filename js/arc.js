@@ -1,5 +1,6 @@
 // The 2041 arc (STORY.md, spoilers): small things in the office that don't add up. Act 1 is
-// weeks 1 to 4 and has to work as plain 2007 office jokes. Rules: at most one new hint lands per
+// weeks 1 to 4 and has to work as plain 2007 office jokes; act 2 (weeks 5 to 7) shows the seams,
+// each still with a 2007 excuse. Rules: at most one new hint lands per
 // in-game day, none is scored, and hard mode and Try one case never show one. A week counts only
 // when its Friday is done in the normal game, so `week` here is not the same as the game's weekNo.
 (function () {
@@ -12,8 +13,30 @@
     { id: 'planner', week: 2, day: 2 },   // Darren's planner: "NEW HIRE!!" again
     { id: 'morning', week: 3, day: 0 },   // Mieke: "Morning again!", word for word every Monday
     { id: 'rain', week: 3, day: 1 },      // morning: the rain started at 08:56, like every day
-    { id: 'flicker', week: 3, day: 3 }    // end of the week: the lift indicator flickers 4, 5, 4
+    { id: 'flicker', week: 3, day: 3 },   // end of the week: the lift indicator flickers 4, 5, 4
+    // Act 2. From week 5 every week is a team week, so only Monday and Thursday are played.
+    { id: 'lehman', week: 5, day: 0 },    // inbox: a 2008 headline, recalled as a test from the template folder
+    { id: 'coffee', week: 5, day: 3 },    // floor: "since 2004", the 0 corrected to a 2 in another pen
+    { id: 'source', week: 6, day: 0 },    // inbox: a bounce whose source says 2041 and "71% recovered"
+    { id: 'legible', week: 6, day: 3 },   // case file: "restored, 71% legible" and [REDACTED: ARCHIVE]
+    { id: 'bart', week: 7, day: 0 },      // team: Bart's draft has no flaw and nothing of the client in it
+    { id: 'transcript', week: 7, day: 3 } // case file: Max's intake log, fourteen questions, all about the course
   ];
+  // Mieke's excuses for the odd things, handed to her prompt in weeks 5 to 7 so she can't make up lore.
+  const EXCUSES = [
+    ['the lift, button 5 or a fifth floor', 'Facilities. Do not get me started on Facilities.'],
+    ['the rain starting at the same time every morning', 'This is Belgium. It rains.'],
+    ['the badge without a photo', 'HR. Mine took two years.'],
+    ['Darren writing NEW HIRE every Monday', 'Darren likes to plan ahead.'],
+    ['her saying "Morning again!" every Monday', 'It is a ritual. Rituals are good for you.'],
+    ['a headline from 2008 in the inbox', 'The intranet team sends test mails. Delete it.'],
+    ['odd dates in mail or "recovered" in the message source', 'The server clock is wrong again. IT will deny it.'],
+    ['case files that say "restored" or have a redacted line', 'Bad scans from the client. Always bad scans.'],
+    ['the coffee machine note and its corrected year', 'Somebody\'s idea of a joke.'],
+    ['Bart\'s draft', 'Bart didn\'t write that. Ask him on Monday.'],
+    ['the GMS avatar\'s list of questions', 'That is GMS. Fourteen questions, and not one of them is whether.']
+  ];
+  const lore = now => !now || now.off || now.week < 5 || now.week > 7 ? null : EXCUSES;
   const slot = (week, day) => week * 7 + day;
 
   function read() {
@@ -39,6 +62,8 @@
   // For a hint that is a moment, not a thing that stays: true only the time it lands.
   function once(id, now) { return read().shown[id] == null && offer(id, now); }
   const shown = () => Object.keys(read().shown);
+  // The arc week a hint landed in, or 0.
+  const landed = id => { const d = read().shown[id]; return d == null ? 0 : Math.floor(d / 7); };
 
   // ---------- Doesn't add up: a notebook page ----------
   // Odd things can be noted (some note themselves: you can't click a morning). Pin two that go
@@ -51,7 +76,13 @@
     floor5: { who: 'Facilities', label: 'Floor 5 mail', text: '"There is no floor 5. Please stop pressing it."' },
     morning: { who: 'Mieke', label: '"Morning again!"', text: 'The same line every Monday, word for word.' },
     rain: { who: 'The weather', label: '08:56', text: 'It starts raining at 08:56. Every morning.' },
-    flicker: { who: 'The lift', label: '4, 5, 4', text: 'The numbers went 4, 5, 4. The doors opened on dark and a hum.' }
+    flicker: { who: 'The lift', label: '4, 5, 4', text: 'The numbers went 4, 5, 4. The doors opened on dark and a hum.' },
+    lehman: { who: 'NewsFlash Daily', label: 'Lehman, 2008', text: 'A headline dated 15 September 2008, recalled as "a test headline from our template folder".' },
+    coffee: { who: 'Coffee machine', label: 'Since 2024', text: '"since 2004", with the 0 corrected to a 2 in another pen.' },
+    source: { who: 'Doors Mail', label: '71% recovered', text: 'A bounce whose message source has a date that can\'t be right, and "71% recovered".' },
+    legible: { who: 'Case file', label: '71% legible', text: '"Restored, 71% legible", and a line that only says [REDACTED: ARCHIVE].' },
+    bart: { who: 'Bart', label: 'The empty draft', text: 'Every line sound, none of it about the client. Bart says he didn\'t write it.' },
+    transcript: { who: 'GMS', label: 'Max\'s 14 questions', text: 'Fourteen good questions, all about the course. Not one about whether.' }
   };
   // Pairs we wrote. Order does not matter.
   const PAIRS = [
@@ -61,7 +92,12 @@
     { a: 'darren:umbrella', b: 'rain', lead: 'It starts raining at 08:56. Every day. To the minute.' },
     { a: 'darren:planner', b: 'badge', lead: 'A new hire every Monday, and nobody\'s photo ever arrives.' },
     { a: 'darren:planner', b: 'morning', lead: 'Every Monday starts like the first one.' },
-    { a: 'mieke:cds', b: 'priya:chart', lead: 'Everybody counts who finished. Nobody checks what changed.' }
+    { a: 'mieke:cds', b: 'priya:chart', lead: 'Everybody counts who finished. Nobody checks what changed.' },
+    { a: 'source', b: 'legible', lead: 'The same tool restored both. The case files are rebuilt too.' },
+    { a: 'lehman', b: 'source', lead: 'Some of the mail comes from after now.' },
+    { a: 'lehman', b: 'coffee', lead: 'Two dates from later on, both explained away as mistakes.' },
+    { a: 'bart', b: 'transcript', lead: 'Something writes the courses. It never asks whether.' },
+    { a: 'bart', b: 'mieke:cds', lead: 'Complete, and nothing changed.' }
   ];
   const ODD_LINES = ['Could be a coincidence. Mieke says most things are.', 'You stare at them side by side. Nothing. Maybe another day.', 'Not those two. Not yet, anyway.'];
   const notes = () => { const st = read(); return { noted: st.noted || [], leads: st.leads || [], tries: st.tries || 0 }; };
@@ -142,5 +178,5 @@
     drawLeads();
   }
 
-  window.Arc = { HINTS, offer, once, shown, NOTES, PAIRS, note, noted, notes, connect, page };
+  window.Arc = { HINTS, offer, once, shown, NOTES, PAIRS, note, noted, notes, connect, page, lore, landed };
 })();

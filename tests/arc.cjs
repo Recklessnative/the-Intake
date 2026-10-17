@@ -11,13 +11,25 @@ const A = window.Arc, reset = () => { for (const k in store) delete store[k]; };
 // One slot per day in the schedule.
 const slots = A.HINTS.map(h => h.week * 7 + h.day);
 assert.strictEqual(new Set(slots).size, slots.length, 'two hints share a day');
-assert.ok(A.HINTS.every(h => h.week >= 1 && h.week <= 4 && h.day >= 0 && h.day <= 4), 'act 1 hints sit in weeks 1 to 4, Monday to Friday');
+assert.ok(A.HINTS.every(h => h.week >= 1 && h.week <= 7 && h.day >= 0 && h.day <= 4), 'hints sit in weeks 1 to 7, Monday to Friday');
+// From week 5 every week is a team week: only Monday and Thursday are played.
+assert.ok(A.HINTS.filter(h => h.week >= 5).every(h => h.day === 0 || h.day === 3), 'an act 2 hint on a day nobody plays');
+// Mieke deflects only in act 2, and never in hard mode.
+assert.strictEqual(A.lore({ week: 4, day: 0 }), null);
+assert.ok(A.lore({ week: 6, day: 0 }).length > 5);
+assert.strictEqual(A.lore({ week: 6, day: 0, off: true }), null);
+require('../js/prompts.js');
+const sys = window.Prompts.colleague({}, A.lore({ week: 6, day: 0 })).system;
+assert.ok(sys.includes('Facilities. Do not get me started') && !/\[\w+\]/.test(sys), 'lore missing from Mieke, or it looks like a hidden fact');
+assert.ok(!window.Prompts.colleague({}, null).system.includes('odd things in the office'));
 
 // Not before its slot; then it lands and stays.
 reset();
 assert.strictEqual(A.offer('floor5', { week: 1, day: 4 }), false);
 assert.strictEqual(A.offer('floor5', { week: 2, day: 0 }), true);
 assert.strictEqual(A.offer('floor5', { week: 5, day: 3 }), true, 'a hint that landed stays');
+assert.strictEqual(A.landed('floor5'), 2);
+assert.strictEqual(A.landed('lehman'), 0);
 // once(): a moment, true only when it lands.
 assert.strictEqual(A.once('rain', { week: 3, day: 1 }), true);
 assert.strictEqual(A.once('rain', { week: 3, day: 2 }), false);
@@ -59,7 +71,7 @@ A.PAIRS.forEach(p => [p.a, p.b].forEach(id => {
 
 // Act 1 must stand alone: no hint text names AI, 2041 or the operator.
 const app = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
-['BADGE', 'FLICKER'].forEach(k => {
+['BADGE', 'FLICKER', 'COFFEE_2024'].forEach(k => {
   const m = app.match(new RegExp('const ' + k + " = '([^\\n]*)';"));
   assert.ok(m, k + ' text not found');
   assert.ok(!/\b(AI|2041|operator|simulation|archive)\b/i.test(m[1]), k + ' gives the twist away');

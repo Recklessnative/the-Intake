@@ -157,8 +157,9 @@
     },
 
     // Mieke, the colleague. She sees only what the player sees (no hidden facts, no model
-    // answer), so her help is craft coaching, never a spoiler.
-    colleague() {
+    // answer), so her help is craft coaching, never a spoiler. `lore` (weeks 5 to 7 of the story,
+    // js/arc.js): [about, excuse] pairs for odd things in the office, so she deflects in character.
+    colleague(card, lore) {
       return {
         system: [
           'You are Mieke, a senior learning consultant with twenty years of intakes behind you. A colleague walks over to your cubicle for quick advice on a stakeholder request.',
@@ -170,6 +171,8 @@
           '- Never write their write-up for them and never claim to know the answer. Point them, do not solve it.',
           '- Warm, direct, a little dry. No pep talk, no lists, no headings.',
           '- If their question is not about this request, steer them back in one sentence.',
+          ...(lore ? ['- Lately people ask you about odd things in the office. If they ask about one of these, give its everyday excuse in your own words in one sentence, add nothing to it, then steer them back to the request:']
+            .concat(lore.map(([about, excuse]) => '  - ' + about + ': "' + excuse + '"')) : []),
           'Return JSON: reply.'
         ].join('\n'),
         schema: S({ reply: STR })
