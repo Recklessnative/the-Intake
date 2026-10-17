@@ -10,21 +10,27 @@
 <body>
 <main id="app">
 
-  <!-- Title -->
+  <!-- Title: the Synergix building from its parking lot. It changes as you play (js/title.js). -->
   <section id="s-title" class="screen active">
+    <div class="title-bg" aria-hidden="true"><div class="title-layer" id="title-old"></div><div class="title-layer" id="title-now"></div></div>
+    <canvas id="title-rain" class="title-rain" aria-hidden="true"></canvas>
+    <div class="title-shade" aria-hidden="true"></div>
     <div class="title-card">
       <p class="eyebrow">An experiment by Yannick, learning strategist</p>
       <h1>THE INTAKE</h1>
-      <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
-      <button id="btn-resume" class="primary" hidden></button>
-      <button id="btn-morning" class="primary">☎ Today's call (3 minutes)</button>
-      <button id="btn-start" class="primary">Clock in for the week</button>
-      <button id="btn-one" class="ghost">Try one case (about 10 minutes)</button>
-      <button id="btn-hard" class="ghost">Hard mode</button>
-      <button id="btn-settings" class="ghost">Gemini key</button>
+      <p id="title-sub" class="subtitle">"Can we make this mandatory?"</p>
+      <nav class="title-menu" aria-label="Main menu">
+        <button id="btn-resume" class="primary" hidden></button>
+        <button id="btn-morning" class="primary">Today's call <small>3 minutes</small></button>
+        <button id="btn-start" class="primary">Clock in for the week</button>
+        <button id="btn-one" class="ghost">Try one case <small>about 10 minutes</small></button>
+        <button id="btn-hard" class="ghost">Hard mode</button>
+        <button id="btn-settings" class="ghost">Gemini key</button>
+      </nav>
       <p id="runs-left" class="fine"></p>
       <button id="btn-watch-intro" class="linkish">Watch the intro</button>
     </div>
+    <p id="title-foot" class="title-foot"></p>
   </section>
 
   <!-- The morning call: one stakeholder a day, no desktop -->
@@ -611,6 +617,7 @@
 <script src="js/tour.js?v=dev"></script>
 <script src="js/office-map.js?v=dev"></script>
 <script src="js/office.js?v=dev"></script>
+<script src="js/title.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
 </html>

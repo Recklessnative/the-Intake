@@ -46,7 +46,7 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
-    if (id === 's-title') resumeButton();
+    if (id === 's-title') { resumeButton(); titleScreen(); }
     window.scrollTo(0, 0);
   }
   function step(text) { $('os-step').textContent = text; }
@@ -281,9 +281,10 @@
   const INTRO = [
     'The year is 2007.',
     'Phones have keyboards. Slides have star wipes. Every training request ends in an e-learning.',
+    'An e-learning costs forty thousand euros and twelve weeks. So someone still has to decide if it\'s worth making.',
     'AI that can write a whole course is fifteen years away.',
-    'You still have time to hone the one skill it won\'t replace.',
-    'Asking the right questions.'
+    'It will ask excellent questions. All of them about the course.',
+    'You still have time to learn the other one: do we need a course at all?'
   ];
   function seenIntro() { try { return window.localStorage.getItem('intake-intro') === 'seen'; } catch (e) { return true; } }
   function intro(then) {
@@ -370,6 +371,8 @@
   $('notes').addEventListener('input', saveSoon);
   $('write-form').addEventListener('input', saveSoon);
 
+  // The title picture follows finished normal weeks (js/title.js); hard mode and one case never count.
+  function titleScreen() { Title.show(scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one).length); }
   function resumeButton() {
     const s = readSave();
     const b = $('btn-resume');
@@ -2857,6 +2860,7 @@
 
   runsLeft();
   resumeButton();
+  titleScreen();
 
   // test hook
   window.__intake = { state, points };
