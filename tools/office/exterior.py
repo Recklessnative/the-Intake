@@ -1,8 +1,8 @@
-# The Synergix building from the street, for the title screen (Belgium, autumn 2007).
+# The Synergix building from its parking lot, for the title screen (Belgium, autumn 2007).
 # One locked camera; the stage changes the weather and the hour, never the framing.
 # Usage: python3 exterior.py <stage> <width> <height> <samples> [frame]
 #   stage = day | rain | night | dystopia      -> out/title_<stage>_<width>.png
-# x runs along the street, y = 0 is the building's face (it looks towards -y), z is up.
+# x runs along the building, y = 0 is its face (it looks towards -y, over the lot), z is up.
 import bpy, math, os, sys, random
 from mathutils import Vector
 
@@ -95,12 +95,21 @@ def cyl(name, x, y, z0, r, h, m, verts=16, r2=None):
     bpy.ops.object.shade_smooth()
     return o
 
+BALL = {}
 def ball(name, x, y, z, r, m, sx=1, sy=1, sz=1):
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=r, location=(x, y, z))
-    o = bpy.context.object; o.name = name; o.scale = (sx, sy, sz); o.data.materials.append(m)
-    d = o.modifiers.new('lumps', 'DISPLACE'); t = bpy.data.textures.new(name + 'tx', 'CLOUDS'); t.noise_scale = r * 0.45
-    d.texture = t; d.strength = r * 0.35
-    bpy.ops.object.shade_smooth()
+    """A lumpy ball (shrubs, tree crowns). One mesh and one noise per material, shared and scaled."""
+    if m.name not in BALL:
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1)
+        src = bpy.context.object; bpy.ops.object.shade_smooth()
+        src.data.materials.append(m)
+        tx = bpy.data.textures.new('lumps_' + m.name, 'CLOUDS'); tx.noise_scale = 0.45
+        BALL[m.name] = (src.data, tx)
+        bpy.data.objects.remove(src)
+    me, tx = BALL[m.name]
+    o = bpy.data.objects.new(name, me); S.collection.objects.link(o)
+    o.location = (x, y, z); o.scale = (r * sx, r * sy, r * sz)
+    o.rotation_euler = (0, 0, random.uniform(0, math.tau))
+    d = o.modifiers.new('lumps', 'DISPLACE'); d.texture = tx; d.strength = 0.35; d.texture_coords = 'GLOBAL'
     return o
 
 # ---------- palette ----------
@@ -132,202 +141,166 @@ AD = emit_mat('adpanel', (0.92, 0.94, 0.98), 2.2)
 SIGN = emit_mat('sign', (0.2, 0.45, 1.0), 6)
 SIGN_DOOR = emit_mat('signdoor', (0.15, 0.75, 0.55), 6)
 
-# ---------- the Synergix building: 2 + 6 floors of 1990s precast and ribbon glass ----------
-BX0, BX1, BD = 0.0, 34.0, 16.0
-GROUND = 4.6; FLOOR = 3.5; FLOORS = 6
-TOP = GROUND + FLOOR * FLOORS
+# ---------- the Synergix building: a plain business-park office, ground floor plus four ----------
+# Tan brick, a light precast band at every sill, dark ribbon windows, a flat roof with plant on it.
+BX0, BX1, BD = 0.0, 44.0, 18.0
+FLOOR = 3.4; LEVELS = 5            # ground floor (0) and floors 1-4; Synergix rents the fourth
+TOP = LEVELS * FLOOR + 0.3
+TAN = mat('tanbrick', (0.47, 0.37, 0.27), 0.85, bump=0.2, scale=45, var=0.35)
+BAND = mat('precast', (0.62, 0.59, 0.52), 0.8, bump=0.05, scale=30, var=0.3)
+BLIND = mat('blind', (0.62, 0.62, 0.58), 0.7)
+GRASS = mat('grass', (0.13, 0.17, 0.06), 0.9, bump=0.3, scale=80, var=0.6)
+SHRUB = mat('shrub', (0.08, 0.12, 0.05), 0.8, bump=0.6, scale=12, var=0.6)
 # floor -> lit stretches (x0, x1, strength). The one constant across every stage: a single lit
-# stretch of window on the fourth floor, Synergix, near the corner.
-LIT = {4: [(25.4, 31.4, 1.0)]}
-if STAGE == 'night': LIT[2] = [(4.0, 7.0, 0.35)]
-box('core', BX0 + 0.6, 9.1, 0, BX1 - 1.2, BD - 0.8, TOP, mat('coredark', (0.1, 0.1, 0.1), 0.9))   # the front 9 m are open office behind glass
-DEEP = 9.0
-# Ground floor: recessed glass lobby behind round columns, a canopy over the door.
-box('lobby_floor', BX0, -0.2, 0, BX1, BD, 0.15, STONE)
-box('lobby_back', BX0 + 0.6, 3.0, 0, BX1 - 0.6, 3.1, GROUND, mat('lobbywall', (0.75, 0.72, 0.65), 0.6))
-box('lobby_glass', BX0 + 0.6, 1.4, 0.15, BX1 - 0.6, 1.43, GROUND - 0.3, TINT)
-for i in range(13):
-    x = BX0 + 0.8 + i * (BX1 - BX0 - 1.6) / 12
-    box(f'lobby_mull{i}', x - 0.04, 1.36, 0.15, x + 0.04, 1.46, GROUND - 0.3, MULLION)
-for i in range(7):
-    cyl(f'column{i}', BX0 + 1.5 + i * (BX1 - BX0 - 3) / 6, 0.4, 0.15, 0.32, GROUND - 0.15, CONCRETE, 24)
-box('canopy', 12.0, -2.2, 3.4, 18.0, 1.4, 3.6, STEEL, 0.02)
-for x in (12.3, 17.7): cyl(f'canopy_rod{x}', x, -2.0, 0.15, 0.05, 3.3, STEEL)
-lobby_light = emit_mat('lobbylight', WARM, 3.0 if DARK else 1.2)
-for i in range(6): box(f'lobby_lamp{i}', 3 + i * 5.5, 1.6, GROUND - 0.32, 4.4 + i * 5.5, 2.9, GROUND - 0.3, lobby_light)
-box('band0', BX0, -0.15, GROUND - 0.3, BX1, 1.0, GROUND + 0.9, CONCRETE, 0.02)
-
-# Upper floors: a precast band, then a ribbon of tinted glass with thin mullions, every floor.
-for f in range(1, FLOORS + 1):
-    z0 = GROUND + (f - 1) * FLOOR
-    sill = z0 + 0.9; head = z0 + FLOOR - 0.35
-    if f > 1: box(f'band{f}', BX0, -0.15, z0 - 0.35, BX1, 1.0, sill, CONCRETE, 0.02)
-    box(f'spandrel{f}', BX0 + 0.05, -0.17, sill - 0.25, BX1 - 0.05, -0.15, sill, SPANDREL)
-    box(f'glass{f}', BX0 + 0.1, 0.35, sill, BX1 - 0.1, 0.38, head, TINT)
-    for i in range(35):
-        x = BX0 + 0.1 + i * (BX1 - BX0 - 0.2) / 34
-        box(f'mull{f}_{i}', x - 0.035, 0.3, sill, x + 0.035, 0.42, head, MULLION)
-    # The same ribbon turns the corner and runs down the side as far as the office goes.
-    box(f'sband{f}', BX1 - 1.0, 0.8, z0 - 0.35, BX1 + 0.15, BD, sill, CONCRETE, 0.02)
-    box(f'sglass{f}', BX1 - 0.38, 0.8, sill, BX1 - 0.35, BD - 0.6, head, TINT)
-    for i in range(11):
-        y = 0.9 + i * (BD - 1.5) / 10
-        box(f'smull{f}_{i}', BX1 - 0.42, y - 0.035, sill, BX1 - 0.3, y + 0.035, head, MULLION)
-    # Inside: a floor, a ceiling with tube lights where the floor is lit, partitions and a back wall.
-    box(f'slab{f}', BX0 + 0.1, 0.42, z0 + 0.6, BX1 - 0.1, 9, z0 + 0.9, FLOOR_IN)
-    box(f'back{f}', BX0 + 0.1, 9, z0 + 0.9, BX1 - 0.1, 9.1, head + 0.35, mat('backwall', (0.55, 0.55, 0.52), 0.9))
-    box(f'ceil{f}', BX0 + 0.1, 0.42, head + 0.06, BX1 - 0.1, 9, head + 0.35, CEIL_OFF)
-    for i in range(22):   # cubicle walls, mostly lost in the dark unless a stretch is lit
-        x = BX0 + 1 + i * 1.5 + random.uniform(-0.2, 0.2)
-        box(f'part{f}_{i}', x, 1.4 + random.uniform(0, 1.5), z0 + 0.9, x + 0.06, 4.2, z0 + 2.4, PARTITION)
+# stretch of window on the fourth floor, Synergix.
+LIT = {4: [(27.0, 33.0, 1.0)]}
+if STAGE == 'night': LIT[2] = [(6.0, 9.0, 0.35)]
+box('body', BX0, 9.1, 0, BX1, BD, TOP, TAN)   # the core; the front 9 m are open office behind glass
+for x0, x1 in ((BX0 - 0.0, BX0 + 1.2), (BX0 + 10.8, BX0 + 11.8), (BX0 + 21.4, BX0 + 22.4), (BX0 + 32.0, BX0 + 33.0), (BX1 - 1.2, BX1)):
+    box(f'pier{x0}', x0, -0.03, 0, x1, 9.1, TOP, TAN)   # proud of the spandrels; no shared faces
+box('coping', BX0 - 0.1, -0.1, TOP, BX1 + 0.1, BD + 0.1, TOP + 0.25, BAND)
+for f in range(LEVELS):
+    z0 = f * FLOOR + 0.3
+    sill = z0 + (1.0 if f else 0.6); head = z0 + 2.75
+    box(f'band{f}', BX0 - 0.06, -0.06, sill - 0.3, BX1 + 0.06, 0.2, sill, BAND)
+    box(f'spandrel{f}', BX0, 0.0, head, BX1, 0.4, (f + 1) * FLOOR + 0.3 + (1.0 if f + 1 < LEVELS else 0) - (0.3 if f + 1 < LEVELS else 0), TAN)
+    if f == 0: box('plinth', BX0, 0.0, 0, BX1, 0.4, sill - 0.3, TAN)
+    # The ribbon: recessed dark glass between brick piers every 11 m.
+    for p in range(4):
+        x0 = BX0 + 1.2 + p * 10.6; x1 = x0 + 9.6
+        if f == 0 and p == 1: continue              # the entrance takes this bay
+        box(f'glass{f}_{p}', x0, 0.18, sill, x1, 0.2, head, TINT)
+        for i in range(7):
+            x = x0 + i * (x1 - x0) / 6
+            box(f'mull{f}_{p}_{i}', x - 0.04, 0.14, sill, x + 0.04, 0.22, head, MULLION)
+        # Vertical blinds, half down at random: somebody always fights the glare.
+        for i in range(6):
+            if random.random() < 0.35:
+                bx = x0 + i * (x1 - x0) / 6
+                box(f'blind{f}_{p}_{i}', bx + 0.06, 0.3, head - random.uniform(0.6, 1.6), bx + (x1 - x0) / 6 - 0.06, 0.32, head - 0.05, BLIND)
+    # Inside, so the glass has depth: a floor, a dark ceiling, cubicle walls.
+    box(f'slab{f}', BX0 + 0.3, 0.2, z0, BX1 - 0.3, 9, sill - 0.3, FLOOR_IN)
+    box(f'ceil{f}', BX0 + 0.3, 0.2, head + 0.05, BX1 - 0.3, 9, head + 0.3, CEIL_OFF)
+    box(f'back{f}', BX0 + 0.3, 9, z0, BX1 - 0.3, 9.1, head + 0.3, mat('backwall', (0.4, 0.4, 0.38), 0.9))
+    for i in range(26):
+        x = BX0 + 1.5 + i * 1.6 + random.uniform(-0.2, 0.2)
+        box(f'part{f}_{i}', x, 1.6 + random.uniform(0, 1.2), sill - 0.3, x + 0.06, 4.0, sill + 0.6, PARTITION)
     for j, (lx0, lx1, lit) in enumerate(LIT.get(f, [])):
-        box(f'ceilglow{f}_{j}', lx0, 0.42, head + 0.04, lx1, 9, head + 0.06, emit_mat(f'ceilglow{f}_{j}', WARM, 3.0 * lit))
+        box(f'ceilglow{f}_{j}', lx0, 0.2, head + 0.03, lx1, 9, head + 0.05, emit_mat(f'ceilglow{f}_{j}', WARM, 3.0 * lit))
         for k in range(int((lx1 - lx0) / 1.6)):
             x = lx0 + 0.3 + k * 1.6
-            for yy in (2.0, 4.6, 7.2): box(f'tube{f}_{j}_{k}_{yy}', x, yy, head + 0.02, x + 1.2, yy + 0.25, head + 0.04, TUBE)
-        # Real light, so the glass and the street catch it.
+            for yy in (1.8, 4.4, 7.0): box(f'tube{f}_{j}_{k}_{yy}', x, yy, head + 0.01, x + 1.2, yy + 0.25, head + 0.03, TUBE)
         lt = bpy.data.lights.new(f'floorlight{f}_{j}', 'AREA'); lt.shape = 'RECTANGLE'; lt.size = lx1 - lx0; lt.size_y = 7
         lt.energy = 3500 * lit * (lx1 - lx0) / 6 * (1.5 if DARK else 1.0); lt.color = WARM
         lo = bpy.data.objects.new(f'floorlight{f}_{j}', lt); lo.location = ((lx0 + lx1) / 2, 4.5, head); S.collection.objects.link(lo)
-box('parapet', BX0, -0.15, TOP - 0.35, BX1, 1.0, TOP + 1.1, CONCRETE, 0.02)
-box('sparapet', BX1 - 1.0, -0.15, TOP - 0.35, BX1 + 0.15, BD, TOP + 1.1, CONCRETE, 0.02)
-box('sground', BX1 - 0.6, 3.0, 0, BX1 + 0.15, BD, GROUND + 0.9, STONE)
-for i in range(4): box(f'sgwin{i}', BX1 + 0.15, 3.6 + i * 3.1, 0.9, BX1 + 0.18, 5.6 + i * 3.1, 3.6, DARKWIN)
-box('sgdoor', BX1 + 0.15, 14.2, 0.15, BX1 + 0.19, 15.4, 2.3, PAINT)
-box('roof', BX0 + 0.6, 0.6, TOP, BX1 - 0.6, BD, TOP + 0.9, CONCRETE)
-box('plant_room', BX0 + 6, 3, TOP + 0.9, BX1 - 12, 12, TOP + 3.6, mat('plantroom', (0.45, 0.45, 0.43), 0.7, var=0.4, scale=8))
-for i in range(6): box(f'louvre{i}', BX0 + 6.2, 2.95, TOP + 1.3 + i * 0.35, BX1 - 12.2, 3.0, TOP + 1.42 + i * 0.35, STEEL)
-# The company sign on the roof edge: a lit box with an open door. No lettering.
-box('sign_box', BX1 - 9.5, -0.35, TOP + 1.1, BX1 - 1.0, 0.4, TOP + 3.0, mat('signcase', (0.08, 0.09, 0.1), 0.4, metal=0.6), 0.03)
-box('sign_face', BX1 - 9.3, -0.37, TOP + 1.3, BX1 - 1.2, -0.35, TOP + 2.8, SIGN)
-box('sign_door', BX1 - 8.6, -0.39, TOP + 1.45, BX1 - 7.8, -0.37, TOP + 2.65, SIGN_DOOR)
-for x in (BX1 - 8.8, BX1 - 2.0): box(f'sign_leg{x}', x, 0, TOP + 0.9, x + 0.12, 0.3, TOP + 1.1, STEEL)
+# The entrance: a glass door bay, a flat steel canopy, two steps, a bench and an ashtray bin.
+EX0, EX1 = BX0 + 11.8, BX0 + 21.8
+box('entry_glass', EX0 + 2.5, 0.25, 0.3, EX1 - 2.5, 0.28, 3.0, TINT)
+for x in (EX0 + 2.5, EX0 + 3.75, EX0 + 5.0, EX0 + 6.25, EX1 - 2.5): box(f'entry_mull{x}', x - 0.05, 0.2, 0.3, x + 0.05, 0.3, 3.0, MULLION)
+box('entry_inside', EX0 + 2.5, 0.3, 0.3, EX1 - 2.5, 6, 3.0, emit_mat('lobbyglow', WARM, 0.6 if DARK else 0.25))
+box('canopy', EX0 + 1.5, -2.6, 3.2, EX1 - 1.5, 0.0, 3.4, STEEL, 0.02)
+for x in (EX0 + 1.7, EX1 - 1.7): cyl(f'canopy_post{x}', x, -2.4, 0.15, 0.06, 3.05, STEEL)
+box('step1', EX0 + 1.5, -1.2, 0.0, EX1 - 1.5, 0.0, 0.3, BAND)
+box('step0', EX0 + 1.5, -2.0, 0.0, EX1 - 1.5, -1.2, 0.15, BAND)
+box('bench_seat', EX1 - 1.2, -3.6, 0.45, EX1 + 0.6, -3.2, 0.5, mat('benchwood', (0.3, 0.2, 0.12), 0.7))
+for x in (EX1 - 1.1, EX1 + 0.5): box(f'bench_leg{x}', x, -3.55, 0.15, x + 0.05, -3.25, 0.45, STEEL)
+cyl('ashtray', EX0 + 1.0, -2.8, 0.15, 0.2, 0.9, STEEL, 16)
+# Downpipes, roof plant, a lift overrun.
+for x in (BX0 + 0.6, BX0 + 11.4, BX0 + 32.6, BX1 - 0.6): cyl(f'downpipe{x}', x, -0.1, 0, 0.06, TOP, PAINT, 8)
+box('overrun', BX0 + 18, 6, TOP + 0.25, BX0 + 23, 11, TOP + 3.0, TAN)
+for i, (x, y) in enumerate(((6, 4), (9, 4), (30, 5), (34, 5), (38, 10))):
+    box(f'hvac{i}', x, y, TOP + 0.25, x + 2.2, y + 1.6, TOP + 1.5, mat('hvac', (0.55, 0.56, 0.55), 0.5, metal=0.4))
+# The sign by the door: a wall plate with the open-door mark. No lettering.
+box('sign_plate', EX1 + 0.6, -0.08, 2.0, EX1 + 3.0, 0.0, 3.0, mat('signplate', (0.85, 0.86, 0.86), 0.3, metal=0.5))
+box('sign_door', EX1 + 0.85, -0.1, 2.12, EX1 + 1.35, -0.08, 2.88, SIGN_DOOR)
+box('sign_band', EX1 + 1.55, -0.1, 2.38, EX1 + 2.8, -0.08, 2.62, SIGN)
+# A gravel and shrub strip along the front, grass at the ends.
+box('verge', BX0 - 20, -3.2, 0, BX1 + 30, 0.0, 0.12, GRASS)
+for i in range(70):
+    x = random.uniform(BX0 + 0.5, BX1 - 0.5)
+    if EX0 + 1.0 < x < EX1 + 3.2: continue
+    ball(f'shrub{i}', x, -1.2 + random.uniform(-0.5, 0.5), 0.35, random.uniform(0.45, 0.8), SHRUB, 1, 1, 0.75)
 
-# ---------- neighbours: older brick houses to the left, a lower block to the right ----------
-x = BX0
-for i in range(16):
-    w = random.uniform(5.5, 7.5); x1 = x; x0 = x - w
-    floors = random.choice((2, 3, 3)); h = 1.2 + floors * 3.1
-    m = BRICK if i % 2 == 0 else BRICK2
-    y0 = random.uniform(-0.2, 0.3)
-    box(f'house{i}', x0, y0, 0, x1, 12, h, m)
-    box(f'cornice{i}', x0 - 0.05, y0 - 0.25, h - 0.3, x1 + 0.05, y0 + 0.2, h, STONE, 0.02)
-    for fl in range(floors):
-        for k in range(3):
-            wx = x0 + 0.7 + k * (w - 1.4) / 3
-            wz = 1.2 + fl * 3.1 + (0.6 if fl == 0 else 0.4)
-            lit = DARK and random.random() < 0.25
-            wm = emit_mat('housewarm', (1.0, 0.72, 0.42), 2.0) if lit else DARKWIN
-            box(f'hwin{i}_{fl}_{k}', wx, y0 - 0.02, wz, wx + (w - 1.4) / 3 - 0.5, y0 + 0.05, wz + 1.9, wm)
-            box(f'hsill{i}_{fl}_{k}', wx - 0.08, y0 - 0.12, wz - 0.1, wx + (w - 1.4) / 3 - 0.42, y0 + 0.05, wz, STONE)
-    x = x0
-box('block_r', BX1 + 12, 1.0, 0, BX1 + 42, 16, 8, mat('blockr', (0.5, 0.47, 0.42), 0.8, var=0.3, scale=10))
-for fl in range(2):
-    for k in range(14):
-        wx = BX1 + 12.6 + k * 2.1
-        box(f'rwin{fl}_{k}', wx, 0.97, 1.4 + fl * 3.2, wx + 1.4, 1.02, 3.0 + fl * 3.2, DARKWIN)
-# A far skyline closes the street on the left.
-for i in range(10):
-    x0 = -90 + i * 7 + random.uniform(-2, 2)
-    box(f'far{i}', x0, 30 + random.uniform(0, 30), 0, x0 + random.uniform(5, 9), 60 + random.uniform(0, 30), random.uniform(10, 30),
-        mat('far', (0.32, 0.34, 0.37), 0.9))
-
-# ---------- the street ----------
-box('pavement_far', -120, -3.2, 0, 90, 1.0, 0.15, PAVING)
-box('kerb_far', -120, -3.4, 0, 90, -3.2, 0.15, KERB)
-box('road', -120, -12.6, -0.02, 90, -3.4, 0.0, ASPHALT)
-box('kerb_near', -120, -12.8, 0, 90, -12.6, 0.15, KERB)
-box('pavement_near', -160, -17.0, 0, 90, -12.8, 0.15, PAVING)
-# Across the street: a quay and the canal, then the far bank low on the horizon. It keeps the left calm.
-box('quay_edge', -160, -17.4, -0.1, 90, -17.0, 0.25, STONE, 0.02)
-for i in range(-64, 36):
-    cyl(f'rail_post{i}', i * 2.5, -17.2, 0.25, 0.03, 0.9, PAINT, 8)
-box('rail_top', -160, -17.24, 1.12, 90, -17.16, 1.18, PAINT)
-box('quay_wall', -160, -17.6, -2.2, 90, -17.4, 0.0, mat('quaywall', (0.3, 0.29, 0.27), 0.8, bump=0.3, scale=6, var=0.5))
-WATER = bpy.data.materials.new('water'); WATER.use_nodes = True
-wn, wl = WATER.node_tree.nodes, WATER.node_tree.links
-wp = wn['Principled BSDF']; wp.inputs['Base Color'].default_value = (0.02, 0.03, 0.03, 1); wp.inputs['Roughness'].default_value = 0.04
-wtc = wn.new('ShaderNodeTexCoord'); wnz = wn.new('ShaderNodeTexNoise'); wnz.inputs['Scale'].default_value = 1.6; wnz.inputs['Detail'].default_value = 6
-wmp = wn.new('ShaderNodeMapping'); wmp.inputs['Scale'].default_value = (0.4, 2.5, 1)
-wl.new(wtc.outputs['Object'], wmp.inputs['Vector']); wl.new(wmp.outputs[0], wnz.inputs['Vector'])
-wb = wn.new('ShaderNodeBump'); wb.inputs['Strength'].default_value = 0.08 if not WET else 0.2
-wl.new(wnz.outputs['Fac'], wb.inputs['Height']); wl.new(wb.outputs['Normal'], wp.inputs['Normal'])
-box('canal', -300, -175, -1.6, 90, -17.4, -1.5, WATER)
-random.seed(11)
-FARBANK = mat('farbank', (0.42, 0.46, 0.5), 0.9, var=0.2, scale=4)
-for i in range(60):
-    x0 = -300 + i * 7.5 + random.uniform(-1.5, 1.5)
-    h = random.uniform(5, 12) if random.random() < 0.9 else random.uniform(15, 22)
-    wd = random.uniform(5, 7)
-    box(f'farbank{i}', x0, -185, -1.5, x0 + wd, -170, h, FARBANK)
-    for k in range(int(h / 3.2)):
-        for c in range(int(wd / 1.6)):
-            if random.random() < 0.6:
-                box(f'fbw{i}_{k}_{c}', x0 + 0.4 + c * 1.6, -170.05, 0.5 + k * 3.2, x0 + 1.2 + c * 1.6, -170.0, 1.8 + k * 3.2,
-                    emit_mat('fbwarm', (1.0, 0.75, 0.45), 1.5) if DARK and random.random() < 0.3 else DARKWIN)
-for i in range(-30, 22):
-    box(f'dash{i}', i * 4.0, -8.05, 0.0, i * 4.0 + 2.0, -7.95, 0.005, LINE)
-box('stopline', -120, -12.45, 0.0, 90, -12.35, 0.005, LINE)
-
-# A bus shelter on the building's side, glass and steel, its advert lit and blank.
-SX, SY = -6.0, -2.4
-box('shelter_roof', SX - 2.0, SY - 0.6, 2.45, SX + 2.0, SY + 1.0, 2.55, STEEL, 0.01)
-for x in (SX - 1.9, SX + 1.9):
-    for y in (SY - 0.5, SY + 0.9): box(f'shelter_post{x}{y}', x - 0.04, y - 0.04, 0.15, x + 0.04, y + 0.04, 2.45, STEEL)
-box('shelter_back', SX - 1.9, SY + 0.88, 0.25, SX + 1.9, SY + 0.9, 2.35, SHELTER_GLASS)
-box('shelter_side', SX + 1.88, SY - 0.4, 0.25, SX + 1.9, SY + 0.88, 2.35, SHELTER_GLASS)
-box('shelter_ad_case', SX - 2.0, SY - 0.5, 0.3, SX - 1.86, SY + 0.85, 2.3, STEEL)
-box('shelter_ad', SX - 2.02, SY - 0.4, 0.4, SX - 2.0, SY + 0.75, 2.2, AD)
-box('shelter_bench', SX - 1.2, SY + 0.45, 0.5, SX + 1.2, SY + 0.8, 0.55, STEEL)
-cyl('stop_pole', SX + 2.5, SY - 0.7, 0.15, 0.04, 2.8, STEEL)
-box('stop_plate', SX + 2.3, SY - 0.73, 2.4, SX + 2.7, SY - 0.69, 2.9, mat('stopplate', (0.85, 0.6, 0.1), 0.4))
-
-# Street lamps on both pavements, and plane trees going yellow along the building.
-def lamp(name, x, y, facing):
-    cyl(name + '_pole', x, y, 0.15, 0.08, 7.0, PAINT, 12, 0.06)
-    arm_y = y + 1.2 * facing
-    box(name + '_arm', x - 0.05, min(y, arm_y), 6.95, x + 0.05, max(y, arm_y), 7.05, PAINT)
-    box(name + '_head', x - 0.22, arm_y - 0.35, 6.85, x + 0.22, arm_y + 0.35, 7.05, PAINT, 0.02)
-    box(name + '_glow', x - 0.18, arm_y - 0.3, 6.83, x + 0.18, arm_y + 0.3, 6.85, LAMPGLOW if DARK else mat('lampoff', (0.7, 0.68, 0.6), 0.2))
+# ---------- the parking lot ----------
+box('walk', BX0 - 20, -4.6, 0, BX1 + 30, -3.2, 0.15, PAVING)
+box('kerb', BX0 - 20, -4.8, 0, BX1 + 30, -4.6, 0.15, KERB)
+box('lot', -140, -120, -0.02, 160, -4.8, 0.0, ASPHALT)
+# Two rows of bays nose to nose either side of an aisle, lines every 2.6 m.
+ROWS = ((-5.0, -10.2), (-17.4, -22.6))
+for r, (ya, yb) in enumerate(ROWS):
+    for i in range(-8, 24):
+        x = i * 2.6
+        box(f'bay{r}_{i}', x - 0.06, min(ya, yb), 0.0, x + 0.06, max(ya, yb), 0.006, LINE)
+box('island', -22, -30.5, 0, 58, -29.0, 0.15, KERB)
+box('island_grass', -21.8, -30.3, 0.15, 57.8, -29.2, 0.2, GRASS)
+# Light poles with shoebox heads.
+def pole(name, x, y):
+    cyl(name, x, y, 0.15, 0.1, 9.0, STEEL, 12, 0.07)
+    box(name + '_head', x - 0.35, y - 0.6, 8.9, x + 0.35, y + 0.6, 9.25, STEEL, 0.03)
+    box(name + '_lens', x - 0.3, y - 0.55, 8.88, x + 0.3, y + 0.55, 8.9, LAMPGLOW if DARK else mat('lens', (0.75, 0.74, 0.7), 0.15))
     if DARK:
-        lt = bpy.data.lights.new(name, 'SPOT'); lt.energy = 2600; lt.color = (1.0, 0.62, 0.3); lt.spot_size = math.radians(120)
-        lt.spot_blend = 0.8; lt.shadow_soft_size = 0.15
-        lo = bpy.data.objects.new(name, lt); lo.location = (x, arm_y, 6.8); S.collection.objects.link(lo)
-for x in (-34, -10, 14, 38): lamp(f'lampf{x}', x, -2.7, -1)
-for x in (-46, -22, 2, 26): lamp(f'lampn{x}', x, -13.4, 1)
-for i, x in enumerate((-9.0, -2.5, 3.0, 9.5, 16.0, 22.0)):
-    cyl(f'trunk{i}', x, -2.2, 0.15, 0.2, 4.2, BARK, 12, 0.14)
-    for k in range(4): rod_branch = cyl(f'branch{i}_{k}', x, -2.2, 3.6, 0.07, 2.6, BARK, 8, 0.02)
-    for k in range(5):   # bare limbs show through: it is late October
-        a = k * math.tau / 5 + random.uniform(-0.3, 0.3)
-        o = cyl(f'limb{i}_{k}', 0, 0, 0, 0.07, 2.6, BARK, 6, 0.02)
-        o.location = (x + math.cos(a) * 0.5, -2.2 + math.sin(a) * 0.5, 4.9)
-        o.rotation_euler = (math.sin(a) * -0.6, math.cos(a) * 0.6, 0)
-    for k in range(90):
-        a = random.uniform(0, math.tau); r = random.uniform(0.2, 1.9) ** 0.8
-        ball(f'crown{i}_{k}', x + math.cos(a) * r, -2.2 + math.sin(a) * r * 0.8, 4.4 + random.uniform(0, 2.6) - r * 0.25,
-             random.uniform(0.18, 0.38), LEAVES if k % 3 else LEAVES2, 1, 1, 0.8)
-    box(f'treegrate{i}', x - 0.7, -2.9, 0.15, x + 0.7, -1.5, 0.17, STEEL)
-# Fallen leaves along the kerb.
-for i in range(140):
-    x = random.uniform(-8, 46); y = random.uniform(-3.5, -1.0) if random.random() < 0.7 else random.uniform(-4.2, -3.4)
-    box(f'leaf{i}', x, y, 0.15 if y > -3.4 else 0.0, x + 0.09, y + 0.06, 0.155 if y > -3.4 else 0.005, LEAVES)
-# A few parked cars of the period, boxy and anonymous, along the far kerb.
-def car(name, x, color):
-    body = mat('car_' + name, color, 0.25, metal=0.5)
-    box(name + '_body', x, -5.1, 0.32, x + 4.1, -3.45, 0.95, body, 0.12)
-    box(name + '_cabin', x + 0.9, -4.95, 0.95, x + 3.2, -3.6, 1.45, body, 0.12)
-    box(name + '_glass', x + 0.95, -4.97, 1.0, x + 3.15, -3.58, 1.4, mat('carglass', (0.02, 0.025, 0.03), 0.05))
-    for wx in (x + 0.75, x + 3.35):
-        for wy in (-5.12, -3.55):
-            o = cyl(f'{name}_wheel{wx}{wy}', wx, wy, 0, 0.31, 0.2, mat('tyre', (0.02, 0.02, 0.02), 0.7), 16)
-            o.rotation_euler = (math.pi / 2, 0, 0); o.location = (wx, wy + 0.1 if wy > -4 else wy - 0.0, 0.31)
-car('car2', 21.0, (0.5, 0.52, 0.55))
-car('car3', 8.0, (0.06, 0.09, 0.16))
-car('car4', -14.0, (0.2, 0.22, 0.18))
-# Bollards and a litter bin by the entrance.
-for x in range(10, 21, 2): cyl(f'bollard{x}', x, -3.0, 0.15, 0.09, 0.9, PAINT, 12)
-cyl('bin', 19.5, -2.6, 0.15, 0.25, 0.85, PAINT, 16)
+        lt = bpy.data.lights.new(name, 'SPOT'); lt.energy = 6000; lt.color = (1.0, 0.62, 0.3); lt.spot_size = math.radians(130)
+        lt.spot_blend = 0.7; lt.shadow_soft_size = 0.2
+        lo = bpy.data.objects.new(name, lt); lo.location = (x, y, 8.85); S.collection.objects.link(lo)
+for x in (-18, 8, 34, 60): pole(f'pole{x}', x, -29.75)
+# Parked cars of the period: saloons and estates, nose to the building, a few bays empty.
+def car(name, x, y, color, estate=False, facing=1):
+    body = mat('car_' + name, color, 0.2, metal=0.6)
+    L, Wd = 4.4, 1.75
+    y0 = y - L / 2; y1 = y + L / 2
+    box(name + '_body', x - Wd / 2, y0, 0.3, x + Wd / 2, y1, 0.92, body, 0.12)
+    # The cabin: a box with its roof pulled in, set back from the nose.
+    cy0 = y0 + (1.0 if facing > 0 else 0.5); cy1 = y1 - (0.5 if facing > 0 else 1.0)
+    if estate: cy0, cy1 = (y0 + 1.0, y1 - 0.15) if facing > 0 else (y0 + 0.15, y1 - 1.0)
+    me = bpy.data.meshes.new(name + '_cabin')
+    t0, t1 = (cy0 + 0.35, cy1 - (0.1 if estate else 0.35))
+    if facing < 0: t0, t1 = cy0 + (0.1 if estate else 0.35), cy1 - 0.35
+    xa, xb, ia = x - Wd / 2 + 0.06, x + Wd / 2 - 0.06, 0.12
+    v = [(xa, cy0, 0.92), (xb, cy0, 0.92), (xb, cy1, 0.92), (xa, cy1, 0.92),
+         (xa + ia, t0, 1.42), (xb - ia, t0, 1.42), (xb - ia, t1, 1.42), (xa + ia, t1, 1.42)]
+    f = [(0, 3, 2, 1), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)]
+    me.from_pydata(v, [], f); me.update()
+    o = bpy.data.objects.new(name + '_cabin', me); S.collection.objects.link(o)
+    o.data.materials.append(mat('carglass', (0.015, 0.02, 0.025), 0.04))
+    box(name + '_roof', xa + ia + 0.02, t0 + 0.05, 1.42, xb - ia - 0.02, t1 - 0.05, 1.45, body, 0.02)
+    for wy in (y0 + 0.85, y1 - 0.85):
+        for wx in (x - Wd / 2 - 0.02, x + Wd / 2 - 0.2):
+            o = cyl(f'{name}_wheel{wx}{wy}', 0, 0, 0, 0.31, 0.22, mat('tyre', (0.02, 0.02, 0.02), 0.7), 18)
+            o.rotation_euler = (0, math.pi / 2, 0); o.location = (wx + 0.11, wy, 0.31)
+COLOURS = [(0.45, 0.46, 0.48), (0.08, 0.1, 0.16), (0.3, 0.04, 0.04), (0.6, 0.6, 0.58), (0.12, 0.16, 0.12), (0.03, 0.03, 0.035), (0.35, 0.3, 0.22)]
+random.seed(21)
+for r, (ya, yb) in enumerate(ROWS):
+    for i in range(-7, 22):
+        if random.random() < 0.38: continue
+        x = i * 2.6 + 1.3
+        car(f'car{r}_{i}', x + random.uniform(-0.1, 0.1), (ya + yb) / 2 + random.uniform(-0.15, 0.15), random.choice(COLOURS),
+            random.random() < 0.35, 1 if r == 0 else -1)
+# A dumpster by the far corner and a trolley bay of nothing in particular.
+box('dumpster', BX1 + 3, -2.0, 0.0, BX1 + 5.0, -0.6, 1.3, mat('dumpster', (0.12, 0.22, 0.14), 0.6, metal=0.3), 0.03)
+
+# ---------- around it: trees behind and to the left, a neighbouring shed to the right ----------
+random.seed(5)
+TREE_A = mat('treeA', (0.14, 0.15, 0.06), 0.8, bump=0.6, scale=10, var=0.6)
+TREE_B = mat('treeB', (0.32, 0.22, 0.07), 0.8, bump=0.6, scale=10, var=0.6)
+def tree(name, x, y, h):
+    cyl(name + '_trunk', x, y, 0, 0.25, h * 0.45, BARK, 8, 0.18)
+    mm = TREE_A if random.random() < 0.6 else TREE_B
+    for k in range(12):
+        hk = random.uniform(0.35, 0.95)
+        spread = (1.0 - abs(hk - 0.6)) * 2.6 * h / 12
+        ball(f'{name}_{k}', x + random.uniform(-spread, spread), y + random.uniform(-spread, spread), h * hk,
+             random.uniform(1.2, 2.0) * h / 12, mm if random.random() < 0.8 else (TREE_B if mm is TREE_A else TREE_A))
+for i in range(40):
+    tree(f'back{i}', random.uniform(-60, BX1 + 40), random.uniform(BD + 4, BD + 30), random.uniform(10, 17))
+for i in range(90):   # the far tree line all round, so the lot never ends in nothing
+    a = random.uniform(-1.25, 1.25)
+    tree(f'far{i}', -14 + math.sin(a) * 130, -46 + math.cos(a) * 130, random.uniform(14, 22))
+for i in range(45):
+    tree(f'left{i}', random.uniform(-110, -32), random.uniform(-22, 30), random.uniform(9, 15))
+for i in range(60):   # a clipped hedge closes the lot on the left
+    ball(f'hedge{i}', -30 + random.uniform(-0.3, 0.3), -40 + i * 1.1, 0.6, random.uniform(0.8, 1.0), SHRUB, 1, 1, 0.9)
+box('shed', BX1 + 14, 4, 0, BX1 + 60, 30, 7.5, mat('cladding', (0.5, 0.52, 0.5), 0.6, metal=0.3, var=0.2, scale=4))
+for i in range(4): box(f'shed_door{i}', BX1 + 16 + i * 6, 3.95, 0, BX1 + 20 + i * 6, 4.0, 4.5, mat('sheddoor', (0.3, 0.32, 0.33), 0.5, metal=0.5))
 
 # ---------- sky, sun, render ----------
 w = bpy.data.worlds.new('world'); S.world = w; w.use_nodes = True
@@ -357,15 +330,13 @@ sun.energy = {'day': 1.1, 'rain': 0.4, 'night': 0.0, 'dystopia': 0.0}[STAGE]; su
 so = bpy.data.objects.new('sun', sun); S.collection.objects.link(so)
 so.rotation_euler = (math.radians(90 - 9), 0, math.radians(-120 + 180))
 
-# A level camera with the lens shifted up keeps the verticals straight, like an architect's photo.
-# The building fills the right; the left third is low houses and sky, where the menu sits.
-# Standing on the quay past the building's corner, looking back down the street: the building rises
-# on the right and runs away to the left; the road, the canal and the sky take the left third.
-cd = bpy.data.cameras.new('cam'); cd.lens = 18; cd.clip_end = 600
-cd.shift_y = 0.2
+# Standing in the lot between the parked cars, a little off to the left: the building fills the
+# right two thirds, the lot, the trees and the sky leave the left calm for the menu.
+cd = bpy.data.cameras.new('cam'); cd.lens = 24; cd.clip_end = 600
+cd.shift_y = 0.12
 cam = bpy.data.objects.new('cam', cd); S.collection.objects.link(cam); S.camera = cam
-cam.location = (56.0, -14.8, 1.7)
-cam.rotation_euler = (math.pi / 2, 0, math.radians(81))
+cam.location = (-14.0, -46.0, 1.6)
+cam.rotation_euler = (math.pi / 2, 0, math.radians(-16))
 
 S.render.engine = 'CYCLES'
 S.cycles.device = 'CPU'
