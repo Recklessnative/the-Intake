@@ -43,6 +43,8 @@
     $('title-foot').textContent = FOOT[n];
     $('s-title').dataset.stage = NAMES[n];
     Rain.toggle(n >= 2);
+    // Each stage has its own sound: traffic, rain, rain under a low note, rain over servers.
+    if (window.Sound) Sound.scene('title' + n);
   }
 
   function show(weeks) {
