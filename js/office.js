@@ -217,6 +217,15 @@
     nb.hidden = !opts.notebook || !opts.notebook.of;
     if (opts.notebook) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of;
     $('office-line').textContent = opts.line || '';
+    // At the end of a day the same floor at 17:40: most lights off, dusk behind the rain.
+    const eve = !!(opts.evening && MAP.evening);
+    const stage = $('office-stage');
+    if (stage.classList.contains('evening') !== eve) {
+      stage.classList.toggle('evening', eve);
+      const name = eve ? 'hub-evening' : 'hub';
+      $('office-pic').src = MEDIA + name + '.webp';
+      document.querySelector('#office-stage picture source').srcset = MEDIA + name + '-960.webp';
+    }
     closeCard();
     light(null);
     document.querySelectorAll('#s-office .office-tag').forEach(t => {

@@ -2120,6 +2120,7 @@
       notebook: L.notebook,
       onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
       when: Story.day(state.weekNo, day) + ' · ' + time,
+      evening: !!evening,
       line: last ? 'That was the last request of the week. The board is gathering.'
         : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
         : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
@@ -2179,11 +2180,12 @@
   // Pitchwright (js/slides.js) and presented full screen while the board reacts. Each member
   // nods if the slide already answers their concern, or asks you one question to answer live.
   const BOARD = [
-    { role: 'CFO', name: 'Geert Claes', face: '👨🏻‍💼', cares: 'cost, return on investment, and what you stop doing to pay for it' },
-    { role: 'CHRO', name: 'Annelies Wouters, with the privacy officer at her side', face: '👩🏼‍💼', cares: 'data privacy, the works council, fairness and workload' },
-    { role: 'COO', name: 'Rachid Bensaid', face: '👨🏽‍💼', cares: 'operational dependencies, timing, and who loses productive hours' }
+    { role: 'CFO', name: 'Geert Claes', seat: 'cfo', cares: 'cost, return on investment, and what you stop doing to pay for it' },
+    { role: 'CHRO', name: 'Annelies Wouters, with the privacy officer at her side', seat: 'chro', cares: 'data privacy, the works council, fairness and workload' },
+    { role: 'COO', name: 'Rachid Bensaid', seat: 'coo', cares: 'operational dependencies, timing, and who loses productive hours' }
   ];
-  const MOOD = { approved: '😄', pilot: '🙂', rejected: '😒' };
+  // The room keeps its lights on for a yes, the projector on for a pilot, and goes dark for a no.
+  const ROOM_LIGHT = { approved: 'lit', pilot: 'dim', rejected: 'off' };
   const SLIDE = [['problem', 'The problem'], ['evidence', 'Evidence of the need'], ['concept', 'The concept'], ['measure', 'How we will know'], ['risks', 'Risks and dependencies'], ['ask', 'The ask: budget, time, sponsor']];
   const DECISIONS = { approved: 'Approved.', pilot: 'Approved as a pilot.', rejected: 'Rejected.' };
   const BOARD_BARS = { approved: 75, pilot: 50 };   // out of 100; below the pilot bar is a rejection
@@ -2253,20 +2255,21 @@
       const card = boardCard();
       box.appendChild(el('h2', null, B.stage === 'result' ? DECISIONS[B.result.decision] : 'The board responds'));
       let asked = 0;
+      if (B.stage === 'questions') box.appendChild(Slides.room(B, card, 'dim', 'The board room: your slide is still on the screen, and the board has questions.'));
       if (B.stage === 'result') {
-        // The verdict lands on the slide like a rubber stamp.
+        // The verdict lands on the slide like a rubber stamp, and the room answers with its lights.
         const wrap = el('div', 'br-verdict');
-        wrap.appendChild(Slides.render(B, card, 'thumb'));
+        wrap.appendChild(Slides.room(B, card, ROOM_LIGHT[B.result.decision], { approved: 'The board room with the lights on: approved.', pilot: 'The board room, projector still on: a pilot.', rejected: 'The board room gone dark: rejected.' }[B.result.decision]));
         wrap.appendChild(el('span', 'br-stamp s-' + B.result.decision, { approved: 'APPROVED', pilot: 'PILOT', rejected: 'REJECTED' }[B.result.decision]));
         box.appendChild(wrap);
         if (!B.stamped) { B.stamped = true; if (window.Sound) Sound.stamp(); } else wrap.classList.add('still');
       }
       const table = el('div', 'br-table');
       B.members.forEach((m, i) => {
-        const who = BOARD[i] || { role: m.role, name: '', face: '🙂' };
+        const who = BOARD[i] || { role: m.role, name: '', seat: '' };
         const d = el('div', 'member' + (m.preempted ? ' nod' : ' asks'));
         const seat = el('div', 'br-seat');
-        seat.appendChild(el('span', 'br-face', B.stage === 'result' ? MOOD[B.result.decision] : who.face));
+        seat.appendChild(Slides.seat(who.seat, B.stage === 'result' ? ROOM_LIGHT[B.result.decision] : 'dim'));
         seat.appendChild(el('span', 'br-sign', B.stage === 'result' ? '' : m.preempted ? '👍' : '✋'));
         d.appendChild(seat);
         const body = el('div', 'br-body');

@@ -106,8 +106,8 @@ def carpet_mat():
     m, n, l, p = nodes_mat('carpet')
     tc = n.new('ShaderNodeTexCoord')
     ck = n.new('ShaderNodeTexChecker'); ck.inputs['Scale'].default_value = 1.0
-    ck.inputs['Color1'].default_value = (0.105, 0.12, 0.15, 1); ck.inputs['Color2'].default_value = (0.12, 0.135, 0.165, 1)
-    mp = n.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (0.5, 0.5, 0.5)
+    ck.inputs['Color1'].default_value = (0.115, 0.118, 0.125, 1); ck.inputs['Color2'].default_value = (0.13, 0.13, 0.135, 1)
+    mp = n.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (2.0, 2.0, 2.0)
     l.new(tc.outputs['Object'], mp.inputs['Vector']); l.new(mp.outputs[0], ck.inputs['Vector'])
     nz = n.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 300; nz.inputs['Detail'].default_value = 4
     l.new(tc.outputs['Object'], nz.inputs['Vector'])
@@ -137,7 +137,7 @@ def link(o, bevel=0.0):
     for c in o.users_collection: c.objects.unlink(o)
     coll(CUR[0]).objects.link(o)
     if bevel:
-        b = o.modifiers.new('bevel', 'BEVEL'); b.width = bevel; b.segments = 2; b.limit_method = 'ANGLE'
+        b = o.modifiers.new('bevel', 'BEVEL'); b.width = bevel; b.segments = 3; b.limit_method = 'ANGLE'
     return o
 
 def box(name, x0, y0, z0, x1, y1, z1, m, bevel=0.006, hot=None):
@@ -158,7 +158,8 @@ def box(name, x0, y0, z0, x1, y1, z1, m, bevel=0.006, hot=None):
     o = bpy.data.objects.new(name, me); bpy.context.collection.objects.link(o)
     o.data.materials.append(m)
     if hot: HOT[o.name] = hot
-    return link(o, bevel if min(x1 - x0, y1 - y0, z1 - z0) > bevel * 3 else 0)
+    if m is M.get('wall') and not bevel: bevel = 0.012   # cut walls catch a highlight on their edge
+    return link(o, bevel if min(x1 - x0, y1 - y0, z1 - z0) > bevel * 2 else 0)
 
 def plane_img(name, cx, cy, cz, w, h, m, face='-y', hot=None):
     """A picture on a wall. face = direction the picture looks at."""
@@ -178,6 +179,13 @@ def turn(o, r):
     """Rotate a box about its own middle (boxes are built in world coordinates)."""
     c = sum((Vector(v.co) for v in o.data.vertices), Vector()) / len(o.data.vertices)
     o.data.transform(Matrix.Translation(-c)); o.location = c; o.rotation_euler = r
+    return o
+
+def rod(name, p1, p2, r, m, verts=12, hot=None):
+    a, b = Vector(p1), Vector(p2)
+    o = cyl(name, 0, 0, 0, r, (b - a).length, m, verts, hot)
+    o.location = (a + b) / 2
+    o.rotation_euler = (b - a).to_track_quat('Z', 'Y').to_euler()
     return o
 
 def ball(name, x, y, z, r, m, sx=1, sy=1, sz=1, hot=None):
@@ -227,7 +235,8 @@ PANEL = emit_mat('troffer', (1.0, 0.95, 0.86), 5, camera_only=True)
 # ---------- the room ----------
 CUR[0] = 'room'
 box('floor', -0.2, -0.6, -0.1, 18.2, 12.2, 0, CARPET, 0)
-box('slab', -0.2, -0.6, -0.45, 18.2, 12.2, -0.1, mat('slab', (0.35, 0.36, 0.38), 0.7), 0)
+CAP = mat('modelcard', (0.8, 0.78, 0.72), 0.9, bump=0.05, scale=120)
+box('slab', -0.2, -0.6, -0.45, 18.2, 12.2, -0.1, CAP, 0.01)
 # Back wall with a band of windows between x 5 and 13.5, solid elsewhere.
 box('wall_back_l', 0, 12, 0, 5, 12.2, 2.8, WALL, 0)
 box('wall_back_r', 13.5, 12, 0, 18, 12.2, 2.8, WALL, 0)
@@ -266,14 +275,16 @@ cyl('sign_ring', 0.0, 3.35, 1.95, 0.2, 0.03, SIGN).rotation_euler = (0, math.pi 
 
 # Ceiling with a grid and troffers (only the walk-in sees it).
 CUR[0] = 'ceiling'
+TROFFERS = []
 box('ceiling', -0.2, -1, 2.8, 18, 12.2, 2.85, CEIL, 0)
 for ix in range(7):
     for iy in range(5):
         x, y = 1.4 + ix * 2.5, 1.3 + iy * 2.4
         box(f'troffer{ix}_{iy}', x - 0.3, y - 0.6, 2.79, x + 0.3, y + 0.6, 2.8, PANEL, 0)
         lt = bpy.data.lights.new(f'L{ix}_{iy}', 'AREA'); lt.shape = 'RECTANGLE'; lt.size = 0.6; lt.size_y = 1.2
-        lt.energy = 38; lt.color = (1.0, 0.92, 0.80)
+        lt.energy = 62 if (ix + iy) % 2 == 0 else 14; lt.color = (0.96, 1.0, 0.86)
         lo = bpy.data.objects.new(f'L{ix}_{iy}', lt); lo.location = (x, y, 2.77); coll('lights').objects.link(lo)
+        TROFFERS.append(lt)
 
 # ---------- reception ----------
 CUR[0] = 'room'
@@ -294,9 +305,17 @@ box('mag_table', 0.4, 6.9, 0.38, 0.9, 7.4, 0.42, GLASS, 0)
 box('mag', 0.5, 7.0, 0.42, 0.72, 7.28, 0.425, mat('magazine', (0.8, 0.2, 0.15), 0.3), 0)
 
 # ---------- cubicles ----------
+def star_base(n, x, y, hot=None, reach=0.3, top=0.44):
+    cyl(f'{n}_hub', x, y, 0.06, 0.045, 0.05, DARKP, 16, hot)
+    for k in range(5):
+        a = k * 2 * math.pi / 5 + 0.3
+        tx, ty = x + reach * math.cos(a), y + reach * math.sin(a)
+        rod(f'{n}_spoke{k}', (x, y, 0.085), (tx, ty, 0.06), 0.018, DARKP, 8, hot)
+        ball(f'{n}_caster{k}', tx, ty, 0.03, 0.028, DARKP, 1, 1, 0.9, hot)
+    cyl(f'{n}_post', x, y, 0.11, 0.025, top - 0.11, STEEL, 12, hot)
+
 def chair(n, x, y, rot=0.0, hot=None):
-    cyl(f'{n}_base', x, y, 0.05, 0.3, 0.03, DARKP, 5, hot)
-    cyl(f'{n}_post', x, y, 0.08, 0.025, 0.36, STEEL, 12, hot)
+    star_base(n, x, y, hot)
     box(f'{n}_seat', x - 0.25, y - 0.24, 0.44, x + 0.25, y + 0.24, 0.52, CHAIR, 0.03, hot)
     by = y - 0.26 if rot == 0 else y + 0.26
     box(f'{n}_back', x - 0.21, by - 0.025, 0.6, x + 0.21, by + 0.025, 0.98, CHAIR, 0.022, hot)
@@ -325,18 +344,21 @@ def cubicle(n, cx, cy, who=None, hot=None):
     box(f'{n}_modesty', cx - 1.1, back - 0.12, 0.2, cx + 1.1, back - 0.09, 0.71, TRIM, 0, hot)
     box(f'{n}_pedestal', cx - 1.1, cy - 0.7, 0, cx - 0.55, cy - 0.1, 0.68, GREY, 0.008, hot)
     box(f'{n}_tower', cx + 0.55, back - 0.62, 0, cx + 0.75, back - 0.17, 0.45, BEIGE, 0.008, hot)
-    box(f'{n}_kbd', cx - 0.22, back - 0.7, 0.745, cx + 0.22, back - 0.53, 0.768, BEIGE, 0.006, hot)
+    box(f'{n}_kbd', cx - 0.22, back - 0.775, 0.745, cx + 0.22, back - 0.635, 0.768, BEIGE, 0.006, hot)
     box(f'{n}_mouse', cx + 0.33, back - 0.65, 0.745, cx + 0.39, back - 0.56, 0.77, BEIGE, 0.01, hot)
     box(f'{n}_pad', cx + 0.27, back - 0.72, 0.745, cx + 0.47, back - 0.52, 0.748, BLUE, 0, hot)
     chair(f'{n}_chair', cx + 0.1, cy - 0.15, 0, hot)
     box(f'{n}_phone', cx + 0.62, back - 0.5, 0.745, cx + 0.84, back - 0.28, 0.8, BEIGE, 0.012, hot)
     box(f'{n}_handset', cx + 0.6, back - 0.46, 0.8, cx + 0.66, back - 0.3, 0.83, BEIGE, 0.01, hot)
     box(f'{n}_paper', cx - 0.95, cy - 0.6, 0.745, cx - 0.66, cy - 0.38, 0.752 + 0.01 * (len(n) % 3), PAPER, 0.001, hot)
-    # Shelf of binders on the back panel.
-    box(f'{n}_shelf', cx - 1.1, back - 0.35, 1.55, cx - 0.1, back - 0.03, 1.58, TRIM, 0.004, hot)
+    # Shelf of binders resting on the back panel's top rail, held by two steel brackets.
+    top = h + 0.025
+    box(f'{n}_shelf', cx - 1.1, back - 0.33, top, cx - 0.1, back + 0.035, top + 0.025, GREY, 0.004, hot)
+    for i, bx in enumerate((cx - 1.04, cx - 0.16)):
+        box(f'{n}_bracket{i}', bx - 0.006, back - 0.3, top - 0.16, bx + 0.006, back - 0.03, top, TRIM, 0, hot)
     for i in range(7):
         bm = (BLUE, RED, GREY)[(i * 5 + len(n)) % 3]
-        box(f'{n}_binder{i}', cx - 1.05 + i * 0.09, back - 0.32, 1.58, cx - 0.97 + i * 0.09, back - 0.05, 1.86, bm, 0.004, hot)
+        box(f'{n}_binder{i}', cx - 1.05 + i * 0.09, back - 0.3, top + 0.025, cx - 0.97 + i * 0.09, back - 0.02, top + 0.305, bm, 0.004, hot)
     return back
 
 CUR[0] = 'cubicles'
@@ -347,6 +369,7 @@ crt('mieke_crt', 6.75, b - 0.62, 0.745, img_mat('scr_mieke', 'screen_mieke.png',
 cyl('mieke_mug', 7.45, b - 0.62, 0.745, 0.04, 0.1, MUG, hot='mieke')
 cyl('mieke_lampbase', 6.05, b - 0.3, 0.745, 0.08, 0.02, DARKP, hot='mieke')
 cyl('mieke_lamparm', 6.05, b - 0.3, 0.765, 0.012, 0.42, DARKP, hot='mieke')
+rod('mieke_lamparm2', (6.05, b - 0.3, 1.18), (6.15, b - 0.36, 1.2), 0.011, DARKP, 8, 'mieke')
 cyl('mieke_lampshade', 6.15, b - 0.36, 1.08, 0.11, 0.12, mat('lampgreen', (0.05, 0.25, 0.12), 0.25), hot='mieke', r2=0.05)
 ball('mieke_bulb', 6.15, b - 0.36, 1.09, 0.035, LAMPWARM, hot='mieke')
 ml = bpy.data.lights.new('mieke_lamp', 'SPOT'); ml.energy = 25; ml.color = (1, 0.72, 0.45); ml.spot_size = 1.6; ml.shadow_soft_size = 0.05
@@ -463,6 +486,8 @@ box('meet_door', 3.6, 8.0, 0, 4.5, 8.04, 2.1, GLASS, 0, hot=H)
 for x in (0.02, 3.6, 4.5):
     box(f'meet_post{x}', x - 0.025, 7.99, 0, x + 0.025, 8.05, 2.8, TRIM, 0.003, hot=H)
 box('meet_post_c', 4.98, 7.99, 0, 5.06, 8.05, 2.8, TRIM, 0.003, hot=H)
+for nm, a in (('meet_rail_front', (0, 7.99, 2.74, 4.5, 8.05, 2.8)), ('meet_rail_side', (4.98, 8.0, 2.74, 5.06, 12, 2.8))):
+    box(nm, *a, TRIM, 0.003, hot=H)
 box('meet_frost', 0, 7.995, 1.0, 3.6, 8.045, 1.3, mat('frost', (0.9, 0.92, 0.92), 0.5), 0, hot=H)
 box('meet_table', 1.0, 9.4, 0.72, 4.0, 10.6, 0.76, WOOD, 0.01, hot=H)
 for x in (1.2, 3.8):
@@ -482,14 +507,53 @@ thing(bpy.data.objects['meet_projector'], 'projector')
 thing(box('meet_projnote', 2.42, 9.98, 0.86, 2.56, 10.12, 0.861, img_mat('projnote', 'projnote.png', 0, 0.8), 0, hot=H), 'projector')
 # Darren's chair at the head of the table, four centimetres higher than the rest.
 LEATHER = mat('leather', (0.06, 0.06, 0.07), 0.35)
-cyl('meet_head_base', 0.62, 10.0, 0.05, 0.3, 0.03, DARKP, 5, hot=H)
-thing(cyl('meet_head_post', 0.62, 10.0, 0.08, 0.025, 0.5, STEEL, 12, hot=H), 'chair')
+star_base('meet_head', 0.62, 10.0, H, 0.3, 0.56)
+thing(bpy.data.objects['meet_head_post'], 'chair')
 thing(box('meet_head_seat', 0.36, 9.74, 0.56, 0.88, 10.26, 0.66, LEATHER, 0.03, hot=H), 'chair')
 thing(box('meet_head_back', 0.3, 9.76, 0.66, 0.38, 10.24, 1.32, LEATHER, 0.03, hot=H), 'chair')
 thing(box('meet_adapters', 3.25, 9.5, 0.76, 3.6, 9.75, 0.84, mat('tub', (0.7, 0.72, 0.75), 0.2), 0.006, hot=H), 'adapters')
 for i, c in enumerate(((0.1, 0.2, 0.6), (0.9, 0.9, 0.9), (0.05, 0.05, 0.05), (0.6, 0.1, 0.1), (0.2, 0.2, 0.22))):
     thing(box(f'meet_adapter{i}', 3.28 + i * 0.062, 9.56 + (i % 2) * 0.07, 0.8, 3.33 + i * 0.062, 9.66 + (i % 2) * 0.07, 0.855, mat(f'adapter{i}', c, 0.4), 0.004, hot=H), 'adapters')
 text('meet_label', 'BOARD ROOM', 1.8, 7.985, 1.15, 0.12, mat('signdark', (0.15, 0.17, 0.2), 0.4), '-y', hot=H)
+
+# ---------- board day (pitch shots only) ----------
+# Friday the screen comes down in front of the whiteboard and the board takes the near side of the
+# table. Nobody has a face: each member is known by what they bring.
+CUR[0] = 'pitch'
+SHOT[0] = 'pitch'
+SCREEN = (1.4, 3.6, 0.9, 2.55)   # x0, x1, z0, z1: 4 by 3, like the slide
+SCREEN_Y = 11.9
+box('pitch_case', SCREEN[0] - 0.12, SCREEN_Y - 0.06, SCREEN[3] + 0.02, SCREEN[1] + 0.12, SCREEN_Y + 0.06, SCREEN[3] + 0.13, mat('casegrey', (0.82, 0.82, 0.8), 0.4), 0.02)
+box('pitch_screen_frame', SCREEN[0] - 0.04, SCREEN_Y - 0.008, SCREEN[2] - 0.06, SCREEN[1] + 0.04, SCREEN_Y, SCREEN[3] + 0.02, mat('screenblack', (0.03, 0.03, 0.03), 0.6), 0)
+SCREEN_MAT = mat('screenwhite', (0.85, 0.86, 0.86), 0.9)
+SCREEN_MAT.node_tree.nodes['Principled BSDF'].inputs['Emission Color'].default_value = (0.8, 0.85, 1.0, 1)
+box('pitch_screen', SCREEN[0], SCREEN_Y - 0.012, SCREEN[2], SCREEN[1], SCREEN_Y - 0.008, SCREEN[3], SCREEN_MAT, 0)
+box('pitch_pull', 2.47, SCREEN_Y - 0.02, SCREEN[2] - 0.16, 2.53, SCREEN_Y - 0.01, SCREEN[2] - 0.06, DARKP, 0)
+# CFO, left: a desk calculator with a paper roll, reading glasses on the cost sheet.
+H = 'cfo'
+thing(box('cfo_sheet', 1.4, 9.45, 0.76, 1.65, 9.8, 0.762, PAPER, 0, hot=H), H)
+thing(turn(box('cfo_calc', 1.68, 9.48, 0.76, 1.88, 9.72, 0.8, mat('calcbeige', (0.7, 0.66, 0.56), 0.45), 0.006, hot=H), (0.12, 0, -0.2)), H)
+thing(box('cfo_roll', 1.71, 9.68, 0.8, 1.85, 9.74, 0.86, PAPER, 0.01, hot=H), H)
+for i, gx in enumerate((1.49, 1.56)):
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.026, minor_radius=0.003, location=(gx, 9.6, 0.766))
+    g = bpy.context.object; g.name = f'cfo_glass{i}'; g.data.materials.append(DARKP); HOT[g.name] = H; link(g); thing(g, H)
+thing(box('cfo_bridge', 1.515, 9.598, 0.765, 1.535, 9.602, 0.768, DARKP, 0, hot=H), H)
+# CHRO, middle: the works council binder, and a second chair pulled up for the privacy officer.
+H = 'chro'
+thing(box('chro_binder', 2.3, 9.45, 0.76, 2.6, 9.82, 0.81, mat('binder_green', (0.08, 0.3, 0.16), 0.45), 0.004, hot=H), H)
+thing(box('chro_binder_label', 2.36, 9.5, 0.81, 2.54, 9.62, 0.8105, PAPER, 0, hot=H), H)
+for i in range(3):
+    thing(box(f'chro_flag{i}', 2.6, 9.5 + i * 0.09, 0.77, 2.64, 9.53 + i * 0.09, 0.8, mat('stickyblue', (0.45, 0.75, 1.0), 0.7), 0, hot=H), H)
+thing(box('chro_dpo_pad', 2.75, 9.55, 0.76, 2.85, 9.65, 0.775, mat('sticky', (1.0, 0.85, 0.25), 0.7), 0.002, hot=H), H)
+thing(cyl('chro_pen', 2.88, 9.6, 0.76, 0.005, 0.14, mat('penred', (0.7, 0.05, 0.05), 0.4), 8, hot=H), H).rotation_euler = (math.pi / 2, 0, 0.4)
+# COO, right: the shift roster on a clipboard, a hard hat on the table, still dusty.
+H = 'coo'
+thing(turn(box('coo_clip', 3.2, 9.45, 0.76, 3.45, 9.8, 0.768, mat('masonite', (0.45, 0.3, 0.16), 0.6), 0.003, hot=H), (0, 0, 0.1)), H)
+thing(turn(box('coo_roster', 3.22, 9.47, 0.768, 3.43, 9.74, 0.77, PAPER, 0, hot=H), (0, 0, 0.1)), H)
+thing(turn(box('coo_clipjaw', 3.27, 9.73, 0.768, 3.38, 9.78, 0.785, STEEL, 0.003, hot=H), (0, 0, 0.1)), H)
+hat = ball('coo_hat', 3.68, 9.65, 0.775, 0.13, mat('hatyellow', (0.9, 0.65, 0.05), 0.4, var=0.2, scale=30), 1, 1.15, 0.85, hot=H); thing(hat, H)
+thing(cyl('coo_brim', 3.68, 9.65, 0.765, 0.155, 0.012, mat('hatyellow', (0.9, 0.65, 0.05), 0.4), 32, hot=H), H).scale = (1, 1.12, 1)
+CUR[0] = 'room'
 
 # ---------- Darren's office (back right) ----------
 CUR[0] = 'darren'
@@ -499,6 +563,8 @@ box('dar_glass', 13.5, 8.5, 0, 14.5, 8.54, 2.8, GLASS, 0, hot=H)
 box('dar_door', 14.5, 8.5, 0, 15.4, 8.54, 2.1, mat('doorwood', (0.35, 0.2, 0.1), 0.45), 0.01, hot=H)
 box('dar_door_head', 14.5, 8.5, 2.1, 15.4, 8.6, 2.8, WALL, 0)
 box('dar_glass_side', 13.5, 8.5, 0, 13.54, 12, 2.8, GLASS, 0, hot=H)
+box('dar_rail_front', 13.49, 8.49, 2.74, 14.5, 8.55, 2.8, TRIM, 0.003, hot=H)
+box('dar_rail_side', 13.49, 8.5, 2.74, 13.55, 12, 2.8, TRIM, 0.003, hot=H)
 for i in range(22):   # venetian blinds behind the glass, half drawn
     z = 0.9 + i * 0.085
     box(f'dar_blind{i}', 13.56, 8.6, z, 13.58, 11.9, z + 0.06, mat('blind', (0.82, 0.8, 0.74), 0.5), 0, hot=H)
@@ -507,7 +573,11 @@ box('dar_plate', 14.75, 8.495, 1.5, 15.15, 8.5, 1.62, mat('brass', (0.8, 0.6, 0.
 text('dar_plate_t', 'DARREN', 14.95, 8.49, 1.56, 0.06, mat('signdark', (0.15, 0.17, 0.2), 0.4), '-y', hot=H)
 box('dar_desk', 15.0, 10.4, 0.72, 17.2, 11.3, 0.78, mat('mahogany', (0.18, 0.06, 0.03), 0.3, coat=0.4), 0.01, hot=H)
 box('dar_desk_body', 15.1, 10.9, 0, 17.1, 11.25, 0.72, mat('mahogany', (0.18, 0.06, 0.03), 0.3, coat=0.4), 0.01, hot=H)
-box('dar_chair', 15.75, 11.4, 0.45, 16.45, 11.95, 1.4, mat('leather', (0.06, 0.06, 0.07), 0.35), 0.06, hot=H)
+star_base('dar_chair', 16.1, 11.65, H, 0.32, 0.5)
+box('dar_chair_seat', 15.8, 11.4, 0.5, 16.4, 11.92, 0.62, mat('leather', (0.06, 0.06, 0.07), 0.35), 0.04, hot=H)
+box('dar_chair_back', 15.83, 11.86, 0.62, 16.37, 11.96, 1.38, mat('leather', (0.06, 0.06, 0.07), 0.35), 0.04, hot=H)
+for i, ax in enumerate((15.8, 16.4)):
+    box(f'dar_chair_arm{i}', ax - 0.03, 11.5, 0.72, ax + 0.03, 11.88, 0.76, DARKP, 0.01, hot=H)
 box('dar_lcd', 15.8, 11.05, 0.78, 16.4, 11.1, 1.22, DARKP, 0.01, hot=H)
 box('dar_lcd_scr', 15.83, 11.045, 0.82, 16.37, 11.05, 1.19, img_mat('scr_desk', 'screen_desk.png', 1.2), 0, hot=H)
 plane_img('dar_poster', 14.2, 11.99, 1.55, 0.6, 0.8, img_mat('poster', 'poster.png', 0, 0.2), '-y', H)
@@ -593,6 +663,8 @@ for i in range(8):
         box(f'foos_man{i}_{k}', x - 0.015, 1.8 + k * 0.2 - 0.02, 0.82, x + 0.015, 1.8 + k * 0.2 + 0.02, 0.95, mat('foosred', (0.6, 0.05, 0.05), 0.3) if i % 2 else mat('foosblue', (0.05, 0.1, 0.5), 0.3), 0.004)
 for x, y in ((0.5, 0.3), (14.2, 0.4)):
     cyl(f'lobbypot{x}', x, y, 0, 0.2, 0.42, mat('blackpot', (0.05, 0.05, 0.05), 0.4))
+    cyl(f'lobbysoil{x}', x, y, 0.42, 0.18, 0.01, mat('soil', (0.08, 0.05, 0.03), 0.9))
+    cyl(f'lobbytrunk{x}', x, y, 0.42, 0.035, 0.7, mat('trunk', (0.22, 0.15, 0.08), 0.8, bump=0.4, scale=60), 10, r2=0.025)
     for k in range(5):
         a = k * 1.26
         o = ball(f'palm{x}_{k}', x + 0.2 * math.cos(a), y + 0.2 * math.sin(a), 1.15, 0.35, LEAF, 1, 0.25, 0.9)
@@ -664,6 +736,15 @@ do2 = bpy.data.objects.new('daylight2', dl2); do2.location = (8.5, -1.3, 1.6); d
 coll('walklights').objects.link(do2)
 CUR[0] = 'room'
 
+# Cut walls get an off-white cap, like an architect's model; the eye reads the cut, not a grey slab.
+CUR[0] = 'room'
+for o in list(S.objects):
+    if o.type != 'MESH' or not o.data.materials or o.data.materials[0] is not WALL: continue
+    if any(c.name in ('walkonly', 'ceiling') for c in o.users_collection): continue
+    xs = [v.co.x for v in o.data.vertices]; ys = [v.co.y for v in o.data.vertices]; zs = [v.co.z for v in o.data.vertices]
+    if max(zs) < 2.79: continue
+    box(o.name + '_cap', min(xs) - 0.004, min(ys) - 0.004, max(zs), max(xs) + 0.004, max(ys) + 0.004, max(zs) + 0.012, CAP, 0.003, hot=HOT.get(o.name))
+
 # ---------- world, render ----------
 w = bpy.data.worlds.new('world'); S.world = w; w.use_nodes = True
 w.node_tree.nodes['Background'].inputs['Color'].default_value = (0.3, 0.33, 0.38, 1)
@@ -672,12 +753,12 @@ S.render.engine = 'CYCLES'
 S.cycles.device = 'CPU'
 S.cycles.use_denoising = True
 S.cycles.denoiser = 'OPENIMAGEDENOISE'
-S.cycles.max_bounces = 4
+S.cycles.max_bounces = 8
 S.cycles.diffuse_bounces = 3
 S.cycles.glossy_bounces = 2
 S.cycles.adaptive_threshold = 0.04
 S.render.use_persistent_data = True
-S.cycles.transmission_bounces = 4
+S.cycles.transmission_bounces = 8
 S.cycles.sample_clamp_indirect = 8
 S.cycles.blur_glossy = 0.5
 S.view_settings.view_transform = 'AgX'
@@ -708,6 +789,18 @@ def hide(name, flag=True):
     if name in COL: COL[name].hide_render = flag
 
 # ---------- modes ----------
+PITCH = MODE in ('shot', 'shotmask') and ARGS[:1] in (['pitch'], ['pitchwide'])
+if not PITCH: hide('pitch')
+
+def evening():
+    """17:40: most of the troffers off, dusk outside, the desk lamps and screens carry the room."""
+    for lt in TROFFERS: lt.energy *= 0.22
+    dl.energy = 140; dl.color = (0.35, 0.42, 0.75)
+    fl.energy = 22
+    for nm, x, y in (('eve_lamp_you', 12.5, 5.1), ('eve_lamp_priya', 6.2, 8.5)):
+        lt = bpy.data.lights.new(nm, 'POINT'); lt.energy = 18; lt.color = (1, 0.7, 0.42); lt.shadow_soft_size = 0.1
+        lo = bpy.data.objects.new(nm, lt); lo.location = (x, y, 1.15); coll('lights').objects.link(lo)
+
 HUB_TARGET = (9.0, 6.5, 0.8)
 def hub_camera():
     cd = bpy.data.cameras.new('hubcam'); cd.type = 'ORTHO'; cd.ortho_scale = 22
@@ -766,12 +859,15 @@ def set_res(w, h, samples):
     S.render.resolution_x, S.render.resolution_y, S.render.resolution_percentage = w, h, 100
     S.cycles.samples = samples
 
-if MODE in ('hub', 'mask'):
+if MODE in ('hub', 'hubeve', 'mask'):
     w_, h_ = (int(ARGS[0]), int(ARGS[1])) if len(ARGS) > 1 else (1920, 1080)
     samples = int(ARGS[2]) if len(ARGS) > 2 else 128
     cam = hub_camera()
     set_res(w_, h_, samples)
-    if MODE == 'hub':
+    if MODE == 'hubeve':
+        evening()
+        S.render.filepath = os.path.join(OUT, f'hub_evening_{w_}.png')
+    elif MODE == 'hub':
         compositor()
         json.dump(hotspot_boxes(cam), open(os.path.join(OUT, 'hotspots.json'), 'w'), indent=1)
         S.render.filepath = os.path.join(OUT, f'hub_{w_}.png')
@@ -839,6 +935,8 @@ elif MODE in ('shot', 'shotmask'):
         'jens': ((12.1, 6.55, 1.62), (11.85, 8.25, 0.8), 24),
         'canteen': ((14.5, 4.3, 1.6), (16.4, 7.6, 0.95), 20),
         'board': ((3.9, 8.4, 1.7), (1.6, 10.8, 1.0), 18),
+        'pitch': ((2.5, 8.95, 1.45), (2.5, 11.9, 1.68), 27),          # the slide show: the screen, big
+        'pitchwide': ((2.5, 8.12, 2.1), (2.5, 11.0, 1.12), 16),       # questions and verdict: the board's places too
     }
     name = ARGS[0]
     e, g, lens = SHOTS[name]
@@ -847,15 +945,41 @@ elif MODE in ('shot', 'shotmask'):
     cam.location = e; look_at(cam, g)
     w_, h_ = (int(ARGS[1]), int(ARGS[2])) if len(ARGS) > 2 else (1600, 900)
     set_res(w_, h_, int(ARGS[3]) if len(ARGS) > 3 else 96)
+    variant = ARGS[4] if len(ARGS) > 4 else ''
+    if PITCH:
+        # You stand at the screen end; the far chairs are yours to pace behind, so they go.
+        for o in S.objects:
+            if o.name.startswith('meet_d') or o.name.startswith('meet_adapter'): o.hide_render = True
+        # Where the slide sits on the picture: the screen's corners, for the HTML layer.
+        from bpy_extras.object_utils import world_to_camera_view
+        S.frame_set(1); bpy.context.view_layer.update()
+        x0, x1, z0, z1 = SCREEN; y = SCREEN_Y - 0.012
+        corners = [world_to_camera_view(S, cam, Vector(c)) for c in ((x0, y, z1), (x1, y, z1), (x1, y, z0), (x0, y, z0))]
+        json.dump([[round(c.x * 100, 3), round((1 - c.y) * 100, 3)] for c in corners], open(os.path.join(OUT, f'{name}_screen.json'), 'w'))
+        room = [lt for lt in TROFFERS if bpy.data.objects[lt.name].location.x < 5.2 and bpy.data.objects[lt.name].location.y > 7.8]
+        if variant in ('dim', 'off'):
+            for lt in TROFFERS: lt.energy *= 0.35
+            for lt in room: lt.energy *= 0.3
+            PANEL.node_tree.nodes['Emission'].inputs['Strength'].default_value = 1.2
+        # The projector throws the slide; the game draws it, so the render only lights the screen and its spill.
+        sp = SCREEN_MAT.node_tree.nodes['Principled BSDF']
+        sp.inputs['Emission Strength'].default_value = {'dim': 1.6, 'lit': 0.5}.get(variant, 0.0)
+        if variant in ('dim', 'lit'):
+            gl = bpy.data.lights.new('screen_spill', 'AREA'); gl.shape = 'RECTANGLE'; gl.size = SCREEN[1] - SCREEN[0]; gl.size_y = SCREEN[3] - SCREEN[2]
+            gl.energy = 40 if variant == 'dim' else 10; gl.color = (0.8, 0.86, 1.0)
+            go = bpy.data.objects.new('screen_spill', gl); go.location = ((SCREEN[0] + SCREEN[1]) / 2, SCREEN_Y - 0.05, (SCREEN[2] + SCREEN[3]) / 2)
+            go.rotation_euler = (-math.pi / 2, 0, 0); coll('lights').objects.link(go)
+    suffix = '_' + variant if variant else ''
     if MODE == 'shotmask':
-        ids = sorted({t for s_, t in THING.values() if s_ == name})
+        key = 'pitch' if PITCH else name   # both board day shots share the board's places
+        ids = sorted({t for s_, t in THING.values() if s_ == key})
         json.dump(ids, open(os.path.join(OUT, f'shot_{name}_ids.json'), 'w'))
         cols = {t: emit_mat('th_' + t, ((i + 1) / 16, 0, 0), 1) for i, t in enumerate(ids)}
         black = emit_mat('id_none', (0, 0, 0), 0)
         for o in S.objects:
             if o.type in ('MESH', 'FONT'):
                 st = THING.get(o.name)
-                m = cols.get(st[1], black) if st and st[0] == name else black
+                m = cols.get(st[1], black) if st and st[0] == key else black
                 o.data.materials.clear(); o.data.materials.append(m)
         for o in list(S.objects):
             if o.type == 'LIGHT': o.hide_render = True
@@ -866,7 +990,7 @@ elif MODE in ('shot', 'shotmask'):
         S.render.filepath = os.path.join(OUT, f'shot_{name}_mask.png')
     else:
         S.render.image_settings.file_format = 'PNG'
-        S.render.filepath = os.path.join(OUT, f'shot_{name}.png')
+        S.render.filepath = os.path.join(OUT, f'shot_{name}{suffix}.png')
     bpy.ops.render.render(write_still=True)
 
 elif MODE in ('stand', 'standstill'):
