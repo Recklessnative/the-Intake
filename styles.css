@@ -398,13 +398,28 @@ input.wordart::placeholder { color: #ff9a1f; opacity: 1; }
 }
 @keyframes ss-spin { from { transform: rotate(-720deg) scale(.05); opacity: .2; } to { transform: none; opacity: 1; } }
 .ss-audience { display: flex; gap: min(8vw, 60px); justify-content: center; align-items: flex-end; height: 92px; }
+/* In the board room: the render fills the screen, the slide sits on the pull-down screen in it. */
+.slideshow.in-room { gap: 0; }
+.ss-stage.in-room { position: relative; display: block; width: min(100vw, 100vh * 16 / 9); aspect-ratio: 16 / 9; overflow: hidden; }
+.ss-room, .br-room picture { display: block; width: 100%; height: 100%; }
+.ss-room img, .br-room img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ss-screen { position: absolute; left: 0; top: 0; width: 800px; height: 600px; transform-origin: 0 0; pointer-events: none; }
+.ss-screen > .ss-slide { width: 800px; height: 600px; box-shadow: none; filter: brightness(.94) saturate(.95); }
+.ss-stage.in-room .ss-audience { position: absolute; left: 0; right: 0; bottom: 2.5%; height: auto; }
+.slideshow.in-room .ss-hint { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; margin: 0; color: #f1ece1; text-shadow: 0 1px 2px #000; }
+.br-place { display: block; height: 54px; aspect-ratio: 16 / 9; background-repeat: no-repeat; border: 1px solid #000; box-shadow: 0 0 0 1px #6f7c91; background-color: #222; }
+.ss-member .br-place { height: 62px; }
+.ss-member .ss-plate { margin-top: 3px; padding: 1px 6px; background: #ffffe1; color: #000; border: 1px solid #000; font: 11px Tahoma, Verdana, sans-serif; letter-spacing: 0; }
+.br-room { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid #000; background: #111; }
+.br-room.flat { aspect-ratio: auto; border: 0; background: none; }
+.br-room .ss-screen { position: absolute; }
 .ss-member { position: relative; display: flex; flex-direction: column; align-items: center; color: #9aa4b5; font-size: 11px; }
-.ss-face { font-size: 44px; line-height: 1; filter: brightness(.75) saturate(.7); }
 .ss-plate { margin-top: 2px; letter-spacing: .08em; }
-.ss-react { position: absolute; top: -26px; font-size: 24px; line-height: 1; }
-.ss-member.r-nod .ss-face { animation: ss-nod .5s ease-in-out 2; }
-.ss-member.r-frown .ss-face, .ss-member.r-eyebrow .ss-face { animation: ss-shake .4s ease-in-out; }
-.ss-member.r-yawn .ss-face { animation: ss-sink 1.2s ease-in-out; }
+.ss-react { position: absolute; top: -30px; font-size: 24px; line-height: 1; }
+.ss-member[class*=" r-"] .ss-react { padding: 2px 5px; background: #ffffe1; border: 1px solid #000; border-radius: 6px; }
+.ss-member.r-nod .br-place { animation: ss-nod .5s ease-in-out 2; }
+.ss-member.r-frown .br-place, .ss-member.r-eyebrow .br-place { animation: ss-shake .4s ease-in-out; }
+.ss-member.r-yawn .br-place { animation: ss-sink 1.2s ease-in-out; }
 .ss-member[class*=" r-"] .ss-react { animation: ss-pop .35s ease-out; }
 @keyframes ss-nod { 50% { transform: translateY(6px); } }
 @keyframes ss-shake { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
@@ -420,8 +435,8 @@ input.wordart::placeholder { color: #ff9a1f; opacity: 1; }
 .br-team p { margin: 0; flex: 1 1 260px; }
 .br-table { display: flex; flex-direction: column; }
 .member { display: flex; gap: 10px; border-top: 1px solid #c8d3e4; padding: 8px 0; }
-.br-seat { position: relative; flex: 0 0 52px; text-align: center; }
-.br-face { font-size: 40px; line-height: 1; display: inline-block; }
+.br-seat { position: relative; flex: 0 0 96px; text-align: center; }
+.br-seat .br-place { width: 96px; height: auto; }
 .br-sign { position: absolute; right: -2px; top: -4px; font-size: 18px; }
 .member.asks .br-sign { animation: br-wave 1s ease-in-out 2; transform-origin: bottom center; }
 @keyframes br-wave { 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
@@ -430,7 +445,9 @@ input.wordart::placeholder { color: #ff9a1f; opacity: 1; }
 .member-who { margin: 0 0 4px; font-weight: 700; }
 .member.nod .member-who { color: #2e7d32; }
 .member .msg { max-width: 100%; }
-.br-verdict { position: relative; max-width: 420px; margin: 6px auto 12px; }
+.br-verdict { position: relative; max-width: 640px; margin: 6px auto 12px; }
+.br-verdict .br-stamp { top: 32%; }
+#boardroom > .br-room { max-width: 640px; margin: 6px auto 12px; }
 .br-verdict.still .br-stamp { animation: none; }
 .ss-slide.thumb { width: 100%; box-shadow: 2px 2px 6px rgba(0,0,0,.35); }
 .br-stamp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-12deg); font: 900 34px Impact, 'Arial Black', sans-serif; letter-spacing: .08em; padding: 4px 14px; border: 5px solid currentColor; border-radius: 6px; background: rgba(255,255,255,.75); animation: br-stamp .45s cubic-bezier(.3,1.6,.6,1) .2s both; }
@@ -439,7 +456,7 @@ input.wordart::placeholder { color: #ff9a1f; opacity: 1; }
 .br-stamp.s-rejected { color: #b5432a; }
 @keyframes br-stamp { from { transform: translate(-50%, -50%) rotate(-12deg) scale(3); opacity: 0; } to { transform: translate(-50%, -50%) rotate(-12deg) scale(1); opacity: 1; } }
 .end-board { font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .ss-slide, .ss-box, .ss-face, .ss-react, .br-stamp, .br-sign { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .ss-slide, .ss-box, .br-place, .ss-react, .br-stamp, .br-sign { animation: none !important; } }
 
 /* Hard mode and the share card */
 body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start-menu [data-open="w-mieke"] { display: none; }
@@ -967,6 +984,11 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
     repeating-linear-gradient(98deg, transparent 0 15px, rgba(220,232,245,.3) 15px 16px, transparent 16px 31px),
     linear-gradient(170deg, #9aa6b2 0%, #7d8995 45%, #5d6772 100%);
   background-size: 120px 180px, 90px 140px, 100% 100%; animation: office-rain .9s linear infinite; }
+.office-stage.evening .office-rain { background:
+    repeating-linear-gradient(104deg, transparent 0 9px, rgba(160,175,205,.35) 9px 10px, transparent 10px 23px),
+    repeating-linear-gradient(98deg, transparent 0 15px, rgba(160,175,205,.2) 15px 16px, transparent 16px 31px),
+    linear-gradient(170deg, #2b3550 0%, #222a40 45%, #171c2c 100%);
+  background-size: 120px 180px, 90px 140px, 100% 100%; }
 @keyframes office-rain { to { background-position: -30px 180px, -18px 140px, 0 0; } }
 /* Labels are tooltips: pale yellow, thin black line, Tahoma 11. */
 .office-tag { position: absolute; transform: translate(-50%, calc(-100% - 8px)); min-height: 0; padding: 2px 7px; white-space: nowrap;

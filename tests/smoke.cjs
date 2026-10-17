@@ -480,6 +480,9 @@ async function followUp() {
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#slideshow .ss-slide.in-star');
   if (await p.$$eval('#slideshow .ss-box.later', l => l.length) !== 6) throw new Error('slide show should start with only the title');
+  // The show happens in the rendered board room: the slide sits on its screen, the board is known by its things.
+  const room = await p.evaluate(() => ({ pic: !!document.querySelector('#slideshow .ss-room img'), warp: (document.querySelector('#slideshow .ss-screen') || {}).style?.transform || '', places: document.querySelectorAll('#slideshow .br-place').length }));
+  if (!room.pic || !/^matrix3d/.test(room.warp) || room.places !== 3) throw new Error('slide show is not in the board room: ' + JSON.stringify(room));
   for (let i = 0; i < 6; i++) await p.click('#slideshow');
   const reacts = await p.$$eval('#slideshow .ss-react', l => l.map(x => x.textContent).join(''));
   if (await p.$$eval('#slideshow .ss-box.later', l => l.length) || !reacts.includes('🧮')) throw new Error('slide show builds or reactions wrong: ' + reacts);
@@ -491,6 +494,9 @@ async function followUp() {
   await p.waitForSelector('.member textarea');
   if (await p.$('#slideshow')) throw new Error('slide show did not close');
   if (await p.$$eval('.member textarea', l => l.length) !== 2 || !(await p.$('.member.nod'))) throw new Error('board questions wrong');
+  // No faces anywhere in the board room: no person or face emoji.
+  if (/\p{Emoji_Presentation}/u.test((await p.textContent('#boardroom')).replace(/[👍✋📝👎❓💤🧮]/gu, ''))) throw new Error('a face in the board room: ' + await p.textContent('#boardroom'));
+  if (!(await p.$('#boardroom .br-room .ss-screen'))) throw new Error('questions are not asked in the board room');
   await p.fill('.member textarea[name=b0]', 'Yes, we showed it to them on Tuesday.');
   await p.fill('.member textarea[name=b1]', 'We pilot on day shift first.');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board.png' });
@@ -500,6 +506,7 @@ async function followUp() {
   if (bt.trim() !== '70 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 0
   // The score decides: 70 is a pilot (approved from 75, a pilot from 50), and the chair's line matches it.
   if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('stamp does not follow the score');
+  if (!(await p.getAttribute('#boardroom .br-verdict .br-room img', 'src')).includes('board-dim')) throw new Error('a pilot should leave the projector on');
   if (!(await p.textContent('#boardroom .quick-debrief')).includes('A pilot. Report back')) throw new Error('verdict does not match the decision');
   await p.waitForTimeout(900);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board-result.png' });

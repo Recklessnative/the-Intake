@@ -7,7 +7,8 @@
   const THEMES = [['blue', 'Corporate Blue'], ['ocean', 'Ocean Gradient'], ['beige', 'Beige Professional'], ['night', 'Midnight Synergy']];
   const TRANSITIONS = [['none', 'No transition'], ['fade', 'Fade smoothly'], ['wipe', 'Wipe right'], ['star', 'Star wipe'], ['spin', 'Spin and zoom']];
   const CLIPART = [['', 'None'], ['🤝', 'Handshake'], ['📈', 'Chart going up'], ['💡', 'Light bulb'], ['🏆', 'Trophy'], ['🧩', 'Puzzle piece'], ['🚀', 'Rocket']];
-  const REACT = { nod: '👍', note: '📝', frown: '😒', eyebrow: '🤨', yawn: '🥱', calculator: '🧮' };
+  // Nobody in the building has a face, so the board reacts with things, not expressions.
+  const REACT = { nod: '👍', note: '📝', frown: '👎', eyebrow: '❓', yawn: '💤', calculator: '🧮' };
   const REACTIONS = Object.keys(REACT);
 
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
@@ -117,7 +118,85 @@
     });
   }
 
-  // The show: full screen, the transition, one box per click, the board in the front row.
+  // ---------- the slide on the board room's screen ----------
+  // The board room is a render; the slide is drawn by the page and bent onto the screen in it, so
+  // whatever you wrote shows without rendering anything again. MAP.board.show / .room hold the
+  // screen's corners (top left, top right, bottom right, bottom left) in % of the picture.
+  const MEDIA = 'media/office/';
+  const MAP = () => (window.OFFICE_MAP || {}).board || {};
+  const BASE_W = 800, BASE_H = 600;
+  // The 2D projective transform taking the base rectangle onto four points, as a CSS matrix3d.
+  function warp(pts) {
+    const src = [[0, 0], [BASE_W, 0], [BASE_W, BASE_H], [0, BASE_H]];
+    const A = [], b = [];
+    src.forEach(([x, y], i) => {
+      const [u, v] = pts[i];
+      A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+      A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+    });
+    for (let c = 0; c < 8; c++) {   // Gaussian elimination with partial pivoting
+      let m = c;
+      for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+      [A[c], A[m]] = [A[m], A[c]]; [b[c], b[m]] = [b[m], b[c]];
+      for (let r = 0; r < 8; r++) {
+        if (r === c) continue;
+        const f = A[r][c] / A[c][c];
+        for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+        b[r] -= f * b[c];
+      }
+    }
+    const h = b.map((v, i) => v / A[i][i]);
+    return 'matrix3d(' + [h[0], h[3], 0, h[6], h[1], h[4], 0, h[7], 0, 0, 1, 0, h[2], h[5], 0, 1].join(',') + ')';
+  }
+  // The slide keeps its own size and transitions; the screen around it does the bending.
+  function onScreen(frame, slide, corners) {
+    const scr = el('div', 'ss-screen');
+    slide.parentNode.insertBefore(scr, slide);
+    scr.appendChild(slide);
+    const place = () => {
+      const w = frame.clientWidth, h = frame.clientHeight;
+      if (!w || !h) return;
+      scr.style.transform = warp(corners.map(([x, y]) => [x / 100 * w, y / 100 * h]));
+    };
+    place();
+    if (window.ResizeObserver) new ResizeObserver(place).observe(frame);
+    else window.addEventListener('resize', place);
+    requestAnimationFrame(place);
+  }
+  function picture(name, cls) {
+    const pic = el('picture', cls);
+    const src = el('source'); src.media = '(max-width: 900px)'; src.srcset = MEDIA + name + '-800.webp';
+    const img = el('img'); img.src = MEDIA + name + '.webp'; img.alt = '';
+    pic.append(src, img);
+    return pic;
+  }
+  // The wide room with the slide on the screen: light = 'lit' (approved), 'dim' (presenting, pilot), 'off' (rejected).
+  function room(B, card, light, alt) {
+    const corners = MAP().room;
+    const frame = el('div', 'br-room');
+    if (!corners) { frame.classList.add('flat'); frame.appendChild(render(B, card, 'thumb')); return frame; }
+    const pic = picture('board-' + light);
+    pic.querySelector('img').alt = alt || 'The board room, with your slide on the screen.';
+    frame.appendChild(pic);
+    const slide = render(B, card, 'thumb');
+    frame.appendChild(slide);
+    onScreen(frame, slide, corners);
+    return frame;
+  }
+  // A board member's place at the table, cut from the wide room: how you know who is talking.
+  function seat(id, light) {
+    const r = ((MAP().seats || {})[id] || {}).rect;
+    const s = el('span', 'br-place');
+    if (!r) return s;
+    const pad = 1.5, x0 = Math.max(0, r[0] - pad), y0 = Math.max(0, r[1] - pad), cw = Math.min(100, r[2] + pad) - x0, ch = Math.min(100, r[3] + pad) - y0;
+    s.style.backgroundImage = 'url(' + MEDIA + 'board-' + (light || 'lit') + '.webp)';
+    s.style.backgroundSize = (10000 / cw) + '% ' + (10000 / ch) + '%';
+    s.style.backgroundPosition = (cw < 100 ? x0 / (100 - cw) * 100 : 0) + '% ' + (ch < 100 ? y0 / (100 - ch) * 100 : 0) + '%';
+    s.style.aspectRatio = (cw * 16) / (ch * 9);
+    return s;
+  }
+
+  // The show: the board room in the dark, the slide on the screen, one box per click, the board at the table.
   let showing = null;
   function show(B, card, board, done) {
     stop();
@@ -126,20 +205,28 @@
     ov.id = 'slideshow';
     ov.setAttribute('role', 'dialog');
     ov.setAttribute('aria-label', 'Slide show');
-    const stage = el('div', 'ss-stage');
+    const corners = MAP().show;
+    const stage = el('div', 'ss-stage' + (corners ? ' in-room' : ''));
     const slide = render(B, card, 'in-' + s.transition);
     slide.querySelectorAll('.ss-box').forEach(b => b.classList.add('later'));
-    stage.appendChild(slide);
+    if (corners) {
+      ov.classList.add('in-room');
+      const pic = picture('board-show', 'ss-room');
+      pic.querySelector('img').alt = 'The board room in the dark, the projector on the screen.';
+      stage.appendChild(pic);
+      stage.appendChild(slide);
+      onScreen(stage, slide, corners);
+    } else stage.appendChild(slide);
     ov.appendChild(stage);
     const row = el('div', 'ss-audience');
     const heads = board.map((m, i) => {
       const h = el('div', 'ss-head-' + i + ' ss-member');
       const bubble = el('span', 'ss-react');
-      h.append(bubble, el('span', 'ss-face', m.face), el('span', 'ss-plate', m.role));
+      h.append(bubble, seat(m.seat, 'dim'), el('span', 'ss-plate', m.role));
       row.appendChild(h);
       return { h, bubble };
     });
-    ov.appendChild(row);
+    (corners ? stage : ov).appendChild(row);
     const hint = el('p', 'ss-hint', 'Click, Space or → for the next box · Esc ends the show');
     ov.appendChild(hint);
     document.body.appendChild(ov);
@@ -196,5 +283,5 @@
     showing = null;
   }
 
-  window.Slides = { BOXES, REACTIONS, editor, render, fit, show, stop, describe, flashy, style };
+  window.Slides = { BOXES, REACTIONS, editor, render, fit, show, stop, describe, flashy, style, room, seat };
 })();
