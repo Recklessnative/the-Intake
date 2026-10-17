@@ -254,9 +254,10 @@
   const INTRO = [
     'The year is 2007.',
     'Phones have keyboards. Slides have star wipes. Every training request ends in an e-learning.',
+    'An e-learning costs forty thousand euros and twelve weeks. So someone still has to decide if it\'s worth making.',
     'AI that can write a whole course is fifteen years away.',
-    'You still have time to hone the one skill it won\'t replace.',
-    'Asking the right questions.'
+    'It will ask excellent questions. All of them about the course.',
+    'You still have time to learn the other one: do we need a course at all?'
   ];
   function seenIntro() { try { return window.localStorage.getItem('intake-intro') === 'seen'; } catch (e) { return true; } }
   function intro(then) {
