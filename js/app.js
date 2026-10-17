@@ -19,6 +19,8 @@
   const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
   const placeOf = where => PLACE[where.replace(/^data:/, '')] || where;
   const MIEKE_ASKS = 3;
+  // Declared up here: the desk reads your scores at start-up (wallpapers, Doors Aero).
+  const SCORES_KEY = 'intake-scores';
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
   const DIMENSIONS = [
     ['diagnosis', 'Need diagnosis', 25],
@@ -2502,7 +2504,6 @@
   }
 
   // ---------- my scores: every finished request, kept in this browser ----------
-  const SCORES_KEY = 'intake-scores';
   function scoreHistory() {
     let h = null;
     try { h = JSON.parse(window.localStorage.getItem(SCORES_KEY) || 'null'); } catch (e) { /* storage blocked */ }

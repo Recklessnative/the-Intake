@@ -627,6 +627,9 @@ async function followUp() {
   // The promotion comes with Doors Aero: glass windows, the Aero Aurora wallpaper and a word from IT.
   const aero = await p.evaluate(() => ({ on: document.body.classList.contains('aero'), wp: localStorage.getItem('intake-wallpaper') }));
   if (!aero.on || aero.wp !== 'aurora') throw new Error('promotion did not switch to Doors Aero: ' + JSON.stringify(aero));
+  // And it is still there the next morning: the desk reads your scores at start-up.
+  await p.goto('http://localhost:8765/?debug=1');
+  if (!(await p.evaluate(() => document.body.classList.contains('aero')))) throw new Error('Doors Aero gone after a reload');
   p.once('dialog', d => d.accept().catch(() => {}));
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
