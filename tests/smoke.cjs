@@ -200,6 +200,8 @@ async function followUp() {
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
   });
   await p.goto('http://localhost:8765/');
+  // The title screen sounds like its stage: a first visit is the Monday-morning business park.
+  if (await p.evaluate(() => Sound.place) !== 'title1') throw new Error('title sound wrong: ' + await p.evaluate(() => Sound.place));
   await p.click('#btn-start'); await p.waitForSelector('#s-settings.active');   // no key -> settings, which says why
   if (!(await p.textContent('#settings-intro')).includes('needs a Gemini API key') || (await p.textContent('#btn-save-key')) !== 'Save and clock in') throw new Error('key screen does not say a key is needed');
   await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');   // ...and Save clocks you in
