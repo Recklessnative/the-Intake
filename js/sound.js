@@ -191,106 +191,232 @@
     noise(c, c.destination, t, 0.05, 1500, 1, 0.2);
   }
 
-  // ---------- ambience: the room you are in, very quietly ----------
-  // No music. Each place is a mix of the same few layers, all made from noise and two sine
-  // voices: the office's room tone and air conditioning at the desk; wind and rain on the glass
-  // on the floor; the same rain at 17:40 under one low held note; the projector's fan and its
-  // mains hum in the board room. Changing place fades from one mix to the next.
-  const MIX = {
-    desk: { room: 1, hvac: 1, rain: 0.15 },
-    floor: { room: 0.7, hvac: 0.6, rain: 1, wind: 0.8 },
-    evening: { room: 0.4, hvac: 0.2, rain: 0.8, wind: 1, note: 1 },
-    board: { room: 0.6, hvac: 0.3, projector: 1 }
+  // ---------- ambience: the place you are in ----------
+  // Each place has a slow score and a few real moments, all made here in the browser.
+  // The score is a handful of soft electric-piano notes, each repeating on its own long cycle
+  // (17 to 53 seconds), so they keep drifting into new chords and never quite loop; under it a
+  // warm held pad. The moments: someone typing two rows away, a phone ringing far off, the
+  // printer; raindrops on the glass, a gust round the building, thunder over Lindeveld; the lift;
+  // the board room's clock and projector. Everything goes through one room reverb, in stereo.
+  const SCENES = {
+    // The desk: warm and unhurried, F major with a raised fourth.
+    desk: { notes: [[65, 19.7, 2], [69, 23.3, 9], [72, 29.1, 5], [76, 31.7, 15], [79, 37.9, 22], [71, 43.3, 30]], pad: [41, 48, 57], bed: { room: 1, hvac: 1, rain: 0.25 },
+      moments: { typing: [5, 14], phone: [55, 120], printer: [90, 200] } },
+    // The floor: open and airy, D with the weather on the glass.
+    floor: { notes: [[62, 17.9, 1], [69, 21.7, 6], [74, 26.3, 3], [76, 31.1, 12], [81, 35.3, 18], [64, 41.9, 25]], pad: [38, 45, 52], bed: { room: 0.8, hvac: 0.5, rain: 1 },
+      drops: 7, moments: { gust: [14, 30], typing: [9, 22], thunder: [60, 140] } },
+    // 17:40: the same rain, lower and slower, in A minor. The office has nearly emptied.
+    evening: { notes: [[57, 25.1, 3], [64, 31.7, 10], [67, 37.3, 6], [72, 44.9, 20], [60, 52.7, 28]], pad: [33, 40, 48], padLevel: 1.5, bed: { room: 0.6, hvac: 0.2, rain: 0.8 },
+      drops: 4, moments: { gust: [18, 36], lift: [50, 110], thunder: [70, 160] } },
+    // The board room: sparse and a little tense, a clock you can hear and the projector's fan.
+    board: { notes: [[64, 27.3, 4], [71, 33.1, 12], [66, 41.9, 20]], pad: [40, 47], padLevel: 0.7, bed: { room: 0.7, projector: 1 },
+      clock: true, moments: { paper: [25, 60] } }
   };
-  const LEVEL = { room: 0.15, hvac: 0.03, rain: 0.06, wind: 0.085, note: 0.02, projector: 0.04 };
+  const BED = { room: 0.05, hvac: 0.008, rain: 0.03, projector: 0.012 };
   let amb = null, place = null;
 
-  function loop(c, seconds) {
-    const b = c.createBuffer(1, Math.ceil(c.sampleRate * seconds), c.sampleRate), d = b.getChannelData(0);
-    for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
-    const n = c.createBufferSource();
-    n.buffer = b; n.loop = true;
-    return n;
+  function noiseBuffer(c, seconds, channels) {
+    const b = c.createBuffer(channels || 1, Math.ceil(c.sampleRate * seconds), c.sampleRate);
+    for (let ch = 0; ch < b.numberOfChannels; ch++) { const d = b.getChannelData(ch); for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1; }
+    return b;
   }
-  function filter(c, type, freq, q) { const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q || 0.7; return f; }
-  // A slow wobble on an AudioParam: depth either side of where it is, `rate` times a second.
+  function filter(c, type, freq, q) { const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q == null ? 0.7 : q; return f; }
+  function chain(nodes) { for (let k = 0; k < nodes.length - 1; k++) nodes[k].connect(nodes[k + 1]); return nodes[nodes.length - 1]; }
   function wobble(c, param, rate, depth) {
     const o = c.createOscillator(), g = c.createGain();
     o.frequency.value = rate; g.gain.value = depth;
     o.connect(g); g.connect(param); o.start();
   }
-  function chain(c, nodes) { for (let k = 0; k < nodes.length - 1; k++) nodes[k].connect(nodes[k + 1]); return nodes[nodes.length - 1]; }
-
-  function build(c) {
-    const master = c.createGain();
-    master.gain.value = 0;
-    master.connect(c.destination);
-    const layer = {};
-    const add = (name, out) => { const g = c.createGain(); g.gain.value = 0; out.connect(g); g.connect(master); layer[name] = g; };
-    // Room tone: a low, dark rumble, the building itself.
-    const room = loop(c, 4.1);
-    add('room', chain(c, [room, filter(c, 'lowpass', 180), filter(c, 'lowpass', 260)]));
-    // Air conditioning: a soft, steady breath higher up.
-    const hvac = loop(c, 3.7);
-    add('hvac', chain(c, [hvac, filter(c, 'bandpass', 480, 0.6), filter(c, 'lowpass', 900)]));
-    // Rain on the glass: a high hiss that comes and goes a little.
-    const rain = loop(c, 5.3), rainSwell = c.createGain();
-    rainSwell.gain.value = 0.85; wobble(c, rainSwell.gain, 0.09, 0.15);
-    add('rain', chain(c, [rain, filter(c, 'highpass', 1600), filter(c, 'lowpass', 5200), rainSwell]));
-    // Wind round the building: a band of noise that slowly rises and falls in pitch and strength.
-    const wind = loop(c, 6.7), windBand = filter(c, 'bandpass', 320, 1.4), windSwell = c.createGain();
-    wobble(c, windBand.frequency, 0.05, 140); wobble(c, windSwell.gain, 0.031, 0.45); windSwell.gain.value = 0.55;
-    add('wind', chain(c, [wind, windBand, windSwell]));
-    // 17:40: one low held note, an open fifth, breathing very slowly.
-    const note = c.createGain();
-    note.gain.value = 0.8; wobble(c, note.gain, 0.06, 0.2);
-    [[110, 0.6], [164.8, 0.35], [220.4, 0.2]].forEach(([f, v]) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.type = 'sine'; o.frequency.value = f; g.gain.value = v;
-      o.connect(g); g.connect(note); o.start();
-    });
-    add('note', chain(c, [note, filter(c, 'lowpass', 600)]));
-    // The projector: its fan, and the 100 Hz hum of a transformer on Belgian 50 Hz mains.
-    const fan = loop(c, 3.1), projector = c.createGain();
-    chain(c, [fan, filter(c, 'bandpass', 950, 0.9), projector]);
-    const hum = c.createOscillator(), humGain = c.createGain();
-    hum.type = 'sawtooth'; hum.frequency.value = 100; humGain.gain.value = 0.18;
-    chain(c, [hum, filter(c, 'lowpass', 320), humGain, projector]);
-    add('projector', projector);
-    [room, hvac, rain, wind, fan, hum].forEach(n => n.start());
-    return { master, layer };
+  // A room: a stereo tail of about three seconds that darkens as it dies away.
+  function room(c) {
+    const len = Math.ceil(c.sampleRate * 3.2), b = c.createBuffer(2, len, c.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = b.getChannelData(ch);
+      let lp = 0;
+      for (let k = 0; k < len; k++) {
+        const x = k / len, cut = 0.5 - 0.42 * x;
+        lp += cut * ((Math.random() * 2 - 1) - lp);
+        d[k] = lp * Math.pow(1 - x, 2.4) * (k < c.sampleRate * 0.012 ? k / (c.sampleRate * 0.012) : 1);
+      }
+    }
+    const v = c.createConvolver();
+    v.buffer = b;
+    return v;
   }
 
-  // A few drops tapping the window, now and then, while it rains.
-  function drip() {
-    if (!amb || !on || document.hidden) return;
-    const mix = MIX[place] || {};
-    if (!mix.rain || mix.rain < 0.5) return;
-    const c = ctx, t = c.currentTime;
-    for (let k = 0; k < 3; k++) {
-      if (Math.random() < 0.55) continue;
-      const at = t + Math.random() * 0.7, f = 2400 + Math.random() * 2600;
-      noise(c, amb.master, at, 0.03, f, 6, 0.012 * mix.rain * (0.4 + Math.random()), 'bandpass');
-    }
+  function build(c) {
+    const out = c.createGain(), comp = c.createDynamicsCompressor();
+    out.gain.value = 0;
+    comp.threshold.value = -24; comp.ratio.value = 3; comp.attack.value = 0.02; comp.release.value = 0.4;
+    out.connect(comp); comp.connect(c.destination);
+    const verb = room(c), wet = c.createGain();
+    wet.gain.value = 0.9;
+    verb.connect(wet); wet.connect(out);
+    const A = { c, out, verb, noise: noiseBuffer(c, 2), bed: {}, pads: {}, next: {} };
+    // The beds: the building's low rumble, the air conditioning, rain washing down the glass.
+    const loop = seconds => { const n = c.createBufferSource(); n.buffer = noiseBuffer(c, seconds, 2); n.loop = true; n.start(); return n; };
+    const bed = (name, nodes, send) => {
+      const g = c.createGain(); g.gain.value = 0;
+      chain(nodes).connect(g); g.connect(out);
+      if (send) { const s = c.createGain(); s.gain.value = send; g.connect(s); s.connect(verb); }
+      A.bed[name] = g;
+    };
+    bed('room', [loop(4.1), filter(c, 'lowpass', 90), filter(c, 'lowpass', 140)]);
+    bed('hvac', [loop(3.7), filter(c, 'bandpass', 380, 0.5), filter(c, 'lowpass', 700)]);
+    const swell = c.createGain(); swell.gain.value = 0.8; wobble(c, swell.gain, 0.07, 0.2);
+    bed('rain', [loop(5.3), filter(c, 'bandpass', 1100, 0.4), filter(c, 'lowpass', 2600), filter(c, 'highshelf', 3000, 0), swell], 0.4);
+    // The projector: a soft fan and its transformer's 100 Hz hum (Belgian mains are 50 Hz).
+    const proj = c.createGain();
+    chain([loop(3.1), filter(c, 'bandpass', 520, 0.8), proj]);
+    [[100, 0.35], [200, 0.12]].forEach(([f, v]) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.value = v; o.connect(g); g.connect(proj); o.start(); });
+    bed('projector', [proj, filter(c, 'lowpass', 700)]);
+    return A;
+  }
+
+  // The pad: each note two detuned saws, through a slowly breathing low-pass filter.
+  function pad(name) {
+    const A = amb, c = A.c, S = SCENES[name];
+    if (A.pads[name]) return A.pads[name];
+    const g = c.createGain(), lp = filter(c, 'lowpass', 420, 0.5), send = c.createGain();
+    g.gain.value = 0; send.gain.value = 0.8;
+    wobble(c, lp.frequency, 0.045, 160);
+    lp.connect(g); g.connect(A.out); g.connect(send); send.connect(A.verb);
+    S.pad.forEach((n, k) => [-7, 7].forEach(cents => {
+      const o = c.createOscillator(), v = c.createGain();
+      o.type = 'sawtooth'; o.frequency.value = hz(n); o.detune.value = cents;
+      v.gain.value = k ? 0.5 : 0.8;
+      o.connect(v); v.connect(lp); o.start();
+    }));
+    return (A.pads[name] = g);
+  }
+
+  // One soft electric-piano note: a sine carrier with a little FM shine that fades first.
+  function keyNote(t, note, gain, pan) {
+    const A = amb, c = A.c, f = hz(note);
+    const car = c.createOscillator(), mod = c.createOscillator(), idx = c.createGain(), env = c.createGain(), p = c.createStereoPanner(), send = c.createGain();
+    car.frequency.value = f; mod.frequency.value = f * 2; mod.connect(idx); idx.connect(car.frequency);
+    idx.gain.setValueAtTime(f * 1.1, t); idx.gain.exponentialRampToValueAtTime(f * 0.02, t + 1.6);
+    env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(gain, t + 0.012);
+    env.gain.setTargetAtTime(gain * 0.35, t + 0.05, 0.6); env.gain.setTargetAtTime(0, t + 1.2, 1.6);
+    p.pan.value = pan; send.gain.value = 0.9;
+    chain([car, env, p]); p.connect(A.out); p.connect(send); send.connect(A.verb);
+    [car, mod].forEach(o => { o.start(t); o.stop(t + 9); });
+  }
+
+  // A short burst of filtered noise: clicks, ticks, drops, rustles and thunder are all this.
+  function burst(t, dur, type, freq, q, gain, pan, send, opt) {
+    const A = amb, c = A.c, n = c.createBufferSource(), f = filter(c, type, freq, q), g = c.createGain(), p = c.createStereoPanner();
+    n.buffer = A.noise;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + ((opt && opt.attack) || 0.002));
+    g.gain.setTargetAtTime(0, t + ((opt && opt.hold) || 0), dur / 4);
+    if (opt && opt.sweep) f.frequency.exponentialRampToValueAtTime(opt.sweep, t + dur);
+    p.pan.value = pan;
+    chain([n, f, g, p]); p.connect(A.out);
+    if (send) { const s = c.createGain(); s.gain.value = send; p.connect(s); s.connect(A.verb); }
+    n.start(t, Math.random() * 1.5); n.stop(t + dur * 1.5 + 0.1);
+  }
+  // A raindrop on glass: a tiny falling ping, now and then a heavier tap.
+  function drop(t, level) {
+    const A = amb, c = A.c, o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner(), s = c.createGain();
+    const f = 1700 + Math.random() * 3200, big = Math.random() < 0.12;
+    o.frequency.setValueAtTime(big ? f * 0.4 : f, t); o.frequency.exponentialRampToValueAtTime((big ? f * 0.4 : f) * 0.78, t + 0.03);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime((big ? 0.02 : 0.008) * level * (0.4 + Math.random() * 0.6), t + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + (big ? 0.06 : 0.025));
+    p.pan.value = Math.random() * 1.6 - 0.8; s.gain.value = 0.5;
+    chain([o, g, p]); p.connect(A.out); p.connect(s); s.connect(A.verb);
+    o.start(t); o.stop(t + 0.1);
+  }
+
+  const MOMENTS = {
+    // Someone two rows away, typing a sentence, stopping, typing again.
+    typing(t) {
+      const pan = Math.random() * 1.4 - 0.7;
+      let at = t;
+      const n = 8 + Math.floor(Math.random() * 22);
+      for (let k = 0; k < n; k++) {
+        at += 0.07 + Math.random() * 0.11 + (Math.random() < 0.08 ? 0.35 : 0);
+        burst(at, 0.03, 'bandpass', 1900 + Math.random() * 900, 1.6, 0.05 * (0.6 + Math.random() * 0.4), pan, 0.5);
+        if (Math.random() < 0.06) burst(at + 0.05, 0.05, 'bandpass', 900, 1.2, 0.06, pan, 0.5); // the space bar
+      }
+    },
+    // A desk phone ringing at the far end of the floor: two short trills, then someone picks up.
+    phone(t) {
+      const c = amb.c, pan = Math.random() < 0.5 ? -0.6 : 0.6, rings = 1 + Math.floor(Math.random() * 2);
+      for (let r = 0; r < rings; r++) {
+        const at = t + r * 3, o = c.createOscillator(), trill = c.createOscillator(), tg = c.createGain(), g = c.createGain(), p = c.createStereoPanner(), s = c.createGain(), lp = filter(c, 'lowpass', 1800);
+        o.type = 'triangle'; o.frequency.value = 1180; trill.type = 'square'; trill.frequency.value = 17;
+        tg.gain.value = 0.5; g.gain.value = 0.5; trill.connect(tg); tg.connect(g.gain);
+        const env = c.createGain();
+        env.gain.setValueAtTime(0, at); env.gain.linearRampToValueAtTime(0.012, at + 0.02); env.gain.setValueAtTime(0.012, at + 1.1); env.gain.linearRampToValueAtTime(0, at + 1.15);
+        p.pan.value = pan; s.gain.value = 1.4;
+        chain([o, g, env, lp, p]); p.connect(amb.out); p.connect(s); s.connect(amb.verb);
+        [o, trill].forEach(x => { x.start(at); x.stop(at + 1.3); });
+      }
+    },
+    // The laser printer by the copier warming up and pulling a page through.
+    printer(t) {
+      burst(t, 2.6, 'bandpass', 420, 2.5, 0.025, 0.55, 0.6, { attack: 0.4, hold: 1.8 });
+      burst(t + 0.6, 1.6, 'bandpass', 1500, 4, 0.01, 0.55, 0.6, { attack: 0.3, hold: 1, sweep: 1900 });
+    },
+    // A gust against the building: a band of air that rises and falls, with a faint whistle.
+    gust(t) {
+      const d = 4 + Math.random() * 3, pan = Math.random() * 1.2 - 0.6;
+      burst(t, d, 'bandpass', 260, 3, 0.07, pan, 0.6, { attack: d * 0.4, hold: d * 0.2, sweep: 520 });
+      if (Math.random() < 0.5) burst(t + d * 0.25, d * 0.6, 'bandpass', 950 + Math.random() * 300, 30, 0.05, -pan, 0.8, { attack: d * 0.3, hold: d * 0.1, sweep: 1300 });
+    },
+    // Thunder a long way off: a soft crack, then a low roll.
+    thunder(t) {
+      burst(t, 0.8, 'lowpass', 700, 0.7, 0.03, 0.3, 1);
+      burst(t + 0.15, 7, 'lowpass', 120, 0.9, 0.14, -0.2, 0.7, { attack: 0.8, hold: 1.4, sweep: 60 });
+    },
+    // The lift arriving: its two-note chime, down the corridor.
+    lift(t) { keyNote(t, 84, 0.035, -0.7); keyNote(t + 0.45, 81, 0.035, -0.7); },
+    // A page turned somewhere at the table.
+    paper(t) { burst(t, 0.5, 'bandpass', 3200, 0.8, 0.012, Math.random() * 1.2 - 0.6, 0.4, { attack: 0.08, hold: 0.25 }); }
+  };
+
+  // The scheduler: book everything due in the next stretch of time for the place you are in.
+  function plan(until) {
+    const A = amb, S = SCENES[place];
+    if (!A || !S) return;
+    const N = A.next;
+    S.notes.forEach(([note, period], k) => {
+      while (N['n' + k] < until) { keyNote(N['n' + k], note, 0.05, ((k * 0.37) % 1.2) - 0.6); N['n' + k] += period; }
+    });
+    Object.entries(S.moments || {}).forEach(([m, [lo, hi]]) => {
+      while (N[m] < until) { MOMENTS[m](N[m]); N[m] += lo + Math.random() * (hi - lo); }
+    });
+    if (S.drops) while (N.drop < until) { drop(N.drop, 1); N.drop += -Math.log(1 - Math.random()) / S.drops; }
+    if (S.clock) while (N.clock < until) { const tock = Math.round(N.clock) % 2; burst(N.clock, 0.02, 'bandpass', tock ? 2400 : 3100, 9, 0.03, 0.65, 0.3); N.clock += 1; }
+  }
+  function start(name) {
+    const A = amb, S = SCENES[name], t = A.c.currentTime, N = (A.next = {});
+    // The first note comes soon after you arrive; the rest find their own places.
+    S.notes.forEach(([, , off], k) => { N['n' + k] = t + 0.8 + off * 0.35; });
+    Object.entries(S.moments || {}).forEach(([m, [lo, hi]]) => { N[m] = t + lo * (0.3 + Math.random() * 0.7); });
+    N.drop = t + 0.3; N.clock = Math.ceil(t + 0.5);
   }
 
   function fade() {
     if (!amb) return;
-    const t = ctx.currentTime, mix = MIX[place] || {};
-    Object.entries(amb.layer).forEach(([name, g]) => g.gain.setTargetAtTime((mix[name] || 0) * LEVEL[name], t, 0.9));
-    amb.master.gain.setTargetAtTime(on && place && !document.hidden ? 1 : 0, t, place ? 0.6 : 0.3);
+    const t = amb.c.currentTime, S = SCENES[place] || { bed: {} };
+    Object.entries(amb.bed).forEach(([name, g]) => g.gain.setTargetAtTime((S.bed[name] || 0) * BED[name], t, 0.9));
+    Object.keys(SCENES).forEach(name => { if (amb.pads[name] || name === place) pad(name).gain.setTargetAtTime(name === place ? 0.006 * (SCENES[name].padLevel || 1) : 0, t, 1.4); });
+    amb.out.gain.setTargetAtTime(on && place && !document.hidden ? 1 : 0, t, place ? 0.6 : 0.3);
   }
 
   // Where you are now: 'desk', 'floor', 'evening', 'board', or null for silence.
   function scene(name) {
-    place = MIX[name] ? name : null;
+    const was = amb ? place : null;
+    place = SCENES[name] ? name : null;
     if (!place && !amb) return;
     if (!amb) {
       if (!on) return;
       const c = audio();
       if (!c) return;
       amb = build(c);
-      setInterval(drip, 700);
+      setInterval(() => { if (on && !document.hidden) plan(amb.c.currentTime + 1.5); }, 500);
       // Browsers only play sound after a click or a key; wake the audio on the next one.
       if (c.state !== 'running') {
         const wake = () => { c.resume(); window.removeEventListener('pointerdown', wake, true); window.removeEventListener('keydown', wake, true); };
@@ -298,8 +424,11 @@
         window.addEventListener('keydown', wake, true);
       }
     }
+    if (place && place !== was) start(place);
     fade();
   }
+  // For a recording or a test: book the next `seconds` of the current place in one go.
+  function preview(seconds) { if (amb) plan(amb.c.currentTime + seconds); }
   document.addEventListener('visibilitychange', fade);
 
   function toggle() {
@@ -310,5 +439,5 @@
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, toggle, get on() { return on; }, get place() { return place; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, preview, toggle, get on() { return on; }, get place() { return place; } };
 })();
