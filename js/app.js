@@ -500,6 +500,9 @@
     { from: 'Global Multimedia Solutions', subject: 'Re: quick question!!', ago: 9,
       body: 'Hi there!\n\nJust circling back on my circle-back. Our Web 2.0, multimedia, edutainment academy (now with a Second Life campus!) boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
   ];
+  // From week 2 Facilities has one more mail, and it comes back every week like the others.
+  const FLOOR5 = { from: 'Facilities', subject: 'Lift, floor 5', ago: 33,
+    body: 'The lift button for floor 5 is out of order. A technician has been informed.\n\nThere is no floor 5. Please stop pressing it. It does not help and it has been noted.' };
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
   function mailbox() {
@@ -508,7 +511,7 @@
     // Your very first request: everything else is already read, so the one bold line is the request.
     const today = state.days[state.index] || 0, fresh = firstEver();
     const seen = sub => { if (fresh) r.readMail[sub] = true; return !!r.readMail[sub]; };
-    const mails = FILLER.map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    const mails = FILLER.concat(Arc.offer('floor5', arcNow()) ? [FLOOR5] : []).map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
@@ -992,6 +995,12 @@
     try { if (localStorage.getItem('intake-told-' + k)) return true; localStorage.setItem('intake-told-' + k, '1'); } catch (e) { /* storage blocked */ }
     return false;
   }
+  // Where the 2041 arc is (STORY.md): finished normal weeks and the day of the week. Hard mode and
+  // Try one case are off the arc: no hints there, and they never move it.
+  function arcNow(day) {
+    const week = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one && w.id !== state.weekId).length + 1;
+    return { week, day: day == null ? state.days[state.index] || 0 : day, off: state.hard || state.one };
+  }
   // The first request of your first week: the one moment to show as little as possible.
   function firstEver() { return !state.hard && state.weekNo === 1 && state.index === 0; }
   function mondayFirst() {
@@ -1194,9 +1203,10 @@
     if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
     if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
-    const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
+    const hello = !state.index && Arc.offer('morning', arcNow()) ? 'Morning again! ' : 'Morning! ';
+    const ping = mondayFirst() === 'standup' ? ['Mieke', hello + 'Stand-up first, five minutes, coffee included. Then the request.']
       : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Morning! Before the next request: your first CoE module. It is short, and it does not count. Then the request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
-      : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
+      : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : hello + 'A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
     if (moduleFirst || mondayFirst() === 'standup') { miekePing(ping[1]); return; }
     setTimeout(() => { if (ping[0] === 'Mieke') miekePing(ping[1]); Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'); }, 1200);
   }
@@ -2013,7 +2023,8 @@
     ] },
     darren: { from: 0, shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
       { id: 'poster', at: 0, label: 'Poster', text: 'SYNERGY. "Alone we are smart. Together we are a steering committee." He ordered six. The other five are still in the box behind the door.' },
-      { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.' },
+      { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.',
+        later: { arc: 'planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Same as last week, in the same ink, with the same coffee ring. Tuesday and Wednesday: "airport". Synergix must be growing.' } },
       { id: 'boarding', at: 1, label: 'Boarding passes', text: 'Three boarding passes, Brussels to Frankfurt and back, all seat 2C. On one he has written "GMS = Max??". Max is the avatar that won Global Multimedia Solutions the Brugmann account.' },
       { id: 'charger', at: 2, label: 'Charger', text: 'A charger with nothing on the end. The BlackBerry is wherever Darren is, sending mails that end in "Sent from my BlackBerry".' },
       { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.' }
@@ -2058,27 +2069,31 @@
     try { return Object.assign({ visits: 0, found: [] }, JSON.parse(localStorage.getItem('intake-floor') || '{}')); } catch (e) { return { visits: 0, found: [] }; }
   }
   function keepLook(st) { try { localStorage.setItem('intake-floor', JSON.stringify(st)); } catch (e) { /* storage blocked */ } }
-  function looks() {
+  // A thing with `later` reads differently once its arc hint has landed, and counts as new again.
+  function looks(now) {
     const st = lookState();
     st.visits++;
     keepLook(st);
     const out = {}, entries = [];
     let of = 0;
     Object.entries(LOOKS).forEach(([k, L]) => {
-      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => ({ id: t.id, label: t.label, text: t.text, fresh: !st.found.includes(k + ':' + t.id) }));
+      const now2 = t => t.later && Arc.offer(t.later.arc, now) ? { key: k + ':' + t.id + ':2', text: t.later.text } : { key: k + ':' + t.id, text: t.text };
+      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => { const v = now2(t); return { id: t.id, label: t.label, text: v.text, key: v.key, fresh: !st.found.includes(v.key) }; });
       of += L.things.length;
-      L.things.forEach(t => { if (st.found.includes(k + ':' + t.id)) entries.push({ who: L.who, label: t.label, text: t.text }); });
+      L.things.forEach(t => { if (st.found.includes(k + ':' + t.id) || st.found.includes(k + ':' + t.id + ':2')) entries.push({ who: L.who, label: t.label, text: now2(t).text }); });
       if (things.length) out[k] = { shot: L.shot, title: L.title, note: L.note, things };
     });
     return { looks: out, notebook: { entries, of } };
   }
-  function found(shot, id) {
+  function found(key) {
     const st = lookState();
-    if (!st.found.includes(shot + ':' + id)) st.found.push(shot + ':' + id);
+    if (!st.found.includes(key)) st.found.push(key);
     keepLook(st);
   }
 
   const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
+  const BADGE = '\n\nYour staff badge has come, and it is on your keyboard: SYNERGIX · STAFF · No. 1207. Where the photo goes it says "Photo: to follow". HR is processing it. It is HR.';
+  const FLICKER = 'The numbers above the doors go 4, then 5, then 4. The doors open for half a second. Inside it is dark, and something hums, like a room full of fans. Then they close.\n\nFacilities will say it is the lift motor. It is always the lift motor.';
   const FLOOR_EVENING = '\n\nRight now it is home time, though. The lift is by reception: take it when you are ready, and tomorrow starts at your desk.';
   // In a team week, how many drafts still wait for you.
   const teamLine = () => {
@@ -2101,13 +2116,20 @@
     const day = state.days[evening ? i - 1 : i] || 0;
     const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + 40);
     const tomorrow = dayOf(i);
-    const morning = () => { startRequest(); toast(tomorrow + ', 08:57. The coffee machine is still broken.', 'info'); };
+    // The morning after: the lift up and the rain, each said once; most days it is the coffee machine.
+    const morning = () => {
+      const now = arcNow(state.days[i]);
+      const line = Arc.once('tape', now) ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
+        : Arc.once('rain', now) ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
+      startRequest();
+      toast(tomorrow + ', 08:57. ' + line, 'info');
+    };
     const story = Story.storyMail(state.weekNo);
     const news = Story.news(state.weekNo, day).slice(-1)[0];
     const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
-        : evening ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }
+        : evening ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' + (Arc.offer('badge', arcNow(day)) ? BADGE : '') }
         : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
@@ -2118,7 +2140,8 @@
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
     if (evening) spots.lift = { label: 'Go home: start ' + tomorrow, sub: 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: () => Office.sitDown(morning) };
-    const L = looks();
+    else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER };
+    const L = looks(arcNow(day));
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
     // More places open as the weeks go on: the people you have not met yet are known by their desks.
@@ -2126,10 +2149,16 @@
     if (L.looks.board && !last) spots.meeting.look = L.looks.board;
     const opts = {
       notebook: L.notebook,
-      onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
+      onFind: (shot, id) => {
+        const t = L.looks[shot].things.find(x => x.id === id), had = lookState().found.includes(shot + ':' + id);
+        found(t.key);
+        // A thing that changed is new to look at, but it is still one thing in the notebook.
+        const N = opts.notebook.entries, old = N.find(e => e.who === LOOKS[shot].who && e.label === t.label);
+        if (had && old) old.text = t.text; else N.push({ who: LOOKS[shot].who, label: t.label, text: t.text });
+        const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
       when: Story.day(state.weekNo, day) + ' · ' + time,
       evening: !!evening,
-      line: last ? 'That was the last request of the week. The board is gathering.'
+      line: last ? 'That was the last request of the week. The board is gathering.' + (spots.lift ? ' Behind you, the lift goes ding. Nobody gets out.' : '')
         : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
         : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
       spots,
