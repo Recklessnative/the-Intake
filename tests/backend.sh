@@ -6,7 +6,7 @@ T=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$T"' EXIT
 
 # MySQL schema -> SQLite (drop inline INDEX lines and UNSIGNED)
-sed -e '/^  INDEX/d' -e 's/ UNSIGNED//' "$HERE/api/schema.sql" | perl -0pe 's/,\s*\n\)/\n)/g' > "$T/schema.sqlite.sql"
+sed -e '/^  INDEX/d' -e 's/ UNSIGNED//' -e 's/ *--.*$//' "$HERE/api/schema.sql" | perl -0pe 's/,\s*\n\)/\n)/g' > "$T/schema.sqlite.sql"
 php -r '$p=new PDO("sqlite:'"$T"'/db.sqlite"); $p->exec(file_get_contents("'"$T"'/schema.sqlite.sql"));'
 php -r '$p=new PDO("sqlite:'"$T"'/db.sqlite"); $p->exec("INSERT INTO intake_codes VALUES (\"COFFEE-TEST\", 2, 1, \"test\", 0)");'
 
@@ -21,7 +21,7 @@ echo json_encode(['candidates' => [['content' => ['parts' => [['text' => json_en
 PHP
 cat > "$T/config.php" <<PHP
 <?php return ['gemini_key'=>'SERVER-KEY','models'=>['gemini-3.5-flash-lite'],'db_dsn'=>'sqlite:$T/db.sqlite','db_user'=>null,'db_pass'=>null,
-'free_runs'=>2,'calls_per_run'=>3,'charge_after_calls'=>3,'daily_calls'=>100,'max_output'=>1500,'ip_salt'=>'salt','allowed_origins'=>['https://example.test'],
+'free_runs'=>2,'calls_per_run'=>3,'calls_per_morning'=>2,'mornings_per_ip'=>3,'charge_after_calls'=>3,'daily_calls'=>100,'max_output'=>1500,'ip_salt'=>'salt','allowed_origins'=>['https://example.test'],
 'gemini_base'=>'http://127.0.0.1:8792/models/'];
 PHP
 php -S 127.0.0.1:8792 -t "$T/mock" "$T/mock/index.php" >/dev/null 2>&1 &
@@ -58,6 +58,19 @@ r=$(call start "{\"token\":\"$TOKEN\"}"); check "unlocked run starts" "$r" '"run
 RUN3=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
 r=$(call played "{\"token\":\"$TOKEN\",\"runId\":\"$RUN3\"}"); check "unlocked week charged when played" "$r" '"runsLeft":1'
 r=$(call status '{}'); check "fresh browser on same IP still has runs (office IP)" "$r" '"runsLeft":2'
+# The morning call: its own small cap, the same run all day, never a week.
+r=$(call status '{}'); M=$(echo "$r" | sed -E 's/.*"token":"([a-f0-9]{32})".*/\1/')
+r=$(call morning "{\"token\":\"$M\"}"); check "morning call starts" "$r" '"runId"'
+MRUN=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
+r=$(call morning "{\"token\":\"$M\"}"); check "same morning call all day" "$r" "\"runId\":\"$MRUN\""
+call gemini "{\"runId\":\"$MRUN\",\"request\":$REQ}" >/dev/null; call gemini "{\"runId\":\"$MRUN\",\"request\":$REQ}" >/dev/null
+r=$(call gemini "{\"runId\":\"$MRUN\",\"request\":$REQ}"); check "morning call has its own cap" "$r" ' 429'
+check "and says so" "$r" 'morning call'
+r=$(call status "{\"token\":\"$M\"}"); check "a morning call is not a week" "$r" '"runsLeft":2'
+r=$(call start "{\"token\":\"$M\"}"); RW=$(echo "$r" | sed -E 's/.*"runId":"([a-f0-9]{32})".*/\1/')
+[[ "$RW" != "$MRUN" ]] && echo "ok   a week never reuses the morning call" || { echo "FAIL week reused the morning call"; fails=$((fails+1)); }
+call morning '{}' >/dev/null; call morning '{}' >/dev/null
+r=$(call morning '{}'); check "mornings per IP per day" "$r" ' 429'
 r=$(curl -s -D - -o /dev/null -X OPTIONS -H 'Origin: https://example.test' "$API?action=status"); check "CORS for allowed origin" "$r" 'Access-Control-Allow-Origin: https://example.test'
 r=$(curl -s -D - -o /dev/null -X OPTIONS -H 'Origin: https://evil.test' "$API?action=status"); [[ "$r" != *"Access-Control-Allow-Origin"* ]] && echo "ok   no CORS for other origins" || { echo "FAIL CORS leak"; fails=$((fails+1)); }
 r=$(curl -s -w ' %{http_code}' "$API?action=status"); check "GET refused" "$r" ' 405'

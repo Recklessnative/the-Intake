@@ -17,6 +17,9 @@ return [
     'free_runs'      => 3,
     // Gemini calls one run may make (a full week is about 30 to 65, with three examiner and three boldness runs per request).
     'calls_per_run'  => 80,
+    // The morning call: Gemini calls per call (3 questions plus a spare retry), and how many a day one IP may start.
+    'calls_per_morning' => 5,
+    'mornings_per_ip'   => 10,
     // A week counts as played at its first scorecard, or once it used this many calls.
     'charge_after_calls' => 15,
     // Hard stop for the whole site per day, whatever happens.

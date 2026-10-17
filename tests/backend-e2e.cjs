@@ -11,7 +11,9 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   console.log('title:', await p.textContent('#runs-left'));
   await p.click('#btn-start');
   await p.waitForSelector('#s-intro.active'); await p.click('#btn-intro-skip');
+  await p.click('#btn-walkin-skip', { timeout: 6000 }).catch(() => {});   // the first-morning walk-in
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await p.click('#tour-skip', { timeout: 4000 }).catch(() => {});   // Mieke's first-morning tour
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
   if (await p.isVisible('#w-coe')) await p.click('#w-coe .tb.close');
   await p.click('#mail-rows tr:has-text("❗")');     // calm Monday: open the request first
@@ -19,7 +21,7 @@ const { chromium } = require(require('child_process').execSync('npm root -g').to
   await p.fill('#chat-input', 'What changed recently?'); await p.click('#chat-form button[type=submit]');
   await p.waitForFunction(() => document.querySelectorAll('#chat-log .msg.them').length === 2);
   await p.click('#btn-hangup');
-  await p.click('#btn-memo-mode');
+  await p.evaluate(() => document.getElementById('btn-memo-mode').click());   // the memo-mode link is hidden on the very first request
   for (const n of ['gap', 'idea']) await p.fill(`#write-form [name=${n}]`, 'x');
   await p.click('#write-form button[type=submit]');
   await p.click('#bet-form [data-bet="bold"] [data-v="0"]'); await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');

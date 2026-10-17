@@ -17,13 +17,19 @@
       <h1>THE INTAKE</h1>
       <p class="subtitle">a test of your intake craftsmanship, but then funnier</p>
       <button id="btn-resume" class="primary" hidden></button>
-      <button id="btn-start" class="primary">Clock in</button>
+      <button id="btn-morning" class="primary">☎ Today's call (3 minutes)</button>
+      <button id="btn-start" class="primary">Clock in for the week</button>
       <button id="btn-one" class="ghost">Try one case (about 10 minutes)</button>
       <button id="btn-hard" class="ghost">Hard mode</button>
       <button id="btn-settings" class="ghost">Gemini key</button>
       <p id="runs-left" class="fine"></p>
       <button id="btn-watch-intro" class="linkish">Watch the intro</button>
     </div>
+  </section>
+
+  <!-- The morning call: one stakeholder a day, no desktop -->
+  <section id="s-morning" class="screen">
+    <div id="morning" class="panel morning"></div>
   </section>
 
   <!-- The cold open: 2007, and AI is still years away -->
@@ -43,9 +49,10 @@
   <section id="s-settings" class="screen">
     <div class="panel narrow">
       <h2>Your own Gemini key</h2>
-      <p id="settings-intro">You can play on your own Gemini API key, with no limit on runs. Get a free one at Google AI Studio. The key stays in this browser and is sent only to Google.</p>
+      <p id="settings-intro">You can play on your own Gemini API key, with no limit on runs. The key stays in this browser and is sent only to Google.</p>
+      <p><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key at Google AI Studio ↗</a> Sign in, click "Create API key", copy it.</p>
       <label>API key <input id="in-key" type="password" autocomplete="off" placeholder="AIza..."></label>
-      <label>Model <input id="in-model" type="text" spellcheck="false"></label>
+      <details class="advanced"><summary>Advanced</summary><label>Model <input id="in-model" type="text" spellcheck="false"></label></details>
       <label class="check"><input id="in-remember" type="checkbox"> Remember the key in this browser</label>
       <p class="fine">Please don't type real company data: on Google's free tier, prompts may be used to improve their models.</p>
       <div class="row">
@@ -71,6 +78,12 @@
       <button id="btn-cap-back" class="ghost">Back</button>
     </div>
   </section>
+
+  <!-- Your first morning: the walk from the lift to your desk (js/office.js). -->
+  <section id="s-walkin" class="screen walkin"></section>
+
+  <!-- The office floor between requests (js/office.js). -->
+  <section id="s-office" class="screen office"></section>
 
   <!-- Boot: the office PC starts up while you settle in -->
   <section id="s-cubicle" class="screen boot">
@@ -98,6 +111,7 @@
       <nav id="desk-icons" class="desk-icons" aria-label="Desktop">
         <button type="button" class="desk-icon" data-app="w-coe"><span class="di">🗂</span>Center of Excellence</button>
         <button type="button" class="desk-icon" data-app="w-academy"><span class="di">🎓</span>CoE Academy</button>
+        <button type="button" class="desk-icon" data-app="w-drill"><span class="di">🎯</span>Measurement drill</button>
         <button type="button" class="desk-icon" data-app="w-inbox"><span class="di">✉</span>Doors Mail</button>
         <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
         <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
@@ -171,6 +185,7 @@
         <div id="briefing" class="briefing">
           <h3 id="briefing-head"></h3>
           <ul id="briefing-points"></ul>
+          <button type="button" id="case-call" class="primary case-call">☎ Call them back</button>
         </div>
       </div>
 
@@ -184,8 +199,8 @@
         <div class="chat-head">
           <div><strong id="chat-who"></strong> <span id="chat-role" class="muted"></span></div>
           <div class="meters">
-            <span>Questions <b id="q-left"></b></span>
-            <span>Patience <b id="patience"></b></span>
+            <span title="Every question you send costs one, good or bad.">Questions <b id="q-left"></b></span>
+            <span title="A vague, leading or solution-first question costs a dot. At zero they hang up.">Patience <b id="patience"></b></span>
             <span>Facts found <b id="found"></b></span>
           </div>
         </div>
@@ -203,6 +218,11 @@
       <!-- CoE Academy: this week's e-learning module -->
       <div class="win" id="w-academy" data-title="CoE Academy" data-icon="🎓">
         <div id="academy" class="academy" aria-live="polite"></div>
+      </div>
+
+      <!-- Measurement drill: one case, measurement only -->
+      <div class="win" id="w-drill" data-title="Measurement drill" data-icon="🎯">
+        <div id="drill" class="standup" aria-live="polite"></div>
       </div>
 
       <!-- The Monday stand-up: recall last week's cases before the inbox -->
@@ -350,6 +370,7 @@
           </section>
 
           <div id="board-feedback" class="feedback" hidden></div>
+          <p id="board-why" class="board-why" role="status"></p>
           <div class="row">
             <button type="button" id="board-next" class="primary">Lock it in</button>
             <button type="button" id="btn-memo-mode" class="ghost">Prefer one long form? (memo mode)</button>
@@ -427,7 +448,8 @@
             <label id="bet-exit-label" hidden>If it doesn't work, how do you back out?
               <textarea name="exit" rows="2" maxlength="400" placeholder="A pilot with one team, a stop rule, a cap on scope or budget..."></textarea>
             </label>
-            <p class="fine">Right-sized beats bold: the smallest thing that would work, as bold as this client can take. One step further only with a way back that names a first step and when you would stop.</p>
+            <details class="fine"><summary>How the bet is scored</summary>Right-sized beats bold: the smallest thing that would work, as bold as this client can take. One step further only with a way back that names a first step and when you would stop. Bolder than they can take, and they push back before they read on.</details>
+            <p id="bet-why" class="board-why" role="status"></p>
             <button type="submit" class="primary">Send it</button>
           </form>
         </div>
@@ -446,6 +468,7 @@
         <div id="p-score" class="pane">
           <h2 id="score-title"></h2>
           <div id="score-total" class="score-total"></div>
+          <p id="score-focus" class="score-focus" hidden></p>
           <table class="score-table"><tbody id="score-rows"></tbody></table>
           <div class="debrief">
             <h3>The question you didn't ask</h3>
@@ -488,8 +511,10 @@
         <button data-open="w-notes">📝 My notes</button>
         <button data-open="w-case">📁 Case file</button>
         <button data-open="w-mieke">☕ Ask Mieke</button>
+        <button id="btn-tour">👋 Tour with Mieke</button>
         <button data-open="w-coe">🗂 Center of Excellence</button>
         <button data-open="w-academy">🎓 CoE Academy</button>
+        <button data-open="w-drill">🎯 Measurement drill</button>
         <button data-open="w-scores">🏆 My scores</button>
         <button data-open="w-team" class="team-only">👥 My team</button>
         <button data-open="w-phone">📱 My mobile</button>
@@ -529,6 +554,7 @@
       <div class="tray">
         <button type="button" id="btn-phone" class="tray-phone" title="Your mobile (in your pocket)" aria-label="Your mobile">📱<span id="tray-sms" class="tray-badge" hidden></span></button>
         <button type="button" id="btn-debug" class="debug" hidden title="Test mode: fill in this step for me">🐞 Autofill</button>
+        <button type="button" class="tray-sound" aria-label="Sound">🔊</button>
         <span id="os-step"></span>
         <span id="os-clock">08:57</span>
       </div>
@@ -580,6 +606,11 @@
 <script src="js/retro.js?v=dev"></script>
 <script src="js/slides.js?v=dev"></script>
 <script src="js/standup.js?v=dev"></script>
+<script src="js/drill.js?v=dev"></script>
+<script src="js/morning.js?v=dev"></script>
+<script src="js/tour.js?v=dev"></script>
+<script src="js/office-map.js?v=dev"></script>
+<script src="js/office.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>
 </body>
 </html>

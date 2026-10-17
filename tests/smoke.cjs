@@ -15,12 +15,12 @@ async function bet() {
   if (!betChecked) {
     betChecked = true;
     await p.click('#bet-form button[type=submit]');
-    if (!(await p.textContent('#toast')).includes('Pick both')) throw new Error('bet sent without picks');
+    if (!(await p.textContent('#bet-why')).includes('Pick both')) throw new Error('bet sent without picks');
     await p.click('#bet-form [data-bet="bold"] [data-v="3"]');
     await p.click('#bet-form [data-bet="appetite"] [data-v="1"]');
     if (!(await p.isVisible('#bet-exit-label'))) throw new Error('bold bet asks no way back');
     await p.click('#bet-form button[type=submit]');
-    if (!(await p.textContent('#toast')).includes('way back')) throw new Error('bold bet sent without a way back');
+    if (!(await p.textContent('#bet-why')).includes('way back')) throw new Error('bold bet sent without a way back');
     await p.fill('#bet-form [name=exit]', 'Pilot on one shift; stop if near-misses do not drop.');
   } else if (await p.isVisible('#btn-debug')) {
     await p.click('#btn-debug');
@@ -101,6 +101,12 @@ async function retro() {
   if (MOBILE) await p.click('.task:has-text("Call")');
 }
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
+// Mieke explains a part of the desk the first time you use it, in one bubble that does not block.
+async function tip(what) {
+  await p.waitForSelector('.tour.tip', { timeout: 3000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });
+  await p.click('#tour-next');
+  if (await p.$('.tour')) throw new Error('hint for ' + what + ' did not close');
+}
 async function academy() {
   await visible('#w-academy');
   if (!(await p.textContent('#academy')).includes('Ask before you make')) throw new Error('week 1 module is not "Ask before you make"');
@@ -112,6 +118,7 @@ async function academy() {
   if (await p.isDisabled('#ac-next')) throw new Error('Next stays off after answering');
   await p.waitForTimeout(700);
   await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
+  if (await p.evaluate(() => Sound.place) !== 'desk') throw new Error('no room tone at the desk');
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-academy"]'); } else { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); }
   await visible('#w-academy');
   if (!(await p.$('.ac-opt.wrong'))) throw new Error('academy answer not restored');
@@ -132,6 +139,7 @@ async function academy() {
 // The follow-up after a first call: a data request, the coffee machine, one callback.
 async function followUp() {
   await p.waitForSelector('#w-leads.open');
+  await tip('Follow-up');
   await visible('#w-leads');
   const r0 = await p.evaluate(() => { const r = window.__intake.state.run; return { left: r.questionsLeft, phase: r.phase }; });
   if (r0.phase !== 'investigate' || r0.left !== 8) throw new Error('follow-up budget wrong: ' + JSON.stringify(r0));
@@ -185,16 +193,16 @@ async function followUp() {
     else if (sys.startsWith('You are the examiner')) examiner++, wayBackSeen = wayBackSeen || JSON.stringify(body).includes('stop if near-misses do not drop'), out = { wayBack: 'vague', diagnosis: { score: 3, evidence: 'q', next: 'Name the cause in one line.' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); if (!body.contents[0].parts[0].text.includes('How the slide looks: Design')) throw new Error('board got no design'); const R = ['nod', 'note', 'frown', 'eyebrow', 'yawn', 'calculator']; out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.', reactions: R }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?', reactions: R.slice().reverse() }, { role: 'COO', preempted: false, line: 'Who covers the shifts?', reactions: ['nod'] }], aside: 'CFO, to the COO: was that a star?' }; }
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
-    else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
+    else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 0, note: 'Dodged it.' }], verdicts: { approved: 'Approved. Do not make us regret it.', pilot: 'A pilot. Report back in March.', rejected: 'No. Come back with numbers.' } }; }
     else if (sys.includes('rate the concept')) reactions++, out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good', qualityWhy: 'open, about the first day' }; }
     else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak', qualityWhy: calls % 3 ? 'open and specific' : 'closed: yes or no' }; }
     await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(out) }] } }] } });
   });
   await p.goto('http://localhost:8765/');
-  await p.click('#btn-start');                      // no key -> settings
-  await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');
-  await p.click('#btn-start');
+  await p.click('#btn-start'); await p.waitForSelector('#s-settings.active');   // no key -> settings, which says why
+  if (!(await p.textContent('#settings-intro')).includes('needs a Gemini API key') || (await p.textContent('#btn-save-key')) !== 'Save and clock in') throw new Error('key screen does not say a key is needed');
+  await p.fill('#in-key', 'TESTKEY'); await p.click('#btn-save-key');   // ...and Save clocks you in
   // The cold open: 2007, AI years away. Click through it once.
   await p.waitForSelector('#s-intro.active');
   for (let i = 0; i < 5; i++) await p.click('#s-intro', { position: { x: 20, y: 20 } });
@@ -202,19 +210,55 @@ async function followUp() {
   if (!(await p.textContent('#intro-lines')).includes('fifteen years away')) throw new Error('intro lines missing');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/intro.png' });
   await p.click('#btn-intro-go');
+  // Your first morning: the walk from the lift to your desk, skippable, then the boot screen.
+  await p.waitForSelector('#s-walkin.active, #s-cubicle.active');
+  if (await p.isVisible('#s-walkin')) {
+    if (!(await p.isVisible('#btn-walkin-skip'))) throw new Error('walk-in has no Skip');
+    await p.waitForFunction(() => { const v = document.querySelector('#s-walkin video'); return !v || v.currentTime > 2 || !document.getElementById('s-walkin').classList.contains('active'); }, null, { timeout: 10000 });
+    if (!MOBILE && await p.isVisible('#s-walkin')) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/walkin.png' });
+    if (await p.isVisible('#btn-walkin-skip')) await p.click('#btn-walkin-skip');
+  }
   await p.waitForSelector('#s-cubicle.active');
-  let req = -1;
+  if (await p.evaluate(() => document.body.dataset.walkin) !== 'played') throw new Error('the walk-in film did not play: ' + await p.evaluate(() => document.body.dataset.walkin));
+  await p.waitForSelector('#s-cubicle.active');
+  if ((await p.textContent('#cubicle-line')).startsWith('Your cubicle')) throw new Error('boot repeats the cubicle after the walk-in');
+  let req = -1, stood = false;
   for (let n = 0; n < 3; n++) {
     if (n === 0 && !MOBILE) { await p.waitForTimeout(1200); await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/boot.png' }); }
     if (n === 0) {
       // Log on is one click from the first line of the boot screen.
       if ((await p.textContent('#btn-sit')) !== 'Log on') throw new Error('boot screen makes you read before logging on');
       await p.click('#btn-sit'); await p.waitForSelector('#s-desk.active');
+      // Mieke calls on your first morning and shows you round the desk.
+      await p.waitForSelector('#tour-answer'); await p.click('#tour-answer');
+      const stops = [];
+      for (let i = 0; i < 20; i++) {
+        stops.push(await p.getAttribute('#tour', 'data-target'));
+        if (i === 1 && !MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/tour.png' });
+        const last = !(await p.$('#tour-skip'));
+        await p.click('#tour-next');
+        if (last) break;
+      }
+      if (stops.length !== 5 || (!MOBILE && !stops.includes('w-mieke'))) throw new Error('tour stops wrong: ' + stops);
+      // Day 1 shows only the icons you need today; the rest turn up when you first need them.
+      if (!MOBILE && (await p.isVisible('.desk-icon[data-app="w-drill"]') || await p.isVisible('.desk-icon[data-app="w-leads"]') || !(await p.isVisible('.desk-icon[data-app="w-coe"]')))) throw new Error('day 1 desk icons wrong');
+      if (await p.$('#tour')) throw new Error('tour did not close');
+      // It can be replayed from the start menu, without the call; Escape ends it.
+      await p.click('#btn-startmenu'); await p.click('#btn-tour');
+      await p.waitForSelector('#tour-next'); await p.keyboard.press('Escape');
+      if (await p.$('#tour')) throw new Error('Escape did not end the tour');
+      // Mieke's pop-up stays in her chat, in place of the generic hello.
+      await p.waitForFunction(() => document.getElementById('mieke-log').textContent.includes('Your first request'));
+      if ((await p.textContent('#mieke-log')).includes('Shout if you want')) throw new Error('Mieke ping stacked under the hello');
     }
     if (!(await p.$$eval('#briefing-points li', l => l.length))) throw new Error('case file empty');
-    if (await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length) < 1) throw new Error('no unread mail');
+    // The very first request: nothing else in the inbox is unread. Later, the new request is.
+    const unread = await p.$eval('#mail-rows', t => t.querySelectorAll('tr.unread').length);
+    if (n === 0 ? unread !== 0 : n === 1 ? unread !== 0 : unread < 1) throw new Error('unread mail wrong on request ' + (n + 1) + ': ' + unread);
+    if (n === 0 && (await p.textContent('#mail-rows')).includes('CoE Academy')) throw new Error('module mail should wait until the module is due');
     if (n === 1 && !(await p.$$eval('#mail-rows tr', rows => rows.some(r => r.textContent.includes('✓'))))) throw new Error('handled request missing from the inbox');
-    if (n === 1) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module comes after the first case
+    if (n === 1 && await p.isVisible('#w-academy')) throw new Error('week 1 module should wait until Thursday');
+    if (n === 2) { await academy(); await p.click('#mail-rows tr:has-text("❗")'); }   // week 1: the module waits until Thursday morning
     // The story: Darren's welcome all week; Wednesday's real headline from Thursday on.
     const inbox = await p.textContent('#mail-rows');
     if (!inbox.includes('Welcome aboard') || (n === 2) !== inbox.includes('iPod touch')) throw new Error('story or news mail wrong on request ' + (n + 1));
@@ -233,6 +277,9 @@ async function followUp() {
       if (await p.evaluate(() => document.getElementById('w-coe').classList.contains('open'))) throw new Error('CoE folder should not open by itself any more');
       if (await p.isVisible('#w-academy')) throw new Error('week 1 should start with the request, not the module');
       if (!(await p.isVisible('#btn-call'))) throw new Error('the request is not open on the first Monday');
+      // The inbox alone: the case file is the attachment, no toast sends you elsewhere.
+      if (await p.isVisible('#w-case') || await p.isVisible('#w-notes')) throw new Error('first request should open the inbox alone');
+      if (await p.isVisible('#toast') && (await p.textContent('#toast')).includes('New here')) throw new Error('the CoE toast is back');
       if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coe"]'); } else await p.click('.desk-icon[data-app="w-coe"]');
       await visible('#w-coe');
       if (!(await p.$('#coe-doc svg.flow'))) throw new Error('flowchart missing');
@@ -253,7 +300,8 @@ async function followUp() {
       if (await p.isVisible('#btn-call')) throw new Error('call button on a filler mail');
       await p.click('[data-mail="delete"]');
       await p.click('#mail-rows tr:has-text("❗")');
-      if (!MOBILE) await visible('#w-case');
+      await p.click('#mail-attach');
+      await visible('#w-case');
       if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/inbox.png' });
     }
     if (!MOBILE) { await visible('#w-inbox'); await visible('#w-case'); await visible('#w-notes'); }
@@ -262,7 +310,8 @@ async function followUp() {
       const r = await p.evaluate(() => window.__intake.state.run);
       if (r.card.difficulty !== 0 || r.questionsLeft !== 10 || r.patience !== 5) throw new Error('first full case is not a starter: ' + r.card.id);
     }
-    await p.click('#btn-call');
+    await p.click(MOBILE && req === 0 ? '#case-call' : '#btn-call');   // on a phone the case file is in front: call from there
+    if (req === 0) await tip('the call');
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
     // Each question shows how it landed, with the reason, as soon as the answer is back.
@@ -298,9 +347,12 @@ async function followUp() {
     }
     if (req === 1) await retro();                    // the first text arrives after the first call
     await p.click('#btn-hangup');
+    if (req === 0) await tip('the case board');
+    if (req === 0) await p.waitForFunction(() => localStorage.getItem('intake-texts'));   // the first text arrives after the first call
     if (req === 2) await followUp();
     if (!MOBILE) { await visible('#w-write'); await visible('#w-call'); await visible('#w-notes'); if (await p.isVisible('#chat-form')) throw new Error('chat form should be gone after the call'); }
-    if (req === 0) {
+    if (req === 0 && await p.isVisible('#staply')) throw new Error('no Staply on the very first request');
+    if (req === 2) {
       // Staply turns up on the case board with confidently bad advice.
       await p.waitForSelector('#staply:not([hidden])');
       if (!(await p.textContent('#staply')).includes('learning styles')) throw new Error('Staply said the wrong thing: ' + await p.textContent('#staply'));
@@ -330,13 +382,17 @@ async function followUp() {
     await p.waitForSelector('#p-score.active');
     if (!(await p.textContent('#score-rows')).includes('Your bet:')) throw new Error('scorecard has no bet row');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
+    if (req === 0) await tip('My scores');
     if (req === 0 && examiner !== 3) throw new Error('expected three examiner runs per request, got ' + examiner);
     if (req === 0 && reactions !== 3) throw new Error('expected three boldness readings per request, got ' + reactions);
     if (req === 0 && (!wayBackSeen || !(await p.textContent('#score-rows')).includes('Your way back: vague'))) throw new Error('way back not graded');
     if (req === 0 && !(await p.textContent('#score-rows')).includes('Hidden facts found')) throw new Error('diagnosis parts missing');
     if (req === 0) {
       // The scorecard teaches: next level, model answers, and one hindsight question.
-      if (!(await p.textContent('#score-rows')).includes('Next level: Name the cause')) throw new Error('no next-level line');
+      // The part with the most points left comes first, with its next level; the table does not repeat it.
+      const focus = await p.textContent('#score-focus'), rowsText = await p.textContent('#score-rows');
+      if (!focus.startsWith('Work on this next: ')) throw new Error('no work-on-this-next line');
+      if (!(focus + rowsText).includes('Name the cause in one line.') || (focus.includes('Name the cause') && rowsText.includes('Next level: Name the cause'))) throw new Error('next-level line missing or repeated');
       if ((await p.$$('#score-rows details.model')).length < 4) throw new Error('model answers missing');
       await p.fill('#redo-q', 'Which shifts and which people were involved?');
       await p.click('#redo-form button');
@@ -359,7 +415,62 @@ async function followUp() {
       if (await p.evaluate(() => window.__intake.state.results.length !== window.__intake.state.index + 1)) throw new Error('scorecard counted twice after resume');
     }
     await p.click('#btn-next');
+    // Between requests: the office floor. Mieke says one thing, your desk moves you on; after the last request the board room does.
+    await p.waitForSelector('#s-office.active');
+    if (await p.evaluate(() => document.body.dataset.film) === 'stand-played') stood = true;
+    // No black end-of-day screen: the evening is the floor itself, and the lift takes you home.
+    if (await p.$('#daybreak')) throw new Error('the black day break is back');
+    const evening = await p.evaluate(() => { const s = window.__intake.state; return s.days[s.index] !== s.days[s.index - 1]; });
+    if (evening && req < 2) {
+      const lift = await p.textContent('#office-list button[data-spot="lift"]');
+      if (!/go home/i.test(lift) || !/start \w+day/.test(lift) || !/Tomorrow at 08:57/.test(lift)) throw new Error('the lift does not say it starts a new day: ' + lift);
+      if (!/done\. Take the lift home/.test(await p.textContent('#office-line'))) throw new Error('the evening floor does not say the day is done');
+    }
+    // Each place has its own quiet sound: rain and wind by day, the same plus a low note at 17:40.
+    if (await p.evaluate(() => Sound.place) !== (evening && req < 2 ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
+    if (req === 0) {
+      // The speaker in the floor's tray mutes everything, and comes back on.
+      await p.click('#s-office .tray-sound');
+      if (await p.evaluate(() => Sound.on) || (await p.textContent('#s-office .tray-sound')) !== '🔇') throw new Error('the tray speaker did not mute');
+      await p.click('#s-office .tray-sound');
+      if (!(await p.evaluate(() => Sound.on))) throw new Error('the tray speaker did not unmute');
+    }
+    const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
+    // A new place opens most visits: Bart's desk on the second, the canteen on the third.
+    if (spots.join(' ') !== ['lift* desk mieke darren meeting tv coffee', 'lift* desk mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
+    if (req === 0) {
+      // First time on the floor: Mieke says what it is for.
+      if (!(await p.textContent('#office-card')).includes('This is the floor')) throw new Error('no floor intro from Mieke');
+      await p.click('#office-list button[data-spot="mieke"]');
+      if (!(await p.textContent('#office-card')).includes('If I were you')) throw new Error('Mieke has no tip on the floor');
+      await p.click('#office-card button');
+      // Her desk, close up: things to find, each goes in the notebook. Then back to the floor.
+      await p.waitForSelector('#office-look .office-look-pic');
+      const things = await p.$$eval('#office-list button[data-thing]', l => l.map(b => b.dataset.thing + (b.classList.contains('fresh') ? '*' : '')));
+      if (things.join(' ') !== 'coe* phone*') throw new Error('first look at Mieke\'s desk should offer two new things: ' + things);
+      await p.click('#office-list button[data-thing="phone"]');
+      if (!(await p.textContent('#office-card')).includes('Snake')) throw new Error('the phone says nothing');
+      if (!(await p.textContent('#office-notebook')).includes('1/35')) throw new Error('notebook did not count the find: ' + await p.textContent('#office-notebook'));
+      if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/look.png' });
+      await p.click('#office-card button');
+      await p.click('#office-list button:has-text("Back to the floor")');
+      await p.waitForSelector('#office-look', { state: 'detached' });
+      if (!MOBILE) {
+        await p.hover('.office-tag[data-spot="darren"]');
+        if (!(await p.$('.office-glow.on[data-spot="darren"]'))) throw new Error('hover does not light the place');
+        await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office.png' });
+      } else await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office-mobile.png' });
+    }
+    await p.click('#office-list button.primary');
+    // Back to the desk: you sit down (a short film), then the next request opens.
+    if (req < 2) {
+      await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
+      if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
+      await p.waitForSelector('#office-film', { state: 'detached' });
+      if (evening && !(await p.textContent('#toast')).includes('08:57')) throw new Error('no good-morning line after going home');
+    }
   }
+  if (!stood) throw new Error('you never stood up from your desk: no stand-up film between two requests');
   // Friday: the board room. Pick a concept, the slide comes prefilled from the write-up.
   await p.waitForSelector('#p-board.active .board-pick');
   if (await p.$$eval('.board-pick', l => l.length) !== 3) throw new Error('board pick should list the three full cases');
@@ -379,6 +490,9 @@ async function followUp() {
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#slideshow .ss-slide.in-star');
   if (await p.$$eval('#slideshow .ss-box.later', l => l.length) !== 6) throw new Error('slide show should start with only the title');
+  // The show happens in the rendered board room: the slide sits on its screen, the board is known by its things.
+  const room = await p.evaluate(() => ({ pic: !!document.querySelector('#slideshow .ss-room img'), warp: (document.querySelector('#slideshow .ss-screen') || {}).style?.transform || '', places: document.querySelectorAll('#slideshow .br-place').length }));
+  if (!room.pic || !/^matrix3d/.test(room.warp) || room.places !== 3) throw new Error('slide show is not in the board room: ' + JSON.stringify(room));
   for (let i = 0; i < 6; i++) await p.click('#slideshow');
   const reacts = await p.$$eval('#slideshow .ss-react', l => l.map(x => x.textContent).join(''));
   if (await p.$$eval('#slideshow .ss-box.later', l => l.length) || !reacts.includes('🧮')) throw new Error('slide show builds or reactions wrong: ' + reacts);
@@ -390,14 +504,21 @@ async function followUp() {
   await p.waitForSelector('.member textarea');
   if (await p.$('#slideshow')) throw new Error('slide show did not close');
   if (await p.$$eval('.member textarea', l => l.length) !== 2 || !(await p.$('.member.nod'))) throw new Error('board questions wrong');
+  // No faces anywhere in the board room: no person or face emoji.
+  if (/\p{Emoji_Presentation}/u.test((await p.textContent('#boardroom')).replace(/[👍✋📝👎❓💤🧮]/gu, ''))) throw new Error('a face in the board room: ' + await p.textContent('#boardroom'));
+  if (!(await p.$('#boardroom .br-room .ss-screen'))) throw new Error('questions are not asked in the board room');
+  if (await p.evaluate(() => Sound.place) !== 'board') throw new Error('no projector hum in the board room');
   await p.fill('.member textarea[name=b0]', 'Yes, we showed it to them on Tuesday.');
   await p.fill('.member textarea[name=b1]', 'We pilot on day shift first.');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board.png' });
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#boardroom .score-total');
   const bt = await p.textContent('#boardroom .score-total');
-  if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
-  if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('no stamp on the result');
+  if (bt.trim() !== '70 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 0
+  // The score decides: 70 is a pilot (approved from 75, a pilot from 50), and the chair's line matches it.
+  if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('stamp does not follow the score');
+  if (!(await p.getAttribute('#boardroom .br-verdict .br-room img', 'src')).includes('board-dim')) throw new Error('a pilot should leave the projector on');
+  if (!(await p.textContent('#boardroom .quick-debrief')).includes('A pilot. Report back')) throw new Error('verdict does not match the decision');
   await p.waitForTimeout(900);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board-result.png' });
   await p.click('#boardroom button.primary');
@@ -444,6 +565,28 @@ async function followUp() {
   if (await p.isVisible('#w-standup')) throw new Error('stand-up did not close');
   const rec = await p.evaluate(() => { const h = JSON.parse(localStorage.getItem('intake-scores')); return { r: h.recall, w: h.weeks[h.weeks.length - 1].standup }; });
   if (!rec.w || rec.w.of !== w2.su.length || rec.r[w2.su[0]].streak !== 0 || !rec.r[w2.su[0]].seen) throw new Error('stand-up not recorded: ' + JSON.stringify(rec));
+  // Measurement drill: sort the card's measures, write a stop rule, rate it; no points, kept in My scores.
+  if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-drill"]'); } else await p.click('.desk-icon[data-app="w-drill"]');
+  await visible('#w-drill');
+  await p.click('#drill-check');
+  if (!(await p.textContent('#drill .su-why')).includes('Sort every')) throw new Error('drill let an empty sort through');
+  const bins = await p.evaluate(() => window.__intake.state.drill.R.tiles.map(t => t.bin));
+  if (!bins.includes('works') || !bins.includes('trap')) throw new Error('drill tiles missing a bin: ' + bins);
+  for (let i = 0; i < bins.length; i++) await p.click('.drill-tiles > li:nth-child(' + (i + 1) + ') [data-bin="' + bins[i] + '"]');
+  await p.click('#drill-check');
+  if ((await p.$$eval('.drill-tiles li.ok', l => l.length)) !== bins.length) throw new Error('drill sort not marked right');
+  await p.fill('#drill textarea', 'Pilot with one team. If damage per 1,000 parcels has not dropped by a third by the end of March, we stop.');
+  await p.click('#drill-rule');
+  const ticks = await p.$$eval('.drill-checks input', l => l.map(x => x.checked));
+  if (ticks.length !== 4 || ticks.some(t => !t)) throw new Error('drill rule checks wrong: ' + ticks);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/drill.png' });
+  await p.click('#drill [data-rate="got"]');
+  await p.waitForSelector('#drill-again');
+  const dr = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).drills);
+  if (!dr || dr.length !== 1 || dr[0].right !== bins.length || dr[0].rating !== 'got') throw new Error('drill not recorded: ' + JSON.stringify(dr));
+  await p.click('#drill-again');
+  if (await p.evaluate(() => window.__intake.state.drill.R.rating)) throw new Error('another case did not start a new drill');
+  await p.click('#w-drill .tb.close');
   // The module is still there, from the mail or the desktop.
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); } else await p.click('.desk-icon[data-app="w-academy"]');
   await visible('#w-academy');
@@ -468,6 +611,8 @@ async function followUp() {
   console.log('autofill request', await p.textContent('#score-total'));
   // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
   await p.click('#btn-next');
+  await p.waitForSelector('#s-office.active'); await p.click('#office-list button.primary');
+  await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
   await p.evaluate(() => { window.__intake.state.weekNo = 3; });
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
   await p.waitForSelector('#memo4-form:not([hidden])');
@@ -483,7 +628,7 @@ async function followUp() {
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-scores"]'); } else await p.click('.desk-icon[data-app="w-scores"]');
   await visible('#w-scores');
   const txt = await p.textContent('#scores');
-  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 5') || !txt.includes('[starter]') || !txt.includes('CoE Academy: Ask before you make · 3 of 4 right') || !txt.includes('board: pilot 80/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
+  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 5') || !txt.includes('[starter]') || !txt.includes('CoE Academy: Ask before you make · 3 of 4 right') || !txt.includes('board: pilot 70/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   // The team: after a promotion, two own requests and three junior drafts with one flaw each.
   if (!(await p.$('#scores .charts svg')) || !(await p.textContent('#scores .weak-spot')).includes('weak spot')) throw new Error('score charts missing');
@@ -493,11 +638,16 @@ async function followUp() {
   // The promotion comes with Doors Aero: glass windows, the Aero Aurora wallpaper and a word from IT.
   const aero = await p.evaluate(() => ({ on: document.body.classList.contains('aero'), wp: localStorage.getItem('intake-wallpaper') }));
   if (!aero.on || aero.wp !== 'aurora') throw new Error('promotion did not switch to Doors Aero: ' + JSON.stringify(aero));
+  // And it is still there the next morning: the desk reads your scores at start-up.
+  await p.goto('http://localhost:8765/?debug=1');
+  if (!(await p.evaluate(() => document.body.classList.contains('aero')))) throw new Error('Doors Aero gone after a reload');
   p.once('dialog', d => d.accept().catch(() => {}));
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   const tw = await p.evaluate(() => ({ n: window.__intake.state.cards.length, team: window.__intake.state.team && window.__intake.state.team.drafts.map(d => d.junior + ':' + d.flaw + ':' + d.lines.length), clash: window.__intake.state.team && window.__intake.state.team.drafts.some(d => window.__intake.state.cards.some(c => c.id === d.card)) }));
   if (tw.n !== 2 || !tw.team || tw.team.length !== 3 || tw.clash) throw new Error('team week wrong: ' + JSON.stringify(tw));
+  // The team week is announced on Monday morning, not discovered in the week report.
+  if (!(await p.evaluate(() => window.__intake.state.run.mieke.some(m => /team lead/.test(m.text))))) throw new Error('Mieke does not announce the team week');
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
   if (await p.isVisible('#w-standup')) await p.click('#w-standup .tb.close');
   await p.click('#mail-rows tr:has-text("drafts for your review")');
@@ -557,6 +707,42 @@ async function followUp() {
   if (oh.length !== weeksBefore + 1 || !oh.at(-1).one) throw new Error('one case not recorded as one case');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-one.png' });
   console.log('one case', await p.textContent('#end-score'));
+  // The morning call: a weekend is closed; a weekday is three questions, the lever, the need, the reveal.
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-17');
+  await p.click('#btn-morning'); await p.waitForSelector('#s-morning.active #mc-one');
+  if (!(await p.textContent('#morning')).includes('no. 6 rings on Monday')) throw new Error('weekend morning call wrong: ' + await p.textContent('#morning'));
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-14');
+  const callsBefore = calls;
+  await p.click('#btn-morning'); await p.waitForSelector('#s-morning.active #mc-input');
+  if (!(await p.textContent('.mc-top')).includes('Morning call no. 3')) throw new Error('morning call number wrong: ' + await p.textContent('.mc-top'));
+  for (let i = 0; i < 3; i++) {
+    await p.fill('#mc-input', 'What changed when the numbers dipped, question ' + (i + 1) + '?'); await p.press('#mc-input', 'Enter');
+    // Wait for her answer, not just your question: the screen redraws when it arrives.
+    await p.waitForFunction(n => document.querySelectorAll('.mc-log .msg.them').length === n + 1 && !document.querySelector('.mc-ask button[type=submit]:disabled'), i + 1);
+  }
+  const mcCard = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-morning')).card);
+  if (calls - callsBefore !== 3) throw new Error('morning call used ' + (calls - callsBefore) + ' Gemini calls');
+  await p.waitForSelector('#mc-reveal');
+  await p.click('#mc-reveal');
+  if (!(await p.textContent('.board-why')).includes('Make the call first')) throw new Error('reveal without a lever call');
+  await p.click('[data-lever="partly"]');
+  await p.fill('#mc-need', 'Night shift newcomers never get shown the routine.');
+  await p.click('#mc-reveal'); await p.waitForSelector('.mc-verdict');
+  await p.check('#mc-best');
+  const mcShare = await p.textContent('#mc-share-text');
+  if (!mcShare.startsWith('THE INTAKE · Morning call no. 3') || !mcShare.includes('My best question') || mcShare.includes('Night shift')) throw new Error('morning share text wrong: ' + mcShare);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/morning.png', fullPage: true });
+  const mh = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).mornings);
+  if (!mh || mh.length !== 1 || mh[0].no !== 3 || mh[0].card !== mcCard) throw new Error('morning call not recorded: ' + JSON.stringify(mh));
+  // Coming back the same day shows the reveal again, not a fresh call.
+  await p.goto('http://localhost:8765/?debug=1&morning=2026-10-14');
+  await p.click('#btn-morning'); await p.waitForSelector('.mc-verdict');
+  // ...and the full case is the same stakeholder, as one case.
+  await p.click('#mc-full');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const mf = await p.evaluate(() => ({ one: window.__intake.state.one, ids: window.__intake.state.cards.map(c => c.id) }));
+  if (!mf.one || mf.ids.join() !== mcCard) throw new Error('full case is not the morning card: ' + JSON.stringify(mf) + ' vs ' + mcCard);
+  console.log('morning call', mcShare.split('\n')[1]);
   // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
   await p.goto('http://localhost:8765/?debug=1');
   await p.click('#btn-hard');

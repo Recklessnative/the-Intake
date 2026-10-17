@@ -19,6 +19,8 @@
   const PLACE = { call: 'on the call', frontline: 'at the coffee machine', kpi: 'in the KPIs', org: 'in the org chart', process: 'in the process docs', policy: 'in the policies', training: 'in the past training records' };
   const placeOf = where => PLACE[where.replace(/^data:/, '')] || where;
   const MIEKE_ASKS = 3;
+  // Declared up here: the desk reads your scores at start-up (wallpapers, Doors Aero).
+  const SCORES_KEY = 'intake-scores';
   const TITLES = [[40, 'Order Taker'], [55, 'Course Builder'], [70, 'Learning Consultant'], [85, 'Learning Strategist'], [101, 'Board Whisperer']];
   const DIMENSIONS = [
     ['diagnosis', 'Need diagnosis', 25],
@@ -39,8 +41,11 @@
   const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, one: false, board: null, academy: null, team: null };
 
   // ---------- screens and panes ----------
+  Office.init({ show: id => show(id) });
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
+    if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') resumeButton();
     window.scrollTo(0, 0);
   }
@@ -49,6 +54,7 @@
   // Defence, waiting and the scorecard share one dialog window.
   function pane(id, stepText) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
+    if ($('s-desk').classList.contains('active')) Sound.scene(id === 'p-board' ? 'board' : 'desk');
     Desktop.title('w-dialog', { 'p-bet': 'Before you send it', 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
     if (stepText) step(stepText);
@@ -133,6 +139,8 @@
   }
   // One case: a tier-1 request with touchpoints, unplayed first.
   function pickOneCase() {
+    // From the morning call: that stakeholder's full case.
+    if (state.oneCard) { const card = state.oneCard; state.oneCard = null; return { cards: [card], days: [0] }; }
     const played = new Set(scoreHistory().weeks.flatMap(w => w.requests.map(x => x.card)));
     const pool = state.pool.filter(c => c.difficulty === 1 && touchpoints(c)).sort(() => Math.random() - 0.5).sort((a, b) => played.has(a.id) - played.has(b.id));
     const card = pool[0] || state.pool.find(c => c.difficulty >= 1);
@@ -154,8 +162,15 @@
 
     // ---------- title / settings ----------
   $('btn-settings').onclick = () => openSettings();
-  $('btn-back-title').onclick = () => show('s-title');
-  function openSettings() {
+  $('btn-back-title').onclick = () => { afterKey = null; show('s-title'); };
+  // `then`: what Save goes on to do. Clock in without a key lands here and Save clocks you in.
+  let afterKey = null;
+  function openSettings(then) {
+    afterKey = then || null;
+    $('settings-intro').textContent = then
+      ? 'One step before your first day: the game needs a Gemini API key. It is free and takes a minute. The key stays in this browser and is sent only to Google.'
+      : 'You can play on your own Gemini API key, with no limit on runs. The key stays in this browser and is sent only to Google.';
+    $('btn-save-key').textContent = then ? 'Save and clock in' : 'Save';
     $('in-key').value = Gemini.key;
     $('in-model').value = Gemini.model;
     show('s-settings');
@@ -164,8 +179,9 @@
     const key = $('in-key').value.trim();
     if (!key) { toast('Paste a Gemini API key first.'); return; }
     Gemini.save(key, $('in-model').value.trim(), $('in-remember').checked);
-    show('s-title');
+    const then = afterKey; afterKey = null;
     runsLeft();
+    if (then) then(); else show('s-title');
   };
   $('btn-clear-key').onclick = () => { Gemini.forget(); $('in-key').value = ''; show('s-title'); runsLeft(); };
 
@@ -206,10 +222,10 @@
   $('btn-cap-back').onclick = () => show('s-title');
 
   // Start a week: own key plays freely; otherwise the backend counts the run.
-  async function claimRun() {
+  async function claimRun(retry) {
     Gemini.runId = null;
     if (Gemini.key) return true;
-    if (!Gemini.hasBackend) { openSettings(); return false; }
+    if (!Gemini.hasBackend) { openSettings(retry); return false; }
     let r;
     try { r = await Gemini.backend('start'); } catch (e) { toast('Could not reach the game server. You can still play on your own Gemini key.'); return false; }
     if (r.status === 402) { openCap(); return false; }
@@ -228,7 +244,7 @@
   async function startWeek(hard, one) {
     if (readSave() && !window.confirm('Start a new week? Your saved week will be dropped.')) return;
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
-    if (!(await claimRun())) return;
+    if (!(await claimRun(() => startWeek(hard, one)))) return;
     dropSave();
     state.hard = !!hard;
     state.one = !hard && !!one;
@@ -247,7 +263,18 @@
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
     state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
     state.run = null;
-    if (!state.hard && !state.one && !seenIntro()) intro(cubicle); else cubicle();
+    if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
+  }
+  // Your very first morning you walk in: lift, reception, Mieke's desk, your chair, your monitor.
+  // After that, and whenever the film cannot play, the day starts at the boot screen.
+  const WALK_CAPTIONS = [
+    [0.4, 'Monday 3 September 2007, 08:56. Synergix e-Learning Solutions, fourth floor.'],
+    [5.2, 'Two cubicles from yours: Mieke. Lamp on, mail open, cardigan on the chair.'],
+    [9.0, 'Yours. Grey fabric walls, a plant on its last legs, a sticky note that says ASK WHY.']
+  ];
+  function arrive() {
+    if (state.hard || state.one || state.weekNo !== 1 || told('walkin')) { cubicle(); return; }
+    Office.walkIn(played => cubicle(played), WALK_CAPTIONS);
   }
 
   // ---------- the cold open: plays once before your first week, and from the title screen ----------
@@ -292,19 +319,21 @@
 
   // The boot screen: the intro lines appear while the progress bar runs and move on by
   // themselves. Log on is there from the start: nobody has to read the cubicle to work.
-  function cubicle() {
+  function cubicle(walked) {
     show('s-cubicle');
+    // After the walk-in you have already seen the cubicle; the boot screen skips that line.
+    const lines = walked ? CUBICLE.filter(l => !/^Your cubicle/.test(l)) : CUBICLE;
     let i = 0;
     const line = $('cubicle-line');
     const say = () => {
       line.classList.remove('in');
       void line.offsetWidth;
-      line.textContent = CUBICLE[i];
+      line.textContent = lines[i];
       line.classList.add('in');
     };
     const next = () => {
       clearTimeout(cubicle.t);
-      if (i < CUBICLE.length - 1) { i++; say(); cubicle.t = setTimeout(next, 4200); }
+      if (i < lines.length - 1) { i++; say(); cubicle.t = setTimeout(next, 4200); }
     };
     say();
     cubicle.t = setTimeout(next, 4200);
@@ -397,12 +426,9 @@
       leg: 'call', legLeft: touchpoints(card) ? budget().call : questionsFor(card), calledBack: false,
       corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: []
     };
-    state.run.mieke.push({ who: 'them', text: 'Morning. Shout if you want a second pair of eyes.' });
+    state.run.mieke.push({ who: 'them', text: miekeHello() });
     openRequest();
-    // Your very first request: the Center of Excellence folder opens on the flowchart.
-    if (!state.index && !scoreHistory().weeks.some(w => w.requests.length)) toast('New here? The Center of Excellence folder on your desktop has the intake flowchart.', 'info');
-    if (state.index) Sound.ding();
-    if (state.index && state.days[state.index] !== state.days[state.index - 1]) toast('Good morning. It is ' + dayOf(state.index) + '.', 'info');
+    if (state.index && !mondayFirst()) Sound.ding();
     retroMorning();
     save();
   }
@@ -412,6 +438,7 @@
     const r = state.run;
     const card = r.card;
     show('s-desk');
+    deskIcons();
     tick(0);
     $('notes').value = r.notes || '';
     $('chat-log').innerHTML = '';
@@ -437,6 +464,8 @@
     phase('inbox');
     Desktop.layout('inbox', 'w-inbox');
     if (calm && state.weekNo !== 1) { Desktop.minimise('w-case'); Desktop.minimise('w-notes'); }
+    // Your very first request: the inbox alone. The case file is the attachment; notes come with the call.
+    if (calm && firstEver()) { Desktop.close('w-case'); Desktop.close('w-notes'); Desktop.focus('w-inbox'); }
     if (!state.hard) { Desktop.open('w-mieke', Desktop.floating['w-mieke']); Desktop.minimise('w-mieke'); }
     Desktop.focus('w-inbox');
     step(Story.day(state.weekNo, state.days[state.index] || 0) + ' · request ' + (state.index + 1) + ' of ' + state.cards.length);
@@ -474,8 +503,10 @@
   function mailbox() {
     const r = state.run;
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
-    const today = state.days[state.index] || 0;
-    const mails = FILLER.map(f => Object.assign({ read: !!r.readMail[f.subject], day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    // Your very first request: everything else is already read, so the one bold line is the request.
+    const today = state.days[state.index] || 0, fresh = firstEver();
+    const seen = sub => { if (fresh) r.readMail[sub] = true; return !!r.readMail[sub]; };
+    const mails = FILLER.map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
@@ -483,8 +514,8 @@
     // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
     if (!state.hard) {
       const sm = Story.storyMail(state.weekNo);
-      mails.push(Object.assign({ read: !!r.readMail[sm.subject], day: 0, at: 8 * 60 + 12, story: true }, sm));
-      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: !!r.readMail[n.subject], at: 7 * 60 + 31 + i }, n)));
+      mails.push(Object.assign({ read: seen(sm.subject), day: 0, at: 8 * 60 + 12, story: true }, sm));
+      Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: seen(n.subject), at: 7 * 60 + 31 + i }, n)));
     }
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
@@ -494,8 +525,9 @@
       mails.push({ from: 'IT Service Desk', subject: sub, read: !!r.readMail[sub], day: 0, at: 7 * 60 + 58,
         body: 'Dear team lead,\n\nCongratulations on your promotion. As agreed with HR, team leads get the new PC. It runs Doors Aero: glass windows, a round start button and roughly 40% more shine.\n\nThe old look is in Display properties if you miss it. Your files are where you left them. Your coffee mug is not our department.\n\nIT Service Desk\n(Do not reply. Nobody will.)' });
     }
-    // This week's CoE Academy module arrives first thing Monday.
-    if (state.academy) {
+    // This week's CoE Academy module arrives first thing Monday (in week 1 on Thursday, when it is due).
+    if (state.academy && state.index >= (state.weekNo === 1 ? 2 : 0)) {
+      unlock('w-academy');
       const m = Academy.MODULES.find(x => x.id === state.academy.id);
       const subject = 'Assigned to you: ' + m.title + ' (' + m.minutes + ' min)';
       mails.push({ from: 'CoE Academy', subject, academy: true, day: 0, read: !!r.readMail[subject] || state.academy.done, at: 8 * 60 + 30,
@@ -572,7 +604,8 @@
       toast(MAIL_JOKES[b.dataset.mail], 'info');
     };
   });
-  $('mail-attach').onclick = () => Desktop.open('w-case');
+  $('case-call').onclick = () => $('btn-call').onclick();
+  $('mail-attach').onclick = () => { Desktop.open('w-case', [67, 3, 31, 54]); Desktop.open('w-notes', [67, 60, 31, 33]); Desktop.focus('w-case'); };
 
   // Pre-call context a well-prepared professional would look up first (never the diagnosis).
   function briefing(b) {
@@ -602,6 +635,7 @@
     phase('call');
     Desktop.layout('call', 'w-call');
     $('chat-input').focus();
+    hint('call');
   };
   function callWindow() {
     const r = state.run;
@@ -715,6 +749,8 @@
       tick(4);
       if (out.quality === 'weak') r.patience--;
       meters();
+      // The first dot you ever lose says why, once.
+      if (out.quality === 'weak' && r.patience > 0 && !state.hard && !told('patience')) addMsg('sys', 'Patience dropped a dot. That question was vague, leading or jumped to a solution. At zero they find another meeting.');
       save();
       const more = touchpoints(r.card) && r.questionsLeft > 0;
       if (r.patience <= 0) {
@@ -745,7 +781,8 @@
   function afterCall() {
     const r = state.run;
     if (r.phase !== 'call') return;
-    if (r.laterText) { const t = r.laterText; r.laterText = null; setTimeout(() => Retro.sms(t[0], t[1]), 2500); }
+    // In week 1 the text arrives without a ring: a badge on the phone, nothing more.
+    if (r.laterText) { const t = r.laterText; r.laterText = null; setTimeout(() => Retro.sms(t[0], t[1], state.weekNo === 1), 2500); }
     if (touchpoints(r.card) && r.questionsLeft > 0) toInvestigate(); else toWriteup();
   }
   function toWriteup() {
@@ -766,6 +803,8 @@
     if (!r.board) r.board = newBoard(r);
     renderBoard();
     Desktop.layout('write', 'w-write');
+    unlock('w-write');
+    hint('write');
   }
 
   // ---------- follow-up: data requests, the coffee machine, one callback ----------
@@ -784,6 +823,8 @@
     phase('investigate');
     renderLeads();
     Desktop.layout('investigate', 'w-leads');
+    unlock('w-leads', 'w-write');
+    hint('leads');
   }
   function renderLeads() {
     const r = state.run, card = r.card, on = r.phase === 'investigate', fl = card.frontline;
@@ -926,7 +967,13 @@
     const A = state.academy;
     if (!A) { toast(state.hard ? 'Hard mode. No e-learning this week. You know what to do.' : 'No module assigned yet. Clock in first.', 'info'); return; }
     Academy.render($('academy'), Academy.MODULES.find(m => m.id === A.id), A, save, (right, of) => {
-      if (right == null) { Desktop.minimise('w-academy'); return; }
+      if (right == null) {
+        Desktop.minimise('w-academy');
+        // Back to work means the request: put it in front of you.
+        const r = state.run;
+        if (r && r.phase === 'inbox') { selectMail(r.mails.find(m => m.current)); Desktop.focus('w-inbox'); }
+        return;
+      }
       A.right = right; A.of = of;
       recordAcademy();
       if (state.run) briefing(state.hard ? null : state.run.card.briefing);
@@ -938,11 +985,18 @@
 
   // What waits on top before this request: the Monday stand-up (weeks 2 and later, when there
   // is something to recall), else the week's CoE module (in week 1 on the second request).
+  // One-off explanations: true if already given, and marks it given.
+  function told(k) {
+    try { if (localStorage.getItem('intake-told-' + k)) return true; localStorage.setItem('intake-told-' + k, '1'); } catch (e) { /* storage blocked */ }
+    return false;
+  }
+  // The first request of your first week: the one moment to show as little as possible.
+  function firstEver() { return !state.hard && state.weekNo === 1 && state.index === 0; }
   function mondayFirst() {
     if (state.hard) return null;
     if (state.standup && !state.standup.done && state.index === 0) return 'standup';
     const A = state.academy;
-    if (A && !A.started && !state.standup && state.index === (state.weekNo === 1 ? 1 : 0)) return 'module';
+    if (A && !A.started && !state.standup && state.index === (state.weekNo === 1 ? 2 : 0)) return 'module';
     return null;
   }
   function openStandup() {
@@ -967,7 +1021,7 @@
   // ---------- the team: review the juniors' drafts ----------
   function renderTeam() {
     if (!state.team) return;
-    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); }, sendTeam);
+    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); if (state.board && state.board.stage === 'pick') renderBoardRoom(); }, sendTeam);
   }
   async function sendTeam(d) {
     const j = Team.junior(d.junior), card = state.pool.find(c => c.id === d.card);
@@ -993,7 +1047,34 @@
   }
   $('btn-team').onclick = () => openApp('w-team');
 
+  // ---------- the desk grows: icons turn up when you first need them ----------
+  const DESK_START = ['w-inbox', 'w-case', 'w-notes', 'w-call', 'w-mieke', 'w-coe'];
+  function deskUnlocked() {
+    let got = [];
+    try { got = JSON.parse(localStorage.getItem('intake-desk') || '[]'); } catch (e) { /* storage blocked */ }
+    return got;
+  }
+  function deskIcons() {
+    const h = scoreHistory();
+    // Someone who has finished a week (or played older versions) gets the whole desk at once.
+    const all = (h.weeks || []).reduce((n, w) => n + (w.requests || []).length, 0) >= 3;
+    const open = DESK_START.concat(deskUnlocked());
+    document.querySelectorAll('.desk-icon').forEach(b => b.classList.toggle('locked', !all && !open.includes(b.dataset.app)));
+  }
+  function unlock(...ids) {
+    const got = deskUnlocked();
+    const fresh = ids.filter(id => !got.includes(id) && !DESK_START.includes(id));
+    if (!fresh.length) return;
+    try { localStorage.setItem('intake-desk', JSON.stringify(got.concat(fresh))); } catch (e) { /* storage blocked */ }
+    deskIcons();
+    fresh.forEach(id => { const b = document.querySelector('.desk-icon[data-app="' + id + '"]'); if (b && !b.classList.contains('locked')) { b.classList.add('fresh'); setTimeout(() => b.classList.remove('fresh'), 4000); } });
+  }
+
   // ---------- Mieke, the colleague two cubicles over ----------
+  const MIEKE_HELLO = 'Morning. Shout if you want a second pair of eyes.';
+  // A team week starts with the news, or the drafts turn up in the week report as a surprise.
+  const MIEKE_TEAM = 'Morning, team lead. Two requests are yours this week, not three: Bart, Priya and Jens each took one and want your eyes on their drafts before Friday. Their mail is in your inbox, and My team is on your desktop.';
+  const miekeHello = () => state.team && !state.index ? MIEKE_TEAM : MIEKE_HELLO;
   function miekeSays(text, who, replay) {
     if (!replay) state.run.mieke.push({ who: who || 'them', text });
     const d = document.createElement('div');
@@ -1008,6 +1089,16 @@
     $('mieke-log').appendChild(d);
     if (!replay && (who || 'them') === 'them') Sound.im();
     $('mieke-log').scrollTop = $('mieke-log').scrollHeight;
+  }
+  // A pop-up from Mieke also lands in her chat, so it is still there when you open it.
+  // Her morning ping replaces the generic hello rather than stacking under it.
+  function miekePing(text) {
+    const r = state.run;
+    if (!r || state.hard) return;
+    if (r.mieke.length === 1 && r.mieke[0].text === MIEKE_HELLO) { r.mieke = []; $('mieke-log').innerHTML = ''; }
+    r.mieke.push({ who: 'them', text });
+    miekeSays(text, 'them', true);
+    save();
   }
   function miekeLeft() {
     const n = state.run.miekeLeft;
@@ -1096,24 +1187,65 @@
     const n = (state.weekNo - 1) * 3 + state.index;
     const t = TEXTS[n % TEXTS.length];
     // Monday morning gets one ping, not two: the first text waits until the first call ends.
-    if (state.index) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    // The module morning gets one ping too: the text waits until the call ends.
     const moduleFirst = mondayFirst() === 'module';
+    if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
+    // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
+    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
     const ping = mondayFirst() === 'standup' ? ['Mieke', 'Morning! Stand-up first, five minutes, coffee included. Then the request.']
-      : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Nice first one. Your CoE module is in the inbox now, it is short. Then the next request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
-      : !state.index ? ['Mieke', 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.'] : PINGS[n % PINGS.length];
-    setTimeout(() => Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'), 1200);
+      : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Morning! Before the next request: your first CoE module. It is short, and it does not count. Then the request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
+      : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : 'Morning! A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
+    if (moduleFirst || mondayFirst() === 'standup') { miekePing(ping[1]); return; }
+    setTimeout(() => { if (ping[0] === 'Mieke') miekePing(ping[1]); Retro.im(ping[0], ping[1], () => { if (ping[0] === 'Mieke') openApp('w-mieke'); }, state.index ? 'im' : 'online'); }, 1200);
   }
-  // Staply turns up at most once per request, and never in hard mode.
+  // Mieke's tour of the desk, in speech bubbles. On a phone the desk icons are hidden, so the
+  // tour is shorter and points at the start menu and the taskbar instead.
+  const TOUR_DESK = [
+    { text: 'Welcome to Synergix! I am Mieke, two cubicles over. Darren wanted to show you around himself, but he is at the airport. Again. So you get me. One minute, promise.' },
+    { target: '.desk-icon[data-app="w-inbox"]', text: 'Doors Mail. Requests from clients land here. Your first one is already waiting, of course. The case file is the paperclip on it.' },
+    { target: '.desk-icon[data-app="w-mieke"]', text: 'And me. Stuck? Click my coffee cup. I have time for a few questions per request, and I only know what you have seen so far.' },
+    { target: '#btn-startmenu', text: 'Everything is also in the start menu. The rest of the desk I will show you when you need it, not before. New icons turn up as you go.' },
+    { target: '#w-inbox', text: 'That is it. Read the request, then call them back. Ask before you make. That is the whole job, really.', last: true }
+  ];
+  const TOUR_PHONE = [
+    TOUR_DESK[0],
+    { target: '#w-inbox', text: 'Your inbox. Requests from clients land here. Your first one is already waiting, of course.' },
+    { target: '#btn-startmenu', text: 'Everything else is in the start menu: the case file, your notes and me (stuck? ask me, I have time for a few questions per request). The rest I will show you when you need it.' },
+    { target: '#task-buttons', text: 'Open windows sit down here in the taskbar. Tap one to bring it back.' },
+    { target: '#w-inbox', text: 'That is it. Read the request, open the case file, then call them back. Ask before you make. That is the whole job, really.', last: true }
+  ];
+  function miekeTour(call, after) {
+    $('start-menu').hidden = true;
+    if (state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
+    if (!state.run || Tour.open) return;
+    Desktop.focus('w-inbox');
+    const phone = !$('desk-icons').offsetParent;
+    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, () => { if (after) miekePing(after); });
+  }
+  $('btn-tour').onclick = () => miekeTour(false);
+  // Mieke explains each part of the desk once, the first time you need it, in one bubble that
+  // does not block anything. Not in hard mode: she is on holiday.
+  const HINTS = {
+    call: { target: '#w-call .meters', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
+    leads: { target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
+    write: { target: '#board-steps', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
+    scores: { target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' }
+  };
+  function hint(k) {
+    if (state.hard || !HINTS[k] || told('hint-' + k)) return;
+    setTimeout(() => { if (!Tour.open) Tour.hint(HINTS[k]); }, 500);
+  }
+  // Staply turns up at most once per request, never in hard mode, and not before the last request of week 1.
   function staply(trigger) {
     const r = state.run;
-    if (state.hard || !r || r.staply) return;
+    if (state.hard || !r || r.staply || (state.weekNo === 1 && state.index < 2)) return;
     if (Retro.staply(trigger)) r.staply = trigger;
   }
   const staplyLabel = () => { $('btn-staply').textContent = Retro.staplyOn() ? '📎 Staply: on' : '📎 Staply: off'; };
   $('btn-staply').onclick = () => { $('start-menu').hidden = true; Retro.setStaply(!Retro.staplyOn()); staplyLabel(); toast(Retro.staplyOn() ? 'Staply is back. He missed you.' : 'Staply is off.', 'info'); };
   Retro.init({
     toast,
-    onStaplyYes: () => { if (!state.hard) setTimeout(() => Retro.im('Mieke', 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.', () => openApp('w-mieke')), 5200); },
+    onStaplyYes: () => { if (!state.hard) setTimeout(() => { const t = 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.'; miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 5200); },
     onStaplyChange: staplyLabel
   });
   staplyLabel();
@@ -1172,6 +1304,7 @@
   function renderBoard() {
     const r = state.run, b = board();
     $('board').hidden = b.mode !== 'board';
+    $('btn-memo-mode').hidden = firstEver();
     $('write-form').hidden = b.mode !== 'memo';
     $('memo4-form').hidden = b.mode !== 'memo4';
     $('hard-form').hidden = b.mode !== 'hard';
@@ -1275,6 +1408,7 @@
     renderOwners();
     if (b.step === 'memo') memo(boardWriteup());
     const fb = $('board-feedback');
+    $('board-why').textContent = '';
     fb.hidden = !b.feedback;
     fb.textContent = b.feedback;
     const next = STEPS[at + 1];
@@ -1409,8 +1543,13 @@
     const b = board();
     if (b.step === 'memo') { submitWriteup(boardWriteup()); return; }
     if (!b.locked) {
+      // Say what is missing next to the button, and take you to it when it is the easy-to-miss owners row.
       const why = missing(b.step);
-      if (why) { toast(why, 'info'); return; }
+      $('board-why').textContent = why || '';
+      if (why) {
+        if (/^Say who owns/.test(why)) { const o = $('owners'); o.classList.remove('flash'); void o.offsetWidth; o.classList.add('flash'); o.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+        return;
+      }
       b.locked = true;
       b.feedback = feedbackFor(b.step);
       if (!b.feedback) { b.step = STEPS[STEPS.indexOf(b.step) + 1]; b.locked = false; }
@@ -1421,7 +1560,9 @@
     }
     renderBoard();
     save();
-    $('w-write').querySelector('.win-body').scrollTop = 0;
+    // Mieke's feedback and the Next button sit at the bottom: bring them up. A new step starts at the top.
+    if (b.locked && b.feedback) $('board-next').scrollIntoView({ block: 'end', behavior: 'smooth' });
+    else $('w-write').querySelector('.win-body').scrollTop = 0;
   };
 
   // Facts the player cited on the case board: diagnosis evidence and the measurement rungs.
@@ -1535,7 +1676,8 @@
     r.writeup = w;
     if (w.kind === 'board') r.boardScores = boardScores(r, w);
     r.bet = r.bet || { bold: null, appetite: null, exit: '' };
-    $('bet-intro').textContent = 'Before ' + r.card.stakeholder.name + ' reads it: place your bet.';
+    $('bet-intro').textContent = 'Two clicks before ' + r.card.stakeholder.name + ' reads it. Points go to fit: as bold as they can take, not bolder.';
+    $('bet-why').textContent = '';
     $('bet-appetite-q').textContent = 'How much risk can ' + r.card.stakeholder.name.split(' ')[0] + ' take?';
     renderBet();
     pane('p-bet', 'Request ' + (state.index + 1) + ' · Your bet');
@@ -1560,8 +1702,10 @@
   $('bet-form').onsubmit = ev => {
     ev.preventDefault();
     const b = state.run.bet;
-    if (b.bold == null || b.appetite == null) { toast('Pick both: how bold it is, and how much risk they can take.'); return; }
-    if (b.bold >= 2 && (b.exit || '').trim().length < 10) { toast('A bold concept needs a way back. Say how you back out if it fails.'); return; }
+    const why = b.bold == null || b.appetite == null ? 'Pick both: how bold it is, and how much risk they can take.'
+      : b.bold >= 2 && (b.exit || '').trim().length < 10 ? 'A bold concept needs a way back. Say how you back out if it fails.' : '';
+    $('bet-why').textContent = why;
+    if (why) return;
     sendWriteup();
   };
   async function sendWriteup() {
@@ -1645,6 +1789,8 @@
     if (!replay) {
       state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g);
+      unlock('w-scores', 'w-drill', 'bin');
+      hint('scores');
       r.phase = 'score';
       r.grade = g;
       save();
@@ -1653,6 +1799,11 @@
     }
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
+    // One thing to work on: the part with the most points left on the table, and its next level.
+    const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
+    $('score-focus').hidden = !weakest || weakest.left <= 0;
+    state.focus = weakest && weakest.left > 0 ? { label: weakest.label, next: weakest.next || '' } : null;
+    if (weakest && weakest.left > 0) $('score-focus').textContent = 'Work on this next: ' + weakest.label.toLowerCase() + '. ' + (weakest.next || 'Open "Why this score" below and compare with the model answer.');
     const rows = $('score-rows');
     rows.innerHTML = '';
     DIMENSIONS.forEach(([k, label, max]) => {
@@ -1660,37 +1811,48 @@
       const a = document.createElement('td');
       const name = document.createElement('div');
       name.textContent = label;
+      a.appendChild(name);
+      // Teach, not just grade: the next level stays in view; why, the checks and a model answer fold away.
+      if (g[k].next && pts[k] < max && k !== weakest.k) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      const more = document.createElement('details'); more.className = 'why';
+      const ms = document.createElement('summary'); ms.textContent = 'Why this score';
       const ev = document.createElement('div');
       ev.className = 'ev';
       ev.textContent = g[k].evidence;
-      a.append(name, ev);
-      // Teach, not just grade: what the next level looks like, and a model answer to compare with.
-      if (g[k].next) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      more.append(ms, ev);
       const model = modelAnswer(r.card, k);
       if (model) {
         const d = document.createElement('details'); d.className = 'model';
         const sm = document.createElement('summary'); sm.textContent = k === 'nextLevel' ? 'Bolder options, if this client could take them (not needed for full marks)' : 'Compare with a model answer';
         const t = document.createElement('p'); t.textContent = model;
-        d.append(sm, t); a.appendChild(d);
+        d.append(sm, t); more.appendChild(d);
       }
       const bs = r.writeup && r.writeup.kind === 'board' ? r.boardScores : null;
       if (k === 'diagnosis') {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Hidden facts found ' + Math.round(parts.facts * 100) + '% · lever ' + (!parts.call || parts.call === 'unclear' ? 'not called' : ({ 1: 'right', 0.25: 'one step off', 0: 'wrong' }[parts.lever] || 'n/a'));
-        a.appendChild(n);
+        more.insertBefore(n, ev.nextSibling);
       }
       if (bs && (k === 'diagnosis' || k === 'risks')) {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Practice check, no points: ' + (k === 'diagnosis'
           ? 'cause types ' + Math.round(bs.tags * 100) + '%, key evidence cited ' + Math.round(bs.evidence * 100) + '%.'
           : 'real blockers picked, ' + Math.round(bs.risks * 2) + ' of 2.');
+        more.insertBefore(n, ev.nextSibling);
+      }
+      if (k === 'measurement' && clamp4(g.measurement.score) < 4) {
+        const n = document.createElement('button');
+        n.type = 'button'; n.className = 'link drill-link'; n.id = 'btn-drill-case';
+        n.textContent = '🎯 Practise measurement on this case (about 3 minutes)';
+        n.onclick = () => openDrill(r.card);
         a.appendChild(n);
       }
       if (k === 'nextLevel' && clamp4(g.fit.score) < 4) {
         const n = document.createElement('div'); n.className = 'ev';
         n.textContent = 'Counts as far as the concept fits the need: ' + clamp4(g.fit.score) + ' of 4 for fit.';
-        a.appendChild(n);
+        more.insertBefore(n, ev.nextSibling);
       }
+      a.appendChild(more);
       const b = document.createElement('td');
       b.className = 'pts';
       b.textContent = pts[k] + ' / ' + max;
@@ -1712,11 +1874,14 @@
       const ev = document.createElement('div'); ev.className = 'ev';
       ev.textContent = r.card.stakeholder.name.split(' ')[0] + "'s appetite for risk: " + lvl(sz.a) + '. You guessed ' + lvl(sz.bet.appetite) + '. '
         + 'Your concept read as ' + sz.b + ' (' + BOLD[sz.b].toLowerCase() + '); you called it ' + (sz.bet.bold == null ? '?' : sz.bet.bold) + '.';
-      a.append(name, ev);
+      const more = document.createElement('details'); more.className = 'why';
+      const ms = document.createElement('summary'); ms.textContent = 'Why this score';
+      more.append(ms, ev);
+      a.append(name, more);
       if (g.wayBack && (sz.bet.exit || '').trim()) {
-        const wb = document.createElement('div'); wb.className = 'ev';
+        const wb = document.createElement('div'); wb.className = g.wayBack === 'concrete' ? 'ev' : 'next';
         wb.textContent = 'Your way back: ' + { concrete: 'concrete, it names a first step and the result that makes you stop.', vague: 'vague. Name a small first step and the result on behaviour or the business number that makes you stop. A date alone, or a satisfaction score, is not enough.', none: 'not one the examiner could use.' }[g.wayBack];
-        a.appendChild(wb);
+        a.insertBefore(wb, more);
       }
       if (r.reaction && r.reaction.acceptReply && sz.d <= 0) { const q = document.createElement('div'); q.className = 'ev'; q.textContent = '"' + r.reaction.acceptReply + '"'; a.appendChild(q); }
       const b = document.createElement('td'); b.className = 'pts'; b.textContent = sz.read ? '+' + sz.read : '';
@@ -1814,8 +1979,163 @@
   };
 
   $('btn-next').onclick = () => {
-    if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard();
+    if (state.hard || state.one) { if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard(); return; }
+    if (state.index + 1 < state.cards.length) {
+      state.index++;
+      const newDay = state.days[state.index] !== state.days[state.index - 1];
+      // You stand up; at the end of a day the floor is the evening, and the lift takes you home.
+      floor(newDay, false);
+    } else floor(false, true);
   };
+
+  // ---------- the office floor, between requests ----------
+  // A breath between two requests: you stand up, and the places you could go are lit. Your desk
+  // moves the game on; everyone else says one thing. Nothing here costs a question or a Gemini call.
+  const COFFEE = [
+    'BUITEN GEBRUIK. HORS SERVICE. Somebody has added, in biro: "since 2004".',
+    'Still broken. A second note says facilities "has escalated it". A third note says "to whom?".',
+    'You press the button anyway. It makes a noise like a fax machine and gives you hot water.',
+    'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
+  ];
+  // ---------- things to find on the floor ----------
+  // No faces: you get to know people by their desks. A place opens from a given floor visit (`from`),
+  // and each thing in it turns up `at` visits later, so there is something new most times you stand up.
+  // Found things go in your notebook.
+  const LOOKS = {
+    mieke: { from: 0, shot: 'mieke', title: 'Mieke\'s desk', who: 'Mieke', note: 'Mieke, from behind her monitor', things: [
+      { id: 'coe', at: 0, label: 'Red pen', text: 'Her own printed copy of the CoE e-learning, the one she made. Red pen on every page. Page 1: "Too long." Page 14: "Still too long." She marks herself harder than she marks you.' },
+      { id: 'phone', at: 0, label: 'Her phone', text: 'A grey phone with a stubby aerial. Snake, high score 4,212. On the back, in her handwriting: "Do not upgrade." IT has tried twice.' },
+      { id: 'cds', at: 1, label: 'CD-ROMs', text: 'A spindle of course CD-ROMs, 1998 to 2001. Each has a sticky note: what it was for, and whether anyone did anything differently afterwards. Most say "no idea". One says "yes: the manager asked about it on Monday".' },
+      { id: 'photo', at: 2, label: 'Photo frame', text: 'A frame turned towards her chair, away from visitors. On the back, in pencil: "Wednesday choir, Gent, 2005. Front row, of course."' },
+      { id: 'cardigan', at: 3, label: 'Cardigan', text: 'The burgundy cardigan lives on her chair all year. Bart borrowed it once for a client visit in February. Neither of them has mentioned it since.' }
+    ] },
+    darren: { from: 0, shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
+      { id: 'poster', at: 0, label: 'Poster', text: 'SYNERGY. "Alone we are smart. Together we are a steering committee." He ordered six. The other five are still in the box behind the door.' },
+      { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.' },
+      { id: 'boarding', at: 1, label: 'Boarding passes', text: 'Three boarding passes, Brussels to Frankfurt and back, all seat 2C. On one he has written "GMS = Max??". Max is the avatar that won Global Multimedia Solutions the Brugmann account.' },
+      { id: 'charger', at: 2, label: 'Charger', text: 'A charger with nothing on the end. The BlackBerry is wherever Darren is, sending mails that end in "Sent from my BlackBerry".' },
+      { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.' }
+    ] },
+    bart: { from: 1, shot: 'bart', title: 'Bart\'s desk', who: 'Bart', note: 'A note on Bart\'s monitor', text: 'Back in 5 min. (Foosball.)\n\nIf it is about the Halvorsen risks: they are fine.', things: [
+      { id: 'pizza', at: 0, label: 'Pizza box', text: 'A pizza box with a sticky note: "FOR THE TEAM!!" There is one slice left. The box is from last Thursday. Bart says it is still fine.' },
+      { id: 'frame', at: 0, label: 'Framed mail', text: 'A client mail from March 2006, printed and framed: "We are FULLY ON BOARD! :)" The project was cancelled three weeks later. He kept the frame.' },
+      { id: 'risk', at: 1, label: 'Risk register', text: 'His risk register for the Halvorsen pitch. Every row says LOW, in green highlighter. Row 7, "client changes their mind", is crossed out. Next to it: "they won\'t".' },
+      { id: 'trophy', at: 2, label: 'Trophy', text: 'Synergix foosball, runner-up, 2006. He had it engraved himself. There were two teams.' },
+      { id: 'tie', at: 3, label: 'Orange tie', text: 'An orange tie on a hook, "for clients". Mieke says it is why they lost the Brugmann account. Bart says it was the avatar.' }
+    ] },
+    canteen: { from: 2, shot: 'canteen', title: 'The canteen', who: 'The canteen', things: [
+      { id: 'lunch', at: 0, label: 'Lunch box', text: 'A plastic lunch box with a note: "JENS. DO NOT EAT." Underneath, smaller: "I know it was you, Bart."' },
+      { id: 'rota', at: 0, label: 'Dishes rota', text: 'AFWAS / VAISSELLE. Weeks 36 to 40: Darren, Darren, Darren, Darren, Darren. None of the boxes are ticked. Nobody remembers who wrote the rota.' },
+      { id: 'mugs', at: 1, label: 'Mugs', text: 'Four mugs. Three have a name on the bottom. The fourth says "GMS: Learning that moves", from a trade fair in Kortrijk. Nobody admits to drinking from it. It is always clean.' },
+      { id: 'microwave', at: 2, label: 'Microwave', text: 'A note on the door: "FISH = WRITTEN WARNING. - HR". There has been exactly one fish. Everyone knows whose.' },
+      { id: 'cooler', at: 3, label: 'Water cooler', text: '"Please do not refill with soup." It is laminated, so it has happened more than once.' }
+    ] },
+    priya: { from: 3, shot: 'priya', title: 'Priya\'s desk', who: 'Priya', note: 'Priya\'s out-of-office, printed', text: 'In a meeting until 10:42.\n\nNot 10:40. 10:42.', things: [
+      { id: 'chart', at: 0, label: 'Chart', text: 'Q3 completion rate: 98%, in orange, pinned at eye level. The small print says "of those who started". Nobody has asked how many started.' },
+      { id: 'notes', at: 0, label: 'Sticky notes', text: 'Twelve sticky notes in a perfect grid: yellow for this week, blue for next, green for done. One pink one does not fit: "Measure what matters? - M." She has not moved it. She has not answered it either.' },
+      { id: 'stopwatch', at: 1, label: 'Stopwatch', text: 'She times meetings. Monday\'s stand-up: 41 minutes 7 seconds. The agenda said 15. The result is in a spreadsheet, with a trend line.' },
+      { id: 'calculator', at: 2, label: 'Calculator', text: 'A graphing calculator from her engineering degree in Leuven, with her name on it in three places. Bart once borrowed it without asking. Once.' },
+      { id: 'cactus', at: 3, label: 'Cactus', text: 'A cactus with a watering log: 20 ml every two weeks, dated and initialled. It is the only plant on the floor that is still alive.' }
+    ] },
+    board: { from: 4, shot: 'board', title: 'The board room', who: 'The board room', things: [
+      { id: 'whiteboard', at: 0, label: 'Whiteboard', text: '"problem? -> cause? -> course?!" Then "WHO asked for this?" in red, and ASK WHY in a green circle. Nobody dares to wipe it, so it has been there since July.' },
+      { id: 'flipchart', at: 0, label: 'Flip chart', text: 'From the last board: HALVORSEN, with GO circled in green and NO GO in grey. Underneath, three red crosses. Mieke says they are the three people who voted no. Darren says they are kisses.' },
+      { id: 'projector', at: 1, label: 'Projector', text: 'A sticky note on top: "Remote: Darren\'s drawer. Darren: Frankfurt." So the board pitches on paper. Mieke says that is a feature.' },
+      { id: 'chair', at: 2, label: 'Head chair', text: 'The chair at the head of the table sits four centimetres higher than the others. Facilities says it is stuck. Nobody has asked facilities to unstick it.' },
+      { id: 'adapters', at: 3, label: 'Adapter box', text: 'A tub of laptop adapters, nine of them. None fit the laptop the board uses. Someone has labelled the tub "SOLUTIONS".' }
+    ] },
+    jens: { from: 5, shot: 'jens', title: 'Jens\'s desk', who: 'Jens', note: 'A note on Jens\'s chair', text: 'At the print shop.\n\nDo NOT look at my storyboard, it is not finished. (It is finished.)', things: [
+      { id: 'storyboard', at: 0, label: 'Storyboard', text: 'FIRE SAFETY: THE GAME!! Six panels, one stick figure, a fire that grows. In the corner, in someone else\'s pen: "client asked for: a poster".' },
+      { id: 'mascots', at: 0, label: 'Clay mascots', text: 'Four clay mascots, one for each course he pitched this year. None of the courses were made. The mascots all have names.' },
+      { id: 'ideas', at: 1, label: 'Notebook', text: 'COURSE IDEAS. 1: "Serious game!!" 2: "serious game (again)". 3: "ask Mieke", crossed out.' },
+      { id: 'headphones', at: 2, label: 'Headphones', text: 'Big studio headphones and a burned CD labelled "animation mix vol. 3". He says he cannot draw without them. The cable reaches exactly as far as Bart\'s desk.' },
+      { id: 'tablet', at: 3, label: 'Drawing tablet', text: 'A drawing tablet he bought himself, because the expense form asked what it was for. He is still working on the answer.' }
+    ] }
+  };
+  function lookState() {
+    try { return Object.assign({ visits: 0, found: [] }, JSON.parse(localStorage.getItem('intake-floor') || '{}')); } catch (e) { return { visits: 0, found: [] }; }
+  }
+  function keepLook(st) { try { localStorage.setItem('intake-floor', JSON.stringify(st)); } catch (e) { /* storage blocked */ } }
+  function looks() {
+    const st = lookState();
+    st.visits++;
+    keepLook(st);
+    const out = {}, entries = [];
+    let of = 0;
+    Object.entries(LOOKS).forEach(([k, L]) => {
+      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => ({ id: t.id, label: t.label, text: t.text, fresh: !st.found.includes(k + ':' + t.id) }));
+      of += L.things.length;
+      L.things.forEach(t => { if (st.found.includes(k + ':' + t.id)) entries.push({ who: L.who, label: t.label, text: t.text }); });
+      if (things.length) out[k] = { shot: L.shot, title: L.title, note: L.note, things };
+    });
+    return { looks: out, notebook: { entries, of } };
+  }
+  function found(shot, id) {
+    const st = lookState();
+    if (!st.found.includes(shot + ':' + id)) st.found.push(shot + ':' + id);
+    keepLook(st);
+  }
+
+  const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
+  const FLOOR_EVENING = '\n\nRight now it is home time, though. The lift is by reception: take it when you are ready, and tomorrow starts at your desk.';
+  // In a team week, how many drafts still wait for you.
+  const teamLine = () => {
+    if (!state.team) return '';
+    const left = state.team.drafts.filter(d => !d.grade).length;
+    return left ? ' ' + left + ' of your team\'s ' + state.team.drafts.length + ' drafts still wait for your review.' : '';
+  };
+  const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  function miekeFloor() {
+    const last = state.results[state.results.length - 1];
+    const f = state.focus;
+    const opener = !last ? 'Morning.' : last.total >= 75 ? 'Saw your scorecard. That was a good one. Do not let it go to your head, Darren will notice and give you three more.'
+      : last.total >= 50 ? 'Saw your scorecard. Not bad at all. Not finished either.' : 'Rough one? Everybody\'s first weeks are. Mine involved a CD-ROM.';
+    return opener + (f ? '\n\nIf I were you, I would work on ' + f.label.toLowerCase() + ' next. ' + (f.next || '') : '\n\nSame again: ask before you make.');
+  }
+  // `evening`: the day you just finished is over. The floor is the evening, and the lift takes you home
+  // to the next morning; your desk waits until then.
+  function floor(evening, last) {
+    const i = state.index, r = state.run;
+    const day = state.days[evening ? i - 1 : i] || 0;
+    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + 40);
+    const tomorrow = dayOf(i);
+    const morning = () => { startRequest(); toast(tomorrow + ', 08:57. The coffee machine is still broken.', 'info'); };
+    const story = Story.storyMail(state.weekNo);
+    const news = Story.news(state.weekNo, day).slice(-1)[0];
+    const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
+    const spots = {
+      desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
+        : evening ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }
+        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
+      mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
+      darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
+      tv: news ? { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: news.subject, text: news.body }
+        : { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: 'Corporate communications', text: 'A slideshow about the new expense form. Slide 4 of 31. Nobody is watching. The remote has been missing since the Rugby World Cup was announced.' },
+      coffee: { label: 'Coffee machine', who: 'Coffee machine', face: '☕', text: COFFEE[(state.weekNo * 3 + i) % COFFEE.length] },
+      meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
+        : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
+    };
+    if (evening) spots.lift = { label: 'Go home: start ' + tomorrow, sub: 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: () => Office.sitDown(morning) };
+    const L = looks();
+    spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
+    spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
+    // More places open as the weeks go on: the people you have not met yet are known by their desks.
+    ['bart', 'priya', 'jens', 'canteen'].forEach(k => { if (L.looks[k]) spots[k] = { label: LOOKS[k].title, who: LOOKS[k].who, face: '🔍', text: LOOKS[k].text, look: L.looks[k] }; });
+    if (L.looks.board && !last) spots.meeting.look = L.looks.board;
+    const opts = {
+      notebook: L.notebook,
+      onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
+      when: Story.day(state.weekNo, day) + ' · ' + time,
+      evening: !!evening,
+      line: last ? 'That was the last request of the week. The board is gathering.'
+        : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
+        : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
+      spots,
+      // The first time out here, Mieke tells you what the floor is for.
+      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO + (evening ? FLOOR_EVENING : '') }
+    };
+    Office.standUp(opts);
+  }
   const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.
@@ -1866,13 +2186,16 @@
   // Pitchwright (js/slides.js) and presented full screen while the board reacts. Each member
   // nods if the slide already answers their concern, or asks you one question to answer live.
   const BOARD = [
-    { role: 'CFO', name: 'Geert Claes', face: '👨🏻‍💼', cares: 'cost, return on investment, and what you stop doing to pay for it' },
-    { role: 'CHRO', name: 'Annelies Wouters, with the privacy officer at her side', face: '👩🏼‍💼', cares: 'data privacy, the works council, fairness and workload' },
-    { role: 'COO', name: 'Rachid Bensaid', face: '👨🏽‍💼', cares: 'operational dependencies, timing, and who loses productive hours' }
+    { role: 'CFO', name: 'Geert Claes', seat: 'cfo', cares: 'cost, return on investment, and what you stop doing to pay for it' },
+    { role: 'CHRO', name: 'Annelies Wouters, with the privacy officer at her side', seat: 'chro', cares: 'data privacy, the works council, fairness and workload' },
+    { role: 'COO', name: 'Rachid Bensaid', seat: 'coo', cares: 'operational dependencies, timing, and who loses productive hours' }
   ];
-  const MOOD = { approved: '😄', pilot: '🙂', rejected: '😒' };
+  // The room keeps its lights on for a yes, the projector on for a pilot, and goes dark for a no.
+  const ROOM_LIGHT = { approved: 'lit', pilot: 'dim', rejected: 'off' };
   const SLIDE = [['problem', 'The problem'], ['evidence', 'Evidence of the need'], ['concept', 'The concept'], ['measure', 'How we will know'], ['risks', 'Risks and dependencies'], ['ask', 'The ask: budget, time, sponsor']];
   const DECISIONS = { approved: 'Approved.', pilot: 'Approved as a pilot.', rejected: 'Rejected.' };
+  const BOARD_BARS = { approved: 75, pilot: 50 };   // out of 100; below the pilot bar is a rejection
+  const boardDecision = total => total >= BOARD_BARS.approved ? 'approved' : total >= BOARD_BARS.pilot ? 'pilot' : 'rejected';
 
   // The slide starts from what you already wrote for that request (hard mode starts blank).
   function slideFrom(w) {
@@ -1902,6 +2225,14 @@
     if (B.stage === 'pick') {
       box.appendChild(el('h2', null, 'Which concept do you take to the board?'));
       box.appendChild(el('p', 'muted', 'One slide, three board members, one shot. Pick the concept you can defend best, not necessarily your highest score.'));
+      // Your team's drafts go out today too: say so before the board, not in the week report.
+      const left = state.team ? state.team.drafts.filter(d => !d.grade).length : 0;
+      if (left) {
+        const n = el('div', 'br-team');
+        n.appendChild(el('p', null, left + ' of your team\'s ' + state.team.drafts.length + ' drafts are not reviewed yet. Unreviewed drafts go out as they are, and Darren reads your team score.'));
+        n.appendChild(button('Review the drafts first', () => openApp('w-team'), ''));
+        box.appendChild(n);
+      }
       state.results.forEach(x => {
         const card = state.pool.find(c => c.id === x.id);
         const b = button(card.stakeholder.name + ': ' + card.subject + ' (' + x.total + '/100)', () => {
@@ -1930,20 +2261,21 @@
       const card = boardCard();
       box.appendChild(el('h2', null, B.stage === 'result' ? DECISIONS[B.result.decision] : 'The board responds'));
       let asked = 0;
+      if (B.stage === 'questions') box.appendChild(Slides.room(B, card, 'dim', 'The board room: your slide is still on the screen, and the board has questions.'));
       if (B.stage === 'result') {
-        // The verdict lands on the slide like a rubber stamp.
+        // The verdict lands on the slide like a rubber stamp, and the room answers with its lights.
         const wrap = el('div', 'br-verdict');
-        wrap.appendChild(Slides.render(B, card, 'thumb'));
+        wrap.appendChild(Slides.room(B, card, ROOM_LIGHT[B.result.decision], { approved: 'The board room with the lights on: approved.', pilot: 'The board room, projector still on: a pilot.', rejected: 'The board room gone dark: rejected.' }[B.result.decision]));
         wrap.appendChild(el('span', 'br-stamp s-' + B.result.decision, { approved: 'APPROVED', pilot: 'PILOT', rejected: 'REJECTED' }[B.result.decision]));
         box.appendChild(wrap);
         if (!B.stamped) { B.stamped = true; if (window.Sound) Sound.stamp(); } else wrap.classList.add('still');
       }
       const table = el('div', 'br-table');
       B.members.forEach((m, i) => {
-        const who = BOARD[i] || { role: m.role, name: '', face: '🙂' };
+        const who = BOARD[i] || { role: m.role, name: '', seat: '' };
         const d = el('div', 'member' + (m.preempted ? ' nod' : ' asks'));
         const seat = el('div', 'br-seat');
-        seat.appendChild(el('span', 'br-face', B.stage === 'result' ? MOOD[B.result.decision] : who.face));
+        seat.appendChild(Slides.seat(who.seat, B.stage === 'result' ? ROOM_LIGHT[B.result.decision] : 'dim'));
         seat.appendChild(el('span', 'br-sign', B.stage === 'result' ? '' : m.preempted ? '👍' : '✋'));
         d.appendChild(seat);
         const body = el('div', 'br-body');
@@ -1972,12 +2304,15 @@
       else {
         box.appendChild(el('p', 'ev', 'The slide: ' + B.result.slide.note + ' · ' + B.result.points.slide + '/40'));
         box.appendChild(el('p', 'score-total', B.result.points.total + ' / 100'));
+        box.appendChild(el('p', 'fine', 'The board approves from ' + BOARD_BARS.approved + ', and approves a pilot from ' + BOARD_BARS.pilot + '.'));
         box.appendChild(el('p', 'quick-debrief', B.result.verdict));
         box.appendChild(button('End the week', () => { dropSave(); endRun(); }));
       }
       if (card && B.stage === 'questions') box.appendChild(el('p', 'fine', 'The concept for ' + card.stakeholder.name + ' is on the table. Answer what they asked, with reasons.'));
     }
     pane('p-board', 'Friday · board room');
+    // Rejected: the projector goes off, and so does its hum.
+    if (B.stage === 'result' && B.result.decision === 'rejected') Sound.scene('desk');
   }
   async function presentSlide() {
     const B = state.board, card = boardCard();
@@ -2023,7 +2358,10 @@
     let n = 0;
     const members = B.members.map(m => m.preempted ? 20 : Math.round(20 * clamp4(((g.answers || [])[n++] || {}).score) / 4));
     const slide = Math.round(40 * clamp4((g.slide || {}).score) / 4);
-    B.result = { slide: g.slide || {}, answers: g.answers || [], decision: DECISIONS[g.decision] ? g.decision : 'pilot', verdict: g.verdict || '', points: { slide, members, total: slide + members.reduce((a, b) => a + b, 0) } };
+    const total = slide + members.reduce((a, b) => a + b, 0);
+    // The score decides, so the stamp never contradicts the number under it.
+    const decision = boardDecision(total);
+    B.result = { slide: g.slide || {}, answers: g.answers || [], decision, verdict: (g.verdicts || {})[decision] || '', points: { slide, members, total } };
     B.stage = 'result';
     save();
     renderBoardRoom();
@@ -2107,8 +2445,71 @@
   };
 
 
+  // ---------- the morning call: one stakeholder a day, three questions ----------
+  let morningRun = null;
+  async function openMorning() {
+    try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
+    const t = Morning.today(), no = Morning.number(t), box = $('morning');
+    show('s-morning');
+    const env = {
+      Gemini, Prompts, Sound, toast, url: GAME_URL, debug: !$('btn-debug').hidden,
+      claim: claimMorning,
+      record: (R, card) => {
+        const h = scoreHistory(), facts = Morning.callFacts(card);
+        h.mornings = (h.mornings || []).filter(m => m.no !== R.no).concat({ no: R.no, at: R.at, card: card.id, found: facts.filter(f => R.revealed.includes(f.id)).length, of: facts.length, lever: R.lever, right: R.lever === card.learningIsTheAnswer, asked: R.asked.map(a => a.quality) }).slice(-120);
+        keepScores(h);
+      },
+      monthCount: () => { const d = new Date(), m = d.getMonth(), y = d.getFullYear(); return (scoreHistory().mornings || []).filter(x => { const a = new Date(x.at); return a.getMonth() === m && a.getFullYear() === y; }).length; },
+      fullCase: card => { state.oneCard = card; startWeek(false, true); },
+      back: () => { show('s-title'); runsLeft(); }
+    };
+    if (!no) { Morning.closed(box, t, env); return; }
+    const card = Morning.cardFor(no, state.pool);
+    const R = Morning.load(no) || Morning.fresh(no, card);
+    Morning.render(box, R, card, env);
+    const input = $('mc-input');
+    if (input) input.focus();
+  }
+  // The morning call runs on your own key, or on a small run of its own on the game server
+  // (it never uses up a free week). No key and no server: the key screen, then straight back here.
+  async function claimMorning() {
+    if (Gemini.key) return true;
+    if (!Gemini.hasBackend) { openSettings(() => openMorning()); return false; }
+    const no = Morning.number(Morning.today());
+    if (!morningRun || morningRun.no !== no) {
+      let r;
+      try { r = await Gemini.backend('morning'); } catch (e) { toast('Could not reach the game server. You can still play on your own Gemini key.'); return false; }
+      if (!r.ok) { toast(r.data.error || 'The game server said no.'); return false; }
+      morningRun = { no, id: r.data.runId };
+    }
+    Gemini.runId = morningRun.id;
+    return true;
+  }
+  $('btn-morning').onclick = () => openMorning();
+
+  // ---------- measurement drill: one case, measurement only, no points ----------
+  // A drill in progress stays open until it is rated; the icon brings it back instead of a new one.
+  async function openDrill(card) {
+    if (card || !state.drill || state.drill.R.rating) {
+      await loadCards();
+      const c = card || Drill.pickCard(scoreHistory(), state.pool, state.drill && state.drill.card.id);
+      if (!c) { toast('No case to drill yet.', 'info'); return; }
+      state.drill = { R: Drill.build(c), card: c };
+    }
+    renderDrill();
+    if (!Desktop.wide()) Retro.hidePhone();
+    Desktop.open('w-drill', Desktop.floating['w-drill']);
+    Desktop.focus('w-drill');
+  }
+  function renderDrill() {
+    const D = state.drill;
+    Drill.render($('drill'), D.R, D.card, () => {}, (R, right, again) => {
+      if (again) { openDrill(); return; }
+      const h = scoreHistory(); Drill.record(h, R, right); keepScores(h);
+    });
+  }
+
   // ---------- my scores: every finished request, kept in this browser ----------
-  const SCORES_KEY = 'intake-scores';
   function scoreHistory() {
     let h = null;
     try { h = JSON.parse(window.localStorage.getItem(SCORES_KEY) || 'null'); } catch (e) { /* storage blocked */ }
@@ -2164,6 +2565,11 @@
     para('MY SCORES.TXT');
     para('Kept in this browser only. Nobody else can see it, including your manager.', 'muted');
     const all = h.weeks.flatMap(w => w.requests);
+    const dr = h.drills || [];
+    if (dr.length) {
+      const last = dr.slice(-5), right = last.reduce((a, d) => a + d.right, 0), of = last.reduce((a, d) => a + d.of, 0);
+      para('\nMeasurement drills: ' + dr.length + ' done · last ' + last.length + ': sorted ' + right + ' of ' + of + ' right · stop rule held up ' + last.filter(d => d.rating === 'got').length + ' of ' + last.length + ' times', 'muted');
+    }
     if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
     const best = all.reduce((a, b) => (b.total > a.total ? b : a));
     const done = h.weeks.filter(w => w.done && !w.hard && !w.one);
@@ -2272,6 +2678,7 @@
     if (id === 'bin') { toast('The Recycle Bin contains 41 MB of "Learning Styles Revisited FINAL v7.ppt". Best left alone.', 'info'); return; }
     if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
     if (id === 'w-academy') { openAcademy(); return; }
+    if (id === 'w-drill') { openDrill(); return; }
     if (id === 'w-team' && !state.team) { toast(scoreHistory().promoted ? 'Your team starts on Monday. HR is still "processing".' : 'No team yet. Darren promotes you after a week of 64+ with every diagnosis at 15+, or after the week 4 tender.', 'info'); return; }
     if (id === 'w-team') renderTeam();
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
@@ -2292,8 +2699,14 @@
   Coe.render($('coe-files'), $('coe-doc'), 'flow');
   renderScores();
 
-  const soundLabel = () => { $('btn-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off'; };
-  $('btn-sound').onclick = () => { Sound.toggle(); soundLabel(); if (Sound.on) Sound.ding(); };
+  // Sound on or off: in the start menu, and as the speaker in both trays (desk and floor).
+  const soundLabel = () => {
+    $('btn-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
+    document.querySelectorAll('.tray-sound').forEach(b => { b.textContent = Sound.on ? '🔊' : '🔇'; b.title = Sound.on ? 'Volume: on. Click to mute.' : 'Muted. Click for sound.'; b.setAttribute('aria-pressed', String(!Sound.on)); });
+  };
+  $('btn-sound').onclick = () => { Sound.toggle(); if (Sound.on) Sound.ding(); };
+  document.addEventListener('click', e => { if (e.target.closest('.tray-sound')) { Sound.toggle(); if (Sound.on) Sound.ding(); } });
+  document.addEventListener('intake-sound', soundLabel);
   soundLabel();
 
   // ---------- test mode: ?debug in the address bar shows an Autofill button ----------

@@ -125,7 +125,7 @@
   // The inbox survives a reload, like a real SIM card (the last eight texts).
   let texts = [];
   try { texts = JSON.parse(store.get('intake-texts', '[]')) || []; } catch (e) { texts = []; }
-  function sms(from, text) {
+  function sms(from, text, quiet) {
     texts.unshift({ from, text });
     texts = texts.slice(0, 8);
     store.set('intake-texts', JSON.stringify(texts));
@@ -133,7 +133,7 @@
     if (n) { n.textContent = '✉ ' + texts.length; n.hidden = false; }
     const t = $('tray-sms');
     if (t) { t.textContent = String((+t.textContent || 0) + 1); t.hidden = false; }
-    if (window.Sound && Sound.sms) Sound.sms();
+    if (!quiet && window.Sound && Sound.sms) Sound.sms();
     if (phone.view === 'texts') renderPhone();
   }
   const phone = { view: 'menu', snake: null };
