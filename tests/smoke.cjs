@@ -461,6 +461,12 @@ async function followUp() {
         await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office.png' });
       } else await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/office-mobile.png' });
     }
+    // The story, act 1: your badge is on your desk the first evening.
+    if (req === 0) {
+      await p.click('#office-list button[data-spot="desk"]');
+      if (!(await p.textContent('#office-card')).includes('No. 1207')) throw new Error('no badge on your desk the first evening');
+      await p.click('#office-card button');
+    }
     await p.click('#office-list button.primary');
     // Back to the desk: you sit down (a short film), then the next request opens.
     if (req < 2) {
@@ -468,6 +474,8 @@ async function followUp() {
       if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
       await p.waitForSelector('#office-film', { state: 'detached' });
       if (evening && !(await p.textContent('#toast')).includes('08:57')) throw new Error('no good-morning line after going home');
+      // The first morning after going home, the lift has a taped-over button 5; after that it is the coffee machine again.
+      if (evening && !(await p.textContent('#toast')).includes(req === 0 ? 'button 5' : 'coffee machine')) throw new Error('morning line wrong: ' + await p.textContent('#toast'));
     }
   }
   if (!stood) throw new Error('you never stood up from your desk: no stand-up film between two requests');
@@ -548,6 +556,8 @@ async function followUp() {
   if (!w2.su.length || w2.su.some(id => ['hotel-upgrades', 'construction-cost-reports', 'telecom-first-call'].includes(id))) throw new Error('stand-up should recall last week\'s full cases: ' + w2.su);
   await visible('#w-standup');
   if (await p.isVisible('#w-academy')) throw new Error('the module should not open on top of the stand-up');
+  // The story, act 1: from week 2 Facilities writes about the floor 5 button.
+  if (!(await p.textContent('#mail-rows')).includes('Lift, floor 5')) throw new Error('no Facilities mail about floor 5 in week 2');
   await p.click('#su-reveal');
   if (await p.$('.su-answer')) throw new Error('stand-up revealed the answer before any recall');
   await p.fill('#standup textarea', 'Which shifts and which drivers are behind the damage?');
@@ -747,6 +757,8 @@ async function followUp() {
   await p.goto('http://localhost:8765/?debug=1');
   await p.click('#btn-hard');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  // Hard mode is off the story: no arc hints in the inbox, even after a finished week.
+  if ((await p.textContent('#mail-rows')).includes('Lift, floor 5')) throw new Error('an arc hint in hard mode');
   const hs = await p.evaluate(() => ({ hard: window.__intake.state.hard, tiers: window.__intake.state.cards.map(c => c.difficulty), q: window.__intake.state.run.questionsLeft, brief: document.getElementById('briefing-points').children.length }));
   if (!hs.hard || hs.tiers.length !== 3 || hs.tiers.some(t => t < 2) || hs.q !== 6 || hs.brief) throw new Error('hard week wrong: ' + JSON.stringify(hs));
   if (!MOBILE && await p.isVisible('.desk-icon[data-app="w-mieke"]')) throw new Error('Mieke on the desk in hard mode');
