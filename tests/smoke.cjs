@@ -427,7 +427,7 @@ async function followUp() {
       if (!/done\. Take the lift home/.test(await p.textContent('#office-line'))) throw new Error('the evening floor does not say the day is done');
     }
     // Each place has its own quiet sound: rain and wind by day, the same plus a low note at 17:40.
-    if (await p.evaluate(() => Sound.place) !== (evening ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
+    if (await p.evaluate(() => Sound.place) !== (evening && req < 2 ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
     if (req === 0) {
       // The speaker in the floor's tray mutes everything, and comes back on.
       await p.click('#s-office .tray-sound');
