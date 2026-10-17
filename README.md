@@ -35,7 +35,7 @@ Without a key, the game uses the backend in `api/` when `js/config.js` points to
 | `js/scoring.js` | The score for one request from the examiner's grades, and the median of three examiner runs (also used by `tests/judge-spread.cjs`) |
 | `js/standup.js` | Monday stand-up: recall the first question and the lever call on cases from earlier weeks; spaced retirement |
 | `js/coe.js` | The Center of Excellence folder on the desktop: intake flowchart, pocket card (saveable), quality standard, good questions, measurement ladder |
-| `js/sound.js` | The Doors OS startup chime and a ding, synthesised with Web Audio (no audio files); mute in the start menu |
+| `js/sound.js` | The Doors OS startup chime, a ding, and each place's quiet ambience (room tone and air conditioning at the desk, wind and rain on the floor, a low held note at 17:40, the projector in the board room), all synthesised with Web Audio (no audio files); mute with the speaker in the tray or in the start menu |
 | `js/prompts.js` | The roles: stakeholder (in character), Mieke the colleague (coaching, sees only what the player sees), reaction (boldness + objections), examiner (scorecard) |
 | `js/tour.js` | Mieke's welcome tour: her call on your first morning, then speech bubbles with a spotlight on each desk shortcut |
 | `js/morning.js` | The morning call: one date-seeded stakeholder a day, three questions, the lever and the need, the reveal and a share line |

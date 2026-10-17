@@ -118,6 +118,7 @@ async function academy() {
   if (await p.isDisabled('#ac-next')) throw new Error('Next stays off after answering');
   await p.waitForTimeout(700);
   await p.reload(); await p.click('#btn-resume'); await p.waitForSelector('#s-desk.active');
+  if (await p.evaluate(() => Sound.place) !== 'desk') throw new Error('no room tone at the desk');
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-academy"]'); } else { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); }
   await visible('#w-academy');
   if (!(await p.$('.ac-opt.wrong'))) throw new Error('academy answer not restored');
@@ -425,6 +426,15 @@ async function followUp() {
       if (!/go home/i.test(lift) || !/start \w+day/.test(lift) || !/Tomorrow at 08:57/.test(lift)) throw new Error('the lift does not say it starts a new day: ' + lift);
       if (!/done\. Take the lift home/.test(await p.textContent('#office-line'))) throw new Error('the evening floor does not say the day is done');
     }
+    // Each place has its own quiet sound: rain and wind by day, the same plus a low note at 17:40.
+    if (await p.evaluate(() => Sound.place) !== (evening ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
+    if (req === 0) {
+      // The speaker in the floor's tray mutes everything, and comes back on.
+      await p.click('#s-office .tray-sound');
+      if (await p.evaluate(() => Sound.on) || (await p.textContent('#s-office .tray-sound')) !== '🔇') throw new Error('the tray speaker did not mute');
+      await p.click('#s-office .tray-sound');
+      if (!(await p.evaluate(() => Sound.on))) throw new Error('the tray speaker did not unmute');
+    }
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
     // A new place opens most visits: Bart's desk on the second, the canteen on the third.
     if (spots.join(' ') !== ['lift* desk mieke darren meeting tv coffee', 'lift* desk mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
@@ -497,6 +507,7 @@ async function followUp() {
   // No faces anywhere in the board room: no person or face emoji.
   if (/\p{Emoji_Presentation}/u.test((await p.textContent('#boardroom')).replace(/[👍✋📝👎❓💤🧮]/gu, ''))) throw new Error('a face in the board room: ' + await p.textContent('#boardroom'));
   if (!(await p.$('#boardroom .br-room .ss-screen'))) throw new Error('questions are not asked in the board room');
+  if (await p.evaluate(() => Sound.place) !== 'board') throw new Error('no projector hum in the board room');
   await p.fill('.member textarea[name=b0]', 'Yes, we showed it to them on Tuesday.');
   await p.fill('.member textarea[name=b1]', 'We pilot on day shift first.');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board.png' });

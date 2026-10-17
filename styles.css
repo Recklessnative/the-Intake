@@ -760,6 +760,9 @@ body.has-team #start-menu .team-only { display: block; }
 .brick-screen { position: relative; }
 .ph-msg { max-height: 62px; overflow: hidden; }
 .tray-phone { position: relative; min-height: 0; padding: 2px 6px; background: transparent; border: 0; color: #fff; font-size: 16px; box-shadow: none; }
+/* The speaker in the tray: click to mute the room (and every other sound). */
+.tray-sound { min-height: 0; padding: 0 4px; background: transparent; border: 0; color: #fff; font-size: 14px; line-height: 1; box-shadow: none; cursor: pointer; }
+.tray-sound:hover, .tray-sound:focus-visible { background: rgba(255,255,255,.18); }
 .tray-badge { position: absolute; top: -4px; right: -2px; min-width: 15px; padding: 0 3px; border-radius: 8px; background: #d0362a; color: #fff; font: bold 10px/15px Tahoma, sans-serif; }
 .tray-badge[hidden] { display: none; }
 

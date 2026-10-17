@@ -61,7 +61,9 @@
     const nb = el('button', 'office-notebook'); nb.id = 'office-notebook'; nb.type = 'button'; nb.hidden = true;
     nb.onclick = () => notebook();
     const tray = el('div', 'office-tray');
-    tray.append(nb, when);
+    const vol = el('button', 'tray-sound'); vol.type = 'button'; vol.setAttribute('aria-label', 'Sound');
+    vol.textContent = window.Sound && !Sound.on ? '🔇' : '🔊';
+    tray.append(nb, vol, when);
     const stage = el('div', 'office-stage'); stage.id = 'office-stage';
     const pic = el('picture');
     const src = el('source'); src.media = '(max-width: 900px)'; src.srcset = MEDIA + 'hub-960.webp';
@@ -219,6 +221,7 @@
     $('office-line').textContent = opts.line || '';
     // At the end of a day the same floor at 17:40: most lights off, dusk behind the rain.
     const eve = !!(opts.evening && MAP.evening);
+    if (window.Sound) Sound.scene(opts.evening ? 'evening' : 'floor');
     const stage = $('office-stage');
     if (stage.classList.contains('evening') !== eve) {
       stage.classList.toggle('evening', eve);

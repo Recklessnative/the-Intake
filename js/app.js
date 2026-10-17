@@ -44,6 +44,8 @@
   Office.init({ show: id => show(id) });
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+    // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
+    if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') resumeButton();
     window.scrollTo(0, 0);
   }
@@ -52,6 +54,7 @@
   // Defence, waiting and the scorecard share one dialog window.
   function pane(id, stepText) {
     document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.id === id));
+    if ($('s-desk').classList.contains('active')) Sound.scene(id === 'p-board' ? 'board' : 'desk');
     Desktop.title('w-dialog', { 'p-bet': 'Before you send it', 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
     if (stepText) step(stepText);
@@ -2307,6 +2310,8 @@
       if (card && B.stage === 'questions') box.appendChild(el('p', 'fine', 'The concept for ' + card.stakeholder.name + ' is on the table. Answer what they asked, with reasons.'));
     }
     pane('p-board', 'Friday · board room');
+    // Rejected: the projector goes off, and so does its hum.
+    if (B.stage === 'result' && B.result.decision === 'rejected') Sound.scene('desk');
   }
   async function presentSlide() {
     const B = state.board, card = boardCard();
@@ -2693,8 +2698,14 @@
   Coe.render($('coe-files'), $('coe-doc'), 'flow');
   renderScores();
 
-  const soundLabel = () => { $('btn-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off'; };
-  $('btn-sound').onclick = () => { Sound.toggle(); soundLabel(); if (Sound.on) Sound.ding(); };
+  // Sound on or off: in the start menu, and as the speaker in both trays (desk and floor).
+  const soundLabel = () => {
+    $('btn-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
+    document.querySelectorAll('.tray-sound').forEach(b => { b.textContent = Sound.on ? '🔊' : '🔇'; b.title = Sound.on ? 'Volume: on. Click to mute.' : 'Muted. Click for sound.'; b.setAttribute('aria-pressed', String(!Sound.on)); });
+  };
+  $('btn-sound').onclick = () => { Sound.toggle(); if (Sound.on) Sound.ding(); };
+  document.addEventListener('click', e => { if (e.target.closest('.tray-sound')) { Sound.toggle(); if (Sound.on) Sound.ding(); } });
+  document.addEventListener('intake-sound', soundLabel);
   soundLabel();
 
   // ---------- test mode: ?debug in the address bar shows an Autofill button ----------

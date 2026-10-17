@@ -1,5 +1,5 @@
-// Doors OS sounds, synthesised in the browser (no audio files): the startup chime and a
-// small "ding". Muting is remembered in this browser.
+// Doors OS sounds, synthesised in the browser (no audio files): the startup chime, a small
+// "ding" and the quiet sound of each place. Muting is remembered in this browser.
 (function () {
   const KEY = 'intake-sound';
   let ctx = null;
@@ -191,11 +191,124 @@
     noise(c, c.destination, t, 0.05, 1500, 1, 0.2);
   }
 
+  // ---------- ambience: the room you are in, very quietly ----------
+  // No music. Each place is a mix of the same few layers, all made from noise and two sine
+  // voices: the office's room tone and air conditioning at the desk; wind and rain on the glass
+  // on the floor; the same rain at 17:40 under one low held note; the projector's fan and its
+  // mains hum in the board room. Changing place fades from one mix to the next.
+  const MIX = {
+    desk: { room: 1, hvac: 1, rain: 0.15 },
+    floor: { room: 0.7, hvac: 0.6, rain: 1, wind: 0.8 },
+    evening: { room: 0.4, hvac: 0.2, rain: 0.8, wind: 1, note: 1 },
+    board: { room: 0.6, hvac: 0.3, projector: 1 }
+  };
+  const LEVEL = { room: 0.15, hvac: 0.03, rain: 0.06, wind: 0.085, note: 0.02, projector: 0.04 };
+  let amb = null, place = null;
+
+  function loop(c, seconds) {
+    const b = c.createBuffer(1, Math.ceil(c.sampleRate * seconds), c.sampleRate), d = b.getChannelData(0);
+    for (let k = 0; k < d.length; k++) d[k] = Math.random() * 2 - 1;
+    const n = c.createBufferSource();
+    n.buffer = b; n.loop = true;
+    return n;
+  }
+  function filter(c, type, freq, q) { const f = c.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q || 0.7; return f; }
+  // A slow wobble on an AudioParam: depth either side of where it is, `rate` times a second.
+  function wobble(c, param, rate, depth) {
+    const o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = rate; g.gain.value = depth;
+    o.connect(g); g.connect(param); o.start();
+  }
+  function chain(c, nodes) { for (let k = 0; k < nodes.length - 1; k++) nodes[k].connect(nodes[k + 1]); return nodes[nodes.length - 1]; }
+
+  function build(c) {
+    const master = c.createGain();
+    master.gain.value = 0;
+    master.connect(c.destination);
+    const layer = {};
+    const add = (name, out) => { const g = c.createGain(); g.gain.value = 0; out.connect(g); g.connect(master); layer[name] = g; };
+    // Room tone: a low, dark rumble, the building itself.
+    const room = loop(c, 4.1);
+    add('room', chain(c, [room, filter(c, 'lowpass', 180), filter(c, 'lowpass', 260)]));
+    // Air conditioning: a soft, steady breath higher up.
+    const hvac = loop(c, 3.7);
+    add('hvac', chain(c, [hvac, filter(c, 'bandpass', 480, 0.6), filter(c, 'lowpass', 900)]));
+    // Rain on the glass: a high hiss that comes and goes a little.
+    const rain = loop(c, 5.3), rainSwell = c.createGain();
+    rainSwell.gain.value = 0.85; wobble(c, rainSwell.gain, 0.09, 0.15);
+    add('rain', chain(c, [rain, filter(c, 'highpass', 1600), filter(c, 'lowpass', 5200), rainSwell]));
+    // Wind round the building: a band of noise that slowly rises and falls in pitch and strength.
+    const wind = loop(c, 6.7), windBand = filter(c, 'bandpass', 320, 1.4), windSwell = c.createGain();
+    wobble(c, windBand.frequency, 0.05, 140); wobble(c, windSwell.gain, 0.031, 0.45); windSwell.gain.value = 0.55;
+    add('wind', chain(c, [wind, windBand, windSwell]));
+    // 17:40: one low held note, an open fifth, breathing very slowly.
+    const note = c.createGain();
+    note.gain.value = 0.8; wobble(c, note.gain, 0.06, 0.2);
+    [[110, 0.6], [164.8, 0.35], [220.4, 0.2]].forEach(([f, v]) => {
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.value = f; g.gain.value = v;
+      o.connect(g); g.connect(note); o.start();
+    });
+    add('note', chain(c, [note, filter(c, 'lowpass', 600)]));
+    // The projector: its fan, and the 100 Hz hum of a transformer on Belgian 50 Hz mains.
+    const fan = loop(c, 3.1), projector = c.createGain();
+    chain(c, [fan, filter(c, 'bandpass', 950, 0.9), projector]);
+    const hum = c.createOscillator(), humGain = c.createGain();
+    hum.type = 'sawtooth'; hum.frequency.value = 100; humGain.gain.value = 0.18;
+    chain(c, [hum, filter(c, 'lowpass', 320), humGain, projector]);
+    add('projector', projector);
+    [room, hvac, rain, wind, fan, hum].forEach(n => n.start());
+    return { master, layer };
+  }
+
+  // A few drops tapping the window, now and then, while it rains.
+  function drip() {
+    if (!amb || !on || document.hidden) return;
+    const mix = MIX[place] || {};
+    if (!mix.rain || mix.rain < 0.5) return;
+    const c = ctx, t = c.currentTime;
+    for (let k = 0; k < 3; k++) {
+      if (Math.random() < 0.55) continue;
+      const at = t + Math.random() * 0.7, f = 2400 + Math.random() * 2600;
+      noise(c, amb.master, at, 0.03, f, 6, 0.012 * mix.rain * (0.4 + Math.random()), 'bandpass');
+    }
+  }
+
+  function fade() {
+    if (!amb) return;
+    const t = ctx.currentTime, mix = MIX[place] || {};
+    Object.entries(amb.layer).forEach(([name, g]) => g.gain.setTargetAtTime((mix[name] || 0) * LEVEL[name], t, 0.9));
+    amb.master.gain.setTargetAtTime(on && place && !document.hidden ? 1 : 0, t, place ? 0.6 : 0.3);
+  }
+
+  // Where you are now: 'desk', 'floor', 'evening', 'board', or null for silence.
+  function scene(name) {
+    place = MIX[name] ? name : null;
+    if (!place && !amb) return;
+    if (!amb) {
+      if (!on) return;
+      const c = audio();
+      if (!c) return;
+      amb = build(c);
+      setInterval(drip, 700);
+      // Browsers only play sound after a click or a key; wake the audio on the next one.
+      if (c.state !== 'running') {
+        const wake = () => { c.resume(); window.removeEventListener('pointerdown', wake, true); window.removeEventListener('keydown', wake, true); };
+        window.addEventListener('pointerdown', wake, true);
+        window.addEventListener('keydown', wake, true);
+      }
+    }
+    fade();
+  }
+  document.addEventListener('visibilitychange', fade);
+
   function toggle() {
     on = !on;
     try { window.localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
+    if (on && place && !amb) scene(place); else fade();
+    document.dispatchEvent(new CustomEvent('intake-sound', { detail: on }));
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, toggle, get on() { return on; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, toggle, get on() { return on; }, get place() { return place; } };
 })();
