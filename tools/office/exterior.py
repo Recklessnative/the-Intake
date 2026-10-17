@@ -15,6 +15,8 @@ SAMPLES = int(sys.argv[4]) if len(sys.argv) > 4 else 64
 WET = True   # the street is wet in every stage; it rains from stage two
 PUDDLES = (0.56, 0.64) if STAGE == 'day' else (0.42, 0.52)
 DARK = STAGE in ('night', 'dystopia')
+AFTER = STAGE == 'dystopia'      # 2041: the building is a server hall; only the fourth-floor stretch is still an office
+R2 = random.Random(1207)          # everything that differs per stage draws from here, so the shared scene never shifts
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 S = bpy.context.scene
@@ -127,7 +129,7 @@ PAVING = mat('paving', (0.26, 0.255, 0.245), 0.8, bump=0.1, scale=6, var=0.35, w
 KERB = mat('kerb', (0.5, 0.5, 0.48), 0.7)
 STEEL = mat('steel', (0.30, 0.32, 0.34), 0.45, metal=0.9)
 PAINT = mat('paint', (0.09, 0.14, 0.12), 0.5, metal=0.3)
-LINE = mat('roadline', (0.75, 0.75, 0.7), 0.6, wet=WET)
+LINE = mat('roadline', (0.75, 0.75, 0.7) if not AFTER else (0.22, 0.22, 0.2), 0.6, wet=WET)
 BARK = mat('bark', (0.12, 0.10, 0.08), 0.9, bump=0.4, scale=20)
 LEAVES = mat('leaves', (0.30, 0.22, 0.07), 0.7, bump=0.6, scale=14, var=0.7)
 LEAVES2 = mat('leaves2', (0.14, 0.15, 0.06), 0.7, bump=0.6, scale=14, var=0.7)
@@ -138,8 +140,8 @@ WARM = (1.0, 0.72, 0.42)
 TUBE = emit_mat('tube', (0.95, 0.97, 1.0), 9.0 if DARK else 5.0)
 LAMPGLOW = emit_mat('lampglow', (1.0, 0.62, 0.3), 14)
 AD = emit_mat('adpanel', (0.92, 0.94, 0.98), 2.2)
-SIGN = emit_mat('sign', (0.2, 0.45, 1.0), 6)
-SIGN_DOOR = emit_mat('signdoor', (0.15, 0.75, 0.55), 6)
+SIGN = emit_mat('sign', (0.2, 0.45, 1.0), 6) if not AFTER else mat('signdead', (0.05, 0.07, 0.1), 0.4)
+SIGN_DOOR = emit_mat('signdoor', (0.15, 0.75, 0.55), 6) if not AFTER else mat('signdoordead', (0.04, 0.08, 0.06), 0.4)
 
 # ---------- the Synergix building: a plain business-park office, ground floor plus four ----------
 # Tan brick, a light precast band at every sill, dark ribbon windows, a flat roof with plant on it.
@@ -193,11 +195,31 @@ for f in range(LEVELS):
         lt = bpy.data.lights.new(f'floorlight{f}_{j}', 'AREA'); lt.shape = 'RECTANGLE'; lt.size = lx1 - lx0; lt.size_y = 7
         lt.energy = 3500 * lit * (lx1 - lx0) / 6 * (1.5 if DARK else 1.0); lt.color = WARM
         lo = bpy.data.objects.new(f'floorlight{f}_{j}', lt); lo.location = ((lx0 + lx1) / 2, 4.5, head); S.collection.objects.link(lo)
+EX0, EX1 = BX0 + 11.8, BX0 + 21.8   # the entrance bay
+# 2041: rows of racks behind every window but the one stretch, blinking blue and green.
+if AFTER:
+    RACK = mat('rack', (0.03, 0.035, 0.04), 0.4, metal=0.5)
+    LEDS = [emit_mat('led_b', (0.2, 0.5, 1.0), 12), emit_mat('led_g', (0.2, 1.0, 0.5), 10)]
+    for f in range(LEVELS):
+        z0 = f * FLOOR + 0.3
+        base = z0 + (1.0 if f else 0.6) - 0.3
+        for i in range(29):
+            x = BX0 + 1.4 + i * 1.45
+            if any(lx0 - 0.8 < x < lx1 for lx0, lx1, _ in LIT.get(f, [])): continue
+            if f == 0 and EX0 - 0.6 < x < EX1 + 0.4: continue
+            box(f'rack{f}_{i}', x, 1.1, base, x + 1.0, 2.1, base + 2.1, RACK)
+            for k in range(R2.randint(3, 9)):
+                lz = base + R2.uniform(0.2, 1.9); lx = x + R2.uniform(0.1, 0.8)
+                box(f'led{f}_{i}_{k}', lx, 1.08, lz, lx + R2.uniform(0.03, 0.12), 1.1, lz + 0.025, R2.choice(LEDS))
+        box(f'rackglow{f}', BX0 + 0.3, 0.2, base + 2.35, BX1 - 0.3, 9, base + 2.37, emit_mat('rackglow', (0.25, 0.45, 0.8), 0.15))
+    # Weeds through the asphalt along the old bay lines.
+    for i in range(220):
+        x = R2.uniform(-25, 60); y = R2.choice((-5.0, -10.2, -17.4, -22.6, -13.8)) + R2.uniform(-0.4, 0.4)
+        ball(f'weed{i}', x, y, 0.02, R2.uniform(0.12, 0.35), GRASS, 1, 1, 0.5)
 # The entrance: a glass door bay, a flat steel canopy, two steps, a bench and an ashtray bin.
-EX0, EX1 = BX0 + 11.8, BX0 + 21.8
 box('entry_glass', EX0 + 2.5, 0.25, 0.3, EX1 - 2.5, 0.28, 3.0, TINT)
 for x in (EX0 + 2.5, EX0 + 3.75, EX0 + 5.0, EX0 + 6.25, EX1 - 2.5): box(f'entry_mull{x}', x - 0.05, 0.2, 0.3, x + 0.05, 0.3, 3.0, MULLION)
-box('entry_inside', EX0 + 2.5, 0.3, 0.3, EX1 - 2.5, 6, 3.0, emit_mat('lobbyglow', WARM, 0.6 if DARK else 0.25))
+box('entry_inside', EX0 + 2.5, 0.3, 0.3, EX1 - 2.5, 6, 3.0, emit_mat('lobbyglow', WARM, 0.6 if DARK else 0.25) if not AFTER else emit_mat('lobbycold', (0.4, 0.6, 1.0), 0.08))
 box('canopy', EX0 + 1.5, -2.6, 3.2, EX1 - 1.5, 0.0, 3.4, STEEL, 0.02)
 for x in (EX0 + 1.7, EX1 - 1.7): cyl(f'canopy_post{x}', x, -2.4, 0.15, 0.06, 3.05, STEEL)
 box('step1', EX0 + 1.5, -1.2, 0.0, EX1 - 1.5, 0.0, 0.3, BAND)
@@ -237,12 +259,21 @@ box('island_grass', -21.8, -30.3, 0.15, 57.8, -29.2, 0.2, GRASS)
 def pole(name, x, y):
     cyl(name, x, y, 0.15, 0.1, 9.0, STEEL, 12, 0.07)
     box(name + '_head', x - 0.35, y - 0.6, 8.9, x + 0.35, y + 0.6, 9.25, STEEL, 0.03)
-    box(name + '_lens', x - 0.3, y - 0.55, 8.88, x + 0.3, y + 0.55, 8.9, LAMPGLOW if DARK else mat('lens', (0.75, 0.74, 0.7), 0.15))
-    if DARK:
+    box(name + '_lens', x - 0.3, y - 0.55, 8.88, x + 0.3, y + 0.55, 8.9, LAMPGLOW if STAGE == 'night' else mat('lens', (0.75, 0.74, 0.7) if not AFTER else (0.08, 0.08, 0.08), 0.15))
+    if STAGE == 'night':
         lt = bpy.data.lights.new(name, 'SPOT'); lt.energy = 6000; lt.color = (1.0, 0.62, 0.3); lt.spot_size = math.radians(130)
         lt.spot_blend = 0.7; lt.shadow_soft_size = 0.2
         lo = bpy.data.objects.new(name, lt); lo.location = (x, y, 8.85); S.collection.objects.link(lo)
 for x in (-18, 8, 34, 60): pole(f'pole{x}', x, -29.75)
+# Wall packs over the ground floor: the building's own night lights (dead by 2041).
+for x in (BX0 + 5.5, BX0 + 27.0, BX0 + 38.0):
+    box(f'wallpack{x}', x - 0.2, -0.25, 3.3, x + 0.2, 0.0, 3.6, STEEL)
+    box(f'wallpack_lens{x}', x - 0.15, -0.26, 3.32, x + 0.15, -0.25, 3.45, LAMPGLOW if STAGE == 'night' else mat('lens', (0.75, 0.74, 0.7), 0.15))
+    if STAGE == 'night':
+        lt = bpy.data.lights.new(f'wallpack{x}', 'SPOT'); lt.energy = 900; lt.color = (1.0, 0.65, 0.35); lt.spot_size = math.radians(140)
+        lt.spot_blend = 0.9; lt.shadow_soft_size = 0.1
+        lo = bpy.data.objects.new(f'wallpack{x}', lt); lo.location = (x, -0.4, 3.3); lo.rotation_euler = (math.radians(25), 0, 0)
+        S.collection.objects.link(lo)
 # Parked cars of the period: saloons and estates, nose to the building, a few bays empty.
 def car(name, x, y, color, estate=False, facing=1):
     body = mat('car_' + name, color, 0.2, metal=0.6)
@@ -273,6 +304,10 @@ for r, (ya, yb) in enumerate(ROWS):
     for i in range(-7, 22):
         if random.random() < 0.38: continue
         x = i * 2.6 + 1.3
+        # Late in the evening most have gone home; in 2041 nobody parks here at all.
+        if AFTER or (STAGE == 'night' and R2.random() < 0.8):
+            for _ in range(4): random.random()       # keep the shared sequence in step
+            continue
         car(f'car{r}_{i}', x + random.uniform(-0.1, 0.1), (ya + yb) / 2 + random.uniform(-0.15, 0.15), random.choice(COLOURS),
             random.random() < 0.35, 1 if r == 0 else -1)
 # A dumpster by the far corner and a trolley bay of nothing in particular.
@@ -314,19 +349,19 @@ nz.inputs['Scale'].default_value = 1.3; nz.inputs['Detail'].default_value = 12; 
 mp = n.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1, 1, 4.0)
 l.new(tc.outputs['Generated'], mp.inputs['Vector']); l.new(mp.outputs[0], nz.inputs['Vector'])
 rp = n.new('ShaderNodeValToRGB')
-cover = {'day': (0.38, 0.75), 'rain': (0.2, 0.45), 'night': (0.2, 0.45), 'dystopia': (0.15, 0.4)}[STAGE]
+cover = {'day': (0.38, 0.75), 'rain': (0.0, 0.32), 'night': (0.2, 0.55), 'dystopia': (0.1, 0.5)}[STAGE]
 rp.color_ramp.elements[0].position, rp.color_ramp.elements[1].position = cover
 l.new(nz.outputs['Fac'], rp.inputs['Fac'])
-cloud = {'day': (0.58, 0.6, 0.63), 'rain': (0.32, 0.34, 0.37), 'night': (0.04, 0.045, 0.06), 'dystopia': (0.06, 0.05, 0.05)}[STAGE]
+cloud = {'day': (0.58, 0.6, 0.63), 'rain': (0.42, 0.44, 0.47), 'night': (0.07, 0.08, 0.11), 'dystopia': (0.06, 0.08, 0.11)}[STAGE]
 mix = n.new('ShaderNodeMix'); mix.data_type = 'RGBA'
 mix.inputs[7].default_value = (*cloud, 1)
 l.new(rp.outputs['Color'], mix.inputs['Factor']); l.new(sky.outputs['Color'], mix.inputs[6])
 l.new(mix.outputs[2], bg.inputs['Color'])
-bg.inputs['Strength'].default_value = {'day': 0.55, 'rain': 0.35, 'night': 0.12, 'dystopia': 0.1}[STAGE]
+bg.inputs['Strength'].default_value = {'day': 0.55, 'rain': 0.4, 'night': 0.3, 'dystopia': 0.22}[STAGE]
 if DARK: sky.sun_elevation = math.radians(-4)
 
 sun = bpy.data.lights.new('sun', 'SUN'); sun.angle = math.radians(6)
-sun.energy = {'day': 1.1, 'rain': 0.4, 'night': 0.0, 'dystopia': 0.0}[STAGE]; sun.color = (1.0, 0.8, 0.6)
+sun.energy = {'day': 1.1, 'rain': 0.0, 'night': 0.0, 'dystopia': 0.0}[STAGE]; sun.color = (1.0, 0.8, 0.6)
 so = bpy.data.objects.new('sun', sun); S.collection.objects.link(so)
 so.rotation_euler = (math.radians(90 - 9), 0, math.radians(-120 + 180))
 
@@ -347,7 +382,7 @@ S.cycles.max_bounces = 6; S.cycles.diffuse_bounces = 3; S.cycles.glossy_bounces 
 S.cycles.sample_clamp_indirect = 6
 S.view_settings.view_transform = 'AgX'
 S.view_settings.look = 'AgX - Medium High Contrast'
-S.view_settings.exposure = {'day': -0.65, 'rain': 0.2, 'night': 0.0, 'dystopia': 0.0}[STAGE]
+S.view_settings.exposure = {'day': -0.65, 'rain': -0.2, 'night': 0.3, 'dystopia': 0.4}[STAGE]
 S.render.resolution_x, S.render.resolution_y = W, H
 S.render.resolution_percentage = 100
 S.render.image_settings.file_format = 'PNG'

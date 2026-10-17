@@ -52,18 +52,51 @@ label.check input { width: auto; }
 .screen { display: none; min-height: 100vh; padding: 24px 16px; }
 .screen.active { display: flex; align-items: center; justify-content: center; }
 
-/* The welcome screen. */
-#s-title, #s-end, #s-settings, #s-cap {
+/* The welcome screen is the one place outside the XP shell: a rendered photo of the building
+   (js/title.js picks the stage) with a plain text menu down the left, like a film's title. */
+#s-end, #s-settings, #s-cap {
   background: linear-gradient(#00309c 0 70px, #f39c1b 70px 72px, #5a7edc 72px calc(100% - 72px), #f39c1b calc(100% - 72px) calc(100% - 70px), #00309c calc(100% - 70px));
   color: #fff;
 }
-.title-card { text-align: center; max-width: 640px; }
-.title-card h1 { font-size: clamp(44px, 11vw, 96px); letter-spacing: .06em; margin: 6px 0; font-weight: 700; font-style: italic;
-  text-shadow: 2px 3px 0 rgba(0,0,0,.25); }
-.title-card .eyebrow, .title-card .fine { color: #dce6ff; }
+#s-end button.ghost { color: #fff; }
 .subtitle { font-style: italic; color: #e8eeff; margin: 0 0 30px; font-size: 18px; }
-.title-card button { margin: 6px; }
-.title-card button.ghost, #s-end button.ghost { color: #fff; }
+#s-title { --t-ink: #eef1f4; --t-dim: rgba(238, 241, 244, .66); --t-mark: #e8a656;
+  position: relative; overflow: hidden; background: #0b0f14; color: var(--t-ink);
+  justify-content: flex-start; padding: 24px clamp(16px, 7vw, 120px);
+  font-family: "Segoe UI", Tahoma, Helvetica, Arial, sans-serif; }
+.title-bg, .title-layer, .title-rain, .title-shade { position: absolute; inset: 0; }
+.title-layer { background: center / cover no-repeat; }
+.title-layer#title-now { opacity: 0; transition: opacity 4s ease; }
+.title-layer#title-now.in { opacity: 1; }
+.title-rain { width: 100%; height: 100%; pointer-events: none; }
+.title-shade { background: linear-gradient(90deg, rgba(8, 12, 18, .8) 0%, rgba(8, 12, 18, .5) 32%, rgba(8, 12, 18, 0) 56%),
+  linear-gradient(0deg, rgba(0, 0, 0, .4), rgba(0, 0, 0, 0) 32%); }
+.title-card { position: relative; max-width: 640px; }
+.title-card .eyebrow { color: var(--t-dim); letter-spacing: .25em; font-size: 11px; margin: 0 0 14px; }
+.title-card h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 300; letter-spacing: .18em; margin: 0 0 12px; line-height: 1.05; white-space: nowrap; }
+.title-card .subtitle { font-style: normal; color: var(--t-ink); opacity: .82; font-size: 16px; margin: 0 0 40px; transition: opacity 1.2s; }
+#s-title[data-stage="2041"] .subtitle { font-family: "Lucida Console", "Courier New", monospace; letter-spacing: .04em; }
+.title-menu { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 0 0 24px -16px; }
+.title-menu button, .title-menu button.primary, .title-menu button.ghost {
+  background: none; border: 0; border-left: 2px solid transparent; border-radius: 0; box-shadow: none; min-height: 0;
+  padding: 8px 0 8px 14px; color: var(--t-dim); font: inherit; font-size: 19px; font-weight: 400; letter-spacing: .04em;
+  text-decoration: none; text-align: left; transition: color .2s, border-color .2s; }
+.title-menu button:hover, .title-menu button:focus-visible { color: var(--t-ink); border-left-color: var(--t-mark); box-shadow: none; outline: none; }
+.title-menu button small { font-size: 13px; opacity: .65; margin-left: 10px; letter-spacing: .02em; }
+.title-card .fine { color: var(--t-dim); }
+.title-card .linkish { color: var(--t-dim); padding: 0; min-height: 0; }
+.title-foot { position: absolute; left: clamp(16px, 7vw, 120px); bottom: 22px; margin: 0; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--t-dim); opacity: .8; }
+@media (max-width: 700px) {
+  /* Phones: the building sits behind the menu, so the shade comes up from the bottom instead. */
+  #s-title { align-items: flex-end; padding-bottom: 56px; }
+  .title-layer { background-position: 68% center; }
+  .title-shade { background: linear-gradient(0deg, rgba(8, 12, 18, .9) 0%, rgba(8, 12, 18, .7) 48%, rgba(8, 12, 18, .1) 80%); }
+  .title-card .subtitle { margin-bottom: 24px; }
+  .title-menu { margin-left: -14px; }
+  .title-menu button { font-size: 17px; padding: 7px 0 7px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .title-layer#title-now { transition: none; } }
 
 .panel { background: var(--win); color: var(--ink); border: 3px solid var(--title-a); border-top-width: 26px; border-radius: 8px 8px 0 0;
   padding: 18px 20px; box-shadow: 4px 6px 18px rgba(0,0,0,.35); }

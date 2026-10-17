@@ -46,7 +46,7 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
-    if (id === 's-title') resumeButton();
+    if (id === 's-title') { resumeButton(); titleScreen(); }
     window.scrollTo(0, 0);
   }
   function step(text) { $('os-step').textContent = text; }
@@ -371,6 +371,8 @@
   $('notes').addEventListener('input', saveSoon);
   $('write-form').addEventListener('input', saveSoon);
 
+  // The title picture follows finished normal weeks (js/title.js); hard mode and one case never count.
+  function titleScreen() { Title.show(scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one).length); }
   function resumeButton() {
     const s = readSave();
     const b = $('btn-resume');
@@ -2858,6 +2860,7 @@
 
   runsLeft();
   resumeButton();
+  titleScreen();
 
   // test hook
   window.__intake = { state, points };

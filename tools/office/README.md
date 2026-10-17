@@ -39,3 +39,23 @@ lives in `post.py`, so the look can change without rendering again. The board ro
 in the render: the game draws the slide and bends it onto the screen's corners, so text never has to
 be rendered. The `pitch` collection (the screen, the board's things) only shows in the pitch shots. Everything is set in 2007: no flat screens on the floor (Darren has
 the only one), no smartphones, and every name and logo is made up.
+
+## The title screen
+
+`exterior.py` builds the Synergix building from its parking lot: a plain business-park office, ground
+floor plus four, tan brick and ribbon windows, with one locked camera. The stage changes the weather,
+the hour and what is behind the glass, never the framing; the stretch of lit window on the fourth floor
+is in all four. Everything that differs per stage draws from its own random generator, so the shared
+scene (blinds, cars, trees) stays put from one picture to the next.
+
+```sh
+python3 exterior.py day 1920 1080 96        # no finished week yet       -> out/title_day_1920.png
+python3 exterior.py rain 1920 1080 96       # after the first week
+python3 exterior.py night 1920 1080 96      # after the tender: most cars gone, the lot lights on
+python3 exterior.py dystopia 1920 1080 96   # 2041: server racks behind the glass, sign and lights dead, weeds
+python3 title_post.py ../..                 # -> media/title/title-<day|rain|night|2041>(-960).webp
+```
+
+Each takes about five minutes on four cores. The menu, the subtitle and the rain are drawn by the
+game (`js/title.js`), so no text is ever rendered into the pictures.
+
