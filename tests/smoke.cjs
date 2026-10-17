@@ -192,7 +192,7 @@ async function followUp() {
     else if (sys.startsWith('You are the examiner')) examiner++, wayBackSeen = wayBackSeen || JSON.stringify(body).includes('stop if near-misses do not drop'), out = { wayBack: 'vague', diagnosis: { score: 3, evidence: 'q', next: 'Name the cause in one line.' }, measurement: { score: 2, evidence: 'q' }, fit: { score: 3, evidence: 'q' }, nextLevel: { score: 3, evidence: 'q' }, risks: { score: 2, evidence: 'q' }, pitch: { score: 3, evidence: 'q' }, defenceOutcome: 'strong', leverCall: 'partly', questionNotAsked: 'What changed?', verdict: 'Fine. Fine.' };
     else if (sys.includes('the executive board of')) { boardCalls++; if (!body.contents[0].parts[0].text.includes('The ask')) throw new Error('board got no slide'); if (!body.contents[0].parts[0].text.includes('How the slide looks: Design')) throw new Error('board got no design'); const R = ['nod', 'note', 'frown', 'eyebrow', 'yawn', 'calculator']; out = { members: [{ role: 'CFO', preempted: true, line: 'The cost is on the slide. Fine.', reactions: R }, { role: 'CHRO', preempted: false, line: 'Has the works council seen this?', reactions: R.slice().reverse() }, { role: 'COO', preempted: false, line: 'Who covers the shifts?', reactions: ['nod'] }], aside: 'CFO, to the COO: was that a star?' }; }
     else if (sys.includes('feedback to')) out = { score: body.contents[0].parts[0].text.includes('(test)') ? 3 : 0, reply: 'Got it, I will fix it.', note: 'Clear.' };
-    else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 2, note: 'Vague.' }], decision: 'pilot', verdict: 'A pilot. Report back in March.' }; }
+    else if (sys.includes('chair of the board')) { boardCalls++; out = { slide: { score: 3, note: 'Clear ask.' }, answers: [{ role: 'CHRO', score: 4, note: 'Named it.' }, { role: 'COO', score: 0, note: 'Dodged it.' }], verdicts: { approved: 'Approved. Do not make us regret it.', pilot: 'A pilot. Report back in March.', rejected: 'No. Come back with numbers.' } }; }
     else if (sys.includes('rate the concept')) reactions++, out = { boldness: 3, boldnessReason: 'x', objections: ['Who pays?', 'Works council?', 'Pick rate?'], acceptReply: 'ok' };
     else if (sys.includes('at the coffee machine')) { corridor++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'First day I watched a video.', revealed: facts.slice(0, 1), quality: 'good', qualityWhy: 'open, about the first day' }; }
     else { if (sys.includes('This is a callback')) callbacks++; const facts = [...sys.matchAll(/- \[(\w+)\]/g)].map(m => m[1]); out = { reply: 'Nights, mostly.', revealed: facts.slice(0, 1), quality: calls % 3 ? 'good' : 'weak', qualityWhy: calls % 3 ? 'open and specific' : 'closed: yes or no' }; }
@@ -497,8 +497,10 @@ async function followUp() {
   await p.click('#boardroom button.primary');
   await p.waitForSelector('#boardroom .score-total');
   const bt = await p.textContent('#boardroom .score-total');
-  if (bt.trim() !== '80 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 10
-  if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('no stamp on the result');
+  if (bt.trim() !== '70 / 100') throw new Error('board total wrong: ' + bt);   // 30 slide + 20 + 20 + 0
+  // The score decides: 70 is a pilot (approved from 75, a pilot from 50), and the chair's line matches it.
+  if (!(await p.textContent('#boardroom .br-stamp')).includes('PILOT')) throw new Error('stamp does not follow the score');
+  if (!(await p.textContent('#boardroom .quick-debrief')).includes('A pilot. Report back')) throw new Error('verdict does not match the decision');
   await p.waitForTimeout(900);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/board-result.png' });
   await p.click('#boardroom button.primary');
@@ -608,7 +610,7 @@ async function followUp() {
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-scores"]'); } else await p.click('.desk-icon[data-app="w-scores"]');
   await visible('#w-scores');
   const txt = await p.textContent('#scores');
-  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 5') || !txt.includes('[starter]') || !txt.includes('CoE Academy: Ask before you make · 3 of 4 right') || !txt.includes('board: pilot 80/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
+  if ((txt.match(/=== Week of/g) || []).length !== 2 || !txt.includes('Requests handled: 5') || !txt.includes('[starter]') || !txt.includes('CoE Academy: Ask before you make · 3 of 4 right') || !txt.includes('board: pilot 70/100')) throw new Error('scores file wrong: ' + txt.slice(0, 400));
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/scores.png' });
   // The team: after a promotion, two own requests and three junior drafts with one flaw each.
   if (!(await p.$('#scores .charts svg')) || !(await p.textContent('#scores .weak-spot')).includes('weak spot')) throw new Error('score charts missing');

@@ -2186,6 +2186,8 @@
   const MOOD = { approved: '😄', pilot: '🙂', rejected: '😒' };
   const SLIDE = [['problem', 'The problem'], ['evidence', 'Evidence of the need'], ['concept', 'The concept'], ['measure', 'How we will know'], ['risks', 'Risks and dependencies'], ['ask', 'The ask: budget, time, sponsor']];
   const DECISIONS = { approved: 'Approved.', pilot: 'Approved as a pilot.', rejected: 'Rejected.' };
+  const BOARD_BARS = { approved: 75, pilot: 50 };   // out of 100; below the pilot bar is a rejection
+  const boardDecision = total => total >= BOARD_BARS.approved ? 'approved' : total >= BOARD_BARS.pilot ? 'pilot' : 'rejected';
 
   // The slide starts from what you already wrote for that request (hard mode starts blank).
   function slideFrom(w) {
@@ -2293,6 +2295,7 @@
       else {
         box.appendChild(el('p', 'ev', 'The slide: ' + B.result.slide.note + ' · ' + B.result.points.slide + '/40'));
         box.appendChild(el('p', 'score-total', B.result.points.total + ' / 100'));
+        box.appendChild(el('p', 'fine', 'The board approves from ' + BOARD_BARS.approved + ', and approves a pilot from ' + BOARD_BARS.pilot + '.'));
         box.appendChild(el('p', 'quick-debrief', B.result.verdict));
         box.appendChild(button('End the week', () => { dropSave(); endRun(); }));
       }
@@ -2344,7 +2347,10 @@
     let n = 0;
     const members = B.members.map(m => m.preempted ? 20 : Math.round(20 * clamp4(((g.answers || [])[n++] || {}).score) / 4));
     const slide = Math.round(40 * clamp4((g.slide || {}).score) / 4);
-    B.result = { slide: g.slide || {}, answers: g.answers || [], decision: DECISIONS[g.decision] ? g.decision : 'pilot', verdict: g.verdict || '', points: { slide, members, total: slide + members.reduce((a, b) => a + b, 0) } };
+    const total = slide + members.reduce((a, b) => a + b, 0);
+    // The score decides, so the stamp never contradicts the number under it.
+    const decision = boardDecision(total);
+    B.result = { slide: g.slide || {}, answers: g.answers || [], decision, verdict: (g.verdicts || {})[decision] || '', points: { slide, members, total } };
     B.stage = 'result';
     save();
     renderBoardRoom();
