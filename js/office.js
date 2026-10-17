@@ -94,7 +94,8 @@
     });
     stage.addEventListener('pointermove', ev => { if (looking) return; if (ev.target.classList.contains('office-tag')) return; const id = placeAt(ev, stage); light(id); stage.style.cursor = id ? 'pointer' : ''; });
     stage.addEventListener('pointerleave', () => light(null));
-    stage.addEventListener('click', ev => { if (looking || ev.target.closest('.office-tag, .office-card')) return; const id = placeAt(ev, stage); if (id) go(id); else closeCard(); });
+    // A click inside a card that redrew itself (a notebook tab) lands on a detached element: not the floor.
+    stage.addEventListener('click', ev => { if (looking || !ev.target.isConnected || ev.target.closest('.office-tag, .office-card')) return; const id = placeAt(ev, stage); if (id) go(id); else closeCard(); });
     const card = el('div', 'office-card'); card.id = 'office-card'; card.hidden = true; card.setAttribute('role', 'dialog'); card.setAttribute('aria-live', 'polite');
     stage.appendChild(card);
     // The same places as a list: for phones, keyboards and screen readers.
@@ -127,8 +128,14 @@
     head.append(el('span', 'office-face', sp.face || '•'), el('span', 'tt', sp.who || sp.label), x);
     c.appendChild(head);
     if (sp.title) c.appendChild(el('p', 'office-card-title', sp.title));
-    String(sp.text || '').split('\n\n').forEach(t => c.appendChild(el('p', null, t)));
+    String(sp.text || '').split('\n\n').filter(Boolean).forEach(t => c.appendChild(el('p', null, t)));
     const row = el('div', 'row');
+    // Something odd can go in the notebook's "Doesn't add up" page.
+    if (sp.note) {
+      const nb = el('button', 'note-it', sp.note.done() ? '📌 Noted' : '📌 Note it'); nb.type = 'button'; nb.disabled = sp.note.done();
+      nb.onclick = () => { sp.note.add(); nb.textContent = '📌 Noted'; nb.disabled = true; };
+      row.appendChild(nb);
+    }
     const back = el('button', null, backLabel || 'Back to the floor'); back.type = 'button'; back.onclick = closeCard;
     row.appendChild(back);
     const main = Object.entries(current.spots).find(([, v]) => v.primary);
@@ -185,19 +192,32 @@
   function find(t) {
     const shot = current.spots[looking].look.shot;
     const r = (MAP.shots[shot].things[t.id] || {}).rect;
-    say('thing', { face: '🔍', who: t.label, text: t.text }, r, 'Keep looking');
+    say('thing', { face: '🔍', who: t.label, text: t.text, note: t.odd && current.noteThing ? current.noteThing(shot, t) : null }, r, 'Keep looking');
     if (t.fresh) {
       t.fresh = false;
       document.querySelectorAll('#office-look [data-thing="' + t.id + '"], #office-list [data-thing="' + t.id + '"]').forEach(b => b.classList.remove('fresh'));
       if (current.onFind) current.onFind(shot, t.id);
     }
   }
-  // What you have found so far, by whose it is.
-  function notebook() {
+  // What you have found so far, by whose it is. Once something odd is noted, a second page:
+  // "Doesn't add up" (drawn by N.odd, see js/arc.js).
+  function notebook(tab) {
     const N = current.notebook;
     const text = N.entries.length ? N.entries.map(e => e.who + ' · ' + e.label + '\n' + e.text).join('\n\n')
       : 'Nothing yet. Have a closer look at people\'s desks between requests.';
-    say('notebook', { face: '📓', who: 'Your notebook', title: N.entries.length + ' of ' + N.of + ' found', text }, [30, 4, 32, 10], 'Close');
+    const odd = N.odd && N.odd.count() > 0;
+    if (!odd || tab !== 'odd') say('notebook', { face: '📓', who: 'Your notebook', title: N.entries.length + ' of ' + N.of + ' found', text }, [30, 4, 32, 10], 'Close');
+    else { say('notebook', { face: '📓', who: 'Your notebook' }, [30, 4, 32, 10], 'Close'); const c = $('office-card'), box = el('div', 'nb-page'); c.insertBefore(box, c.querySelector('.row')); N.odd.draw(box); }
+    if (!odd) return;
+    const c = $('office-card'), tabs = el('div', 'nb-tabs'); tabs.setAttribute('role', 'tablist');
+    [['found', 'Found'], ['odd', 'Doesn\'t add up']].forEach(([k, t]) => {
+      const b = el('button', null, t); b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.tab = k;
+      const on = (tab === 'odd') === (k === 'odd');
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.onclick = () => { if (!on) notebook(k); };
+      tabs.appendChild(b);
+    });
+    c.insertBefore(tabs, c.querySelector('.office-card-head').nextSibling);
   }
   function closeLook() {
     looking = null;
