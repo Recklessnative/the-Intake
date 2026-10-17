@@ -210,9 +210,17 @@
       drops: 4, moments: { gust: [18, 36], lift: [50, 110], thunder: [70, 160] } },
     // The board room: sparse and a little tense, a clock you can hear and the projector's fan.
     board: { notes: [[64, 27.3, 4], [71, 33.1, 12], [66, 41.9, 20]], pad: [40, 47], padLevel: 0.7, bed: { room: 0.7, projector: 1 },
-      clock: true, moments: { paper: [25, 60] } }
+      clock: true, moments: { paper: [25, 60] } },
+    // The title screen follows the arc, one stage at a time: the business park on a Monday
+    // morning (traffic on the ring road), then rain on the glass, then rain under the evening's
+    // low note, then 2041: rain, and server racks humming where the desks were.
+    title1: { notes: [[67, 23.9, 3], [74, 29.3, 9], [71, 37.1, 16]], pad: [43, 50], padLevel: 0.6, bed: { room: 0.4, traffic: 1 },
+      moments: { car: [6, 15] } },
+    title2: { notes: [[62, 21.7, 2], [69, 27.9, 8], [74, 33.1, 14]], pad: [38, 45], padLevel: 0.8, bed: { room: 0.4, rain: 1 }, drops: 6 },
+    title3: { notes: [[57, 29.3, 4], [64, 37.7, 12]], pad: [33, 40, 48], padLevel: 1.5, bed: { room: 0.4, rain: 0.8 }, drops: 4 },
+    title4: { notes: [[56, 41.3, 6], [63, 53.9, 20]], pad: [32, 39], padLevel: 0.9, bed: { rain: 0.7, servers: 1 }, drops: 3 }
   };
-  const BED = { room: 0.05, hvac: 0.008, rain: 0.03, projector: 0.012 };
+  const BED = { room: 0.05, hvac: 0.008, rain: 0.03, projector: 0.012, traffic: 0.028, servers: 0.024 };
   let amb = null, place = null;
 
   function noiseBuffer(c, seconds, channels) {
@@ -270,6 +278,14 @@
     chain([loop(3.1), filter(c, 'bandpass', 520, 0.8), proj]);
     [[100, 0.35], [200, 0.12]].forEach(([f, v]) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.value = v; o.connect(g); g.connect(proj); o.start(); });
     bed('projector', [proj, filter(c, 'lowpass', 700)]);
+    // The ring road behind the business park: a far, low wash of tyres.
+    const road = c.createGain(); road.gain.value = 0.8; wobble(c, road.gain, 0.03, 0.2);
+    bed('traffic', [loop(4.7), filter(c, 'lowpass', 500), filter(c, 'highpass', 70), road], 0.3);
+    // Server racks: a steady fan roar, mains hum and one thin, high whine.
+    const rack = c.createGain();
+    chain([loop(3.3), filter(c, 'bandpass', 300, 0.6), rack]);
+    [[100, 0.25], [300, 0.08], [7400, 0.012]].forEach(([f, v]) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; g.gain.value = v; o.connect(g); g.connect(rack); o.start(); });
+    bed('servers', [rack, filter(c, 'lowpass', 9000)], 0.3);
     return A;
   }
 
@@ -373,6 +389,18 @@
     // The lift arriving: its two-note chime, down the corridor.
     lift(t) { keyNote(t, 84, 0.035, -0.7); keyNote(t + 0.45, 81, 0.035, -0.7); },
     // A page turned somewhere at the table.
+    // A car going past on the ring road, left to right or back, its pitch falling as it passes.
+    car(t) {
+      const A = amb, c = A.c, d = 3 + Math.random() * 2.5, dir = Math.random() < 0.5 ? 1 : -1;
+      const n = c.createBufferSource(), f = filter(c, 'bandpass', 700, 1.1), g = c.createGain(), p = c.createStereoPanner(), s = c.createGain();
+      n.buffer = A.noise; n.loop = true;
+      f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(950, t + d * 0.45); f.frequency.exponentialRampToValueAtTime(420, t + d);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.05, t + d * 0.5); g.gain.linearRampToValueAtTime(0, t + d);
+      p.pan.setValueAtTime(-0.9 * dir, t); p.pan.linearRampToValueAtTime(0.9 * dir, t + d);
+      s.gain.value = 0.4;
+      chain([n, f, g, p]); p.connect(A.out); p.connect(s); s.connect(A.verb);
+      n.start(t); n.stop(t + d + 0.1);
+    },
     paper(t) { burst(t, 0.5, 'bandpass', 3200, 0.8, 0.012, Math.random() * 1.2 - 0.6, 0.4, { attack: 0.08, hold: 0.25 }); }
   };
 
@@ -406,7 +434,7 @@
     amb.out.gain.setTargetAtTime(on && place && !document.hidden ? 1 : 0, t, place ? 0.6 : 0.3);
   }
 
-  // Where you are now: 'desk', 'floor', 'evening', 'board', or null for silence.
+  // Where you are now: 'desk', 'floor', 'evening', 'board', 'title1' to 'title4', or null for silence.
   function scene(name) {
     const was = amb ? place : null;
     place = SCENES[name] ? name : null;
