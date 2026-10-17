@@ -416,6 +416,8 @@ input.wordart::placeholder { color: #ff9a1f; opacity: 1; }
 .ss-aside { font-style: italic; color: #f0d27a; max-width: 560px; }
 
 /* The board room table */
+.br-team { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 12px; padding: 8px 10px; background: #ffffe1; border: 1px solid #000; color: #000; }
+.br-team p { margin: 0; flex: 1 1 260px; }
 .br-table { display: flex; flex-direction: column; }
 .member { display: flex; gap: 10px; border-top: 1px solid #c8d3e4; padding: 8px 0; }
 .br-seat { position: relative; flex: 0 0 52px; text-align: center; }
@@ -921,11 +923,6 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .desk-icon.fresh { animation: icon-new 1.2s ease-in-out 3; }
 @keyframes icon-new { 50% { background: rgba(255, 214, 120, .55); border-radius: 6px; } }
 @media (prefers-reduced-motion: reduce) { .desk-icon.fresh { animation: none; outline: 2px solid var(--accent); } }
-.daybreak { position: fixed; inset: 0; z-index: 100005; background: #0c1220; color: #f1ece1; display: grid; place-items: center; text-align: center; padding: 16px; cursor: pointer; animation: daybreak 3s ease forwards; }
-.daybreak p { margin: 6px 0; font-size: 20px; }
-.daybreak .fine { color: #a8b0c0; font-size: 13px; }
-@keyframes daybreak { 0% { opacity: 0; } 12%, 80% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-@media (prefers-reduced-motion: reduce) { .daybreak { animation-duration: 2.4s; } }
 
 /* ---------- the office floor (js/office.js) ----------
    You have stood up: the render fills the screen. On top of it sit the PC's own controls:

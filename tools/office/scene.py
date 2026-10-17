@@ -243,11 +243,11 @@ box('wall_left_a', -0.2, -0.6, 0, 0, 0.9, 2.8, WALL, 0)
 box('wall_left_b', -0.2, 2.1, 0, 0, 12.2, 2.8, WALL, 0)
 box('wall_left_head', -0.2, 0.9, 2.2, 0, 2.1, 2.8, WALL, 0)
 box('accent_left', 0.0, 2.6, 0, 0.012, 7.5, 2.8, WALL2, 0)
-box('lift_frame_l', 0, 0.82, 0, 0.04, 0.9, 2.2, STEEL, 0.003)
-box('lift_frame_r', 0, 2.1, 0, 0.04, 2.18, 2.2, STEEL, 0.003)
-box('lift_frame_t', 0, 0.82, 2.2, 0.04, 2.18, 2.28, STEEL, 0.003)
-DOOR_L = box('lift_door_l', -0.06, 0.9, 0, -0.02, 1.5, 2.2, STEEL, 0.003)
-DOOR_R = box('lift_door_r', -0.06, 1.5, 0, -0.02, 2.1, 2.2, STEEL, 0.003)
+box('lift_frame_l', 0, 0.82, 0, 0.04, 0.9, 2.2, STEEL, 0.003, hot='lift')
+box('lift_frame_r', 0, 2.1, 0, 0.04, 2.18, 2.2, STEEL, 0.003, hot='lift')
+box('lift_frame_t', 0, 0.82, 2.2, 0.04, 2.18, 2.28, STEEL, 0.003, hot='lift')
+DOOR_L = box('lift_door_l', -0.06, 0.9, 0, -0.02, 1.5, 2.2, STEEL, 0.003, hot='lift')
+DOOR_R = box('lift_door_r', -0.06, 1.5, 0, -0.02, 2.1, 2.2, STEEL, 0.003, hot='lift')
 CUR[0] = 'walkonly'
 box('lift_car_floor', -1.7, 0.85, -0.1, -0.06, 2.15, 0.0, mat('liftfloor', (0.15, 0.15, 0.15), 0.5), 0)
 box('lift_car_back', -1.8, 0.85, 0, -1.7, 2.15, 2.5, STEEL, 0)
@@ -255,7 +255,7 @@ box('lift_car_l', -1.8, 0.75, 0, -0.06, 0.85, 2.5, STEEL, 0)
 box('lift_car_r', -1.8, 2.15, 0, -0.06, 2.25, 2.5, STEEL, 0)
 box('lift_car_ceil', -1.8, 0.75, 2.4, -0.06, 2.25, 2.5, emit_mat('liftlight', (1, 0.95, 0.85), 3), 0)
 CUR[0] = 'room'
-box('lift_indicator', 0.0, 2.3, 2.0, 0.02, 2.45, 2.14, emit_mat('led', (1, 0.25, 0.05), 6), 0)
+box('lift_indicator', 0.0, 2.3, 2.0, 0.02, 2.45, 2.14, emit_mat('led', (1, 0.25, 0.05), 6), 0, hot='lift')
 text('lift_floor_no', '4', 0.03, 2.375, 2.07, 0.1, emit_mat('led', (1, 0.25, 0.05), 6), '+x')
 # Company sign on the accent wall, facing the lift exit.
 text('sign_main', 'SYNERGIX', 0.03, 5.0, 1.95, 0.42, mat('signwhite', (0.95, 0.95, 0.95), 0.3), '+x', extrude=0.02)
@@ -742,7 +742,7 @@ def hotspot_boxes(cam):
             r[0] = min(r[0], p.x); r[1] = min(r[1], 1 - p.y); r[2] = max(r[2], p.x); r[3] = max(r[3], 1 - p.y)
     return {k: [round(v, 4) for v in r] for k, r in res.items()}
 
-IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen']
+IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen', 'lift']
 def mask_materials():
     """Every hotspot glows in its own flat colour; the rest is black. One cheap pass."""
     cols = {}

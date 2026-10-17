@@ -23,8 +23,8 @@
 
   // ---------- the hit mask: one grey level per place ----------
   // The mask's place ids, in tools/office/post.py order; ORDER is how the taskbar lists them.
-  const IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen'];
-  const ORDER = ['desk', 'mieke', 'bart', 'priya', 'jens', 'darren', 'meeting', 'canteen', 'tv', 'coffee'];
+  const IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen', 'lift'];
+  const ORDER = ['desk', 'mieke', 'bart', 'priya', 'jens', 'darren', 'meeting', 'canteen', 'tv', 'coffee', 'lift'];
   function loadMask() {
     if (mask) return;
     const img = new Image();

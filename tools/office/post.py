@@ -9,7 +9,7 @@ OUT = os.path.join(HERE, 'out')
 REPO = sys.argv[1]
 MEDIA = os.path.join(REPO, 'media', 'office')
 os.makedirs(MEDIA, exist_ok=True)
-IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen']
+IDS = ['desk', 'mieke', 'darren', 'tv', 'meeting', 'coffee', 'window', 'bart', 'priya', 'jens', 'canteen', 'lift']
 
 hub = Image.open(os.path.join(OUT, 'hub_1920.png')).convert('RGBA')
 W, H = hub.size
