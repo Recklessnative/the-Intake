@@ -408,7 +408,7 @@
   };
 
   // ---------- one request ----------
-  function startRequest(dayShown) {
+  function startRequest() {
     const card = state.cards[state.index];
     const prev = state.run;
     state.run = {
@@ -420,27 +420,13 @@
       leg: 'call', legLeft: touchpoints(card) ? budget().call : questionsFor(card), calledBack: false,
       corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: []
     };
-    state.run.mieke.push({ who: 'them', text: MIEKE_HELLO });
+    state.run.mieke.push({ who: 'them', text: miekeHello() });
     openRequest();
     if (state.index && !mondayFirst()) Sound.ding();
-    // A new day says good morning, unless the module is already waiting on top with its own hello.
-    if (state.index && !dayShown && state.days[state.index] !== state.days[state.index - 1]) dayBreak(dayOf(state.index - 1), dayOf(state.index));
     retroMorning();
     save();
   }
 
-  // Between two days: a breath. You go home, you come back. Click to skip.
-  function dayBreak(from, to) {
-    const d = document.createElement('div');
-    d.className = 'daybreak'; d.id = 'daybreak'; d.setAttribute('role', 'status');
-    const home = state.weekNo === 1 && state.index === 1 ? 'You go home. Your first case is done.' : 'You go home.';
-    [from + ', 17:40. ' + home, to + ', 08:57. The coffee machine is still broken.'].forEach(t => { const p = document.createElement('p'); p.textContent = t; d.appendChild(p); });
-    const f = document.createElement('p'); f.className = 'fine'; f.textContent = 'Click to skip'; d.appendChild(f);
-    const end = () => d.remove();
-    d.onclick = end;
-    document.body.appendChild(d);
-    setTimeout(end, 3000);
-  }
   // Draw the desk for the current request, at whatever step it is (also after a resume).
   function openRequest() {
     const r = state.run;
@@ -1029,7 +1015,7 @@
   // ---------- the team: review the juniors' drafts ----------
   function renderTeam() {
     if (!state.team) return;
-    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); }, sendTeam);
+    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); if (state.board && state.board.stage === 'pick') renderBoardRoom(); }, sendTeam);
   }
   async function sendTeam(d) {
     const j = Team.junior(d.junior), card = state.pool.find(c => c.id === d.card);
@@ -1080,6 +1066,9 @@
 
   // ---------- Mieke, the colleague two cubicles over ----------
   const MIEKE_HELLO = 'Morning. Shout if you want a second pair of eyes.';
+  // A team week starts with the news, or the drafts turn up in the week report as a surprise.
+  const MIEKE_TEAM = 'Morning, team lead. Two requests are yours this week, not three: Bart, Priya and Jens each took one and want your eyes on their drafts before Friday. Their mail is in your inbox, and My team is on your desktop.';
+  const miekeHello = () => state.team && !state.index ? MIEKE_TEAM : MIEKE_HELLO;
   function miekeSays(text, who, replay) {
     if (!replay) state.run.mieke.push({ who: who || 'them', text });
     const d = document.createElement('div');
@@ -1988,8 +1977,8 @@
     if (state.index + 1 < state.cards.length) {
       state.index++;
       const newDay = state.days[state.index] !== state.days[state.index - 1];
-      // You stand up first; on a new day you go home after that, and the floor is the next morning.
-      floor(newDay, false, newDay ? () => dayBreak(dayOf(state.index - 1), dayOf(state.index)) : null);
+      // You stand up; at the end of a day the floor is the evening, and the lift takes you home.
+      floor(newDay, false);
     } else floor(false, true);
   };
 
@@ -2082,6 +2071,13 @@
   }
 
   const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
+  const FLOOR_EVENING = '\n\nRight now it is home time, though. The lift is by reception: take it when you are ready, and tomorrow starts at your desk.';
+  // In a team week, how many drafts still wait for you.
+  const teamLine = () => {
+    if (!state.team) return '';
+    const left = state.team.drafts.filter(d => !d.grade).length;
+    return left ? ' ' + left + ' of your team\'s ' + state.team.drafts.length + ' drafts still wait for your review.' : '';
+  };
   const clockText = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
   function miekeFloor() {
     const last = state.results[state.results.length - 1];
@@ -2090,15 +2086,20 @@
       : last.total >= 50 ? 'Saw your scorecard. Not bad at all. Not finished either.' : 'Rough one? Everybody\'s first weeks are. Mine involved a CD-ROM.';
     return opener + (f ? '\n\nIf I were you, I would work on ' + f.label.toLowerCase() + ' next. ' + (f.next || '') : '\n\nSame again: ask before you make.');
   }
-  function floor(newDay, last, home) {
+  // `evening`: the day you just finished is over. The floor is the evening, and the lift takes you home
+  // to the next morning; your desk waits until then.
+  function floor(evening, last) {
     const i = state.index, r = state.run;
-    const day = state.days[i] || 0;
-    const time = last ? '17:10' : newDay || !r ? '08:57' : clockText(r.clock + 40);
+    const day = state.days[evening ? i - 1 : i] || 0;
+    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + 40);
+    const tomorrow = dayOf(i);
+    const morning = () => { startRequest(); toast(tomorrow + ', 08:57. The coffee machine is still broken.', 'info'); };
     const story = Story.storyMail(state.weekNo);
     const news = Story.news(state.weekNo, day).slice(-1)[0];
     const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
+        : evening ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }
         : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
@@ -2108,6 +2109,7 @@
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
+    if (evening) spots.lift = { label: 'Go home: start ' + tomorrow, sub: 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: () => Office.sitDown(morning) };
     const L = looks();
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
@@ -2118,12 +2120,14 @@
       notebook: L.notebook,
       onFind: (shot, id) => { found(shot, id); const e = LOOKS[shot].things.find(t => t.id === id); opts.notebook.entries.push({ who: LOOKS[shot].who, label: e.label, text: e.text }); const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
       when: Story.day(state.weekNo, day) + ' · ' + time,
-      line: last ? 'That was the last request of the week. The board is gathering.' : newDay ? 'Morning. Your next request is on your desk.' : 'You stretch your legs. The next request is on your desk when you are.',
+      line: last ? 'That was the last request of the week. The board is gathering.'
+        : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
+        : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
       spots,
       // The first time out here, Mieke tells you what the floor is for.
-      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO }
+      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO + (evening ? FLOOR_EVENING : '') }
     };
-    Office.standUp(opts, home);
+    Office.standUp(opts);
   }
   const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
@@ -2213,6 +2217,14 @@
     if (B.stage === 'pick') {
       box.appendChild(el('h2', null, 'Which concept do you take to the board?'));
       box.appendChild(el('p', 'muted', 'One slide, three board members, one shot. Pick the concept you can defend best, not necessarily your highest score.'));
+      // Your team's drafts go out today too: say so before the board, not in the week report.
+      const left = state.team ? state.team.drafts.filter(d => !d.grade).length : 0;
+      if (left) {
+        const n = el('div', 'br-team');
+        n.appendChild(el('p', null, left + ' of your team\'s ' + state.team.drafts.length + ' drafts are not reviewed yet. Unreviewed drafts go out as they are, and Darren reads your team score.'));
+        n.appendChild(button('Review the drafts first', () => openApp('w-team'), ''));
+        box.appendChild(n);
+      }
       state.results.forEach(x => {
         const card = state.pool.find(c => c.id === x.id);
         const b = button(card.stakeholder.name + ': ' + card.subject + ' (' + x.total + '/100)', () => {

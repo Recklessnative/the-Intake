@@ -417,17 +417,23 @@ async function followUp() {
     // Between requests: the office floor. Mieke says one thing, your desk moves you on; after the last request the board room does.
     await p.waitForSelector('#s-office.active');
     if (await p.evaluate(() => document.body.dataset.film) === 'stand-played') stood = true;
-    // Going home comes after you stand up, never on top of the film.
-    if (await p.evaluate(() => !!document.getElementById('daybreak') && /-playing$/.test(document.body.dataset.film || ''))) throw new Error('day break shown during the stand-up film');
+    // No black end-of-day screen: the evening is the floor itself, and the lift takes you home.
+    if (await p.$('#daybreak')) throw new Error('the black day break is back');
+    const evening = await p.evaluate(() => { const s = window.__intake.state; return s.days[s.index] !== s.days[s.index - 1]; });
+    if (evening && req < 2) {
+      const lift = await p.textContent('#office-list button[data-spot="lift"]');
+      if (!/go home/i.test(lift) || !/start \w+day/.test(lift) || !/Tomorrow at 08:57/.test(lift)) throw new Error('the lift does not say it starts a new day: ' + lift);
+      if (!/done\. Take the lift home/.test(await p.textContent('#office-line'))) throw new Error('the evening floor does not say the day is done');
+    }
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
     // A new place opens most visits: Bart's desk on the second, the canteen on the third.
-    if (spots.join(' ') !== ['desk* mieke darren meeting tv coffee', 'desk* mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
+    if (spots.join(' ') !== ['lift* desk mieke darren meeting tv coffee', 'lift* desk mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
     if (req === 0) {
       // First time on the floor: Mieke says what it is for.
       if (!(await p.textContent('#office-card')).includes('This is the floor')) throw new Error('no floor intro from Mieke');
       await p.click('#office-list button[data-spot="mieke"]');
       if (!(await p.textContent('#office-card')).includes('If I were you')) throw new Error('Mieke has no tip on the floor');
-      await p.click('#office-card button'); await p.waitForSelector('#daybreak', { state: 'detached' });
+      await p.click('#office-card button');
       // Her desk, close up: things to find, each goes in the notebook. Then back to the floor.
       await p.waitForSelector('#office-look .office-look-pic');
       const things = await p.$$eval('#office-list button[data-thing]', l => l.map(b => b.dataset.thing + (b.classList.contains('fresh') ? '*' : '')));
@@ -451,6 +457,7 @@ async function followUp() {
       await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
       if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
       await p.waitForSelector('#office-film', { state: 'detached' });
+      if (evening && !(await p.textContent('#toast')).includes('08:57')) throw new Error('no good-morning line after going home');
     }
   }
   if (!stood) throw new Error('you never stood up from your desk: no stand-up film between two requests');
@@ -618,6 +625,8 @@ async function followUp() {
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
   const tw = await p.evaluate(() => ({ n: window.__intake.state.cards.length, team: window.__intake.state.team && window.__intake.state.team.drafts.map(d => d.junior + ':' + d.flaw + ':' + d.lines.length), clash: window.__intake.state.team && window.__intake.state.team.drafts.some(d => window.__intake.state.cards.some(c => c.id === d.card)) }));
   if (tw.n !== 2 || !tw.team || tw.team.length !== 3 || tw.clash) throw new Error('team week wrong: ' + JSON.stringify(tw));
+  // The team week is announced on Monday morning, not discovered in the week report.
+  if (!(await p.evaluate(() => window.__intake.state.run.mieke.some(m => /team lead/.test(m.text))))) throw new Error('Mieke does not announce the team week');
   if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
   if (await p.isVisible('#w-standup')) await p.click('#w-standup .tb.close');
   await p.click('#mail-rows tr:has-text("drafts for your review")');
