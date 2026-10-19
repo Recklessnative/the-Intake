@@ -22,6 +22,8 @@ python3 scene.py stand 960 540 16           # standing up from your monitor, 105
 python3 scene.py standstill 640 360 8 1,50,105  # a few stand-up frames
 python3 post.py ../..                        # hub(-evening).webp, mask.png, glows, board-*.webp, js/office-map.js (grades every picture)
 ./encode.sh ../..                            # walkin, stand and sit (stand backwards): .webm, .mp4, -poster.jpg
+python3 scene.py floor5 1600 900 128           # the reveal: floor 5 in 2041 from the lift -> out/floor5.png + out/floor5_screen.json
+python3 floor5_post.py ../..                 # -> media/office/floor5(-960).webp; copy the screen box into SCREEN in js/reveal.js
 ```
 
 On four CPU cores the hub takes about 20 minutes the walk-in about two hours and the stand-up about 45 minutes.

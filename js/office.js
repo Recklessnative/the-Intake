@@ -138,6 +138,8 @@
     }
     const back = el('button', null, backLabel || 'Back to the floor'); back.type = 'button'; back.onclick = closeCard;
     row.appendChild(back);
+    // A place with a choice (the lift, once button 5 works): one button per way to go.
+    (sp.actions || []).forEach(a => { const b = el('button', 'primary', a.label); b.type = 'button'; b.onclick = () => { closeCard(); a.go(); }; row.appendChild(b); });
     const main = Object.entries(current.spots).find(([, v]) => v.primary);
     if (main && main[0] !== id && !looking) { const b = el('button', 'primary', main[1].label); b.type = 'button'; b.onclick = () => go(main[0]); row.appendChild(b); }
     c.appendChild(row);

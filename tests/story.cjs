@@ -1,5 +1,5 @@
 // End-to-end checks for the 2041 arc (STORY.md, spoilers): seeds finished weeks, plays one normal
-// week on Autofill with Gemini mocked, and checks which hints land where. Usage: node tests/story.cjs [root] [shots]
+// week on Autofill (weeks 2, 3, 5 to 7, and the reveal in week 8) with Gemini mocked, and checks which hints land where. Usage: node tests/story.cjs [root] [shots]
 const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = process.argv[2] || path.join(__dirname, '..');
@@ -83,7 +83,15 @@ async function playWeek(b, n, opt, onFloor) {
     seen.floors.push(f);
     if (last) break;
     await p.click('#office-list button.primary');
-    await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
+    // From the evening of the tender the lift asks: home, or button 5.
+    let revealed = false;
+    if (await p.isVisible('#office-card button:has-text("Press 5")')) {
+      seen.lift = await p.textContent('#office-card');
+      if (opt.onLift) revealed = await opt.onLift(p, seen);
+      else await p.click('#office-card button:has-text("Go home")');
+    }
+    if (revealed) await p.waitForSelector('#s-desk', { state: 'visible' });
+    else await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
     seen.toasts.push(await p.textContent('#toast'));
     await p.waitForTimeout(1600);
     await grabMieke();
@@ -168,6 +176,7 @@ const fail = m => { throw new Error(m); };
   const w5 = await playWeek(b, 4, { arc: ACT1 }, async (p, f) => { if (f.last) coffee = await card(p, 'coffee'); });
   if (!w5.mails.includes('Recall: Lehman Brothers files for bankruptcy')) fail('week 5: no recalled Lehman headline');
   if (!coffee.includes('corrected the 0 to a 2')) fail('week 5: coffee note not corrected: ' + coffee);
+  if (!/tape is gone/.test(w5.lift || '') || !/Go home/.test(w5.lift)) fail('week 5: the lift does not offer button 5 after the tender: ' + w5.lift);
   if (w5.errs.length) fail('week 5 errors: ' + w5.errs);
   console.log('week 5 ok');
   // Week 6: a bounce whose source is from much later; Thursday's case file is a restored scan.
@@ -211,6 +220,49 @@ const fail = m => { throw new Error(m); };
   if (!/Fourteen good questions/.test(maxq)) fail('week 7: Max\'s log wrong: ' + maxq.slice(-300));
   if (w7.errs.length) fail('week 7 errors: ' + w7.errs);
   console.log('week 7 ok', JSON.stringify(w7.arc.shown));
+  // Week 8, nobody went up yet: 5 is the only button. Floor 5, the operator's mail, the waiver; then
+  // the aftermath on the floor, the boot screen, the start menu and My scores.txt.
+  const ALL = Object.assign({ lehman: 35, coffee: 38, source: 42, legible: 45, bart: 49, transcript: 52 }, ACT1);
+  const rv = {};
+  const w8 = await playWeek(b, 7, { arc: ALL, noted: [tape], onLift: async (p, seen) => {
+    if (await p.isVisible('#office-card button:has-text("Go home")')) fail('week 8: the lift still offers home');
+    await p.click('#office-card button:has-text("Press 5")');
+    await p.waitForSelector('#reveal.in');
+    await p.waitForTimeout(1700);
+    await p.screenshot({ path: SHOTS + '/arc-floor5.png' });
+    await p.click('#reveal .office-tag');
+    rv.mail = await p.textContent('#reveal .rv-mail');
+    rv.log = await p.textContent('#reveal .rv-log');
+    await p.click('#reveal .rv-att');
+    await p.fill('#reveal .rv-sign input', 'Test Player');
+    await p.screenshot({ path: SHOTS + '/arc-waiver.png' });
+    rv.before = await p.evaluate(() => localStorage.getItem('intake-told-reveal'));
+    await p.click('#reveal .rv-sign button');
+    await p.waitForSelector('#reveal .rv-back');
+    rv.name = await p.inputValue('#reveal .rv-sign input');
+    rv.after = await p.evaluate(() => localStorage.getItem('intake-told-reveal'));
+    await p.screenshot({ path: SHOTS + '/arc-signed.png' });
+    await p.click('#reveal .rv-back');
+    await p.waitForSelector('#reveal', { state: 'detached' });
+    return true;
+  } }, async (p, f) => {
+    if (!f.last) return;
+    rv.mieke = await card(p, 'mieke');
+    if (await p.isVisible('#office-look')) await p.click('#office-list button:has-text("Back to the floor")');
+    rv.tv = await card(p, 'tv');
+    rv.desk = await p.evaluate(() => ({ boot: document.querySelector('.boot-foot').textContent, logoff: document.getElementById('btn-logoff').textContent, greyed: (document.getElementById('btn-logoff-2041') || {}).disabled }));
+    await p.evaluate(() => { document.querySelector('#start-menu [data-open="w-scores"]').click(); });
+    rv.scores = await p.textContent('#scores');
+  });
+  if (!/only button 5 lights/i.test(w8.lift || '')) fail('week 8: 5 is not the only button: ' + w8.lift);
+  if (!/operator@archive\.lindeveld\.be/.test(rv.mail) || !/cohort 12, seat 07/.test(rv.mail) || !/Sorry about the rain/.test(rv.mail)) fail('week 8: operator mail wrong: ' + rv.mail);
+  if (!/Flagged by participant: [1-9]/.test(rv.log) || !/Button 5/.test(rv.log)) fail('week 8: the session log does not list what you noted: ' + rv.log);
+  if (rv.before || rv.after !== '1' || rv.name !== '1207') fail('week 8: signing did not turn you into 1207: ' + JSON.stringify(rv));
+  if (!/Participant 0031/.test(rv.mieke) || !/Test card/.test(rv.tv)) fail('week 8: no aftermath on the floor: ' + rv.mieke + ' / ' + rv.tv);
+  if (!/2041\.03/.test(rv.desk.boot) || !/Clock out/.test(rv.desk.logoff) || !rv.desk.greyed) fail('week 8: no aftermath on the desk: ' + JSON.stringify(rv.desk));
+  if (!/Exported from session 1207/.test(rv.scores)) fail('week 8: My scores.txt is not exported from session 1207');
+  if (w8.errs.length) fail('week 8 errors: ' + w8.errs);
+  console.log('week 8 ok');
   await b.close(); srv.close();
   console.log('story: all fine');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

@@ -1116,3 +1116,43 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .walkin-cap.in { animation: walkin-cap 4s ease forwards; }
 @keyframes walkin-cap { 0% { opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
 .walkin-skip { position: absolute; top: 16px; right: 16px; }
+
+/* ---------- the reveal: floor 5 (js/reveal.js) ---------- */
+.reveal { position: fixed; inset: 0; z-index: 9000; background: #000; display: flex; flex-direction: column; opacity: 0; transition: opacity 1.6s ease; }
+.reveal.in { opacity: 1; }
+.rv-stage { position: relative; flex: 1; min-height: 0; aspect-ratio: 16 / 9; max-width: 100%; margin: auto; }
+.rv-stage picture, .rv-pic { display: block; width: 100%; height: 100%; object-fit: contain; }
+.rv-glow { position: absolute; cursor: pointer; border-radius: 3px; box-shadow: 0 0 24px 6px rgba(80, 130, 255, .35); animation: rv-pulse 3s ease-in-out infinite; }
+@keyframes rv-pulse { 50% { box-shadow: 0 0 34px 10px rgba(80, 130, 255, .55); } }
+.rv-bar { flex: none; display: flex; align-items: center; gap: 12px; padding: 6px 12px; min-height: 34px;
+  background: linear-gradient(#3168d5, #1941a5 12%, #1e4bb6 90%, #1d3f99); color: #fff; font-size: 13px; }
+.rv-line { margin: 0; flex: 1; }
+.rv-bar button { color: var(--ink); }
+.rv-crt { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); width: min(820px, 94vw); aspect-ratio: 4 / 3; max-height: 80vh;
+  padding: 26px; background: linear-gradient(#d8d1bd, #b9b19a); border-radius: 14px; box-shadow: 0 10px 50px rgba(0, 0, 0, .8), inset 0 0 0 2px #e9e3d1;
+  animation: rv-zoom .9s ease-out; }
+@keyframes rv-zoom { from { transform: translate(-50%, -50%) scale(.2); opacity: 0; } }
+.rv-desk { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 10px / 14px; background: #3a6ea5;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .6); }
+.rv-desk::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 2px, rgba(0, 0, 0, .08) 2px 3px); }
+.rv-win { position: absolute; display: flex; flex-direction: column; background: var(--win); border: 3px solid var(--title-a); border-top: 0;
+  border-radius: 8px 8px 0 0; box-shadow: 3px 4px 14px rgba(0, 0, 0, .35); font-size: 13px; max-height: 92%; }
+.rv-body { padding: 10px 12px; overflow: auto; }
+.rv-body p { margin: 0 0 8px; }
+.rv-head { color: #333; margin: 0 0 2px !important; }
+.rv-mail { left: 4%; top: 5%; width: 62%; }
+.rv-log { left: 4%; bottom: 4%; width: 42%; opacity: .92; }
+.rv-log pre { margin: 0; font: 12px/1.35 "Lucida Console", monospace; white-space: pre-wrap; }
+.rv-waiver { right: 3%; top: 30%; width: 60%; }
+.rv-waiver h3 { margin: 0 0 8px; font-size: 13px; }
+.rv-sign { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.rv-sign label { flex: 1; display: flex; gap: 6px; align-items: center; }
+.rv-sign input { flex: 1; width: auto; transition: color .4s; }
+.rv-sign input.struck { text-decoration: line-through; text-decoration-thickness: 2px; color: #a00; }
+.rv-sign input.number { font-weight: 700; letter-spacing: .2em; }
+.rv-att { margin-top: 4px; }
+#btn-logoff-2041 { opacity: .55; }
+/* The CRT on floor 5 runs the plain 2007 build, even after your promotion to Aero. */
+body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; text-shadow: 1px 1px #0f1089;
+  background: linear-gradient(var(--title-b), var(--title-a) 30%, var(--title-a) 85%, #0040c0); }
+@media (prefers-reduced-motion: reduce) { .reveal, .rv-crt, .rv-glow { transition: none; animation: none; } }

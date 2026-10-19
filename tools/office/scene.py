@@ -657,8 +657,8 @@ for i in range(4):
     box(f'foos_leg{i}', lx - 0.04, ly - 0.04, 0, lx + 0.04, ly + 0.04, 0.62, mat('foosframe', (0.12, 0.08, 0.05), 0.35), 0.01)
 for i in range(8):
     x = 15.15 + i * 0.155
-    rod = cyl(f'foos_rod{i}', x, 1.3, 0.9, 0.008, 1.4, STEEL, 8)
-    rod.rotation_euler = (math.pi / 2, 0, 0); rod.location = (x, 2.0, 0.9)
+    fr = cyl(f'foos_rod{i}', x, 1.3, 0.9, 0.008, 1.4, STEEL, 8)
+    fr.rotation_euler = (math.pi / 2, 0, 0); fr.location = (x, 2.0, 0.9)
     for k in range(3):
         box(f'foos_man{i}_{k}', x - 0.015, 1.8 + k * 0.2 - 0.02, 0.82, x + 0.015, 1.8 + k * 0.2 + 0.02, 0.95, mat('foosred', (0.6, 0.05, 0.05), 0.3) if i % 2 else mat('foosblue', (0.05, 0.1, 0.5), 0.3), 0.004)
 for x, y in ((0.5, 0.3), (14.2, 0.4)):
@@ -1048,4 +1048,83 @@ elif MODE in ('stand', 'standstill'):
         S.frame_set(f)
         S.render.filepath = name(f)
         bpy.ops.render.render(write_still=True)
+elif MODE == 'floor5':
+    # The reveal: the lift opens on floor 5, the same floor in 2041. No desks, rows of GMS racks, one CRT
+    # on the carpet running Doors OS. Its screen is drawn by the game. ARGS: w h samples
+    keep = ('wall_', 'mullion', 'sill', 'window_glass', 'lift_', 'accent_left', 'floor', 'slab', 'troffer', 'ceiling', 'street', 'sky', 'bld', 'bwin', 'fbld', 'right_print')
+    for o in S.objects:
+        if o.type in ('MESH', 'FONT') and not o.name.startswith(keep): o.hide_render = True
+    for nm in ('right_print', 'lift_floor_no'): bpy.data.objects[nm].hide_render = True
+    for cname in ('cubicles', 'meeting', 'pitch', 'darren', 'canteen'): hide(cname)
+    CUR[0] = 'floor5'
+    LED = emit_mat('led', (1, 0.25, 0.05), 6)
+    text('f5_floor_no', '5', 0.03, 2.375, 2.07, 0.1, LED, '+x')
+    # Where the sign hung: a cleaner patch of wall and four screw holes.
+    box('f5_signghost', 0.012, 3.0, 1.45, 0.016, 7.0, 2.25, mat('wallclean', (0.74, 0.72, 0.66), 0.85), 0)
+    for i, (y, z) in enumerate(((3.2, 1.55), (6.8, 1.55), (3.2, 2.15), (6.8, 2.15))):
+        cyl(f'f5_screw{i}', 0.017, y, z, 0.012, 0.004, DARKP).rotation_euler = (0, math.pi / 2, 0)
+    # Lighter carpet where the cubicles stood for years.
+    GHOST = mat('carpetghost', (0.16, 0.17, 0.19), 0.95, bump=0.2, scale=300)
+    for cx, cy in ((7.0, 4.3), (9.5, 4.3), (12.0, 4.3), (7.0, 7.7), (9.5, 7.7), (12.0, 7.7)):
+        box(f'f5_ghost{cx}_{cy}', cx - 1.2, cy - 0.9, 0.0, cx + 1.2, cy + 1.2, 0.002, GHOST, 0)
+    RACK = mat('rack', (0.03, 0.035, 0.04), 0.4, metal=0.5)
+    MESHF = mat('rackmesh', (0.06, 0.065, 0.07), 0.5, metal=0.7, bump=0.4, scale=900)
+    BLUEL = emit_mat('rackblue', (0.25, 0.5, 1.0), 9)
+    GREENL = emit_mat('rackgreen', (0.2, 1.0, 0.4), 9)
+    GMSRED = emit_mat('gmsred', (0.9, 0.08, 0.1), 2.5)
+    import random as _r
+    _r.seed(41)
+    for row, y in enumerate((6.9, 9.0, 11.0)):
+        for i in range(11):
+            x = 3.0 + i * 1.05 + (0.6 if i > 5 else 0)
+            if row == 0 and i in (3,): continue   # a gap in the first row, towards the window
+            box(f'f5_rack{row}_{i}', x, y, 0, x + 1.0, y + 1.1, 2.15, RACK, 0.01)
+            box(f'f5_door{row}_{i}', x + 0.04, y - 0.012, 0.08, x + 0.96, y, 2.08, MESHF, 0)
+            text(f'f5_gms{row}_{i}', 'GMS', x + 0.5, y - 0.016, 1.92, 0.12, GMSRED, '-y', extrude=0.002)
+            for k in range(14):
+                if _r.random() < 0.55:
+                    lz = 0.3 + k * 0.11; lx = x + 0.12 + _r.random() * 0.15
+                    box(f'f5_led{row}_{i}_{k}', lx, y - 0.016, lz, lx + 0.02, y - 0.013, lz + 0.012, BLUEL if _r.random() < 0.7 else GREENL, 0)
+    # Cold light from the racks onto the carpet.
+    for i, (x, y) in enumerate(((5.5, 6.3), (11.0, 6.3))):
+        lt = bpy.data.lights.new(f'f5_rackwash{i}', 'AREA'); lt.shape = 'RECTANGLE'; lt.size = 4; lt.size_y = 0.3
+        lt.energy = 35; lt.color = (0.35, 0.55, 1.0)
+        lo = bpy.data.objects.new(f'f5_rackwash{i}', lt); lo.location = (x, y, 1.0); lo.rotation_euler = (-math.pi / 2, 0, 0); coll('lights').objects.link(lo)
+    # The CRT on the carpet, cable across the floor to the racks. Its screen glows Doors blue.
+    SCR5 = emit_mat('f5_screen', (0.16, 0.33, 0.78), 0.8)
+    CRT_X, CRT_Y = 4.6, 3.6
+    crt('f5_crt', CRT_X, CRT_Y, 0.0, SCR5, hot='crt')
+    box('f5_kbd', CRT_X - 0.22, CRT_Y - 0.55, 0.0, CRT_X + 0.22, CRT_Y - 0.41, 0.025, BEIGE, 0.006, hot='crt')
+    # Turned three-quarters towards the lift, so the screen catches the eye.
+    piv = bpy.data.objects.new('f5_crt_pivot', None); S.collection.objects.link(piv); piv.location = (CRT_X, CRT_Y, 0)
+    for o in S.objects:
+        if o.name.startswith(('f5_crt_', 'f5_kbd')) and o is not piv:
+            o.parent = piv; o.matrix_parent_inverse = Matrix.Translation((-CRT_X, -CRT_Y, 0))
+    piv.rotation_euler = (0, 0, math.radians(-50))
+    pts = [(CRT_X + 0.1, CRT_Y + 0.4, 0.01), (CRT_X + 0.5, CRT_Y + 1.4, 0.01), (CRT_X - 0.2, CRT_Y + 2.3, 0.01), (CRT_X - 0.9, 6.85, 0.01)]
+    for i in range(len(pts) - 1): rod(f'f5_cable{i}', pts[i], pts[i + 1], 0.009, DARKP, 8)
+    gl = bpy.data.lights.new('f5_crtglow', 'AREA'); gl.size = 0.3; gl.energy = 6; gl.color = (0.4, 0.55, 1.0)
+    go = bpy.data.objects.new('f5_crtglow', gl); go.location = (CRT_X, CRT_Y - 0.1, 0.23); go.rotation_euler = (math.pi / 2, 0, 0); coll('lights').objects.link(go)
+    # Most of the ceiling is dark; the street outside is the same rain, colder.
+    for lt in TROFFERS: lt.energy *= 0.05
+    PANEL.node_tree.nodes['Emission'].inputs['Strength'].default_value = 0.04
+    dl.energy = 500; dl.color = (0.55, 0.62, 0.8); fl.energy = 8
+    WIN.node_tree.nodes['Emission'].inputs['Strength'].default_value = 0.0
+    cd = bpy.data.cameras.new('eye'); cd.lens = 22; cd.clip_start = 0.02; cd.clip_end = 200
+    cd.dof.use_dof = True; cd.dof.aperture_fstop = 5.6
+    cam = bpy.data.objects.new('eye', cd); S.collection.objects.link(cam); S.camera = cam
+    cam.location = (0.9, 1.45, 1.62); look_at(cam, (6.0, 5.2, 0.5))
+    fo_ = bpy.data.objects.new('f5_focus', None); fo_.location = (CRT_X, CRT_Y, 0.2); S.collection.objects.link(fo_); cd.dof.focus_object = fo_
+    for nm in ('lift_door_l', 'lift_door_r'): bpy.data.objects[nm].location.y += (-0.58 if nm.endswith('l') else 0.58)
+    w_, h_ = (int(ARGS[0]), int(ARGS[1])) if len(ARGS) > 1 else (1600, 900)
+    set_res(w_, h_, int(ARGS[2]) if len(ARGS) > 2 else 96)
+    S.render.image_settings.file_format = 'PNG'
+    S.render.filepath = os.path.join(OUT, 'floor5.png')
+    # Where the CRT screen sits on the picture, for the HTML layer.
+    from bpy_extras.object_utils import world_to_camera_view
+    bpy.context.view_layer.update()
+    sc = bpy.data.objects['f5_crt_screen']
+    pts2 = [world_to_camera_view(S, cam, sc.matrix_world @ Vector(c)) for c in sc.bound_box]
+    json.dump([round(min(p.x for p in pts2) * 100, 2), round((1 - max(p.y for p in pts2)) * 100, 2), round(max(p.x for p in pts2) * 100, 2), round((1 - min(p.y for p in pts2)) * 100, 2)], open(os.path.join(OUT, 'floor5_screen.json'), 'w'))
+    bpy.ops.render.render(write_still=True)
 print('done', MODE)
