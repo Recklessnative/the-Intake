@@ -503,7 +503,7 @@
       body: 'Hi there!\n\nJust circling back on my circle-back. Our Web 2.0, multimedia, edutainment academy (now with a Second Life campus!) boosts engagement by up to 400%*.\n\nDo you have 15 minutes this week? Or 14?\n\n*in a survey of our own staff' }
   ];
   // From week 2 Facilities has one more mail, and it comes back every week like the others.
-  const FLOOR5 = { from: 'Facilities', subject: 'Lift, floor 5', ago: 33,
+  const FLOOR5 = { from: 'Facilities', subject: 'Lift, floor 5', ago: 33, arc: 'floor5',
     body: 'The lift button for floor 5 is out of order. A technician has been informed.\n\nThere is no floor 5. Please stop pressing it. It does not help and it has been noted.' };
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
@@ -573,7 +573,7 @@
   }
   function selectMail(m) {
     const r = state.run;
-    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; $('mail-team').hidden = true; renderMail(); return; }
+    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; $('mail-team').hidden = true; $('mail-note').hidden = true; renderMail(); return; }
     if (m.current && r.phase === 'inbox' && !r.readMail.current) Desktop.layout('inbox', 'w-inbox');   // calm Monday: the case file joins
     r.selected = m;
     if (!m.read) { m.read = true; if (m.current) r.readMail.current = true; else if (!m.request) r.readMail[m.subject] = true; }
@@ -586,6 +586,8 @@
     $('mail-actions').hidden = !m.current;
     $('mail-academy').hidden = !m.academy;
     $('mail-team').hidden = !m.team;
+    $('mail-note').hidden = !m.arc;
+    if (m.arc) { const b = $('btn-mail-note'), done = Arc.noted(m.arc); b.textContent = done ? '📌 Noted' : '📌 Note it'; b.disabled = done; }
     if (m.academy) $('btn-academy').textContent = state.academy.done ? '🎓 See the tips again' : state.academy.started ? '🎓 Carry on with the module' : '🎓 Open the module';
     renderMail();
   }
@@ -989,6 +991,8 @@
     Desktop.focus('w-academy');
   }
   $('btn-academy').onclick = () => openAcademy();
+  // Odd mail goes in the notebook's "Doesn't add up" page, which lives on the floor.
+  $('btn-mail-note').onclick = () => { const m = state.run && state.run.selected; if (m && m.arc && Arc.note(m.arc)) { $('btn-mail-note').textContent = '📌 Noted'; $('btn-mail-note').disabled = true; toast('Noted. Your notebook is on the floor, between requests.', 'info'); } };
 
   // What waits on top before this request: the Monday stand-up (weeks 2 and later, when there
   // is something to recall), else the week's CoE module (in week 1 on the second request).
@@ -1205,7 +1209,9 @@
     if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
     if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
-    const hello = !state.index && Arc.offer('morning', arcNow()) ? 'Morning again! ' : 'Morning! ';
+    const again = !state.index && Arc.offer('morning', arcNow());
+    if (again) Arc.note('morning');
+    const hello = again ? 'Morning again! ' : 'Morning! ';
     const ping = mondayFirst() === 'standup' ? ['Mieke', hello + 'Stand-up first, five minutes, coffee included. Then the request.']
       : moduleFirst ? ['Mieke', state.weekNo === 1 ? 'Morning! Before the next request: your first CoE module. It is short, and it does not count. Then the request.' : 'Morning! The CoE module is on top, it is short. Then the request.']
       : !state.index ? ['Mieke', (firstEver() ? 'Morning! Your first request is in the inbox. Read it, open the case file, then call them back. Ask before you make.' : hello + 'A request just came in, it is on top. Ask before you make. Nudge me if you get stuck.')] : PINGS[n % PINGS.length];
@@ -2019,17 +2025,17 @@
     mieke: { from: 0, shot: 'mieke', title: 'Mieke\'s desk', who: 'Mieke', note: 'Mieke, from behind her monitor', things: [
       { id: 'coe', at: 0, label: 'Red pen', text: 'Her own printed copy of the CoE e-learning, the one she made. Red pen on every page. Page 1: "Too long." Page 14: "Still too long." She marks herself harder than she marks you.' },
       { id: 'phone', at: 0, label: 'Her phone', text: 'A grey phone with a stubby aerial. Snake, high score 4,212. On the back, in her handwriting: "Do not upgrade." IT has tried twice.' },
-      { id: 'cds', at: 1, label: 'CD-ROMs', text: 'A spindle of course CD-ROMs, 1998 to 2001. Each has a sticky note: what it was for, and whether anyone did anything differently afterwards. Most say "no idea". One says "yes: the manager asked about it on Monday".' },
+      { id: 'cds', at: 1, label: 'CD-ROMs', text: 'A spindle of course CD-ROMs, 1998 to 2001. Each has a sticky note: what it was for, and whether anyone did anything differently afterwards. Most say "no idea". One says "yes: the manager asked about it on Monday".', odd: true },
       { id: 'photo', at: 2, label: 'Photo frame', text: 'A frame turned towards her chair, away from visitors. On the back, in pencil: "Wednesday choir, Gent, 2005. Front row, of course."' },
       { id: 'cardigan', at: 3, label: 'Cardigan', text: 'The burgundy cardigan lives on her chair all year. Bart borrowed it once for a client visit in February. Neither of them has mentioned it since.' }
     ] },
     darren: { from: 0, shot: 'darren', title: 'Darren\'s office, through the glass', who: 'Darren', note: 'Darren\'s door', things: [
       { id: 'poster', at: 0, label: 'Poster', text: 'SYNERGY. "Alone we are smart. Together we are a steering committee." He ordered six. The other five are still in the box behind the door.' },
       { id: 'planner', at: 0, label: 'Planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Tuesday and Wednesday: "airport". Friday: "BOARD", underlined three times. Thursday is empty. Requests come from empty days.',
-        later: { arc: 'planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Same as last week, in the same ink, with the same coffee ring. Tuesday and Wednesday: "airport". Synergix must be growing.' } },
+        later: { arc: 'planner', text: 'His planner, open on this week. Monday: "NEW HIRE!!" Same as last week, in the same ink, with the same coffee ring. Tuesday and Wednesday: "airport". Synergix must be growing.', odd: true } },
       { id: 'boarding', at: 1, label: 'Boarding passes', text: 'Three boarding passes, Brussels to Frankfurt and back, all seat 2C. On one he has written "GMS = Max??". Max is the avatar that won Global Multimedia Solutions the Brugmann account.' },
       { id: 'charger', at: 2, label: 'Charger', text: 'A charger with nothing on the end. The BlackBerry is wherever Darren is, sending mails that end in "Sent from my BlackBerry".' },
-      { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.' }
+      { id: 'umbrella', at: 3, label: 'Umbrella', text: 'A golf umbrella from a supplier day, still in its sleeve. It has rained every day since you started. He has not taken it once.', odd: true }
     ] },
     bart: { from: 1, shot: 'bart', title: 'Bart\'s desk', who: 'Bart', note: 'A note on Bart\'s monitor', text: 'Back in 5 min. (Foosball.)\n\nIf it is about the Halvorsen risks: they are fine.', things: [
       { id: 'pizza', at: 0, label: 'Pizza box', text: 'A pizza box with a sticky note: "FOR THE TEAM!!" There is one slice left. The box is from last Thursday. Bart says it is still fine.' },
@@ -2046,7 +2052,7 @@
       { id: 'cooler', at: 3, label: 'Water cooler', text: '"Please do not refill with soup." It is laminated, so it has happened more than once.' }
     ] },
     priya: { from: 3, shot: 'priya', title: 'Priya\'s desk', who: 'Priya', note: 'Priya\'s out-of-office, printed', text: 'In a meeting until 10:42.\n\nNot 10:40. 10:42.', things: [
-      { id: 'chart', at: 0, label: 'Chart', text: 'Q3 completion rate: 98%, in orange, pinned at eye level. The small print says "of those who started". Nobody has asked how many started.' },
+      { id: 'chart', at: 0, label: 'Chart', text: 'Q3 completion rate: 98%, in orange, pinned at eye level. The small print says "of those who started". Nobody has asked how many started.', odd: true },
       { id: 'notes', at: 0, label: 'Sticky notes', text: 'Twelve sticky notes in a perfect grid: yellow for this week, blue for next, green for done. One pink one does not fit: "Measure what matters? - M." She has not moved it. She has not answered it either.' },
       { id: 'stopwatch', at: 1, label: 'Stopwatch', text: 'She times meetings. Monday\'s stand-up: 41 minutes 7 seconds. The agenda said 15. The result is in a spreadsheet, with a trend line.' },
       { id: 'calculator', at: 2, label: 'Calculator', text: 'A graphing calculator from her engineering degree in Leuven, with her name on it in three places. Bart once borrowed it without asking. Once.' },
@@ -2079,8 +2085,8 @@
     const out = {}, entries = [];
     let of = 0;
     Object.entries(LOOKS).forEach(([k, L]) => {
-      const now2 = t => t.later && Arc.offer(t.later.arc, now) ? { key: k + ':' + t.id + ':2', text: t.later.text } : { key: k + ':' + t.id, text: t.text };
-      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => { const v = now2(t); return { id: t.id, label: t.label, text: v.text, key: v.key, fresh: !st.found.includes(v.key) }; });
+      const now2 = t => t.later && Arc.offer(t.later.arc, now) ? { key: k + ':' + t.id + ':2', text: t.later.text, odd: t.later.odd } : { key: k + ':' + t.id, text: t.text, odd: t.odd };
+      const things = L.things.filter(t => L.from + t.at < st.visits).map(t => { const v = now2(t); return { id: t.id, label: t.label, text: v.text, key: v.key, odd: !!v.odd, fresh: !st.found.includes(v.key) }; });
       of += L.things.length;
       L.things.forEach(t => { if (st.found.includes(k + ':' + t.id) || st.found.includes(k + ':' + t.id + ':2')) entries.push({ who: L.who, label: t.label, text: now2(t).text }); });
       if (things.length) out[k] = { shot: L.shot, title: L.title, note: L.note, things };
@@ -2094,6 +2100,8 @@
   }
 
   const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
+  // A "Note it" button for an arc hint on the floor.
+  const arcNote = id => ({ done: () => Arc.noted(id), add: () => Arc.note(id) });
   const BADGE = '\n\nYour staff badge has come, and it is on your keyboard: SYNERGIX · STAFF · No. 1207. Where the photo goes it says "Photo: to follow". HR is processing it. It is HR.';
   const FLICKER = 'The numbers above the doors go 4, then 5, then 4. The doors open for half a second. Inside it is dark, and something hums, like a room full of fans. Then they close.\n\nFacilities will say it is the lift motor. It is always the lift motor.';
   const FLOOR_EVENING = '\n\nRight now it is home time, though. The lift is by reception: take it when you are ready, and tomorrow starts at your desk.';
@@ -2121,8 +2129,11 @@
     // The morning after: the lift up and the rain, each said once; most days it is the coffee machine.
     const morning = () => {
       const now = arcNow(state.days[i]);
-      const line = Arc.once('tape', now) ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
-        : Arc.once('rain', now) ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
+      const tape = Arc.once('tape', now), rain = !tape && Arc.once('rain', now);
+      // You can't click a morning, so these go in the notebook by themselves.
+      if (tape) Arc.note('tape'); else if (rain) Arc.note('rain');
+      const line = tape ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
+        : rain ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
       startRequest();
       toast(tomorrow + ', 08:57. ' + line, 'info');
     };
@@ -2131,7 +2142,7 @@
     const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
-        : evening ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' + (Arc.offer('badge', arcNow(day)) ? BADGE : '') }
+        : evening ? Object.assign({ label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }, Arc.offer('badge', arcNow(day)) ? { text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning.' + BADGE, note: arcNote('badge') } : {})
         : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
@@ -2142,15 +2153,17 @@
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
     if (evening) spots.lift = { label: 'Go home: start ' + tomorrow, sub: 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: () => Office.sitDown(morning) };
-    else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER };
+    else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
     const L = looks(arcNow(day));
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
     // More places open as the weeks go on: the people you have not met yet are known by their desks.
     ['bart', 'priya', 'jens', 'canteen'].forEach(k => { if (L.looks[k]) spots[k] = { label: LOOKS[k].title, who: LOOKS[k].who, face: '🔍', text: LOOKS[k].text, look: L.looks[k] }; });
     if (L.looks.board && !last) spots.meeting.look = L.looks.board;
+    L.notebook.odd = { count: () => Arc.notes().noted.length, draw: box => Arc.page(box) };
     const opts = {
       notebook: L.notebook,
+      noteThing: (shot, t) => ({ done: () => Arc.noted(shot + ':' + t.id), add: () => Arc.note(shot + ':' + t.id, { who: LOOKS[shot].who, label: t.label, text: t.text }) }),
       onFind: (shot, id) => {
         const t = L.looks[shot].things.find(x => x.id === id), had = lookState().found.includes(shot + ':' + id);
         found(t.key);

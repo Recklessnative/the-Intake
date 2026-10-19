@@ -36,6 +36,27 @@ assert.strictEqual(A.offer('badge', { week: 9, day: 0, off: true }), false);
 assert.strictEqual(A.once('tape', { week: 9, day: 1, off: true }), false);
 assert.deepStrictEqual(A.shown(), []);
 
+// Doesn't add up: note things, pin two with a guess; pairs we wrote become leads.
+reset();
+assert.strictEqual(A.note('tape'), true);
+assert.strictEqual(A.note('tape'), false, 'noted twice');
+assert.strictEqual(A.note('nonsense'), false, 'a hint without notebook text');
+A.note('darren:umbrella', { who: 'Darren', label: 'Umbrella', text: 'x' });
+A.note('rain');
+assert.ok(A.noted('rain') && A.noted('darren:umbrella'));
+assert.strictEqual(A.connect('rain', 'darren:umbrella', '').ok, false, 'a pair without a guess');
+assert.match(A.connect('rain', 'tape', 'they are both about mornings').line, /coincidence/);
+const r = A.connect('darren:umbrella', 'rain', 'the rain is on a timer');
+assert.ok(r.ok && /08:56/.test(r.line));
+assert.strictEqual(A.connect('rain', 'darren:umbrella', 'again, the other way').ok, false, 'the same lead twice');
+assert.deepStrictEqual(A.notes().leads.map(l => l.guess), ['the rain is on a timer']);
+// Every pair names things that exist: arc hints with notebook text, or floor things marked odd.
+const app0 = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
+A.PAIRS.forEach(p => [p.a, p.b].forEach(id => {
+  if (id.includes(':')) { const [, thing] = id.split(':'); assert.ok(new RegExp("id: '" + thing + "'(?:(?!\\{ id:)[\\s\\S])*odd: true").test(app0), id + ' is not an odd thing on the floor'); }
+  else assert.ok(A.NOTES[id], id + ' has no notebook text');
+}));
+
 // Act 1 must stand alone: no hint text names AI, 2041 or the operator.
 const app = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
 ['BADGE', 'FLICKER'].forEach(k => {
