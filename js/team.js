@@ -2,6 +2,7 @@
 // Each draft has one flaw, built in code from the card's own traps (no Gemini). You find the flaw
 // and coach them in one note; the note is graded as coaching. Static, trusted markup.
 (function () {
+  const PICS = ['bart', 'priya', 'jens'];
   const JUNIORS = [
     { id: 'bart', name: 'Bart', role: 'junior consultant', weak: 'risks', face: '🧔', voice: 'Eager, optimistic, a little defensive. Believes every client is "fully on board".' },
     { id: 'priya', name: 'Priya', role: 'junior consultant', weak: 'measure', face: '👩🏽', voice: 'Precise and quick, loves a dashboard, sometimes measures what is easy instead of what matters.' },
@@ -101,10 +102,19 @@
   function render(box, team, cardOf, onChange, onSend, onNote) {
     box.innerHTML = '';
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    // A junior's display picture, a thing from their desk; the emoji only for anyone without one.
+    const named = (j, cls, text) => {
+      const e = el(cls === 'team-reply' ? 'p' : 'button', cls, null);
+      const i = el('img', 'team-pic');
+      i.src = 'media/people/' + j.id + '.webp';
+      i.alt = '';
+      e.append(PICS.includes(j.id) ? i : j.face + ' ', text);
+      return e;
+    };
     const tabs = el('div', 'team-tabs');
     team.drafts.forEach((d, i) => {
       const j = junior(d.junior);
-      const b = el('button', 'team-tab' + (i === team.at ? ' on' : '') + (d.grade ? ' done' : ''), j.face + ' ' + j.name + (d.grade ? ' ✓' : ''));
+      const b = named(j, 'team-tab' + (i === team.at ? ' on' : '') + (d.grade ? ' done' : ''), j.name + (d.grade ? ' ✓' : ''));
       b.type = 'button';
       b.setAttribute('aria-pressed', String(i === team.at));
       b.onclick = () => { team.at = i; onChange(); };
@@ -183,7 +193,7 @@
       const g = d.grade;
       const res = el('div', 'team-result');
       if (g.unscored) {
-        res.appendChild(el('p', 'team-reply', j.face + ' ' + j.name + ': ' + g.reply));
+        res.appendChild(named(j, 'team-reply', j.name + ': ' + g.reply));
         res.appendChild(el('p', null, g.note));
         res.appendChild(el('p', 'muted', 'Document properties: Author MODULEGEN. Not counted in your team score.'));
         if (onNote) { const n = el('button', 'link', 'Note it'); n.type = 'button'; n.onclick = () => { onNote(d); n.textContent = 'Noted'; n.disabled = true; }; res.appendChild(n); }
@@ -195,7 +205,7 @@
       if (d.pick !== d.flaw) res.appendChild(el('p', null, 'The problem was in "' + LINES.find(([k]) => k === d.flaw)[1] + '". ' + d.why));
       else res.appendChild(el('p', 'muted', d.why));
       if (d.atypical) res.appendChild(el('p', 'muted', 'Not ' + j.name + '\'s usual weak spot. Read every line, not just the one you expect.'));
-      res.appendChild(el('p', 'team-reply', j.face + ' ' + j.name + ': ' + g.reply));
+      res.appendChild(named(j, 'team-reply', j.name + ': ' + g.reply));
       if (g.note) res.appendChild(el('p', 'muted', 'On your coaching: ' + g.note));
       page.appendChild(res);
     }

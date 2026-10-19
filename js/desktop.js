@@ -30,7 +30,7 @@
     bar.className = 'titlebar';
     bar.innerHTML = '<span class="ti"></span><span class="tt"></span>' +
       '<button class="tb min" aria-label="Minimise">_</button><button class="tb max" aria-label="Maximise">□</button><button class="tb close" aria-label="Close">×</button>';
-    bar.querySelector('.ti').textContent = w.dataset.icon || '';
+    bar.querySelector('.ti').replaceChildren(icon(w));
     bar.querySelector('.tt').textContent = w.dataset.title;
     w.append(bar, body);
     bar.querySelector('.min').onclick = e => { e.stopPropagation(); minimise(w.id); };
@@ -111,13 +111,23 @@
     keep.forEach(id => focus(id));
   }
 
+  // A window's small icon: the rendered one (media/icons) where it has one, else its emoji.
+  function icon(w) {
+    if (!w.dataset.img) return document.createTextNode(w.dataset.icon || '');
+    const i = document.createElement('img');
+    i.className = 'wi';
+    i.src = 'media/icons/' + w.dataset.img + '-16.webp';
+    i.alt = '';
+    return i;
+  }
+
   function taskbar() {
     const bar = $('task-buttons');
     bar.innerHTML = '';
     wins().filter(w => w.classList.contains('open')).forEach(w => {
       const b = document.createElement('button');
       b.className = 'task' + (w.classList.contains('focused') && !w.classList.contains('minimised') ? ' active' : '');
-      b.textContent = (w.dataset.icon || '') + ' ' + (w.dataset.task || w.dataset.title.split(' - ')[0]);
+      b.append(icon(w), ' ' + (w.dataset.task || w.dataset.title.split(' - ')[0]));
       b.onclick = () => {
         if (w.classList.contains('focused') && !w.classList.contains('minimised') && wide()) minimise(w.id);
         else open(w.id);
