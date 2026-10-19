@@ -94,14 +94,10 @@
   <!-- Boot: the office PC starts up while you settle in -->
   <section id="s-cubicle" class="screen boot">
     <div class="glare" aria-hidden="true">
-      <svg class="reflection" viewBox="0 0 200 220" aria-hidden="true">
-        <defs><radialGradient id="face" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>
-        <ellipse cx="100" cy="78" rx="38" ry="48" fill="url(#face)"/>
-        <path d="M20 220 C24 160 60 136 100 136 C140 136 176 160 180 220 Z" fill="url(#face)"/>
-      </svg>
+      <img class="reflection" src="media/boot-glass.webp" alt="">
     </div>
     <div class="boot-center">
-      <div class="boot-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <img class="boot-logo" src="media/doors-logo.webp" alt="" aria-hidden="true">
       <p class="boot-name">Doors <em>OS</em></p>
       <div class="boot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
       <p id="cubicle-line" class="boot-line" aria-live="polite"></p>
@@ -115,24 +111,24 @@
     <div id="desktop" class="desktop">
       <!-- Desktop icons: every window can be opened from here (on wide screens; the start menu on phones). -->
       <nav id="desk-icons" class="desk-icons" aria-label="Desktop">
-        <button type="button" class="desk-icon" data-app="w-coe"><span class="di">🗂</span>Center of Excellence</button>
-        <button type="button" class="desk-icon" data-app="w-academy"><span class="di">🎓</span>CoE Academy</button>
-        <button type="button" class="desk-icon" data-app="w-drill"><span class="di">🎯</span>Measurement drill</button>
-        <button type="button" class="desk-icon" data-app="w-inbox"><span class="di">✉</span>Doors Mail</button>
-        <button type="button" class="desk-icon" data-app="w-case"><span class="di">📁</span>Case file</button>
-        <button type="button" class="desk-icon" data-app="w-notes"><span class="di">📝</span>My notes</button>
-        <button type="button" class="desk-icon" data-app="w-call"><span class="di">☎</span>Phone</button>
-        <button type="button" class="desk-icon" data-app="w-leads"><span class="di">🔎</span>Follow-up</button>
-        <button type="button" class="desk-icon" data-app="w-write"><span class="di">📌</span>Case board</button>
-        <button type="button" class="desk-icon" data-app="w-mieke"><span class="di">☕</span>Mieke</button>
-        <button type="button" class="desk-icon" data-app="w-scores"><span class="di">🏆</span>My scores.txt</button>
-        <button type="button" class="desk-icon team-only" data-app="w-team"><span class="di">👥</span>My team</button>
-        <button type="button" class="desk-icon" data-app="bin"><span class="di">🗑</span>Recycle Bin</button>
+        <button type="button" class="desk-icon" data-app="w-coe"><img class="di" src="media/icons/coe.webp" alt="">Center of Excellence</button>
+        <button type="button" class="desk-icon" data-app="w-academy"><img class="di" src="media/icons/academy.webp" alt="">CoE Academy</button>
+        <button type="button" class="desk-icon" data-app="w-drill"><img class="di" src="media/icons/drill.webp" alt="">Measurement drill</button>
+        <button type="button" class="desk-icon" data-app="w-inbox"><img class="di" src="media/icons/mail.webp" alt="">Doors Mail</button>
+        <button type="button" class="desk-icon" data-app="w-case"><img class="di" src="media/icons/case.webp" alt="">Case file</button>
+        <button type="button" class="desk-icon" data-app="w-notes"><img class="di" src="media/icons/notes.webp" alt="">My notes</button>
+        <button type="button" class="desk-icon" data-app="w-call"><img class="di" src="media/icons/phone.webp" alt="">Phone</button>
+        <button type="button" class="desk-icon" data-app="w-leads"><img class="di" src="media/icons/followup.webp" alt="">Follow-up</button>
+        <button type="button" class="desk-icon" data-app="w-write"><img class="di" src="media/icons/board.webp" alt="">Case board</button>
+        <button type="button" class="desk-icon" data-app="w-mieke"><img class="di" src="media/icons/mieke.webp" alt="">Mieke</button>
+        <button type="button" class="desk-icon" data-app="w-scores"><img class="di" src="media/icons/scores.webp" alt="">My scores.txt</button>
+        <button type="button" class="desk-icon team-only" data-app="w-team"><img class="di" src="media/icons/team.webp" alt="">My team</button>
+        <button type="button" class="desk-icon" data-app="bin"><img class="di" src="media/icons/bin.webp" alt="">Recycle Bin</button>
       </nav>
 
 
       <!-- Inbox: an early-2000s mail client -->
-      <div class="win" id="w-inbox" data-title="Inbox - Doors Mail" data-icon="✉">
+      <div class="win" id="w-inbox" data-title="Inbox - Doors Mail" data-icon="✉" data-img="mail">
         <div class="mail-toolbar" role="toolbar" aria-label="Mail">
           <button type="button" data-mail="new"><span>✉</span>Create Mail</button>
           <button type="button" data-mail="reply"><span>↩</span>Reply</button>
@@ -191,7 +187,7 @@
       </div>
 
       <!-- Case file -->
-      <div class="win" id="w-case" data-title="Case file" data-icon="📁">
+      <div class="win" id="w-case" data-title="Case file" data-icon="📁" data-img="case">
         <div id="briefing" class="briefing">
           <h3 id="briefing-head"></h3>
           <ul id="briefing-points"></ul>
@@ -200,12 +196,12 @@
       </div>
 
       <!-- Notes -->
-      <div class="win" id="w-notes" data-title="My notes - Notepad" data-icon="📝">
+      <div class="win" id="w-notes" data-title="My notes - Notepad" data-icon="📝" data-img="notes">
         <textarea id="notes" class="notepad" spellcheck="false" placeholder="Your notes for this request. Pin a line from the call with 📌, or type here. Nobody grades this."></textarea>
       </div>
 
       <!-- Intake call -->
-      <div class="win" id="w-call" data-title="Call" data-icon="☎">
+      <div class="win" id="w-call" data-title="Call" data-icon="☎" data-img="phone">
         <div class="chat-head">
           <div><strong id="chat-who"></strong> <span id="chat-role" class="muted"></span></div>
           <div class="meters">
@@ -227,22 +223,22 @@
       </div>
 
       <!-- CoE Academy: this week's e-learning module -->
-      <div class="win" id="w-academy" data-title="CoE Academy" data-icon="🎓">
+      <div class="win" id="w-academy" data-title="CoE Academy" data-icon="🎓" data-img="academy">
         <div id="academy" class="academy" aria-live="polite"></div>
       </div>
 
       <!-- Measurement drill: one case, measurement only -->
-      <div class="win" id="w-drill" data-title="Measurement drill" data-icon="🎯">
+      <div class="win" id="w-drill" data-title="Measurement drill" data-icon="🎯" data-img="drill">
         <div id="drill" class="standup" aria-live="polite"></div>
       </div>
 
       <!-- The Monday stand-up: recall last week's cases before the inbox -->
-      <div class="win" id="w-standup" data-title="Monday stand-up" data-icon="☕">
+      <div class="win" id="w-standup" data-title="Monday stand-up" data-icon="☕" data-img="standup">
         <div id="standup" class="standup" aria-live="polite"></div>
       </div>
 
       <!-- Follow-up after the first call: data, the coffee machine, a callback -->
-      <div class="win" id="w-leads" data-title="Follow-up" data-icon="🔎">
+      <div class="win" id="w-leads" data-title="Follow-up" data-icon="🔎" data-img="followup">
         <div class="leads">
           <p class="leads-budget"><b id="leads-left"></b> One data request costs 1 question, so does a question at the coffee machine. A callback gives you up to 3 more with the stakeholder.</p>
           <section>
@@ -279,9 +275,9 @@
       </div>
 
       <!-- Colleague -->
-      <div class="win messenger" id="w-mieke" data-title="Mieke - Conversation" data-task="Mieke" data-icon="💬">
+      <div class="win messenger" id="w-mieke" data-title="Mieke - Conversation" data-task="Mieke" data-icon="💬" data-img="messenger">
         <div class="im-head">
-          <svg class="im-avatar" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="im-av" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f29d38"/></linearGradient></defs><rect x="1" y="1" width="46" height="46" rx="6" fill="url(#im-av)" stroke="#9a6a1c"/><path d="M14 30h17v5a6 6 0 0 1-6 6h-5a6 6 0 0 1-6-6z" fill="#fff" stroke="#6b3d10" stroke-width="2"/><path d="M31 32h3a3 3 0 0 1 0 6h-3" fill="none" stroke="#6b3d10" stroke-width="2"/><path d="M18 26c0-3 3-3 3-6M24 26c0-3 3-3 3-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          <img class="im-avatar" src="media/people/mieke.webp" alt="">
           <div class="im-who"><b>Mieke</b> <span class="im-dot" aria-hidden="true">●</span> <span class="im-status">Online</span><br><span class="im-msg">~*~ ask why ~*~ (then ask why again)</span></div>
           <button type="button" id="btn-nudge" class="im-nudge" title="Send Mieke a nudge">📳 Nudge</button>
         </div>
@@ -299,7 +295,7 @@
       </div>
 
       <!-- Write-up -->
-      <div class="win" id="w-write" data-title="Case board" data-icon="📌">
+      <div class="win" id="w-write" data-title="Case board" data-icon="📌" data-img="board">
         <!-- The case board: five short steps built on evidence from the call. -->
         <div id="board" class="board">
           <ol id="board-steps" class="board-steps">
@@ -428,7 +424,7 @@
       </div>
 
       <!-- The learning team's Center of Excellence: reference documents, readable any time. -->
-      <div class="win" id="w-coe" data-title="Center of Excellence" data-icon="🗂">
+      <div class="win" id="w-coe" data-title="Center of Excellence" data-icon="🗂" data-img="coe">
         <div class="explorer">
           <nav class="ex-files" aria-label="Documents">
             <div class="mail-pane-head">L&amp;D Center of Excellence</div>
@@ -439,17 +435,17 @@
       </div>
 
       <!-- Your team (after your promotion): three juniors, one draft each, one flaw each. -->
-      <div class="win" id="w-team" data-title="Team drafts - review before they go out" data-task="My team" data-icon="👥">
+      <div class="win" id="w-team" data-title="Team drafts - review before they go out" data-task="My team" data-icon="👥" data-img="team">
         <div id="team" class="team"></div>
       </div>
 
       <!-- Every request you finished, kept in this browser. -->
-      <div class="win" id="w-scores" data-title="My scores.txt - Notepad" data-icon="🏆">
+      <div class="win" id="w-scores" data-title="My scores.txt - Notepad" data-icon="🏆" data-img="scores">
         <div id="scores" class="scores"></div>
       </div>
 
       <!-- Dialog: defence, waiting, scorecard -->
-      <div class="win" id="w-dialog" data-title="THE INTAKE" data-icon="★">
+      <div class="win" id="w-dialog" data-title="THE INTAKE" data-icon="★" data-img="intake">
         <div id="p-bet" class="pane">
           <p id="bet-intro" class="narration small"></p>
           <form id="bet-form" class="write">
@@ -510,7 +506,7 @@
       </div>
 
       <!-- Display properties: wallpapers you unlock with your titles -->
-      <div class="win" id="w-display" data-title="Display Properties" data-icon="🖼">
+      <div class="win" id="w-display" data-title="Display Properties" data-icon="🖼" data-img="display">
         <p class="fine">Visual style. Doors Aero comes with the new PC you get as team lead.</p>
         <div id="display-style" class="display-style"></div>
         <p class="fine">Desktop background. New ones unlock when you finish a week with a better title.</p>
@@ -519,22 +515,22 @@
 
       <!-- Start menu -->
       <div id="start-menu" class="start-menu" hidden>
-        <div class="start-head">Learning professional</div>
-        <button data-open="w-notes">📝 My notes</button>
-        <button data-open="w-case">📁 Case file</button>
-        <button data-open="w-mieke">☕ Ask Mieke</button>
-        <button id="btn-tour">👋 Tour with Mieke</button>
-        <button data-open="w-coe">🗂 Center of Excellence</button>
-        <button data-open="w-academy">🎓 CoE Academy</button>
-        <button data-open="w-drill">🎯 Measurement drill</button>
-        <button data-open="w-scores">🏆 My scores</button>
-        <button data-open="w-team" class="team-only">👥 My team</button>
-        <button data-open="w-phone">📱 My mobile</button>
-        <button data-open="w-display">🖼 Display properties</button>
+        <div class="start-head"><img class="start-tile" src="media/start-tile.webp" alt="">Learning professional</div>
+        <button data-open="w-notes"><img class="sm-i" src="media/icons/notes-16.webp" alt=""><span>My notes</span></button>
+        <button data-open="w-case"><img class="sm-i" src="media/icons/case-16.webp" alt=""><span>Case file</span></button>
+        <button data-open="w-mieke"><img class="sm-i" src="media/icons/mieke-16.webp" alt=""><span>Ask Mieke</span></button>
+        <button id="btn-tour"><img class="sm-i" src="media/icons/tour-16.webp" alt=""><span>Tour with Mieke</span></button>
+        <button data-open="w-coe"><img class="sm-i" src="media/icons/coe-16.webp" alt=""><span>Center of Excellence</span></button>
+        <button data-open="w-academy"><img class="sm-i" src="media/icons/academy-16.webp" alt=""><span>CoE Academy</span></button>
+        <button data-open="w-drill"><img class="sm-i" src="media/icons/drill-16.webp" alt=""><span>Measurement drill</span></button>
+        <button data-open="w-scores"><img class="sm-i" src="media/icons/scores-16.webp" alt=""><span>My scores</span></button>
+        <button data-open="w-team" class="team-only"><img class="sm-i" src="media/icons/team-16.webp" alt=""><span>My team</span></button>
+        <button data-open="w-phone"><img class="sm-i" src="media/icons/mobile-16.webp" alt=""><span>My mobile</span></button>
+        <button data-open="w-display"><img class="sm-i" src="media/icons/display-16.webp" alt=""><span>Display properties</span></button>
         <button id="btn-staply">📎 Staply: on</button>
         <button id="btn-sound">🔊 Sound: on</button>
         <button id="btn-tidy">▦ Tidy the windows</button>
-        <button id="btn-logoff" class="logoff">⏻ Log off (quit this week)</button>
+        <button id="btn-logoff" class="logoff"><img class="sm-i" src="media/icons/logoff-16.webp" alt=""><span>Log off (quit this week)</span></button>
       </div>
     </div>
 
@@ -554,10 +550,10 @@
         </div>
       </div>
     </div>
-    <div id="im-pop" class="im-pop" hidden role="status"><div class="im-pop-bar">💬 Doors Messenger</div><b class="im-from"></b><p class="im-text"></p><span class="fine">Click to open</span></div>
+    <div id="im-pop" class="im-pop" hidden role="status"><div class="im-pop-bar">💬 Doors Messenger</div><img class="im-pic" alt="" hidden><b class="im-from"></b><p class="im-text"></p><span class="fine">Click to open</span></div>
     <div id="staply" class="staply" hidden role="dialog" aria-label="Staply, your office assistant">
       <div class="st-balloon"><p class="st-text"></p><div class="st-actions"><button type="button" data-st="yes">Yes please!</button><button type="button" data-st="no">No</button><button type="button" data-st="off" class="link">Don't show me this again</button></div></div>
-      <svg class="st-body" viewBox="0 0 90 80" aria-hidden="true"><defs><linearGradient id="st-m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9eef5"/><stop offset="1" stop-color="#8f9bad"/></linearGradient></defs><path d="M6 64h78v8H6z" fill="#3b3f47" rx="3"/><path d="M10 60 C 20 34, 60 30, 82 46 L84 60 Z" fill="url(#st-m)" stroke="#4a5160" stroke-width="2"/><path d="M14 58 C 26 40, 58 38, 78 50" fill="none" stroke="#c0392b" stroke-width="5" stroke-linecap="round"/><g class="st-eyes"><ellipse cx="38" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><ellipse cx="58" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><circle cx="41" cy="24" r="3.5" fill="#222"/><circle cx="61" cy="24" r="3.5" fill="#222"/><path d="M29 9 q9 -6 17 -2 M67 9 q-9 -6 -17 -2" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/></g></svg>
+      <svg class="st-body" viewBox="0 0 90 80" aria-hidden="true"><image href="media/staply.webp" x="0" y="0" width="90" height="80" preserveAspectRatio="xMidYMax meet"/><g class="st-eyes"><ellipse cx="38" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><ellipse cx="58" cy="22" rx="9" ry="11" fill="#fff" stroke="#222" stroke-width="2"/><circle cx="41" cy="24" r="3.5" fill="#222"/><circle cx="61" cy="24" r="3.5" fill="#222"/><path d="M29 9 q9 -6 17 -2 M67 9 q-9 -6 -17 -2" fill="none" stroke="#222" stroke-width="2.5" stroke-linecap="round"/></g></svg>
     </div>
     <div id="stamp" class="stamp" hidden aria-live="polite"><span class="stamp-t">💡 FOUND</span><span class="stamp-n"></span></div>
     <footer class="taskbar">

@@ -55,7 +55,9 @@ label.check input { width: auto; }
 /* The welcome screen is the one place outside the XP shell: a rendered photo of the building
    (js/title.js picks the stage) with a plain text menu down the left, like a film's title. */
 #s-end, #s-settings, #s-cap {
-  background: linear-gradient(#00309c 0 70px, #f39c1b 70px 72px, #5a7edc 72px calc(100% - 72px), #f39c1b calc(100% - 72px) calc(100% - 70px), #00309c calc(100% - 70px));
+  --title-pic: url(media/title-bg.webp);
+  background: linear-gradient(#00309c 0 70px, #f39c1b 70px 72px, transparent 72px calc(100% - 72px), #f39c1b calc(100% - 72px) calc(100% - 70px), #00309c calc(100% - 70px)),
+    var(--title-pic) center / cover no-repeat, #5a7edc;
   color: #fff;
 }
 #s-end button.ghost { color: #fff; }
@@ -105,7 +107,7 @@ label.check input { width: auto; }
 .panel input, .panel textarea { margin-top: 4px; }
 .panel button.ghost { color: var(--ink); }
 
-/* The boot screen: black monitor, glare, your reflection, sticky-note logo, marching progress bar. */
+/* The boot screen: black monitor, glare, the room behind you in the glass, the door logo, marching progress bar. */
 .boot { position: relative; overflow: hidden; background: #000; color: #fff; flex-direction: column; }
 .screen.boot.active { display: flex; }
 .glare { position: absolute; inset: 0; pointer-events: none;
@@ -113,18 +115,10 @@ label.check input { width: auto; }
     linear-gradient(115deg, transparent 0 30%, rgba(255,255,255,.07) 38%, rgba(255,255,255,.02) 46%, transparent 52%),
     radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.9)),
     radial-gradient(ellipse at 70% 15%, rgba(255,255,255,.06), transparent 40%); }
-.reflection { position: absolute; left: 50%; bottom: -4%; width: min(70vh, 80vw); transform: translateX(-30%);
-  opacity: .26; filter: blur(4px); animation: breathe 7s ease-in-out infinite; }
-@keyframes breathe { 0%, 100% { transform: translateX(-30%) translateY(0); } 50% { transform: translateX(-29%) translateY(-6px); } }
+.reflection { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .28; filter: blur(1px); }
 .boot-center { position: relative; z-index: 1; text-align: center; max-width: 640px; padding: 0 8px; }
 /* An original logo: a half-open door, not anybody's flag. */
-.boot-logo { position: relative; display: flex; flex-direction: column; gap: 5px; width: 54px; height: 86px; margin: 0 auto 14px; padding: 6px;
-  border: 3px solid #c9c9c9; border-bottom: 0; border-radius: 4px 4px 0 0; background: #1b1b1b; transform: perspective(180px) rotateY(-24deg); transform-origin: left; }
-.boot-logo::after { content: ""; position: absolute; right: 5px; top: 52%; width: 7px; height: 7px; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 8px rgba(255,210,63,.7); }
-.boot-logo span { border-radius: 2px; box-shadow: 0 0 14px rgba(255,255,255,.1); }
-.boot-logo span:nth-child(1) { flex: 2; background: linear-gradient(135deg, #5aa8ff, #1c5fd9); }
-.boot-logo span:nth-child(2) { flex: 3; background: linear-gradient(135deg, #36c2a8, #138a73); }
-.boot-logo span:nth-child(n+3) { display: none; }
+.boot-logo { display: block; height: 86px; width: auto; margin: 0 auto 14px; filter: drop-shadow(0 0 12px rgba(120, 200, 255, .25)); }
 .boot-name { font-size: 40px; font-weight: 700; margin: 0 0 30px; letter-spacing: -.01em; font-family: "Franklin Gothic Medium", Arial, sans-serif; }
 .boot-name em { font-size: 22px; color: #f39c1b; font-weight: 400; vertical-align: super; margin-left: 4px; }
 .boot-bar { position: relative; width: 150px; height: 20px; margin: 0 auto 34px; border: 2px solid #b2b2b2; border-radius: 4px; overflow: hidden; padding: 2px; }
@@ -150,6 +144,9 @@ label.check input { width: auto; }
     radial-gradient(ellipse 30% 8% at 70% 22%, rgba(255,255,255,.7), transparent),
     radial-gradient(ellipse 22% 6% at 25% 15%, rgba(255,255,255,.6), transparent),
     linear-gradient(var(--sky-top), var(--sky) 70%); }
+/* The wallpaper you picked (js/retro.js): the rendered picture over its old painting. */
+#desktop[style*="--wp"] { background: var(--wp) center bottom / cover no-repeat, var(--wp-svg) center bottom / cover no-repeat, var(--sky-top); }
+@media (max-width: 899px) and (orientation: portrait) { #desktop[style*="--wp"] { background-image: var(--wp-phone), var(--wp-svg); } }
 
 .win { position: absolute; display: none; flex-direction: column; min-width: 260px; min-height: 120px;
   background: var(--win); border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0;
@@ -162,6 +159,7 @@ label.check input { width: auto; }
   font-weight: 700; font-size: 13px; text-shadow: 1px 1px #0f1089; border-radius: 6px 6px 0 0; cursor: default; user-select: none; touch-action: none; }
 .win:not(.focused) { border-color: var(--title-off-a); }
 .win:not(.focused) .titlebar { background: linear-gradient(var(--title-off-b), var(--title-off-a)); text-shadow: none; }
+.titlebar .wi, .task .wi { width: 16px; height: 16px; vertical-align: -3px; }
 .titlebar .tt { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .titlebar .tb { width: 21px; height: 21px; min-height: 0; padding: 0; line-height: 1; font-weight: 700; color: #fff;
   border: 1px solid #fff; border-radius: 3px; background: linear-gradient(#3c8cf7, #1a5fdc); font-size: 13px; }
@@ -183,6 +181,8 @@ label.check input { width: auto; }
 .start-menu[hidden] { display: none; }
 .start-head { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(var(--title-b), var(--title-a)); border-radius: 6px 6px 0 0; }
 .start-menu button { text-align: left; border: 0; border-radius: 0; background: #fff; padding: 9px 14px; }
+.start-menu .sm-i { width: 20px; height: 20px; vertical-align: -5px; margin-right: 7px; }
+.start-head .start-tile { width: 40px; height: 40px; vertical-align: middle; margin-right: 10px; border: 2px solid #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
 .start-menu button:hover { background: #316ac5; color: #fff; box-shadow: none; }
 .start-menu .logoff { border-top: 1px solid #ccc; }
 
@@ -329,7 +329,7 @@ label.check input { width: auto; }
 .desk-icons { position: absolute; left: 6px; top: 8px; bottom: 8px; width: 84px; display: flex; flex-direction: column; flex-wrap: wrap; gap: 4px; z-index: 1; }
 .desk-icon { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 84px; min-height: 0; padding: 4px 2px; border: 1px solid transparent;
   background: transparent; color: #fff; font-size: 11px; line-height: 1.2; text-align: center; text-shadow: 1px 1px 2px #000, 0 0 4px #000; border-radius: 2px; }
-.desk-icon .di { font-size: 30px; line-height: 1.1; text-shadow: 1px 2px 3px rgba(0,0,0,.4); }
+.desk-icon .di { width: 44px; height: 44px; filter: drop-shadow(1px 2px 2px rgba(0,0,0,.45)); }
 .desk-icon:hover, .desk-icon:focus-visible { background: rgba(49,106,197,.45); border-color: rgba(255,255,255,.5); box-shadow: none; }
 
 /* An explorer-style window: file list on the left, the open document on the right. */
@@ -534,8 +534,6 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
 .ac-art { flex: none; }
 .ac-hero { width: 190px; height: auto; display: block; filter: drop-shadow(0 3px 3px rgba(0,0,0,.18)); }
 .ac-hero.small { width: 64px; }
-.ac-ink { stroke: #fff; }
-.ac-inkf { fill: #fff; }
 .ac-kicker { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #2a7bd6; font-weight: bold; }
 .ac-title { margin: 2px 0 8px; font-family: "Trebuchet MS", Verdana, sans-serif; font-size: 26px; color: #0f4e9e; text-shadow: 1px 1px 0 #cfe4fb; }
 .ac-intro { font-size: 14px; line-height: 1.5; margin: 0; }
@@ -667,6 +665,10 @@ button.link { background: none; border: 0; padding: 0; min-height: 0; color: #0b
 .messenger .win-body { background: linear-gradient(#e6effc, #f6f9fe 120px); }
 .im-head { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin: -2px -2px 6px; border-bottom: 1px solid #b9cbe6; background: linear-gradient(#ffffff, #dde8f8); }
 .im-avatar { width: 44px; height: 44px; flex: none; filter: drop-shadow(1px 1px 1px rgba(0,0,0,.25)); }
+img.im-avatar, .im-pop .im-pic, .team-pic { border: 2px solid #fff; border-radius: 5px; box-shadow: 0 0 0 1px #7f9db9; object-fit: cover; }
+.im-pop .im-pic { float: left; width: 40px; height: 40px; margin: 2px 8px 4px 0; }
+.team-pic { width: 22px; height: 22px; vertical-align: middle; margin-right: 6px; border-width: 1px; }
+.team-reply .team-pic { width: 32px; height: 32px; float: left; margin: 0 8px 4px 0; }
 .im-who { flex: 1; font-size: 13px; line-height: 1.35; min-width: 0; }
 .im-dot { color: #2ea12e; }
 .im-msg { color: #5a6b85; font-style: italic; font-size: 12px; }
@@ -844,8 +846,8 @@ body.aero .start-btn { width: 52px; height: 46px; margin: -8px 4px 0 6px; paddin
   background: radial-gradient(circle at 50% 28%, rgba(255,255,255,.9), rgba(255,255,255,.15) 38%, transparent 42%),
     radial-gradient(circle at 50% 95%, #8af06a, #2b9f45 45%, #0b4f6e 75%, #062a46);
   box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 12px rgba(80, 200, 255, .5); position: relative; }
-body.aero .start-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 13px; height: 20px; transform: translate(-50%, -45%); border-radius: 2px;
-  background: linear-gradient(135deg, #fff, #cfefff); box-shadow: 0 0 6px rgba(255,255,255,.9); }
+body.aero .start-btn::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 24px; transform: translate(-50%, -48%);
+  background: url(media/doors-logo.webp) center / contain no-repeat; filter: drop-shadow(0 0 3px rgba(255,255,255,.9)); }
 body.aero .start-btn:hover { box-shadow: 0 0 0 2px rgba(255,255,255,.5), 0 0 18px rgba(120, 230, 255, .9); }
 body.aero .task { height: 30px; color: #fff; border: 1px solid rgba(0,0,0,.8); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
   background: linear-gradient(rgba(255,255,255,.22), rgba(255,255,255,.06) 50%, rgba(0,0,0,.15) 52%, rgba(255,255,255,.08)); }
@@ -1210,3 +1212,5 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
   .tw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .tw-map { height: auto; }
 }
+
+@media (max-width: 899px) and (orientation: portrait) { #s-end, #s-settings, #s-cap { --title-pic: url(media/title-bg-phone.webp); } }

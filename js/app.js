@@ -1372,7 +1372,7 @@
     if (!Reveal.seen()) return;
     const foot = document.querySelector('.boot-foot');
     if (foot) foot.textContent = 'Doors OS · archive build 2041.03 · Copyright © Doors Corp.';
-    $('btn-logoff').textContent = '⏻ Clock out (quit this week)';
+    $('btn-logoff').querySelector('span').textContent = 'Clock out (quit this week)';
     if (!$('btn-logoff-2041')) {
       const b = document.createElement('button'); b.id = 'btn-logoff-2041'; b.className = 'logoff'; b.type = 'button';
       b.textContent = '⏻ Log off...'; b.disabled = true; b.title = 'Not available in this session.';

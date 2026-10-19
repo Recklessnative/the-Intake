@@ -3,7 +3,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = process.argv[2] || path.join(__dirname, "..");
 const srv = http.createServer((q, s) => {
   const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]) === '/' ? 'index.html' : decodeURIComponent(q.url.split('?')[0]));
-  fs.readFile(f, (e, d) => { if (e) { s.writeHead(404); return s.end(); } s.writeHead(200, { 'Content-Type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.css') ? 'text/css' : f.endsWith('.json') ? 'application/json' : 'text/html' }); s.end(d); });
+  fs.readFile(f, (e, d) => { if (e) { s.writeHead(404); return s.end(); } s.writeHead(200, { 'Content-Type': f.endsWith('.js') ? 'text/javascript' : f.endsWith('.css') ? 'text/css' : f.endsWith('.json') ? 'application/json' : f.endsWith('.webp') ? 'image/webp' : f.endsWith('.png') ? 'image/png' : 'text/html' }); s.end(d); });
 }).listen(8765);
 let p, visible, MOBILE, shot = 0;
 // The case board: five short steps, each locked in (some with feedback first), then the memo.
@@ -95,7 +95,11 @@ async function retro() {
   if (wp.length !== 6 || wp.filter(c => c.includes('locked')).length !== 5 || !wp[0].includes(' on')) throw new Error('wallpapers wrong: ' + wp);
   await p.click('#display-grid .wp >> nth=2');
   if (!(await p.textContent('#toast')).includes('Locked')) throw new Error('locked wallpaper did not explain');
-  if (!(await p.evaluate(() => document.getElementById('desktop').style.backgroundImage)).includes('svg')) throw new Error('no wallpaper painted');
+  const bg = await p.evaluate(() => getComputedStyle(document.getElementById('desktop')).backgroundImage);
+  if (!bg.includes('wallpapers/hill' + (MOBILE ? '-phone' : '') + '.webp') || !bg.includes('svg')) throw new Error('no wallpaper painted: ' + bg.slice(0, 120));
+  // Every rendered picture on the desk loads (icons, Mieke's picture, Staply).
+  const broken = await p.$$eval('img', l => l.filter(i => i.complete && i.getAttribute('src') && !i.naturalWidth).map(i => i.getAttribute('src')));
+  if (broken.length) throw new Error('pictures did not load: ' + broken.join(', '));
   if (!MOBILE) await p.screenshot({ path: SHOTS + '/display.png' });
   await p.click('#w-display .tb.close'); if (!MOBILE) await p.click('#phone-away'); if (await p.isVisible('#phone')) throw new Error('phone did not go away'); await p.click('#w-mieke .tb.close');
   if (MOBILE) await p.click('.task:has-text("Call")');

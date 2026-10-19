@@ -200,29 +200,11 @@
 
   const moduleFor = weekNo => MODULES[(Math.max(1, weekNo) - 1) % MODULES.length];
 
-  // Hero pictures in the style of a 2006 course player: a swoosh, a glossy orb, a clip-art symbol.
-  const SYMBOL = {
-    ask: '<path d="M88 66c0-14 12-24 26-24s26 9 26 23c0 18-22 19-22 36" class="ac-ink" fill="none" stroke-width="12" stroke-linecap="round"/><circle cx="118" cy="122" r="7" class="ac-inkf"/>',
-    triage: '<path d="M80 92l20 20 36-44" class="ac-ink" fill="none" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>',
-    measure: '<rect x="78" y="100" width="16" height="26" rx="2" class="ac-inkf"/><rect x="102" y="82" width="16" height="44" rx="2" class="ac-inkf"/><rect x="126" y="62" width="16" height="64" rx="2" class="ac-inkf"/>',
-    people: '<circle cx="92" cy="74" r="12" class="ac-inkf"/><path d="M70 122c0-18 10-28 22-28s22 10 22 28z" class="ac-inkf"/><circle cx="130" cy="70" r="14" class="ac-inkf"/><path d="M104 124c0-22 12-32 26-32s26 10 26 32z" class="ac-inkf"/>',
-    flaw: '<circle cx="104" cy="84" r="24" class="ac-ink" fill="none" stroke-width="10"/><path d="M122 102l22 22" class="ac-ink" stroke-width="12" stroke-linecap="round"/>',
-    board: '<rect x="72" y="58" width="76" height="50" rx="3" class="ac-inkf"/><rect x="78" y="64" width="64" height="38" fill="#fff"/><path d="M84 94l14-12 10 8 18-18" class="ac-ink" fill="none" stroke-width="5" stroke-linejoin="round"/><path d="M110 108v18M96 128h28" class="ac-ink" stroke-width="5" stroke-linecap="round"/>'
-  };
+  // Hero pictures in the style of a 2006 course player (media/academy): a glossy orb on a swoosh,
+  // with a clip-art symbol for the module.
+  const ART = ['ask', 'triage', 'measure', 'people', 'flaw', 'board'];
   function hero(kind, small) {
-    const id = 'g' + kind + (small ? 's' : '');
-    return `<svg class="ac-hero${small ? ' small' : ''}" viewBox="0 0 220 170" aria-hidden="true">
-      <defs>
-        <radialGradient id="${id}" cx="38%" cy="30%" r="75%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#8fd3ff"/><stop offset="1" stop-color="#1767c9"/></radialGradient>
-        <linearGradient id="${id}w" x1="0" x2="1"><stop offset="0" stop-color="#9be15d" stop-opacity=".9"/><stop offset="1" stop-color="#00b4db" stop-opacity=".2"/></linearGradient>
-      </defs>
-      <path d="M0 140 C60 96 140 176 220 112 L220 170 L0 170Z" fill="url(#${id}w)"/>
-      <path d="M0 120 C70 90 150 150 220 96" stroke="#fff" stroke-opacity=".7" stroke-width="3" fill="none"/>
-      <ellipse cx="110" cy="158" rx="58" ry="7" fill="#000" opacity=".15"/>
-      <circle cx="110" cy="92" r="62" fill="url(#${id})" stroke="#0d4fa3" stroke-width="2"/>
-      <ellipse cx="96" cy="58" rx="38" ry="20" fill="#fff" opacity=".55"/>
-      ${SYMBOL[kind] || SYMBOL.ask}
-    </svg>`;
+    return `<img class="ac-hero${small ? ' small' : ''}" src="media/academy/${ART.includes(kind) ? kind : 'ask'}.webp" alt="">`;
   }
 
   function el(tag, cls, text) {

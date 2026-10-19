@@ -22,14 +22,18 @@
     // Doors Aero (team lead only): sky glass, light rays, bubbles and a glossy green swoosh.
     { id: 'aurora', name: 'Aero Aurora', level: 0, aero: true, svg: SVG_HEAD + `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a6fb8"/><stop offset=".5" stop-color="#36b4d8"/><stop offset="1" stop-color="#bff0e4"/></linearGradient><linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f24a"/><stop offset=".5" stop-color="#4fbf2a"/><stop offset="1" stop-color="#1d7a17"/></linearGradient><linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><radialGradient id="bu" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".25" stop-color="#e8fbff" stop-opacity=".35"/><stop offset=".85" stop-color="#9fe6ff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></radialGradient><radialGradient id="sun" cx=".78" cy=".12" r=".45"><stop offset="0" stop-color="#fffbe0" stop-opacity=".9"/><stop offset="1" stop-color="#fffbe0" stop-opacity="0"/></radialGradient><filter id="b"><feGaussianBlur stdDeviation="10"/></filter></defs><rect width="1600" height="1000" fill="url(#s)"/><rect width="1600" height="1000" fill="url(#sun)"/><g fill="url(#r)" filter="url(#b)"><path d="M1250 0 L1340 0 L900 1000 L700 1000Z"/><path d="M1380 0 L1430 0 L1200 1000 L1080 1000Z"/><path d="M1100 0 L1160 0 L520 1000 L420 1000Z"/></g><path d="M-100 760 C 300 600, 800 700, 1100 640 S 1500 560, 1700 600 L1700 1000 L-100 1000Z" fill="url(#g)"/><path d="M-100 760 C 300 600, 800 700, 1100 640 S 1500 560, 1700 600 L1700 640 C 1500 610, 1200 690, 1000 700 S 400 680, -100 800Z" fill="url(#gl)"/><g fill="none" stroke="#fff" stroke-linecap="round" opacity=".55"><path d="M-50 860 C 400 700, 1000 900, 1650 700" stroke-width="10"/><path d="M-50 900 C 450 760, 1050 960, 1650 760" stroke-width="4"/></g>${[[220, 380, 70], [340, 250, 38], [520, 470, 26], [980, 300, 54], [1120, 470, 30], [1420, 420, 82], [760, 200, 20], [1300, 220, 24], [140, 560, 22]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#bu)" stroke="#fff" stroke-opacity=".7" stroke-width="1.5"/>`).join('')}</svg>` }
   );
+  const pic = name => 'url("media/wallpapers/' + name + '.webp")';
   const UNLOCK = ['', 'Course Builder', 'Learning Consultant', 'Learning Strategist', 'Board Whisperer'];
   let level = 0, aero = false;
   const open = w => w.level <= level && (!w.aero || aero);
   function wallpaper(id) {
     const w = WALLPAPERS.find(x => x.id === id && open(x)) || WALLPAPERS[0];
-    $('desktop').style.backgroundImage = svg(w.svg);
-    $('desktop').style.backgroundSize = 'cover';
-    $('desktop').style.backgroundPosition = 'center bottom';
+    // The rendered picture (wide or upright, picked in styles.css), with the old painting under it
+    // in case the picture does not load.
+    const d = $('desktop').style;
+    d.setProperty('--wp', pic(w.id));
+    d.setProperty('--wp-phone', pic(w.id + '-phone'));
+    d.setProperty('--wp-svg', svg(w.svg));
     return w;
   }
   function setLevel(n) { level = Math.max(0, n | 0); wallpaper(store.get('intake-wallpaper', 'hill')); renderDisplay(); }
@@ -80,7 +84,7 @@
       b.className = 'wp' + (locked ? ' locked' : '') + (w.id === cur && !locked ? ' on' : '');
       const thumb = document.createElement('span');
       thumb.className = 'wp-thumb';
-      thumb.style.backgroundImage = svg(w.svg);
+      thumb.style.backgroundImage = pic(w.id + '-thumb') + ', ' + svg(w.svg);
       const label = document.createElement('span');
       label.className = 'wp-name';
       label.textContent = locked ? '🔒 ' + w.name : w.name;
@@ -99,9 +103,14 @@
 
   // ---------- Doors Messenger: pop-ups and nudges ----------
   let toastFn = () => {};
+  const PICS = ['mieke', 'darren', 'bart', 'priya', 'jens'];
   function im(from, text, onOpen, sound) {
     const box = $('im-pop');
     box.querySelector('.im-from').textContent = from + ' says:';
+    // People you work with have a display picture: a thing from their desk, never a face.
+    const who = String(from).split(' ')[0].toLowerCase(), pic = box.querySelector('.im-pic');
+    pic.hidden = !PICS.includes(who);
+    if (!pic.hidden) pic.src = 'media/people/' + who + '.webp';
     box.querySelector('.im-text').textContent = text;
     box.hidden = false;
     box.classList.remove('in');
