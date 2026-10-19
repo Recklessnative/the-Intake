@@ -1,0 +1,217 @@
+{
+  "id": "operator-2041",
+  "schema_version": 1,
+  "era": "2041",
+  "sector": "Re-skilling (public body)",
+  "tier": 3,
+  "tier_label": "The last request: the week after the reveal",
+  "title": "We Need a Course",
+  "briefing": {
+    "headline": "The Learning House, 2041: what you should know before the call",
+    "points": [
+      "The Learning House is a public body in Lindeveld. It certifies the people who must sign off mandatory training in the region.",
+      "A human-oversight rule says every mandatory course needs a named human under it. Machines write the courses; a person signs.",
+      "Courses cost nothing to make any more. A course on any request can be ready the same afternoon.",
+      "The Intake is one of the Learning House's programmes. You are in it: participant 1207, cohort 12, seat 07."
+    ]
+  },
+  "stakeholder": {
+    "name": "The operator",
+    "role": "Programme operator, the Learning House",
+    "org": "The Learning House, Lindeveld",
+    "voice": "Quiet, exact, a little tired. Writes the way people write e-mail. Has watched many cohorts. Never pushes; waits to see whether you ask.",
+    "patience": 5,
+    "risk_appetite": 2,
+    "risk_appetite_label": "Medium"
+  },
+  "frontline": {
+    "name": "Mieke",
+    "role": "Participant 0031, coach on floor 4",
+    "voice": "The same Mieke: warm, dry, cardigan on the chair. Off the record now, and relieved to be."
+  },
+  "opening_message": "We certify 4,000 team leads a year. The system keeps writing them courses on intake. We need someone who can tell us when it shouldn't. Can you build us a course for that?",
+  "surface_ask": "A course that teaches 4,000 team leads to say when a course is the wrong answer.",
+  "gold": {
+    "real_problem": "The operator wants a course that teaches team leads to refuse courses. But the team leads already sign every mandatory course, and nothing in their job lets them say no: the rule wants a name under each course, not a judgement, and a refusal lands on the person who signed it. Nobody has refused one since the last intake on file in 2033, and the module dashboards show 100% completion with no idea whether anything changed. The lever is a role with authority: a named person who may say 'not a course', is protected when they do, and checks three months later whether the problem moved.",
+    "root_cause_types": [
+      "expectations",
+      "incentive",
+      "process"
+    ],
+    "is_training_the_lever": "no",
+    "need_statement": "Someone in each organisation must be allowed to say 'not a course', sign it with their own name, and check three months later. Give that role authority and protection before giving anyone another module."
+  },
+  "hidden_facts": [
+    {
+      "id": "last_intake",
+      "fact": "The last intake on file in the region is from 2033. Since then every request has gone straight to the system, which writes the course the same day.",
+      "unlocks_when": "The player asks when somebody last asked whether a course was needed, or how requests are handled now.",
+      "reveal_line": "The last intake on file is from 2033. A woman at the port. She said no to a safety course and wrote down why. After that, requests go straight to the system. It is very good. It asks fourteen questions, all of them about the course.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Intakes filed, region: 2031: 212. 2032: 61. 2033: 1. 2034 to 2040: 0. Courses written on request, 2040: 38,400.",
+      "data_source": "Learning House register, intakes and courses"
+    },
+    {
+      "id": "dashboards",
+      "fact": "The module dashboards report 100% completion and a 96% average score, and link to nothing that happened on the job.",
+      "unlocks_when": "The player asks how the Learning House knows the courses work, or for the numbers.",
+      "reveal_line": "Completion is one hundred percent. It has been for years.",
+      "weight": 2,
+      "critical": true,
+      "found_at": [
+        "data:kpi"
+      ],
+      "data_doc": "Module dashboard, 2040. Team leads certified: 4,112. Completion: 100%. Average score: 96%. Incidents in their teams: not linked. Complaints: not linked. Behaviour on the job: not measured. Requests refused at sign-off: 0.",
+      "data_source": "Module dashboard, last year"
+    },
+    {
+      "id": "sign_off",
+      "fact": "Every certified team lead already signs the courses the system writes. Refusing one is allowed on paper, but the refusal is filed under the signer's name and nobody has ever been backed when they did it.",
+      "unlocks_when": "The player asks what the team leads actually do with a course, who decides, or what happens to someone who says no.",
+      "reveal_line": "They sign. That is what the rule asks: a name under each course. Saying no is allowed. It goes in your file, with your name on it. In eight years nobody has been thanked for one.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "Human-oversight rule, article 4: each mandatory course carries the name of a certified person. Article 9: a certified person may refuse a course in writing. The refusal is recorded against the person. (No article on what happens next.)",
+      "data_source": "Human-oversight rule, extract"
+    },
+    {
+      "id": "why_2007",
+      "fact": "The programme is rebuilt from 2007 because it is the best-archived year with no machines in it: Synergix went bankrupt in 2009 and the receiver kept every drive. The archive is 71% recovered.",
+      "unlocks_when": "The player asks why 2007, why this office, or why the rain.",
+      "reveal_line": "Because 2007 is the last year that kept its paperwork and had nobody to write a course for you. Synergix went under in 2009; the receiver kept every drive. Seventy-one percent of it came back. The rest is fog. And rain.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
+    },
+    {
+      "id": "blame",
+      "fact": "Organisations do not want better courses; they want someone they believe and can blame. Nobody buys 'not a course' from a machine.",
+      "unlocks_when": "The player asks why a machine can't do this part too, or what the organisations really want.",
+      "reveal_line": "The system can say 'not a course' too. Nobody believes it. They want a person they can believe, and blame if it goes wrong. That is the job nobody applies for.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Learning House org chart. Programme operator: 1. Coaches: 1 (participant 0031). Certified signers: 4,112. Accountable for refusals: (vacant).",
+      "data_source": "Learning House organisation chart"
+    },
+    {
+      "id": "mieke",
+      "fact": "Mieke is participant 0031. She logged off once, saw that nobody out there asks anything, and came back to coach.",
+      "unlocks_when": "The player asks about Mieke, about other participants, or about logging off.",
+      "reveal_line": "Ask Mieke. I would rather she told you.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "Off the record? I logged off once. Walked out into the rain, the real one. Nobody asked me anything for a month. Not why, not what for. They just sent me modules. So I came back. Somebody has to tell the new ones to ask."
+    },
+    {
+      "id": "most_notice_four",
+      "fact": "Most participants notice about four of the odd things in the office before the reveal; a few log off for good.",
+      "unlocks_when": "The player asks how other cohorts did, or what the programme measures.",
+      "reveal_line": "Most cohorts notice four things before they press five. Some notice none and press it anyway on the last Friday. A few log off and do not come back. We count that as a pass.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call"
+      ]
+    }
+  ],
+  "volunteered_facts": [
+    "We certify 4,000 team leads a year.",
+    "The system writes a course on any request, the same afternoon."
+  ],
+  "constraints": {
+    "budget": "Courses cost nothing now. A person's time and a person's name are the only expensive things.",
+    "deadline": "The next certification round, in June.",
+    "audience": "4,112 certified team leads across the region, and the people in their teams.",
+    "schedule": "The Learning House can change its own rules; the oversight rule itself takes a vote.",
+    "languages": "English.",
+    "data_available": [
+      "Module dashboards",
+      "The intake register",
+      "The human-oversight rule"
+    ],
+    "data_not_available": [
+      "Anything about what changed on the job after a course"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The oversight board",
+      "concern": "Owns the rule that asks for a name under every course, and likes that the numbers are clean.",
+      "if_ignored": "A refusal role without the board behind it stays a line on paper, and the first person to use it carries it alone."
+    },
+    {
+      "who": "The organisations that request courses",
+      "concern": "They want a course by Friday and someone to blame if it fails.",
+      "if_ignored": "They route around a signer who says no and find one who signs."
+    },
+    {
+      "who": "The certified team leads",
+      "concern": "A refusal goes in their file, under their name.",
+      "if_ignored": "Nobody takes the role, or takes it and never uses it."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Completion of a new module on 'asking why'.",
+      "Pass rates on a certification test about intakes.",
+      "Counting how many team leads were trained."
+    ],
+    "gold_plan": {
+      "baseline": "Refusals at sign-off last year (zero) and what happened in the teams behind the 2040 courses.",
+      "behaviour": "Share of requests where the signer refused or changed the request, in writing, with their name under it.",
+      "leading_indicators": "Requests returned with a reason; three-month checks filed; signers who keep the role a year.",
+      "business_metric": "Whether the problem behind each request moved three months later, seen where it happens.",
+      "collection": "The sign-off register, the three-month check, and a walk through town."
+    }
+  },
+  "concepts": {
+    "conventional": "A new module for 4,000 team leads on asking whether a course is needed.",
+    "solid": "No new module. Create a named sign-off role that may refuse a course, back it in the rule so a refusal is defended and not just filed, and make the three-month check part of the job. Practice only for the few who take the role, on real requests.",
+    "next_level_examples": [
+      "Put your own name under this request: answer the operator with a signed 'not a course', and be the first refusal since 2033.",
+      "Let the three-month check be public: each signer walks the town where the request came from and files what they saw."
+    ],
+    "also_valid": [
+      "A short practice programme like this one, for the people who hold the role, not for all 4,000."
+    ],
+    "red_flags": [
+      "Another mandatory module for all team leads.",
+      "Letting the system write a course on asking why.",
+      "Measuring success by completion."
+    ]
+  },
+  "defence_objections": [
+    "You want me to ask the board for a rule that defends people who say no? They will ask who is accountable when the no was wrong.",
+    "A role without a course: how do I show the board it worked by June?",
+    "If nobody takes the role, I have changed a rule for nothing."
+  ],
+  "question_you_didnt_ask": "What happens to the person who says no?",
+  "actor_notes": [
+    "The operator hopes the player will refuse the request, but will not say so. A clear 'not a course, and here is who should sign that' earns quiet respect.",
+    "Answer questions about 2041 plainly and briefly, then bring it back to the request. Never describe technology beyond what the facts say.",
+    "If asked whether this is still a game or a test, say: 'It is an intake. They are the same thing, mostly.'",
+    "Never call yourself a machine and never claim to be a person. If asked, say you are the operator."
+  ],
+  "flavour_lines": [
+    "Sorry about the rain. It was in the archive.",
+    "The system would have finished this call ten minutes ago. It would have built the course, too."
+  ]
+}

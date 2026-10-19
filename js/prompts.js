@@ -272,10 +272,14 @@
   const PERIOD = 'Period: everything happens in Belgium in autumn 2007. Speak and think as people did then. There are no smartphone apps, no AI or chatbots, no social media at work, no cloud software, no video calls as a daily habit. There are e-mail, the intranet, e-learning on an LMS, CD-ROMs and DVDs, PowerPoint, mobile phones with SMS, BlackBerrys, PDAs, conference calls and paper. Never mention, suggest or reward anything that did not exist in 2007.';
   const PERIOD_ROLEPLAY = ' If the professional mentions something like that, you have never heard of it.';
   const PERIOD_JUDGE = ' If the player proposes something like that, judge it as not feasible.';
+  // The operator's request (the week after the reveal) happens in 2041, and says so.
+  const PERIOD_2041 = 'Period: Thursday 14 March 2041, Lindeveld, Belgium. Machines write every course on request, the same day, and ask good questions, but only about the course. Speak plainly about that world when asked, using only what this brief says about it; never invent other technology. Everything else is an intake like any other.';
+  const in2041 = args => [].some.call(args, a => a && (a.era === '2041' || (a.card && a.card.era === '2041')));
   Object.keys(Prompts).forEach(k => {
     const make = Prompts[k];
     Prompts[k] = function () {
       const p = make.apply(this, arguments);
+      if (p && typeof p.system === 'string' && in2041(arguments)) { p.system += '\n\n' + PERIOD_2041; return p; }
       if (p && typeof p.system === 'string') p.system += '\n\n' + PERIOD + (/^You are |^You play /.test(p.system) && !/^You are the examiner|^You are the chair/.test(p.system) ? PERIOD_ROLEPLAY : PERIOD_JUDGE);
       return p;
     };

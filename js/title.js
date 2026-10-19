@@ -39,7 +39,8 @@
     return 'url("' + MEDIA + 'title-' + NAMES[n] + (small ? '-960' : '') + '.webp")';
   }
   function paint(n) {
-    $('title-sub').textContent = SUB[n];
+    // After the Log off ending the session is over; after Clock in it simply goes on.
+    $('title-sub').textContent = n === 4 && get('intake-ending') === 'logoff' ? 'Session 1207: logged off. Resume anyway?' : SUB[n];
     $('title-foot').textContent = FOOT[n];
     $('s-title').dataset.stage = NAMES[n];
     Rain.toggle(n >= 2);

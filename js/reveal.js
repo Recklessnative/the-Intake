@@ -144,5 +144,76 @@
     }
   }
 
-  window.Reveal = { KEY, seen, open, forced, go, MAIL };
+  // ---------- the ending (the week after the reveal) ----------
+  // Your own lever call on the operator's request decides it: training means Clock in tomorrow,
+  // anything else (someone who can say no and sign it) means Log off. Neither is the good one.
+  const END_KEY = 'intake-ending';
+  const ending = () => get(END_KEY) || '';
+  // The fourth-floor window on the 2041 title picture (left, top, width, height in %).
+  const WINDOW = [80.0, 39.6, 7.2, 4.4];
+  const END_CARD = 'Asking why was never the hard part. Saying "not a course", with your name under it, is.';
+  // opts: { lever: 'yes' | 'partly' | 'no', accountable, noticed, onDone(choice) }
+  function end(opts) {
+    const choice = opts.lever === 'no' ? 'logoff' : 'clockin';
+    try { localStorage.setItem(END_KEY, choice); } catch (e) { /* storage blocked */ }
+    if (window.Sound) Sound.scene(null);
+    const lay = el('div', 'reveal ending ' + choice);
+    lay.id = 'reveal';
+    lay.setAttribute('role', 'dialog');
+    lay.setAttribute('aria-label', choice === 'logoff' ? 'Log off' : 'Clock in tomorrow');
+    const stage = el('div', 'rv-stage');
+    const img = el('img', 'rv-pic');
+    img.src = choice === 'logoff' ? 'media/title/title-2041.webp' : 'media/office/hub.webp';
+    img.alt = choice === 'logoff' ? 'The Synergix building in 2041, at night, in the rain. One window on the fourth floor is lit.' : 'The office floor at 08:57.';
+    stage.appendChild(img);
+    let win = null;
+    if (choice === 'logoff') {
+      win = el('div', 'rv-window');
+      Object.assign(win.style, { left: WINDOW[0] + '%', top: WINDOW[1] + '%', width: WINDOW[2] + '%', height: WINDOW[3] + '%' });
+      stage.appendChild(win);
+    }
+    const card = el('div', 'rv-endcard');
+    stage.appendChild(card);
+    lay.appendChild(stage);
+    const bar = el('div', 'rv-bar');
+    const line = el('p', 'rv-line');
+    bar.appendChild(line);
+    lay.appendChild(bar);
+    document.body.appendChild(lay);
+    requestAnimationFrame(() => lay.classList.add('in'));
+    const lines = choice === 'logoff'
+      ? ['You write "not a course" under the operator\'s request' + (opts.accountable ? ', and your name: ' + opts.accountable + '.' : '.'),
+        'In the start menu, Log off... is not grey any more.',
+        'The lift goes down past four. Nobody gets in. Outside it is 2041, and it is raining. Not at 08:56. Just raining.',
+        'Behind you, on the fourth floor, the window goes dark.']
+      : ['You send the operator a course. It is a good course. Somebody signs it.',
+        'Clock in tomorrow. 08:57. Mieke\'s lamp is on again.',
+        'It starts raining at 08:56.'];
+    let i = 0, t = 0, shown = false;
+    const next = () => {
+      clearTimeout(t);
+      if (i < lines.length) {
+        line.textContent = lines[i++];
+        if (win && i === lines.length) win.classList.add('dark');
+        t = setTimeout(next, i === lines.length ? 4200 : 3600);
+        return;
+      }
+      if (shown) return;
+      shown = true;
+      const n = opts.noticed || 0;
+      card.append(el('p', 'rv-end-big', END_CARD),
+        el('p', null, 'You noticed ' + (n === 1 ? 'one thing' : n + ' things') + '. Most cohorts notice four. That is the skill, by the way.'),
+        el('p', 'rv-end-small', choice === 'logoff' ? 'Final settlement: 0.00 (archive currency). Sign-offs: ' + (opts.accountable ? 1 : 0) + '.' : 'Session 1207 continues. Week ' + (opts.week || '') + ' starts Monday.'));
+      card.classList.add('in');
+      const done = el('button', 'primary rv-back', choice === 'logoff' ? 'Log off' : 'Clock in tomorrow'); done.type = 'button';
+      done.onclick = () => { lay.classList.remove('in'); setTimeout(() => { lay.remove(); if (opts.onDone) opts.onDone(choice); }, 600); };
+      bar.appendChild(done);
+      done.focus({ preventScroll: true });
+    };
+    // A click moves the lines on, for readers who are quicker than the timer.
+    lay.addEventListener('click', ev => { if (!ev.target.closest('button')) next(); });
+    t = setTimeout(next, 900);
+  }
+
+  window.Reveal = { KEY, seen, open, forced, go, MAIL, END_KEY, ending, end, END_CARD };
 })();
