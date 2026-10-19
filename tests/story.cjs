@@ -272,7 +272,12 @@ async function townText(p) {
     if (await p.isVisible('#office-card button:has-text("Go home")')) fail('week 8: the lift still offers home');
     await p.click('#office-card button:has-text("Press 5")');
     await p.waitForSelector('#reveal.in');
-    await p.waitForTimeout(1700);
+    // The lift film plays first, then lands on the floor 5 still.
+    await p.waitForSelector('#reveal .rv-film');
+    rv.film = await p.textContent('#reveal .rv-line');
+    await p.waitForFunction(() => /^lift5-/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
+    rv.played = await p.evaluate(() => document.body.dataset.film);
+    await p.waitForTimeout(900);
     await p.screenshot({ path: SHOTS + '/arc-floor5.png' });
     await p.click('#reveal .office-tag');
     rv.mail = await p.textContent('#reveal .rv-mail');
@@ -298,6 +303,7 @@ async function townText(p) {
     await p.evaluate(() => { document.querySelector('#start-menu [data-open="w-scores"]').click(); });
     rv.scores = await p.textContent('#scores');
   });
+  if (!/press 5/.test(rv.film) || rv.played !== 'lift5-played') fail('week 8: the lift film did not play: ' + rv.film + ' / ' + rv.played);
   if (!/only button 5 lights/i.test(w8.lift || '')) fail('week 8: 5 is not the only button: ' + w8.lift);
   if (!/operator@archive\.lindeveld\.be/.test(rv.mail) || !/cohort 12, seat 07/.test(rv.mail) || !/Sorry about the rain/.test(rv.mail)) fail('week 8: operator mail wrong: ' + rv.mail);
   if (!/Flagged by participant: [1-9]/.test(rv.log) || !/Button 5/.test(rv.log)) fail('week 8: the session log does not list what you noted: ' + rv.log);

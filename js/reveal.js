@@ -62,6 +62,50 @@
     return w;
   }
 
+  // The lift film (tools/office/scene.py lift5): from inside the car, the doors open on floor 5 and
+  // the camera steps out to where the still picks up. Skippable; skipped by itself when motion is
+  // reduced, data is saved, or the video cannot play, and then the still is all there is.
+  function film(stage, bar, line, done) {
+    const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saveData = !!(navigator.connection && navigator.connection.saveData);
+    if (reduced || saveData || !document.createElement('video').canPlayType) { done(); return; }
+    stage.classList.add('filming');
+    const text = line.textContent;
+    line.textContent = 'You press 5. The lift goes up past four.';
+    const v = el('video', 'rv-film');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+    v.poster = 'media/office/lift5-poster.jpg';
+    [['lift5.webm', 'video/webm'], ['lift5.mp4', 'video/mp4']].forEach(([f, t]) => { const so = el('source'); so.src = 'media/office/' + f; so.type = t; v.appendChild(so); });
+    const skip = el('button', 'rv-skip', 'Skip'); skip.type = 'button';
+    stage.appendChild(v);
+    bar.appendChild(skip);
+    let over = false, dinged = false;
+    const finish = played => {
+      if (over) return;
+      over = true;
+      clearTimeout(stall);
+      v.pause();
+      document.body.dataset.film = played ? 'lift5-played' : 'lift5-failed';
+      v.classList.add('out');
+      setTimeout(() => v.remove(), 700);
+      skip.remove();
+      stage.classList.remove('filming');
+      line.textContent = text;
+      done();
+    };
+    skip.onclick = () => finish(true);
+    const stall = setTimeout(() => { if (!v.currentTime) finish(false); }, 4000);
+    v.addEventListener('error', () => finish(false), true);
+    v.querySelectorAll('source')[1].addEventListener('error', () => finish(false));
+    // The doors start to open at frame 34 of 125.
+    v.addEventListener('timeupdate', () => { if (!dinged && v.currentTime > 1.3) { dinged = true; if (window.Sound) Sound.ding(); } });
+    v.addEventListener('ended', () => finish(true));
+    skip.focus({ preventScroll: true });
+    const p = v.play();
+    if (p && p.catch) p.catch(() => finish(false));
+  }
+
   // opts: { notes: Arc.notes(), onDone }
   function go(opts) {
     const notes = (opts && opts.notes) || { noted: [], leads: [] };
@@ -89,8 +133,8 @@
     lay.appendChild(bar);
     document.body.appendChild(lay);
     requestAnimationFrame(() => lay.classList.add('in'));
-    tag.focus({ preventScroll: true });
     tag.onclick = glow.onclick = () => crt();
+    film(stage, bar, line, () => tag.focus({ preventScroll: true }));
 
     function crt() {
       tag.remove(); glow.onclick = null;

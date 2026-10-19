@@ -4,6 +4,7 @@
 #   walk  -> walkin.webm/.mp4      the first-morning film
 #   stand -> stand.webm/.mp4       you stand up from your monitor into the floor picture
 #            sit.webm/.mp4         the same shot backwards, back to your desk
+#   lift5 -> lift5.webm/.mp4       the reveal: the lift doors open on floor 5 (STORY.md)
 set -e
 cd "$(dirname "$0")"
 DST="$1/media/office"
@@ -23,5 +24,9 @@ if [ -d out/stand ]; then
   last=$(ls out/stand | sort | tail -1)
   ffmpeg -y -loglevel error -i out/stand/0001.jpg -vf "scale=960:-2" -q:v 4 "$DST/stand-poster.jpg"
   ffmpeg -y -loglevel error -i "out/stand/$last" -vf "scale=960:-2" -q:v 4 "$DST/sit-poster.jpg"
+fi
+if [ -d out/lift5 ]; then
+  enc lift5 lift5
+  ffmpeg -y -loglevel error -i out/lift5/0001.jpg -vf "scale=960:-2" -q:v 4 "$DST/lift5-poster.jpg"
 fi
 ls -la "$DST"
