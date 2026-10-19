@@ -34,7 +34,8 @@
     ['case files that say "restored" or have a redacted line', 'Bad scans from the client. Always bad scans.'],
     ['the coffee machine note and its corrected year', 'Somebody\'s idea of a joke.'],
     ['Bart\'s draft', 'Bart didn\'t write that. Ask him on Monday.'],
-    ['the GMS avatar\'s list of questions', 'That is GMS. Fourteen questions, and not one of them is whether.']
+    ['the GMS avatar\'s list of questions', 'That is GMS. Fourteen questions, and not one of them is whether.'],
+    ['the town: the 08:56 train, the queue ticket, the bakery, the fog, the answering machine', 'Lindeveld. Nothing works here after six. Or before.']
   ];
   const lore = now => !now || now.off || now.week < 5 || now.week > 7 ? null : EXCUSES;
   const slot = (week, day) => week * 7 + day;
@@ -97,7 +98,15 @@
     { a: 'lehman', b: 'source', lead: 'Some of the mail comes from after now.' },
     { a: 'lehman', b: 'coffee', lead: 'Two dates from later on, both explained away as mistakes.' },
     { a: 'bart', b: 'transcript', lead: 'Something writes the courses. It never asks whether.' },
-    { a: 'bart', b: 'mieke:cds', lead: 'Complete, and nothing changed.' }
+    { a: 'bart', b: 'mieke:cds', lead: 'Complete, and nothing changed.' },
+    // The town (js/town.js).
+    { a: 'town:train', b: 'rain', lead: 'Everything in Lindeveld runs on 08:56.' },
+    { a: 'town:ticket', b: 'badge', lead: '1207 at work, 1207 at City Hall.' },
+    { a: 'town:machine', b: 'morning', lead: 'Every Monday starts like the first one. At home too.' },
+    { a: 'town:machine', b: 'darren:planner', lead: 'Every Monday is your first day.' },
+    { a: 'town:regulars', b: 'morning', lead: 'Everybody repeats themselves, word for word.' },
+    { a: 'town:edge', b: 'legible', lead: 'Where the archive stops, the town stops.' },
+    { a: 'town:bakery', b: 'town:regulars', lead: 'Lindeveld is on a loop.' }
   ];
   const ODD_LINES = ['Could be a coincidence. Mieke says most things are.', 'You stare at them side by side. Nothing. Maybe another day.', 'Not those two. Not yet, anyway.'];
   const notes = () => { const st = read(); return { noted: st.noted || [], leads: st.leads || [], tries: st.tries || 0 }; };

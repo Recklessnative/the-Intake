@@ -124,6 +124,8 @@ Lindeveld is rebuilt from the same archive, so it is faceless too; people are kn
 
 Money (round 6 plan): flat weekly pay in a Friday envelope, the same for a 41 and a 91, an HR remarks line, rent already deducted, a fixed catalogue for the flat. Money buys comfort, never learning, never a score. The balance is derived from finished normal weeks, never stored; hard mode and Try one case pay nothing. Arc layer: employee no. 1207; act 2 fine print "Immersion costs: covered by the Learning House"; Mieke: "Nobody here gets paid for being right. That's why we can afford to be."; after the reveal "Sign-offs: 0", which becomes 1 if the last lever call is "not a course" with your name under it; Log off brings "Final settlement: 0.00 (archive currency)".
 
+In the game: `js/town.js`, a Doors Maps window the evening lift offers once a normal week is finished (never in hard mode, Try one case or the last week). The Monday check lines are `CHECK` in that file, one per card: `right` when your lever call matched the card, `wrong` when it didn't (the call is kept on each request in `intake-scores`). Act 2 seams are notebook things (`town:train`, `town:regulars`, `town:machine`, `town:ticket`, `town:bakery`, `town:edge`) with pairs in `js/arc.js`. Flat purchases are the only thing stored (`intake-flat`); `Reveal.end` stores `intake-signoffs`. `tests/story.cjs` walks the town in acts 1, 2 and after the ending.
+
 ## Rules for anything that touches the story
 
 - Act 1 stands alone; nothing in weeks 1 to 4 needs the twist to make sense.

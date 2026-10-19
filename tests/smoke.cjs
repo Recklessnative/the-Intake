@@ -628,6 +628,8 @@ async function followUp() {
   // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
   await p.click('#btn-next');
   await p.waitForSelector('#s-office.active'); await p.click('#office-list button.primary');
+  // With a finished week behind you the lift asks: home, or through town.
+  if (await p.isVisible('#office-card button:has-text("Go home")')) await p.click('#office-card button:has-text("Go home")');
   await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
   await p.evaluate(() => { window.__intake.state.weekNo = 3; });
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');

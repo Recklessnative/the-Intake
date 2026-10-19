@@ -155,7 +155,11 @@
   // opts: { lever: 'yes' | 'partly' | 'no', accountable, noticed, onDone(choice) }
   function end(opts) {
     const choice = opts.lever === 'no' ? 'logoff' : 'clockin';
-    try { localStorage.setItem(END_KEY, choice); } catch (e) { /* storage blocked */ }
+    try {
+      localStorage.setItem(END_KEY, choice);
+      // The payslip's "Sign-offs": 1 only for "not a course" with a name under it.
+      localStorage.setItem('intake-signoffs', choice === 'logoff' && opts.accountable ? '1' : '0');
+    } catch (e) { /* storage blocked */ }
     if (window.Sound) Sound.scene(null);
     const lay = el('div', 'reveal ending ' + choice);
     lay.id = 'reveal';

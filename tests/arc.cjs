@@ -65,7 +65,8 @@ assert.deepStrictEqual(A.notes().leads.map(l => l.guess), ['the rain is on a tim
 // Every pair names things that exist: arc hints with notebook text, or floor things marked odd.
 const app0 = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
 A.PAIRS.forEach(p => [p.a, p.b].forEach(id => {
-  if (id.includes(':')) { const [, thing] = id.split(':'); assert.ok(new RegExp("id: '" + thing + "'(?:(?!\\{ id:)[\\s\\S])*odd: true").test(app0), id + ' is not an odd thing on the floor'); }
+  if (id.startsWith('town:')) { const town = fs.readFileSync(path.join(__dirname, '..', 'js', 'town.js'), 'utf8'); assert.ok(new RegExp('\\n    ' + id.slice(5) + ': \\{ who:').test(town), id + ' is not a seam in town'); }
+  else if (id.includes(':')) { const [, thing] = id.split(':'); assert.ok(new RegExp("id: '" + thing + "'(?:(?!\\{ id:)[\\s\\S])*odd: true").test(app0), id + ' is not an odd thing on the floor'); }
   else assert.ok(A.NOTES[id], id + ' has no notebook text');
 }));
 
