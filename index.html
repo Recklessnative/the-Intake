@@ -217,6 +217,7 @@
             <button type="submit" class="primary">Ask</button>
             <button type="button" id="btn-hangup">End the call</button>
             <button type="button" class="btn-mieke">Ask Mieke</button>
+            <button type="button" id="btn-tellme" class="ghost" hidden title="For players who came for the story: the operator tells you everything.">Just tell me</button>
           </div>
         </form>
       </div>
@@ -373,6 +374,7 @@
             <h3>Your one-pager</h3>
             <div id="memo" class="memo"></div>
             <label>Risky strat? If you know this is a bold bet, say what the risk is (optional)<input id="b-flag" maxlength="200" autocomplete="off"></label>
+            <label id="b-acc-wrap" hidden>Accountable: <input id="b-accountable" maxlength="60" autocomplete="off" placeholder="your name, if you will sign this"></label>
           </section>
 
           <div id="board-feedback" class="feedback" hidden></div>

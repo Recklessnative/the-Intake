@@ -1120,7 +1120,7 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 .walkin-skip { position: absolute; top: 16px; right: 16px; }
 
 /* ---------- the reveal: floor 5 (js/reveal.js) ---------- */
-.reveal { position: fixed; inset: 0; z-index: 9000; background: #000; display: flex; flex-direction: column; opacity: 0; transition: opacity 1.6s ease; }
+.reveal { position: fixed; inset: 0; z-index: 100005; background: #000; display: flex; flex-direction: column; opacity: 0; transition: opacity 1.6s ease; }
 .reveal.in { opacity: 1; }
 .rv-stage { position: relative; flex: 1; min-height: 0; aspect-ratio: 16 / 9; max-width: 100%; margin: auto; }
 .rv-stage picture, .rv-pic { display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -1158,5 +1158,15 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; text-shadow: 1px 1px #0f1089;
   background: linear-gradient(var(--title-b), var(--title-a) 30%, var(--title-a) 85%, #0040c0); }
 @media (prefers-reduced-motion: reduce) { .reveal, .rv-crt, .rv-glow { transition: none; animation: none; } }
+/* The ending (js/reveal.js) */
+.rv-window { position: absolute; background: #03101a; box-shadow: 0 0 6px 3px #03101a; opacity: 0; transition: opacity 3.5s ease; pointer-events: none; }
+.rv-window.dark { opacity: 1; }
+.rv-endcard { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, 90%); padding: 18px 22px;
+  background: rgba(8, 12, 20, .78); color: #e8edf5; text-align: center; opacity: 0; transition: opacity 2s ease; pointer-events: none; border-radius: 4px; }
+.rv-endcard.in { opacity: 1; }
+.rv-endcard p { margin: 0 0 10px; }
+.rv-end-big { font-size: 20px; line-height: 1.35; }
+.rv-end-small { font-size: 12px; opacity: .7; margin: 0 !important; }
+.ending.clockin .rv-pic { filter: saturate(.85); }
 
 @media (max-width: 899px) and (orientation: portrait) { #s-end, #s-settings, #s-cap { --title-pic: url(media/title-bg-phone.webp); } }

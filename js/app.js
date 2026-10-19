@@ -90,6 +90,8 @@
     const index = await (await fetch('scenarios/index.json', { cache: 'no-cache' })).json();
     const cards = (await Promise.all(index.map(id => fetch('scenarios/' + id + '.json', { cache: 'no-cache' }).then(r => r.json())))).map(Cards.normalise);
     state.pool = cards;
+    // The operator's request (STORY.md): never in a normal week, only the week after the reveal.
+    state.finalCard = Cards.normalise(await (await fetch('scenarios/operator-2041.json', { cache: 'no-cache' })).json());
   }
   // The shape of a week changes from week to week. Each slot is [day, tier] (0 = starter);
   // Friday is the board room. Each normal week also assigns one CoE Academy module.
@@ -248,20 +250,22 @@
     dropSave();
     state.hard = !!hard;
     state.one = !hard && !!one;
+    // The week after the reveal is one request: the operator's. Your lever call on it is the ending.
+    state.final = !state.hard && !state.one && Reveal.seen() && !Reveal.ending();
     document.body.classList.toggle('hard', state.hard);
     state.weekId = 'w' + Date.now();
     state.weekNo = weekNumber();
-    const week = pickWeek(state.weekNo);
+    const week = state.final ? { cards: [state.finalCard], days: [0] } : pickWeek(state.weekNo);
     state.cards = week.cards;
     state.days = week.days;
     state.index = 0;
     state.results = [];
     state.charged = false;
     state.board = null;
-    state.academy = state.hard || state.one ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
-    const recall = state.hard || state.one || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
+    state.academy = state.hard || state.one || state.final ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
+    const recall = state.hard || state.one || state.final || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
-    state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0))) } : null;
+    state.team = !state.one && !state.final && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0))) } : null;
     state.run = null;
     if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
   }
@@ -364,7 +368,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, final: state.final, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -383,7 +387,7 @@
     const s = readSave();
     if (!s) { resumeButton(); return; }
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios.'); return; }
-    const cards = s.cards.map(id => state.pool.find(c => c.id === id));
+    const cards = s.final ? [state.finalCard] : s.cards.map(id => state.pool.find(c => c.id === id));
     if (cards.some(c => !c)) { dropSave(); resumeButton(); toast('That week used a scenario that no longer exists. Start a new one.'); return; }
     if (s.runId) Gemini.runId = s.runId;
     else if (!(await claimRun())) return;
@@ -392,6 +396,7 @@
     state.weekNo = s.weekNo || 1;
     state.hard = !!s.hard;
     state.one = !!s.one;
+    state.final = !!s.final;
     state.board = s.board || null;
     state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
     state.academy = s.academy || (s.hard || s.one ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
@@ -448,6 +453,8 @@
     $('chat-log').innerHTML = '';
     r.chat.forEach(m => addMsg(m.who, m.text, true, m));
     $('w-call').classList.remove('ended');
+    $('btn-tellme').hidden = !state.final;
+    $('btn-tellme').disabled = r.card.hiddenFacts.every(f => r.revealed.has(f.id));
     $('write-form').reset();
     Object.entries(r.draft || {}).forEach(([k, v]) => { const el = $('write-form').elements[k]; if (el) el.value = v; });
     $('mieke-log').innerHTML = '';
@@ -524,13 +531,14 @@
     const today = state.days[state.index] || 0, fresh = firstEver();
     const seen = sub => { if (fresh) r.readMail[sub] = true; return !!r.readMail[sub]; };
     const now = arcNow();
-    const mails = FILLER.concat(Arc.offer('floor5', now) ? [FLOOR5] : [], Arc.offer('source', now) ? [BOUNCE] : []).map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    // The week after the reveal the inbox has one mail: the operator's.
+    const mails = state.final ? [] : FILLER.concat(Arc.offer('floor5', now) ? [FLOOR5] : [], Arc.offer('source', now) ? [BOUNCE] : []).map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
     }));
     // Darren's mail for the week, and real headlines up to today (not in hard mode: no time for news).
-    if (!state.hard) {
+    if (!state.hard && !state.final) {
       const sm = Story.storyMail(state.weekNo);
       mails.push(Object.assign({ read: seen(sm.subject), day: 0, at: 8 * 60 + 12, story: true }, sm));
       Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: seen(n.subject), at: 7 * 60 + 31 + i }, n)));
@@ -561,7 +569,7 @@
           state.team.drafts.map(d => '- ' + Team.junior(d.junior).name + ': ' + state.pool.find(c => c.id === d.card).subject + (d.grade ? ' (reviewed)' : '')).join('\n') +
           '\n\nBart, Priya and Jens\n\nP.S. from HR: your team is now "processed". Review all three before Friday; unreviewed drafts go out as they are.' });
     }
-    mails.push({ from: r.card.stakeholder.name, subject: r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, day: today, at: r.clock - 2, body: r.card.surfaceAsk });
+    mails.push({ from: state.final ? Reveal.MAIL.from : r.card.stakeholder.name, subject: state.final ? Reveal.MAIL.subject : r.card.subject || 'A learning request', request: r.card, current: true, read: r.readMail.current, day: today, at: r.clock - 2, body: r.card.surfaceAsk });
     mails.sort((a, b) => (b.day * 1440 + b.at) - (a.day * 1440 + a.at));
     r.mails = mails;
     renderMail();
@@ -850,6 +858,18 @@
     }
   };
   $('btn-hangup').onclick = () => afterCall();
+  // The operator's request: for players who came for the story, the operator just tells you.
+  $('btn-tellme').onclick = () => {
+    const r = state.run;
+    if (!r || !state.final) return;
+    r.card.hiddenFacts.filter(f => !r.revealed.has(f.id)).forEach(f => {
+      const at = f.foundAt[0];
+      addMsg('them', at === 'call' ? f.revealLine : at === 'frontline' ? 'Mieke asked me to pass this on: "' + f.frontlineLine + '"' : f.dataSource + ': ' + f.dataDoc);
+    });
+    discover(r.card.hiddenFacts.map(f => f.id));
+    $('btn-tellme').disabled = true;
+    save();
+  };
   // Enter sends, Shift+Enter makes a new line.
   $('chat-input').addEventListener('keydown', ev => {
     if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); $('chat-form').requestSubmit(); }
@@ -1075,7 +1095,7 @@
   // Try one case are off the arc: no hints there, and they never move it.
   function arcNow(day) {
     const week = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one && w.id !== state.weekId).length + 1;
-    return { week, day: day == null ? state.days[state.index] || 0 : day, off: state.hard || state.one };
+    return { week, day: day == null ? state.days[state.index] || 0 : day, off: state.hard || state.one || !!state.final };
   }
   // The first request of your first week: the one moment to show as little as possible.
   function firstEver() { return !state.hard && state.weekNo === 1 && state.index === 0; }
@@ -1358,6 +1378,12 @@
       b.textContent = '⏻ Log off...'; b.disabled = true; b.title = 'Not available in this session.';
       $('btn-logoff').after(b);
     }
+    // After the Log off ending it works: it takes you out, to the title.
+    const lo = $('btn-logoff-2041');
+    if (Reveal.ending() === 'logoff' && lo.disabled) {
+      lo.disabled = false; lo.title = 'Session 1207: end';
+      lo.onclick = () => { $('start-menu').hidden = true; save(); Desktop.reset(); show('s-title'); };
+    }
   }
   afterReveal();
   // The promotion comes with a new PC: Doors Aero. IT says so once.
@@ -1389,9 +1415,9 @@
     const tiles = deps.map(who => ({ who, real: true })).concat(decoys.map(who => ({ who, real: false }))).sort(() => Math.random() - 0.5);
     return {
       // Help fades: week 1 the full board, week 2 chips on the diagnosis only, then a blank memo.
-      mode: state.hard ? 'hard' : state.weekNo >= 3 ? 'memo4' : 'board', hardMemo: '', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
+      mode: state.hard ? 'hard' : state.weekNo >= 3 && !state.final ? 'memo4' : 'board', hardMemo: '', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
       step: 'diagnose', locked: false, feedback: '',
-      evidence: [], tags: [], problem: '', lever: '', leverWhy: '',
+      evidence: [], tags: [], problem: '', lever: '', leverWhy: '', accountable: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
       idea: '', formats: [], why: '', not: '', owners: {}, tiles, risks: [], flag: ''
     };
@@ -1410,7 +1436,9 @@
   function renderBoard() {
     const r = state.run, b = board();
     $('board').hidden = b.mode !== 'board';
-    $('btn-memo-mode').hidden = firstEver();
+    $('btn-memo-mode').hidden = firstEver() || !!state.final;
+    $('b-acc-wrap').hidden = !state.final;
+    $('b-accountable').value = b.accountable || '';
     $('write-form').hidden = b.mode !== 'memo';
     $('memo4-form').hidden = b.mode !== 'memo4';
     $('hard-form').hidden = b.mode !== 'hard';
@@ -1576,7 +1604,7 @@
 
   // Inputs write straight into the board state, so a reload keeps them.
   const bind = (id, key) => { $(id).addEventListener('input', () => { board()[key] = $(id).value; saveSoon(); }); };
-  bind('b-problem', 'problem'); bind('b-lever-why', 'leverWhy'); bind('b-idea', 'idea'); bind('b-why', 'why'); bind('b-not', 'not'); bind('b-flag', 'flag');
+  bind('b-problem', 'problem'); bind('b-lever-why', 'leverWhy'); bind('b-idea', 'idea'); bind('b-why', 'why'); bind('b-not', 'not'); bind('b-flag', 'flag'); bind('b-accountable', 'accountable');
   RUNGS.forEach(([k]) => {
     document.querySelector(`[data-rung="${k}"]`).addEventListener('input', e => { board().rungs[k].text = e.target.value; saveSoon(); });
     document.querySelector(`[data-rung-ev="${k}"]`).addEventListener('change', e => { board().rungs[k].ev = e.target.value; saveSoon(); });
@@ -1685,7 +1713,7 @@
     return {
       kind: 'board', tags: b.tags.slice(), evidence: b.evidence.map(quote), problem: b.problem, lever: b.lever, leverWhy: b.leverWhy,
       rungs: RUNGS.map(([k, label]) => ({ label, text: b.rungs[k].text, ev: quote(b.rungs[k].ev) })),
-      idea: b.idea, formats: b.formats.slice(), why: b.why, not: b.not, owners: b.tags.map(t => Object.assign({ tag: t }, (b.owners || {})[t])), risks: b.risks.map(x => Object.assign({}, x)), flag: b.flag
+      idea: b.idea, formats: b.formats.slice(), why: b.why, not: b.not, owners: b.tags.map(t => Object.assign({ tag: t }, (b.owners || {})[t])), risks: b.risks.map(x => Object.assign({}, x)), flag: b.flag, accountable: state.final ? b.accountable : undefined
     };
   }
 
@@ -1714,6 +1742,7 @@
         'Evidence cited from the call: ' + (w.evidence.map(e => '"' + e + '"').join(' | ') || '(none)'),
         'The real problem: ' + w.problem,
         'Is learning the lever: ' + (LEVER_NAMES[w.lever] || '(not chosen)') + '. Because: ' + w.leverWhy,
+        ...(w.accountable ? ['Accountable for this call (the participant signed it): ' + w.accountable] : []),
         'MEASUREMENT',
         ...w.rungs.map(x => x.label + ': ' + (x.text || '(empty)') + (x.ev ? ' (evidence: "' + x.ev + '")' : '')),
         'CONCEPT',
@@ -2085,6 +2114,7 @@
   };
 
   $('btn-next').onclick = () => {
+    if (state.final) { finale(); return; }
     if (state.hard || state.one) { if (state.index + 1 < state.cards.length) { state.index++; startRequest(); } else if (state.one) endRun(); else toBoard(); return; }
     if (state.index + 1 < state.cards.length) {
       state.index++;
@@ -2254,7 +2284,7 @@
     const L = looks(arcNow(day));
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
-    if (Reveal.seen() && !now.off) {
+    if (Reveal.seen() && !now.off && Reveal.ending() !== 'clockin') {
       spots.mieke.text = 'Her lamp is off. On her chair, a badge on a lanyard: "Participant 0031". No photo. Her coffee is still warm.';
       spots.tv = { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: 'Test card', text: 'A test card, all day now. Colour bars and a thin tone nobody turns down. In the corner, very small: BUILD 2041.03.' };
     }
@@ -2283,7 +2313,7 @@
     };
     Office.standUp(opts);
   }
-  const nextLabel = () => (state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
+  const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.
   function bestLine(w) {
@@ -2292,6 +2322,18 @@
     return short(first(w.kind === 'board' ? w.problem : w.kind === 'memo4' ? w.need : w.kind === 'hard' ? w.memo : w.gap), 160);
   }
 
+  // The week after the reveal ends on your own lever call (js/reveal.js). It is kept like any other
+  // week; the ending is stored, so the next week is a normal one again.
+  function finale() {
+    const w = (state.run && state.run.writeup) || {};
+    const score = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));
+    recordWeek(score, TITLES.find(([max]) => score < max)[1], null);
+    dropSave();
+    Reveal.end({
+      lever: w.lever, accountable: String(w.accountable || '').trim(), noticed: Arc.notes().noted.length, week: weekNumber(),
+      onDone: choice => { afterReveal(); Desktop.reset(); state.run = null; if (choice === 'clockin') startWeek(false, false); else show('s-title'); }
+    });
+  }
   function endRun() {
     try { localStorage.removeItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
     const avg = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));

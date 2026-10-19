@@ -35,7 +35,7 @@ async function playWeek(b, n, opt, onFloor) {
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const prompts = [];
   await p.route('https://generativelanguage.googleapis.com/**', route => { prompts.push(JSON.parse(route.request().postData()).systemInstruction.parts[0].text); return mock(route); });
-  await p.addInitScript(([h, arc]) => {
+  await p.addInitScript(([h, arc, extra]) => {
     if (sessionStorage.getItem('seeded')) return;
     sessionStorage.setItem('seeded', '1');
     localStorage.clear();
@@ -44,7 +44,8 @@ async function playWeek(b, n, opt, onFloor) {
     ['walkin', 'tour', 'floor', 'hint-call', 'hint-leads', 'hint-write', 'hint-scores', 'patience'].forEach(k => localStorage.setItem('intake-told-' + k, '1'));
     localStorage.setItem('intake-scores', JSON.stringify(h));
     if (arc) localStorage.setItem('intake-arc', JSON.stringify(arc));
-  }, [history(n, ['hotel-upgrades', 'telecom-first-call', 'logistics-night-shift'], opt.hard), { shown: opt.arc || {}, noted: opt.noted || [] }]);
+    Object.entries(extra || {}).forEach(([k, v]) => localStorage.setItem(k, v));
+  }, [history(n, ['hotel-upgrades', 'telecom-first-call', 'logistics-night-shift'], opt.hard), { shown: opt.arc || {}, noted: opt.noted || [] }, opt.storage]);
   await p.goto('http://localhost:8766/?debug=1');
   await p.click('#btn-start');
   while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
@@ -71,6 +72,7 @@ async function playWeek(b, n, opt, onFloor) {
     await p.waitForSelector('#p-defence.active, #p-score.active');
     if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
     await p.waitForSelector('#p-score.active');
+    if (opt.atScore) { await opt.atScore(p, seen); break; }
     await p.click('#btn-next');
     await p.waitForSelector('#s-office.active');
     await p.waitForFunction(() => !document.getElementById('office-film'));
@@ -263,6 +265,49 @@ const fail = m => { throw new Error(m); };
   if (!/Exported from session 1207/.test(rv.scores)) fail('week 8: My scores.txt is not exported from session 1207');
   if (w8.errs.length) fail('week 8 errors: ' + w8.errs);
   console.log('week 8 ok');
+  // Week 9, the week after the reveal: one request, the operator's. Autofill calls it "not a learning
+  // problem" with a name under it, so the ending is Log off.
+  const fin = {};
+  const w9 = await playWeek(b, 8, { arc: ALL, noted: [tape], storage: { 'intake-told-reveal': '1' }, onDesk: async (p, req) => {
+    fin.cards = await p.evaluate(() => window.__intake.state.cards.map(c => c.id));
+    fin.tell = await p.evaluate(() => { const b = document.getElementById('btn-tellme'); const was = b.hidden; b.click(); return { was, found: document.getElementById('found').textContent }; });
+  }, atScore: async (p, seen) => {
+    fin.next = await p.textContent('#btn-next');
+    await p.evaluate(() => { const b = window.__intake.state.run.writeup; b.accountable = 'Test Player'; });
+    await p.click('#btn-next');
+    await p.waitForSelector('#reveal.ending.in');
+    for (let k = 0; k < 6 && !(await p.$('#reveal .rv-back')); k++) { await p.mouse.click(40, 40); await p.waitForTimeout(400); }
+    await p.waitForSelector('#reveal .rv-back');
+    await p.waitForTimeout(2200);
+    fin.card = await p.textContent('#reveal .rv-endcard');
+    await p.screenshot({ path: SHOTS + '/arc-ending.png' });
+    await p.click('#reveal .rv-back');
+    await p.waitForSelector('#s-title', { state: 'visible' });
+    fin.ending = await p.evaluate(() => localStorage.getItem('intake-ending'));
+    fin.sub = await p.textContent('#title-sub');
+  } });
+  if (fin.cards.join() !== 'operator-2041') fail('week 9: not the operator\'s request: ' + fin.cards);
+  if (fin.tell.was || !/^7 \/ 7/.test(fin.tell.found)) fail('week 9: Just tell me did not tell: ' + JSON.stringify(fin.tell));
+  if (!/operator is waiting/.test(fin.next)) fail('week 9: scorecard does not lead to the ending: ' + fin.next);
+  if (fin.ending !== 'logoff' || !/Most cohorts notice four/.test(fin.card) || !/Final settlement: 0\.00/.test(fin.card) || !/Sign-offs: 1/.test(fin.card)) fail('week 9: Log off ending wrong: ' + JSON.stringify(fin));
+  if (!/logged off/.test(fin.sub)) fail('week 9: title does not know the session ended: ' + fin.sub);
+  if (w9.mails.includes('Darren') || !w9.mails.includes('Request: we need a course')) fail('week 9: inbox is not just the operator: ' + w9.mails.slice(0, 300));
+  if (w9.errs.length) fail('week 9 errors: ' + w9.errs);
+  console.log('week 9 ok');
+  // The same week, called "learning fixes this": Clock in tomorrow, and the next week is a normal one.
+  const ci = {};
+  await playWeek(b, 8, { arc: ALL, storage: { 'intake-told-reveal': '1' }, atScore: async p => {
+    await p.evaluate(() => { window.__intake.state.run.writeup.lever = 'yes'; });
+    await p.click('#btn-next');
+    await p.waitForSelector('#reveal.ending.clockin.in');
+    for (let k = 0; k < 6 && !(await p.$('#reveal .rv-back')); k++) { await p.mouse.click(40, 40); await p.waitForTimeout(400); }
+    ci.card = await p.textContent('#reveal .rv-endcard');
+    await p.click('#reveal .rv-back');
+    await p.waitForFunction(() => window.__intake.state.cards.length > 1);
+    ci.after = await p.evaluate(() => ({ ending: localStorage.getItem('intake-ending'), final: window.__intake.state.final, cards: window.__intake.state.cards.map(c => c.id) }));
+  } });
+  if (ci.after.ending !== 'clockin' || ci.after.final || ci.after.cards.includes('operator-2041') || !/Session 1207 continues/.test(ci.card)) fail('Clock in ending wrong: ' + JSON.stringify(ci));
+  console.log('clock in ok');
   await b.close(); srv.close();
   console.log('story: all fine');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

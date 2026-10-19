@@ -2,7 +2,9 @@
 // words that don't belong in 2007. Usage: node tests/check-cards.cjs [dir] [id ...]
 const fs = require('fs'), path = require('path');
 const dir = process.argv[2] || path.join(__dirname, '..', 'scenarios');
-const index = process.argv.length > 3 ? process.argv.slice(3) : JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
+const pool = process.argv.length > 3 ? process.argv.slice(3) : JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8'));
+// The operator's request (STORY.md, the week after the reveal) is never drawn, but it is a card like any other.
+const index = process.argv.length > 3 ? pool : pool.concat(['operator-2041']);
 const ANACHRONISM = /\b(AI|A\.I\.|artificial intelligence|ChatGPT|GPT|LLM|chatbot|smartphones?|apps?|app-based|WhatsApp|Teams call|MS Teams|Microsoft Teams|Zoom|Slack|Instagram|TikTok|Snapchat|Uber|Airbnb|Deliveroo|iPad|tablets?|GDPR|COVID|pandemic|lockdown|remote work|hybrid work|working from home|cloud|SaaS|influencer|QR|contactless|e-scooter|crypto|bitcoin|selfie|hashtag|emoji|webinar|Power BI|SharePoint Online|OKR|NPS|Net Promoter|millennials?|Gen Z|metaverse|wearables?|smartwatch|streaming|gamif\w*|microlearning|agile|scrum|Google Meet|Android|iPhone|4G|5G|Wi-?Fi hotspot)\b/i;
 let bad = 0;
 const fail = (id, msg) => { bad++; console.log('FAIL ' + id + ': ' + msg); };
@@ -39,12 +41,13 @@ index.forEach(id => {
   const k = c.concepts || {};
   if (!k.conventional || !k.solid || !(k.next_level_examples || []).length || !(k.red_flags || []).length) fail(id, 'concepts');
   if (!(c.defence_objections || []).length || !(c.actor_notes || []).length || !(c.constraints || {}).budget) fail(id, 'objections, actor notes or constraints');
-  // 2007: nothing that did not exist yet.
+  // 2007: nothing that did not exist yet. The 2041 card is the one allowed exception.
+  if (c.era === '2041') return;
   const text = JSON.stringify(Object.assign({}, c, { id: '' }));
   const hits = new Set();
   let m2; const re = new RegExp(ANACHRONISM.source, 'gi');
   while ((m2 = re.exec(text))) hits.add(m2[0]);
   if (hits.size) fail(id, 'not 2007: ' + [...hits].join(', '));
 });
-console.log(index.length + ' cards, ' + (bad ? bad + ' problem(s)' : 'all fine'));
+console.log(pool.length + ' cards' + (index.length > pool.length ? ' and the 2041 card' : '') + ', ' + (bad ? bad + ' problem(s)' : 'all fine'));
 process.exit(bad ? 1 : 0);

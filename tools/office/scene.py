@@ -1048,7 +1048,7 @@ elif MODE in ('stand', 'standstill'):
         S.frame_set(f)
         S.render.filepath = name(f)
         bpy.ops.render.render(write_still=True)
-elif MODE == 'floor5':
+elif MODE in ('floor5', 'lift5', 'lift5still'):
     # The reveal: the lift opens on floor 5, the same floor in 2041. No desks, rows of GMS racks, one CRT
     # on the carpet running Doors OS. Its screen is drawn by the game. ARGS: w h samples
     keep = ('wall_', 'mullion', 'sill', 'window_glass', 'lift_', 'accent_left', 'floor', 'slab', 'troffer', 'ceiling', 'street', 'sky', 'bld', 'bwin', 'fbld', 'right_print')
@@ -1115,6 +1115,31 @@ elif MODE == 'floor5':
     cam = bpy.data.objects.new('eye', cd); S.collection.objects.link(cam); S.camera = cam
     cam.location = (0.9, 1.45, 1.62); look_at(cam, (6.0, 5.2, 0.5))
     fo_ = bpy.data.objects.new('f5_focus', None); fo_.location = (CRT_X, CRT_Y, 0.2); S.collection.objects.link(fo_); cd.dof.focus_object = fo_
+    if MODE.startswith('lift5'):
+        # The film before the still: inside the lift, the doors open on floor 5 and you step out to
+        # where the still is taken. 125 frames at 25 fps; the game adds the ding and plays it once.
+        cam.constraints.clear()
+        tgt = bpy.data.objects.new('lift_target', None); S.collection.objects.link(tgt)
+        tr = cam.constraints.new('TRACK_TO'); tr.target = tgt; tr.track_axis = 'TRACK_NEGATIVE_Z'; tr.up_axis = 'UP_Y'
+        KEYS = [(1, (-1.35, 1.5, 1.62), (1.0, 1.5, 1.5)), (40, (-1.35, 1.5, 1.62), (1.0, 1.52, 1.45)),
+                (70, (-0.9, 1.5, 1.62), (3.0, 2.6, 1.0)), (125, (0.9, 1.45, 1.62), (6.0, 5.2, 0.5))]
+        for f, e, g in KEYS:
+            cam.location = e; cam.keyframe_insert('location', frame=f)
+            tgt.location = g; tgt.keyframe_insert('location', frame=f)
+        for o, dy in ((bpy.data.objects['lift_door_l'], -0.58), (bpy.data.objects['lift_door_r'], 0.58)):
+            o.keyframe_insert('location', frame=34)
+            o.location.y += dy; o.keyframe_insert('location', frame=62)
+        S.render.fps = 25
+        w_, h_ = (int(ARGS[0]), int(ARGS[1])) if len(ARGS) > 1 else (960, 540)
+        set_res(w_, h_, int(ARGS[2]) if len(ARGS) > 2 else 24)
+        S.render.image_settings.file_format = 'JPEG'; S.render.image_settings.quality = 92
+        frames = [int(x) for x in ARGS[3].split(',')] if MODE == 'lift5still' else range(int(ARGS[3]) if len(ARGS) > 3 else 1, (int(ARGS[4]) if len(ARGS) > 4 else 125) + 1)
+        os.makedirs(os.path.join(OUT, 'lift5'), exist_ok=True)
+        for f in frames:
+            S.frame_set(f)
+            S.render.filepath = os.path.join(OUT, 'lift5', f'{f:04d}.jpg')
+            bpy.ops.render.render(write_still=True)
+        print('done', MODE); sys.exit(0)
     for nm in ('lift_door_l', 'lift_door_r'): bpy.data.objects[nm].location.y += (-0.58 if nm.endswith('l') else 0.58)
     w_, h_ = (int(ARGS[0]), int(ARGS[1])) if len(ARGS) > 1 else (1600, 900)
     set_res(w_, h_, int(ARGS[2]) if len(ARGS) > 2 else 96)
