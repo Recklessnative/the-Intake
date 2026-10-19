@@ -792,6 +792,8 @@
     if (!fresh.length) return;
     const of = r.card.hiddenFacts.length, n = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length;
     Sound.found();
+    // The field stamp: a Learning House handout whose question would have found this fact (js/clinic.js).
+    if (!state.hard) Clinic.stamp(r.card.id, fresh).slice(0, 1).forEach(x => setTimeout(() => toast('📑 Stamp ' + x.n + ' on your Learning House handout "' + x.title + '": ' + x.question, 'info'), 1600));
     const s = $('stamp');
     s.querySelector('.stamp-n').textContent = n + ' of ' + of + ' facts';
     s.hidden = false;
@@ -2073,6 +2075,8 @@
   // this call. Kept in My scores and printed on the pocket card in the Center of Excellence folder.
   const plans = () => (scoreHistory().plans || []);
   Coe.plans = plans;
+  // The reader's cards in the folder read differently per act (js/clinic.js).
+  Coe.act = () => { try { return Reveal.seen() ? 3 : arcNow().week >= 5 ? 2 : 1; } catch (e) { return 1; } };
   function renderPlan() {
     const r = state.run, kept = r.plan;
     $('plan-form').hidden = !!kept;
@@ -2327,7 +2331,7 @@
     const checks = done.slice().reverse().flatMap(w => w.requests.slice().sort((a, b) => b.index - a.index))
       .filter(x => !seen.has(x.card) && seen.add(x.card)).map(x => Town.check(x, card(x.card))).filter(Boolean);
     const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
-    Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow,
+    Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow, card, dayKey: state.weekId + ':' + day,
       when: Story.day(state.weekNo, day) + ' · 18:30', onDone: after });
   }
   const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');

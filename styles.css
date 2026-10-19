@@ -1213,4 +1213,48 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
   .tw-map { height: auto; }
 }
 
+/* The Learning House (js/clinic.js): the phone call, the Case Clinic in the Academy shell, the reader's cards. */
+.lh, .lh-call { position: fixed; inset: 0; z-index: 100006; display: flex; align-items: center; justify-content: center; padding: 12px; background: rgba(8, 14, 22, .55); }
+.lh { opacity: 0; transition: opacity .3s ease; }
+.lh.in { opacity: 1; }
+.lh-win { display: flex; flex-direction: column; width: min(980px, 100%); height: min(680px, 100%); color: var(--ink); background: var(--win);
+  border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 18px rgba(0,0,0,.55); }
+.lh-win .titlebar .tt { flex: 1; }
+.lh-x { min-width: 22px; height: 21px; padding: 0; color: #fff; font-weight: 700; background: linear-gradient(#e8a08a, #c8462a 55%, #b43a20); border: 1px solid #fff; border-radius: 3px; }
+.lh-box { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #f4f7fb; }
+.lh-by { margin: -4px 0 8px; color: #555; font-style: italic; }
+.lh-diagram { max-width: 560px; margin: 4px 0 10px; padding: 6px; background: #fff; border: 1px solid #c9c4b2; box-shadow: 2px 2px 0 #e3dfcf; }
+.lh-q { margin: 4px 0; font-size: 15px; font-weight: 700; color: #7a5b00; }
+.lh-case { margin: 6px 0 10px; padding: 6px 8px; background: #fffbe8; border: 1px dashed #d8c27a; font-size: 13px; }
+.lh-tiles .chips + .chips { margin-top: 4px; }
+.lh-facts { margin: 0 0 10px; padding-left: 20px; font-size: 13px; }
+.lh-facts li { margin: 3px 0; }
+.lh-grid { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 6px; margin: 4px 0; }
+.lh-cell { display: flex; flex-direction: column; gap: 4px; min-height: 84px; padding: 6px; background: #fff; border: 1px solid #9db6d6; border-radius: 4px; font-size: 12px; }
+.lh-cell b { color: #0f4e9e; }
+.lh-cell.asked { background: repeating-linear-gradient(135deg, #fff, #fff 6px, #fde8e3 6px, #fde8e3 9px); border-color: #b5432a; }
+.lh-chip { padding: 3px 6px; background: #fff6c8; border: 1px solid #e0b928; border-radius: 3px; box-shadow: 1px 1px 0 rgba(0,0,0,.12); }
+.lh-empty { color: #8a99ab; font-style: italic; }
+.lh-asked { margin-top: auto; color: #b5432a; font-weight: 700; font-size: 11px; }
+.lh-card { margin: 8px 0; padding: 8px 10px; border: 1px solid #7f9db9; background: #f6fff4; box-shadow: 2px 2px 0 #d5e6d0; }
+.lh-card h2 { font-size: 16px; }
+.lh-cite { margin-top: 12px; padding-top: 6px; border-top: 1px dotted #b8b29e; color: #666; font-size: 11px; }
+.lh-smudge { color: #999; filter: blur(.6px); }
+.flow .grey { fill: #eeeeee; stroke: #9a9a9a; }
+.lh-phone { width: min(340px, 100%); background: var(--win); border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 18px rgba(0,0,0,.55); }
+.lh-phone-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.lh-caller { margin: 0; font-weight: 700; font-size: 15px; }
+.lh-ring { margin: 0 0 6px; color: #555; animation: lh-ring 1s steps(2) infinite; }
+.lh-line { margin: 0; font-style: italic; }
+.lh-phone-body button { align-self: flex-end; margin-top: 6px; }
+@keyframes lh-ring { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .lh-ring { animation: none; } .lh { transition: none; } }
+@media (max-width: 760px) {
+  .lh { padding: 0; }
+  .lh-win { height: 100%; border-radius: 0; }
+  .lh-grid { grid-template-columns: 1fr; }
+  .lh-grid.nine { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lh-grid.nine .lh-chip { font-size: 11px; }
+}
+
 @media (max-width: 899px) and (orientation: portrait) { #s-end, #s-settings, #s-cap { --title-pic: url(media/title-bg-phone.webp); } }

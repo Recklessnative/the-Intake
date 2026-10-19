@@ -150,6 +150,18 @@
     [0, 0.14, 0.42, 0.56].forEach(d => voice(c, g, 93, t + d, 0.07, 0.5, 'square'));
   }
 
+  // A mobile ringing in a coat pocket: two trills, twice.
+  function ring() {
+    if (!on) return;
+    const c = audio();
+    if (!c) return;
+    const t = c.currentTime + 0.02;
+    const g = c.createGain();
+    g.gain.value = 0.06;
+    g.connect(c.destination);
+    [0, 1.1].forEach(r => [0, 0.08, 0.16, 0.24, 0.32, 0.4].forEach((d, i) => voice(c, g, i % 2 ? 88 : 91, t + r + d, 0.07, 0.5, 'square')));
+  }
+
   // Pitchwright: a burst of filtered noise, shaped. Used for the projector and the stamp.
   function noise(c, out, t, len, freq, q, gain, type) {
     const n = c.createBufferSource(), b = c.createBuffer(1, Math.ceil(c.sampleRate * len), c.sampleRate), d = b.getChannelData(0);
@@ -493,5 +505,5 @@
     return on;
   }
 
-  window.Sound = { chime, ding, found, im, nudge, online, sms, click, whoosh, stamp, scene, preview, morning, toggle, get on() { return on; }, get place() { return place; } };
+  window.Sound = { chime, ding, found, im, nudge, online, sms, ring, click, whoosh, stamp, scene, preview, morning, toggle, get on() { return on; }, get place() { return place; } };
 })();
