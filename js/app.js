@@ -1346,6 +1346,20 @@
     return scoreHistory().weeks.filter(w => w.done && !w.one).reduce((a, w) => Math.max(a, TITLES.findIndex(([, t]) => t === w.title)), 0);
   }
   Retro.setLevel(wallpaperLevel());
+  // After the reveal (js/reveal.js) the desk knows what it is: the boot screen names the build, and
+  // the start menu has a Log off... that does not work yet. Quitting the week is clocking out.
+  function afterReveal() {
+    if (!Reveal.seen()) return;
+    const foot = document.querySelector('.boot-foot');
+    if (foot) foot.textContent = 'Doors OS · archive build 2041.03 · Copyright © Doors Corp.';
+    $('btn-logoff').textContent = '⏻ Clock out (quit this week)';
+    if (!$('btn-logoff-2041')) {
+      const b = document.createElement('button'); b.id = 'btn-logoff-2041'; b.className = 'logoff'; b.type = 'button';
+      b.textContent = '⏻ Log off...'; b.disabled = true; b.title = 'Not available in this session.';
+      $('btn-logoff').after(b);
+    }
+  }
+  afterReveal();
   // The promotion comes with a new PC: Doors Aero. IT says so once.
   function applyStyle() {
     if (Retro.setAero(!!scoreHistory().promoted)) { try { localStorage.setItem('intake-aero-news', '1'); } catch (e) { /* storage blocked */ } }
@@ -2176,6 +2190,8 @@
   // A "Note it" button for an arc hint on the floor.
   const arcNote = id => ({ done: () => Arc.noted(id), add: () => Arc.note(id) });
   const BADGE = '\n\nYour staff badge has come, and it is on your keyboard: SYNERGIX · STAFF · No. 1207. Where the photo goes it says "Photo: to follow". HR is processing it. It is HR.';
+  const FIVE_OPEN = 'The tape is gone from button 5. Nobody took it off; it is just gone. The button is not lit, but it is not quite dark either.';
+  const FIVE_ONLY = 'You press 0. Nothing. You press 3, 2, 1. Nothing. Only button 5 lights up when you touch it.';
   const FLICKER = 'The numbers above the doors go 4, then 5, then 4. The doors open for half a second. Inside it is dark, and something hums, like a room full of fans. Then they close.\n\nFacilities will say it is the lift motor. It is always the lift motor.';
   const FLOOR_EVENING = '\n\nRight now it is home time, though. The lift is by reception: take it when you are ready, and tomorrow starts at your desk.';
   // In a team week, how many drafts still wait for you.
@@ -2205,7 +2221,8 @@
       const tape = Arc.once('tape', now), rain = !tape && Arc.once('rain', now);
       // You can't click a morning, so these go in the notebook by themselves.
       if (tape) Arc.note('tape'); else if (rain) Arc.note('rain');
-      const line = tape ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
+      const lit = !tape && !rain && Reveal.seen() && !now.off && !told('lift-lit');
+      const line = lit ? 'In the lift, button 5 is still lit. You press 4. It is the same rain at 08:56.' : tape ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
         : rain ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
       startRequest();
       toast(tomorrow + ', 08:57. ' + line, 'info');
@@ -2226,11 +2243,21 @@
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
-    if (evening) spots.lift = { label: 'Go home: start ' + tomorrow, sub: 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: () => Office.sitDown(morning) };
+    const now = arcNow(day), home = { label: 'Go home: start ' + tomorrow, go: () => Office.sitDown(morning) };
+    if (evening && Reveal.open(now)) {
+      // From the evening of the tender, button 5 works. After week 7 it is the only one that does.
+      const five = { label: 'Press 5', go: () => { Office.close(); Reveal.go({ notes: Arc.notes(), onDone: () => { afterReveal(); morning(); } }); } };
+      const only = Reveal.forced(now);
+      spots.lift = { label: only ? 'The lift: button 5' : 'The lift', sub: only ? 'It is the only button that lights' : 'Home, or button 5', primary: true, who: 'The lift', face: '🛗', text: only ? FIVE_ONLY : FIVE_OPEN, actions: only ? [five] : [home, five] };
+    } else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
     const L = looks(arcNow(day));
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
+    if (Reveal.seen() && !now.off) {
+      spots.mieke.text = 'Her lamp is off. On her chair, a badge on a lanyard: "Participant 0031". No photo. Her coffee is still warm.';
+      spots.tv = { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: 'Test card', text: 'A test card, all day now. Colour bars and a thin tone nobody turns down. In the corner, very small: BUILD 2041.03.' };
+    }
     // More places open as the weeks go on: the people you have not met yet are known by their desks.
     ['bart', 'priya', 'jens', 'canteen'].forEach(k => { if (L.looks[k]) spots[k] = { label: LOOKS[k].title, who: LOOKS[k].who, face: '🔍', text: LOOKS[k].text, look: L.looks[k] }; });
     if (L.looks.board && !last) spots.meeting.look = L.looks.board;
@@ -2683,6 +2710,7 @@
     box.innerHTML = '';
     const para = (t, cls) => { const p = document.createElement('p'); p.textContent = t; if (cls) p.className = cls; box.appendChild(p); };
     para('MY SCORES.TXT');
+    if (Reveal.seen()) para('Exported from session 1207', 'muted');
     para('Kept in this browser only. Nobody else can see it, including your manager.', 'muted');
     const all = h.weeks.flatMap(w => w.requests);
     const dr = h.drills || [];
