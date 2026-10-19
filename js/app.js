@@ -429,6 +429,8 @@
       corridor: [], corridorTurns: [], corridorLeft: budget().corridor, data: [], docs: []
     };
     state.run.mieke.push({ who: 'them', text: miekeHello() });
+    // A new day starts at 08:57, and the rain a minute before, the same way every time.
+    if (state.run.clock === 8 * 60 + 57) Sound.morning();
     openRequest();
     if (state.index && !mondayFirst()) Sound.ding();
     retroMorning();
