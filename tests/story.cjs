@@ -26,14 +26,15 @@ function mock(route) {
 
 const PTS = { diagnosis: 15, measurement: 10, fit: 10, nextLevel: 10, risks: 8, pitch: 7 };
 // A history with `n` finished normal weeks (plus, with `hard`, a hard week, which must not count).
-const history = (n, cards, hard) => ({ weeks: Array.from({ length: n }, (_, i) => ({ id: 'seed' + i, started: Date.UTC(2026, 0, 1 + 7 * i), done: true, title: 'Learning Consultant', avg: 60, requests: cards.map((c, k) => ({ index: k, card: c, total: 60, at: Date.UTC(2026, 0, 1 + 7 * i), pts: PTS })) }))
+const history = (n, cards, hard) => ({ promoted: n >= 4 ? { week: 4 } : undefined, weeks: Array.from({ length: n }, (_, i) => ({ id: 'seed' + i, started: Date.UTC(2026, 0, 1 + 7 * i), done: true, title: 'Learning Consultant', avg: 60, requests: cards.map((c, k) => ({ index: k, card: c, total: 60, at: Date.UTC(2026, 0, 1 + 7 * i), pts: PTS })) }))
   .concat(hard ? [{ id: 'seedhard', started: Date.UTC(2026, 3, 1), done: true, hard: true, title: 'Learning Consultant', avg: 60, requests: [{ index: 0, card: cards[0], total: 60, pts: PTS }] }] : []) });
 
 // `arc`: hints that already landed in earlier weeks.
 async function playWeek(b, n, opt, onFloor) {
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.route('https://generativelanguage.googleapis.com/**', mock);
+  const prompts = [];
+  await p.route('https://generativelanguage.googleapis.com/**', route => { prompts.push(JSON.parse(route.request().postData()).systemInstruction.parts[0].text); return mock(route); });
   await p.addInitScript(([h, arc]) => {
     if (sessionStorage.getItem('seeded')) return;
     sessionStorage.setItem('seeded', '1');
@@ -57,6 +58,8 @@ async function playWeek(b, n, opt, onFloor) {
   if (opt.atDesk) { if (!(await p.isVisible('#w-inbox'))) await p.click('.desk-icon[data-app="w-inbox"]'); await opt.atDesk(p, seen); }
   for (let req = 0; req < 3; req++) {
     if (await p.isVisible('#w-academy')) await p.click('#w-academy .tb.close');
+    if (opt.onDesk) await opt.onDesk(p, req, prompts);
+    const last = await p.evaluate(() => window.__intake.state.index + 1 === window.__intake.state.cards.length);
     await p.click('#btn-debug');
     await p.waitForSelector('#w-leads.open');
     await p.click('#btn-leads-done');
@@ -75,10 +78,10 @@ async function playWeek(b, n, opt, onFloor) {
       line: document.getElementById('office-line').textContent,
       spots: [...document.querySelectorAll('#office-list button')].map(b => b.dataset.spot)
     }));
-    f.req = req;
+    f.req = req; f.last = last;
     if (onFloor) await onFloor(p, f);
     seen.floors.push(f);
-    if (req === 2) break;
+    if (last) break;
     await p.click('#office-list button.primary');
     await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
     seen.toasts.push(await p.textContent('#toast'));
@@ -158,6 +161,56 @@ const fail = m => { throw new Error(m); };
   if (!lift.includes('4, then 5, then 4') || !w3.floors[2].line.includes('Nobody gets out')) fail('week 3: no lift flicker');
   if (w3.errs.length) fail('week 3 errors: ' + w3.errs);
   console.log('week 3 ok', JSON.stringify(w3.arc));
+  // Act 2. Every earlier hint has landed; from week 5 every week is a team week (Monday and Thursday).
+  const ACT1 = { badge: 7, tape: 8, floor5: 14, planner: 16, morning: 21, rain: 22, flicker: 24 };
+  // Week 5: the recalled 2008 headline on Monday, the coffee machine's corrected year on Thursday.
+  let coffee = '';
+  const w5 = await playWeek(b, 4, { arc: ACT1 }, async (p, f) => { if (f.last) coffee = await card(p, 'coffee'); });
+  if (!w5.mails.includes('Recall: Lehman Brothers files for bankruptcy')) fail('week 5: no recalled Lehman headline');
+  if (!coffee.includes('corrected the 0 to a 2')) fail('week 5: coffee note not corrected: ' + coffee);
+  if (w5.errs.length) fail('week 5 errors: ' + w5.errs);
+  console.log('week 5 ok');
+  // Week 6: a bounce whose source is from much later; Thursday's case file is a restored scan.
+  let source = '', normal = '', legible = '';
+  const w6b = await playWeek(b, 5, { arc: Object.assign({ lehman: 35, coffee: 38 }, ACT1), atDesk: async p => {
+    await p.click('#mail-rows tr:has-text("Undeliverable")');
+    await p.click('[data-mail="source"]');
+    source = await p.textContent('#mail-body');
+    await p.screenshot({ path: SHOTS + '/arc-source.png' });
+    await p.click('#mail-rows tr:has-text("Coffee machine")');
+    await p.click('[data-mail="source"]');
+    normal = await p.textContent('#mail-body');
+  }, onDesk: async (p, req) => { if (req === 1) legible = await p.textContent('#briefing'); } });
+  if (!/14 Mar 2041/.test(source) || !/71% recovered/.test(source)) fail('week 6: bounce source wrong: ' + source);
+  if (/2041|recovered/.test(normal) || !/2007/.test(normal)) fail('week 6: an ordinary mail source gives it away: ' + normal);
+  if (!/71% legible/.test(legible) || !/REDACTED: ARCHIVE/.test(legible)) fail('week 6: Thursday case file is not a restored scan: ' + legible);
+  if (w6b.errs.length) fail('week 6 errors: ' + w6b.errs);
+  console.log('week 6 ok');
+  // Week 7: Bart's empty draft on Monday; Max's intake log in Thursday's case file.
+  let bart = '', maxq = '';
+  const w7 = await playWeek(b, 6, { arc: Object.assign({ lehman: 35, coffee: 38, source: 42, legible: 45 }, ACT1), atDesk: async p => {
+    await p.evaluate(() => { document.querySelector('#start-menu [data-open="w-team"]').click(); });
+    await p.waitForSelector('#w-team.open');
+    await p.click('.team-tab:has-text("Bart")');
+    await p.click('.team-draft button:has-text("Something else")');
+    await p.click('#btn-team-send');
+    bart = await p.textContent('#team');
+    await p.screenshot({ path: SHOTS + '/arc-bart.png' });
+    await p.click('#team .team-result button.link');
+    await p.click('#w-team .tb.close');
+  }, onDesk: async (p, req) => {
+    if (req !== 1) return;
+    if (!(await p.isVisible('#w-case'))) await p.click('.desk-icon[data-app="w-case"]');
+    await p.click('.arc-log summary');
+    await p.click('.arc-log button:has-text("doing now")');
+    maxq = await p.textContent('.arc-log');
+    await p.screenshot({ path: SHOTS + '/arc-max.png' });
+  } });
+  if (!/didn't write it/.test(bart) || !/MODULEGEN/.test(bart) || !w7.arc.noted.some(n => n.id === 'bart')) fail('week 7: Bart\'s empty draft wrong: ' + bart.slice(-400));
+  if (w7.mails.includes('Lehman')) fail('week 7: the recalled 2008 headline is back in the inbox');
+  if (!/Fourteen good questions/.test(maxq)) fail('week 7: Max\'s log wrong: ' + maxq.slice(-300));
+  if (w7.errs.length) fail('week 7 errors: ' + w7.errs);
+  console.log('week 7 ok', JSON.stringify(w7.arc.shown));
   await b.close(); srv.close();
   console.log('story: all fine');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

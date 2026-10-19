@@ -69,13 +69,36 @@
       pick: null, note: '', grade: null
     };
   }
-  function plan(cards, seed) { return JUNIORS.map((j, i) => draft(cards[i], j, seed)); }
+  // The story, week 7 (js/arc.js): Bart's draft is sound, generic and empty. No flaw in any line and
+  // nothing from the client in it; only "Something else..." fits. Not scored, no Gemini.
+  const EMPTY = {
+    need: 'Staff need to strengthen the capabilities required to perform effectively in their role.',
+    lever: 'Partly. A blended approach addresses knowledge, skills and attitudes.',
+    measure: 'Completion rate, learner satisfaction and a knowledge check at the end of the module.',
+    concept: 'An engaging, interactive module with realistic scenarios, a quiz and a certificate.',
+    risks: 'Learner engagement and time to participate. Mitigation: visible management support.'
+  };
+  function emptyDraft(card, junior) {
+    return {
+      junior: junior.id, card: card.id, flaw: 'else', empty: true, atypical: false, why: '',
+      found: [],
+      lines: LINES.map(([k, label]) => ({ k, label, text: EMPTY[k] })),
+      pick: null, note: '', grade: null
+    };
+  }
+  function plan(cards, seed, empty) { return JUNIORS.map((j, i) => empty && j.id === 'bart' ? emptyDraft(cards[i], j) : draft(cards[i], j, seed)); }
+  // Reviewing the empty draft: what Bart and Mieke say. It goes in the notebook, not in the score.
+  function reviewEmpty(d) {
+    d.grade = { spot: 0, coach: 0, total: 0, unscored: true,
+      reply: d.pick === 'else' ? 'Something else? ...Yes. I didn\'t write it. It was in my folder this morning, finished. I thought you had done it.' : 'That line? It\'s fine, isn\'t it? They are all fine. I didn\'t write any of them, to be honest. It was in my folder this morning.',
+      note: 'Mieke, reading over your shoulder: "Bart didn\'t write this. Nobody did." She goes back to her desk without another word.' };
+  }
   const junior = id => JUNIORS.find(j => j.id === id);
 
   // Points: 4 for finding the flaw, 6 for the coaching (Gemini scores it 0 to 3, doubled).
   function spotPoints(d) { return d.pick === d.flaw ? 4 : 0; }
 
-  function render(box, team, cardOf, onChange, onSend) {
+  function render(box, team, cardOf, onChange, onSend, onNote) {
     box.innerHTML = '';
     const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
     const tabs = el('div', 'team-tabs');
@@ -107,6 +130,7 @@
     page.appendChild(file);
     const facts = el('div', 'team-facts');
     facts.appendChild(el('b', null, j.name + '\'s notes: what the intake turned up'));
+    if (d.empty) facts.appendChild(el('p', 'muted', 'No notes attached. No call log either.'));
     const ul = el('ul');
     d.found.forEach(f => {
       const li = el('li');
@@ -131,6 +155,14 @@
       li.appendChild(b);
       ol.appendChild(li);
     });
+    if (d.empty) {
+      const li = el('li', d.pick === 'else' ? 'picked' : ''), b = el('button');
+      b.type = 'button'; b.disabled = !!d.grade; b.setAttribute('aria-pressed', String(d.pick === 'else'));
+      b.append(el('b', null, 'Something else...'));
+      b.onclick = () => { d.pick = d.pick === 'else' ? null : 'else'; onChange(); };
+      li.appendChild(b);
+      ol.appendChild(li);
+    }
     page.appendChild(el('p', 'fine', d.grade ? '' : 'Click the line with the problem. Then coach ' + j.name + ' in a few sentences: what is wrong, why, and a question that gets them to fix it. Don\'t rewrite it for them.'));
     page.appendChild(ol);
     if (!d.grade) {
@@ -150,6 +182,15 @@
     } else {
       const g = d.grade;
       const res = el('div', 'team-result');
+      if (g.unscored) {
+        res.appendChild(el('p', 'team-reply', j.face + ' ' + j.name + ': ' + g.reply));
+        res.appendChild(el('p', null, g.note));
+        res.appendChild(el('p', 'muted', 'Document properties: Author MODULEGEN. Not counted in your team score.'));
+        if (onNote) { const n = el('button', 'link', 'Note it'); n.type = 'button'; n.onclick = () => { onNote(d); n.textContent = 'Noted'; n.disabled = true; }; res.appendChild(n); }
+        page.appendChild(res);
+        box.appendChild(page);
+        return;
+      }
       res.appendChild(el('p', 'team-score', g.total + ' / 10 · ' + (d.pick === d.flaw ? 'You found the flaw' : 'You missed the flaw') + ' (' + g.spot + '/4) · Coaching ' + g.coach + '/6'));
       if (d.pick !== d.flaw) res.appendChild(el('p', null, 'The problem was in "' + LINES.find(([k]) => k === d.flaw)[1] + '". ' + d.why));
       else res.appendChild(el('p', 'muted', d.why));
@@ -161,9 +202,9 @@
     box.appendChild(page);
   }
   function score(team) {
-    const done = team.drafts.filter(d => d.grade);
-    return { total: done.reduce((a, d) => a + d.grade.total, 0), of: team.drafts.length * 10, reviewed: done.length };
+    const scored = team.drafts.filter(d => !d.empty), done = scored.filter(d => d.grade);
+    return { total: done.reduce((a, d) => a + d.grade.total, 0), of: scored.length * 10, reviewed: done.length };
   }
 
-  window.Team = { JUNIORS, plan, draft, render, score, spotPoints, junior, LINES };
+  window.Team = { JUNIORS, plan, draft, render, score, spotPoints, junior, LINES, reviewEmpty };
 })();

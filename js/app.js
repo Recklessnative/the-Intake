@@ -261,7 +261,7 @@
     state.academy = state.hard || state.one ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
     const recall = state.hard || state.one || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
-    state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId) } : null;
+    state.team = !state.one && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0))) } : null;
     state.run = null;
     if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
   }
@@ -505,6 +505,16 @@
   // From week 2 Facilities has one more mail, and it comes back every week like the others.
   const FLOOR5 = { from: 'Facilities', subject: 'Lift, floor 5', ago: 33, arc: 'floor5',
     body: 'The lift button for floor 5 is out of order. A technician has been informed.\n\nThere is no floor 5. Please stop pressing it. It does not help and it has been noted.' };
+  // Act 2 of the story: a headline from too late, and a bounce whose source is from much later.
+  const LEHMAN = [
+    { from: 'NewsFlash Daily', subject: 'Lehman Brothers files for bankruptcy', at: 7 * 60 + 29, arc: 'lehman',
+      body: 'Monday 15 September 2008\n\nThe fourth-largest investment bank in the United States filed for bankruptcy protection after weekend talks to rescue it failed.' },
+    { from: 'NewsFlash Daily', subject: 'Recall: Lehman Brothers files for bankruptcy', at: 8 * 60 + 9, arc: 'lehman',
+      body: 'NewsFlash Daily would like to recall the message "Lehman Brothers files for bankruptcy".\n\nOur apologies. That was a test headline from our template folder. Lehman Brothers is fine.\n\nThe intranet team' }
+  ];
+  const BOUNCE = { from: 'Mail Delivery System', subject: 'Undeliverable: RE: Your mailbox is almost full (98%)', ago: 47, arc: 'source',
+    body: 'Your message could not be delivered.\n\nThe recipient\'s mailbox is full. It has been full since 2007.\n\nThe technical details are in the message source.',
+    source: ['Date: Thu, 14 Mar 2041 03:12:09 +0100', 'From: Mail Delivery System <MAILER-DAEMON@synergix.be>', 'X-Restored-From: synergix_pst_2007.bak (71% recovered)'] };
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
   function mailbox() {
@@ -513,7 +523,8 @@
     // Your very first request: everything else is already read, so the one bold line is the request.
     const today = state.days[state.index] || 0, fresh = firstEver();
     const seen = sub => { if (fresh) r.readMail[sub] = true; return !!r.readMail[sub]; };
-    const mails = FILLER.concat(Arc.offer('floor5', arcNow()) ? [FLOOR5] : []).map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
+    const now = arcNow();
+    const mails = FILLER.concat(Arc.offer('floor5', now) ? [FLOOR5] : [], Arc.offer('source', now) ? [BOUNCE] : []).map(f => Object.assign({ read: seen(f.subject), day: 0, at: 8 * 60 + 50 - f.ago }, f));
     state.cards.slice(0, state.index).forEach((c, i) => mails.push({
       from: c.stakeholder.name, subject: c.subject, request: c, read: true, done: true, day: state.days[i] || 0, at: 8 * 60 + 55 + 40 * i,
       body: c.surfaceAsk + '\n\n(Handled. Scored ' + (state.results[i] || {}).total + ' / 100.)'
@@ -523,6 +534,8 @@
       const sm = Story.storyMail(state.weekNo);
       mails.push(Object.assign({ read: seen(sm.subject), day: 0, at: 8 * 60 + 12, story: true }, sm));
       Story.news(state.weekNo, today).forEach((n, i) => mails.push(Object.assign({ read: seen(n.subject), at: 7 * 60 + 31 + i }, n)));
+      // The recalled headline is that week's news only.
+      if (Arc.offer('lehman', now) && Arc.landed('lehman') === now.week) LEHMAN.forEach(m => mails.push(Object.assign({ read: seen(m.subject), day: 0 }, m)));
     }
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
@@ -582,6 +595,7 @@
     $('mail-role').textContent = person ? '(' + person.role + (person.org ? ', ' + person.org.split(',')[0] : '') + ')' : '';
     $('mail-subject').textContent = m.subject;
     $('mail-body').textContent = m.body;
+    $('mail-body').classList.remove('source');
     $('mail-attach').hidden = !m.current;
     $('mail-actions').hidden = !m.current;
     $('mail-academy').hidden = !m.academy;
@@ -590,6 +604,16 @@
     if (m.arc) { const b = $('btn-mail-note'), done = Arc.noted(m.arc); b.textContent = done ? '📌 Noted' : '📌 Note it'; b.disabled = done; }
     if (m.academy) $('btn-academy').textContent = state.academy.done ? '🎓 See the tips again' : state.academy.started ? '🎓 Carry on with the module' : '🎓 Open the module';
     renderMail();
+  }
+  // View source: the message headers, as Doors Mail stores them. Click again for the message.
+  function viewSource(m) {
+    const body = $('mail-body');
+    if (body.classList.toggle('source')) {
+      const d = Story.dateOf(state.weekNo, m.day || 0);
+      const date = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()] + ', ' + d.getUTCDate() + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getUTCMonth()] + ' ' + d.getUTCFullYear() + ' ' + hhmm(m.at || 0) + ':00 +0200';
+      const head = m.source || ['Date: ' + date, 'From: ' + m.from + ' <' + m.from.toLowerCase().replace(/[^a-z]+/g, '.').replace(/^\.|\.$/g, '') + '@' + (m.request ? 'client.be' : 'synergix.be') + '>'];
+      body.textContent = ['Received: from mail.synergix.be ([10.0.0.12])'].concat(head, ['Subject: ' + m.subject, 'X-Mailer: Doors Mail 6.0', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=iso-8859-1', '', m.body]).join('\n');
+    } else body.textContent = m.body;
   }
   function contacts() {
     const ul = $('mail-contacts');
@@ -610,6 +634,7 @@
       if (b.dataset.mail === 'reply' && m && m.current) { $('btn-call').onclick(); return; }
       if (b.dataset.mail === 'reply') { toast('Nobody here reads replies. Pick up the phone for the ones that matter.', 'info'); return; }
       if (b.dataset.mail === 'delete' && m && !m.request) { toast('Archived. It is still there, but in a folder you will never open.', 'info'); return; }
+      if (b.dataset.mail === 'source') { if (m) viewSource(m); else toast('Select a message first.', 'info'); return; }
       toast(MAIL_JOKES[b.dataset.mail], 'info');
     };
   });
@@ -626,6 +651,51 @@
     $('briefing-head').textContent = b.headline;
     if (b.text) { const p = document.createElement('p'); p.textContent = b.text; box.appendChild(p); }
     b.points.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+    arcBriefing(box, ul);
+  }
+  // The story in the case file, from week 6: every file is a restored scan with one line gone, and
+  // on one request in week 7 the client forwards the log of GMS's avatar doing an intake.
+  function arcBriefing(box, ul) {
+    const r = state.run;
+    if (!r || state.hard || state.one) return;
+    box.querySelectorAll('.arc-log').forEach(e => e.remove());
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    if (Arc.offer('legible', arcNow())) {
+      ul.appendChild(el('li')).appendChild(el('span', 'arc-redacted', '[REDACTED: ARCHIVE]'));
+      const src = el('p', 'arc-src', 'Source: ' + ((r.card.stakeholder.org || '').split(',')[0] || 'client') + ', annual report 2007 (restored, 71% legible). ');
+      const b = el('button', 'link', Arc.noted('legible') ? 'Noted' : 'Note it'); b.type = 'button';
+      b.onclick = () => { if (Arc.note('legible')) toast('Noted. Your notebook is on the floor, between requests.', 'info'); b.textContent = 'Noted'; };
+      src.appendChild(b);
+      box.appendChild(src);
+    }
+    if (r.maxLog == null) r.maxLog = Arc.once('transcript', arcNow());
+    if (r.maxLog) box.insertBefore(maxLog(el), $('case-call'));
+  }
+  // Fourteen good questions, all about the course. Pick the one it never asked; nothing is scored.
+  const MAX_ASKED = ['Who is the target audience?', 'How many learners?', 'What is the deadline?', 'What is the budget?', 'Which LMS do you use?', 'SCORM 1.2 or 2004?', 'How long should the module be?', 'Which learning objectives must it cover?', 'Do you want a quiz at the end?', 'What pass mark?', 'Which tone of voice: formal or friendly?', 'Should Max present it, or a narrator?', 'Which languages?', 'Do you need a certificate?'];
+  function maxLog(el) {
+    const d = el('details', 'arc-log');
+    d.appendChild(el('summary', null, '📎 MAX_intake_log.txt'));
+    d.appendChild(el('p', null, 'Forwarded by the client: "GMS\'s avatar asked us these. Is this how you do it too?"'));
+    const ol = el('ol');
+    MAX_ASKED.forEach(q => ol.appendChild(el('li', null, 'MAX: ' + q)));
+    d.appendChild(ol);
+    d.appendChild(el('p', null, 'Which question did Max never ask?'));
+    const out = el('p', 'fine'), row = el('div', 'row');
+    [['Which learning objectives must it cover?', 'It asked that. Number 8.'], ['What are people doing now that they should do differently?', 'That one. Fourteen good questions, and every one of them about the course.'], ['Do you want a quiz at the end?', 'It asked that. Number 9.']].forEach(([q, line], k) => {
+      const b = el('button', null, q); b.type = 'button';
+      b.onclick = () => {
+        out.textContent = line;
+        if (k !== 1) return;
+        row.querySelectorAll('button').forEach(x => { x.disabled = true; });
+        const n = el('button', 'link', Arc.noted('transcript') ? 'Noted' : 'Note it'); n.type = 'button';
+        n.onclick = () => { if (Arc.note('transcript')) toast('Noted. Your notebook is on the floor, between requests.', 'info'); n.textContent = 'Noted'; };
+        out.append(' ', n);
+      };
+      row.appendChild(b);
+    });
+    d.append(row, out);
+    return d;
   }
 
   $('btn-call').onclick = () => {
@@ -1038,11 +1108,13 @@
   // ---------- the team: review the juniors' drafts ----------
   function renderTeam() {
     if (!state.team) return;
-    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); if (state.board && state.board.stage === 'pick') renderBoardRoom(); }, sendTeam);
+    Team.render($('team'), state.team, id => state.pool.find(c => c.id === id), () => { renderTeam(); save(); if (state.board && state.board.stage === 'pick') renderBoardRoom(); }, sendTeam,
+      d => { if (Arc.note('bart')) toast('Noted. Your notebook is on the floor, between requests.', 'info'); });
   }
   async function sendTeam(d) {
     const j = Team.junior(d.junior), card = state.pool.find(c => c.id === d.card);
     if (!d.pick) { toast('Click the line with the problem first.', 'info'); return; }
+    if (d.empty) { Team.reviewEmpty(d); recordTeam(); renderTeam(); save(); if (state.run) mailbox(); return; }
     if (words(d.note || '') < 6) { toast('Write ' + j.name + ' a real note: what is wrong, why, and what to try.', 'info'); return; }
     const flawLabel = Team.LINES.find(([k]) => k === d.flaw)[1];
     const p = Prompts.coach(card, j, flawLabel, d.why);
@@ -1146,7 +1218,7 @@
       '',
       'Their question to you: """' + question + '"""'
     ].join('\n');
-    const p = Prompts.colleague(r.card);
+    const p = Prompts.colleague(r.card, Arc.lore(arcNow()));
     document.querySelectorAll('#w-mieke button:not(.tb)').forEach(b => { b.disabled = true; });
     try {
       const out = await Gemini.json({ system: p.system, schema: p.schema, turns: [{ role: 'user', text: material }] });
@@ -2012,11 +2084,12 @@
   // A breath between two requests: you stand up, and the places you could go are lit. Your desk
   // moves the game on; everyone else says one thing. Nothing here costs a question or a Gemini call.
   const COFFEE = [
-    'BUITEN GEBRUIK. HORS SERVICE. Somebody has added, in biro: "since 2004".',
+    'OUT OF ORDER. Somebody has added, in biro: "since 2004".',
     'Still broken. A second note says facilities "has escalated it". A third note says "to whom?".',
     'You press the button anyway. It makes a noise like a fax machine and gives you hot water.',
     'Mieke keeps a jar of instant coffee in her drawer. She has seen you looking at it.'
   ];
+  const COFFEE_2024 = 'OUT OF ORDER. Somebody has added, in biro: "since 2004". Somebody else has corrected the 0 to a 2, in a different pen.\n\nYou press the button anyway. Hot water.';
   // ---------- things to find on the floor ----------
   // No faces: you get to know people by their desks. A place opens from a given floor visit (`from`),
   // and each thing in it turns up `at` visits later, so there is something new most times you stand up.
@@ -2046,7 +2119,7 @@
     ] },
     canteen: { from: 2, shot: 'canteen', title: 'The canteen', who: 'The canteen', things: [
       { id: 'lunch', at: 0, label: 'Lunch box', text: 'A plastic lunch box with a note: "JENS. DO NOT EAT." Underneath, smaller: "I know it was you, Bart."' },
-      { id: 'rota', at: 0, label: 'Dishes rota', text: 'AFWAS / VAISSELLE. Weeks 36 to 40: Darren, Darren, Darren, Darren, Darren. None of the boxes are ticked. Nobody remembers who wrote the rota.' },
+      { id: 'rota', at: 0, label: 'Dishes rota', text: 'DISHES ROTA. Weeks 36 to 40: Darren, Darren, Darren, Darren, Darren. None of the boxes are ticked. Nobody remembers who wrote the rota.' },
       { id: 'mugs', at: 1, label: 'Mugs', text: 'Four mugs. Three have a name on the bottom. The fourth says "GMS: Learning that moves", from a trade fair in Kortrijk. Nobody admits to drinking from it. It is always clean.' },
       { id: 'microwave', at: 2, label: 'Microwave', text: 'A note on the door: "FISH = WRITTEN WARNING. - HR". There has been exactly one fish. Everyone knows whose.' },
       { id: 'cooler', at: 3, label: 'Water cooler', text: '"Please do not refill with soup." It is laminated, so it has happened more than once.' }
@@ -2148,7 +2221,8 @@
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
       tv: news ? { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: news.subject, text: news.body }
         : { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: 'Corporate communications', text: 'A slideshow about the new expense form. Slide 4 of 31. Nobody is watching. The remote has been missing since the Rugby World Cup was announced.' },
-      coffee: { label: 'Coffee machine', who: 'Coffee machine', face: '☕', text: COFFEE[(state.weekNo * 3 + i) % COFFEE.length] },
+      coffee: Arc.offer('coffee', arcNow(day)) ? { label: 'Coffee machine', who: 'Coffee machine', face: '☕', text: COFFEE_2024, note: arcNote('coffee') }
+        : { label: 'Coffee machine', who: 'Coffee machine', face: '☕', text: COFFEE[(state.weekNo * 3 + i) % COFFEE.length] },
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };

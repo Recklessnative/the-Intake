@@ -75,6 +75,8 @@ Every hint has a 2007 excuse, at most one new hint lands per in-game day, none i
 | 2 | Spam text ends "Reply LOG OFF to stop these messages" | phone, week 7 |
 | 2 | Canteen TV test card after 18:00; Lindeveld streets end in fog | evening floor, town |
 
+In the game: `js/arc.js` holds the slot of every built hint (arc week and day, one per day) and the "Doesn't add up" page; `tests/story.cjs` plays weeks 2, 3 and 5 to 7 to check them. From week 5 every week is a team week, so act 2 hints sit on Mondays and Thursdays only.
+
 ## Mechanics for the story
 
 None costs a case question or a point.
