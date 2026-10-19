@@ -12,6 +12,7 @@
     const k = raw.concepts || {};
     return {
       id: raw.id,
+      era: raw.era || '',
       sector: raw.sector,
       title: raw.title,
       difficulty: raw.tier == null ? 1 : raw.tier,

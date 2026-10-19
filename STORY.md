@@ -109,7 +109,7 @@ The ending is the lever call, graded like any case:
 - **Training** means Clock in tomorrow: back to 2007, endless weeks, Mieke's lamp on again.
 - **Role and authority** (someone who can say no and sign it) means Log off: down the lift, out into the 2041 rain, the fourth-floor window going dark behind you.
 
-Neither is labelled the good one. End card: "Asking why was never the hard part. Saying 'not a course', with your name under it, is." If voiced, the operator speaks only at the end: "You noticed eleven things. Most cohorts notice four. That is the skill, by the way."
+Neither is labelled the good one. In the game: `scenarios/operator-2041.json` (never drawn; `era: "2041"` swaps the period line in every prompt), the week starts when `intake-told-reveal` is set and `intake-ending` is not; `Reveal.end` in `js/reveal.js` plays the ending and stores `intake-ending` (`logoff` or `clockin`). Learning fixes this or Partly means Clock in; Not a learning problem means Log off. `tests/story.cjs` plays both. End card: "Asking why was never the hard part. Saying 'not a course', with your name under it, is." If voiced, the operator speaks only at the end: "You noticed eleven things. Most cohorts notice four. That is the skill, by the way."
 
 ## The town and the money
 
