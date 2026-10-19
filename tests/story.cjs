@@ -26,7 +26,7 @@ function mock(route) {
 
 const PTS = { diagnosis: 15, measurement: 10, fit: 10, nextLevel: 10, risks: 8, pitch: 7 };
 // A history with `n` finished normal weeks (plus, with `hard`, a hard week, which must not count).
-const history = (n, cards, hard) => ({ promoted: n >= 4 ? { week: 4 } : undefined, weeks: Array.from({ length: n }, (_, i) => ({ id: 'seed' + i, started: Date.UTC(2026, 0, 1 + 7 * i), done: true, title: 'Learning Consultant', avg: 60, requests: cards.map((c, k) => ({ index: k, card: c, total: 60, at: Date.UTC(2026, 0, 1 + 7 * i), pts: PTS })) }))
+const history = (n, cards, hard) => ({ promoted: n >= 4 ? { week: 4 } : undefined, weeks: Array.from({ length: n }, (_, i) => ({ id: 'seed' + i, started: Date.UTC(2026, 0, 1 + 7 * i), done: true, title: 'Learning Consultant', avg: 60, requests: cards.map((c, k) => ({ index: k, card: c, who: 'Client ' + k, org: 'Org ' + k, call: k === 0 ? 'yes' : undefined, total: 60, at: Date.UTC(2026, 0, 1 + 7 * i), pts: PTS })) }))
   .concat(hard ? [{ id: 'seedhard', started: Date.UTC(2026, 3, 1), done: true, hard: true, title: 'Learning Consultant', avg: 60, requests: [{ index: 0, card: cards[0], total: 60, pts: PTS }] }] : []) });
 
 // `arc`: hints that already landed in earlier weeks.
@@ -87,9 +87,12 @@ async function playWeek(b, n, opt, onFloor) {
     await p.click('#office-list button.primary');
     // From the evening of the tender the lift asks: home, or button 5.
     let revealed = false;
-    if (await p.isVisible('#office-card button:has-text("Press 5")')) {
-      seen.lift = await p.textContent('#office-card');
-      if (opt.onLift) revealed = await opt.onLift(p, seen);
+    const press5 = await p.isVisible('#office-card button:has-text("Press 5")');
+    if (press5) seen.lift = await p.textContent('#office-card');
+    if (press5 && opt.onLift) revealed = await opt.onLift(p, seen);
+    else if (await p.isVisible('#office-card button:has-text("Walk home through town")')) {
+      // After a finished week the lift also offers the town (js/town.js).
+      if (opt.onTown && !seen.town) { await p.click('#office-card button:has-text("Walk home through town")'); await p.waitForSelector('#town.in'); seen.town = await opt.onTown(p, seen); await p.click('#town .tw-bar button.primary'); revealed = true; }
       else await p.click('#office-card button:has-text("Go home")');
     }
     if (revealed) await p.waitForSelector('#s-desk', { state: 'visible' });
@@ -105,6 +108,18 @@ async function playWeek(b, n, opt, onFloor) {
 }
 const card = async (p, spot) => { await p.click('#office-list button[data-spot="' + spot + '"]'); const t = await p.textContent('#office-card'); await p.click('#office-card button'); return t; };
 const fail = m => { throw new Error(m); };
+// Opens each place on the town map and returns its text, keyed by place; every <details> opened.
+async function townText(p) {
+  const out = {};
+  for (const id of ['flat', 'junction', 'hall', 'streets']) {
+    await p.click('#town .tw-pin[data-place="' + id + '"]');
+    await p.evaluate(() => document.querySelectorAll('#town details').forEach(d => { d.open = true; }));
+    out[id] = await p.textContent('#town .tw-panel');
+  }
+  out.map = await p.textContent('#town .tw-map');
+  out.notes = await p.$$eval('#town .tw-panel button', bs => bs.map(b => b.textContent));
+  return out;
+}
 
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROMIUM || undefined });
@@ -117,7 +132,17 @@ const fail = m => { throw new Error(m); };
     await p.click('#btn-mail-note');
     mailNote = await p.textContent('#btn-mail-note') + ' / ' + await p.textContent('#toast');
   };
-  const w2 = await playWeek(b, 1, { arc: { badge: 7, tape: 8 }, atDesk }, async (p, f) => {
+  // The town, act 1: a plain 2007 town, a week's pay, a regular whose case went right.
+  const onTown1 = async p => {
+    const t = await townText(p);
+    await p.click('#town .tw-pin[data-place="flat"]');
+    await p.evaluate(() => { document.querySelector('#town details:last-of-type').open = true; });
+    await p.click('#town .tw-cat li:has-text("A plant") button');
+    t.after = await p.textContent('#town .tw-panel');
+    await p.screenshot({ path: SHOTS + '/arc-town.png' });
+    return t;
+  };
+  const w2 = await playWeek(b, 1, { arc: { badge: 7, tape: 8 }, atDesk, onTown: onTown1 }, async (p, f) => {
     if (f.req === 1) {
       await p.click('#office-list button[data-spot="darren"]');
       await p.waitForSelector('#office-look');
@@ -131,6 +156,11 @@ const fail = m => { throw new Error(m); };
   if (!planner.includes('Same as last week')) fail('week 2: Darren\'s planner did not change: ' + planner);
   if (w2.mieke.some(t => t.includes('Morning again'))) fail('week 2: "Morning again" too early');
   if (!/Noted.*Noted\. Your notebook/.test(mailNote) || !w2.arc.noted.some(n => n.id === 'floor5')) fail('week 2: could not note the floor 5 mail: ' + mailNote);
+  const T1 = w2.town || fail('week 2: the lift did not offer the town');
+  if (!/Employee no\. 1207/.test(T1.flat) || !/Net pay \(EUR\) \.+ 289\.05/.test(T1.flat) || /Immersion|Sign-offs|Mieke/.test(T1.flat)) fail('week 2: payslip wrong: ' + T1.flat);
+  if (!/plant that is, against the odds, alive/.test(T1.after) || !/276\.55/.test(T1.after)) fail('week 2: buying the plant did not work: ' + T1.after);
+  if (!/first check-in screen/.test(T1.junction) || !/Still working on it/.test(T1.junction) || /DELAYED/.test(T1.junction)) fail('week 2: Monday check at The Junction wrong: ' + T1.junction);
+  if (T1.notes.some(n => /Note it/.test(n)) || /1207/.test(T1.hall) || /fog|recovered/i.test(T1.streets + T1.map)) fail('week 2: act 1 town shows a seam: ' + JSON.stringify(T1));
   if (w2.errs.length) fail('week 2 errors: ' + w2.errs);
   console.log('week 2 ok', JSON.stringify(w2.arc));
   // Week 3, after a hard week that does not count: "Morning again!" on Monday, rain at 08:56 the
@@ -191,7 +221,19 @@ const fail = m => { throw new Error(m); };
     await p.click('#mail-rows tr:has-text("Coffee machine")');
     await p.click('[data-mail="source"]');
     normal = await p.textContent('#mail-body');
-  }, onDesk: async (p, req) => { if (req === 1) legible = await p.textContent('#briefing'); } });
+  }, onDesk: async (p, req) => { if (req === 1) legible = await p.textContent('#briefing'); }, onTown: async p => {
+    // Act 2 in town, on a Monday evening: the 3 September message, the 08:56 train, ticket 1207.
+    const t = await townText(p);
+    await p.click('#town .tw-pin[data-place="flat"]');
+    await p.click('#town details:has-text("answering machine") summary');
+    await p.click('#town details:has-text("answering machine") button');
+    t.noted = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-arc')).noted.map(n => n.id));
+    return t;
+  } });
+  const T2 = w6b.town || fail('week 6: no town');
+  if (!/3 September 2007/.test(T2.flat) || !/Immersion costs: covered by the Learning House/.test(T2.flat) || !/paid for being right/.test(T2.flat) || /Sign-offs/.test(T2.flat)) fail('week 6: act 2 flat wrong: ' + T2.flat);
+  if (!/08:56 Brussels-North · DELAYED/.test(T2.junction) || !/Ticket: 1207|ticket: 1207/.test(T2.hall) || !/fog/i.test(T2.streets)) fail('week 6: act 2 town seams missing: ' + JSON.stringify(T2));
+  if (!T2.noted.includes('town:machine')) fail('week 6: could not note the answering machine: ' + T2.noted);
   if (!/14 Mar 2041/.test(source) || !/71% recovered/.test(source)) fail('week 6: bounce source wrong: ' + source);
   if (/2041|recovered/.test(normal) || !/2007/.test(normal)) fail('week 6: an ordinary mail source gives it away: ' + normal);
   if (!/71% legible/.test(legible) || !/REDACTED: ARCHIVE/.test(legible)) fail('week 6: Thursday case file is not a restored scan: ' + legible);
@@ -308,6 +350,17 @@ const fail = m => { throw new Error(m); };
   } });
   if (ci.after.ending !== 'clockin' || ci.after.final || ci.after.cards.includes('operator-2041') || !/Session 1207 continues/.test(ci.card)) fail('Clock in ending wrong: ' + JSON.stringify(ci));
   console.log('clock in ok');
+  // After the reveal and Log off, the town is the archive: the operator's Monday check, Sign-offs: 1.
+  const w10 = await playWeek(b, 9, { arc: ALL, storage: { 'intake-told-reveal': '1', 'intake-ending': 'logoff', 'intake-signoffs': '1' }, onTown: async p => {
+    const t = await townText(p);
+    await p.screenshot({ path: SHOTS + '/arc-town-2041.png' });
+    return t;
+  } });
+  const T3 = w10.town || fail('after the ending: no town');
+  if (!/MONDAY CHECK, filed by the operator/.test(T3.junction) || !/Sign-offs: 1/.test(T3.flat) || !/Final settlement: 0\.00/.test(T3.flat) || !/ARCHIVE ITEM/.test(T3.flat)) fail('after the ending: town wrong: ' + JSON.stringify(T3));
+  if (!/NOW SERVING: 1207/.test(T3.hall) || !/not recovered/.test(T3.map) || T3.notes.length) fail('after the ending: the archive town wrong: ' + JSON.stringify(T3));
+  if (w10.errs.length) fail('town errors: ' + w10.errs);
+  console.log('town ok');
   await b.close(); srv.close();
   console.log('story: all fine');
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

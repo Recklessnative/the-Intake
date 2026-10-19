@@ -1166,3 +1166,47 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
 .rv-end-big { font-size: 20px; line-height: 1.35; }
 .rv-end-small { font-size: 12px; opacity: .7; margin: 0 !important; }
 .ending.clockin .rv-pic { filter: saturate(.85); }
+/* Lindeveld (js/town.js): a Doors Maps window over the evening. XP chrome, a paper map, no faces. */
+.town { position: fixed; inset: 0; z-index: 100004; display: flex; align-items: center; justify-content: center; padding: 12px;
+  background: radial-gradient(ellipse at 50% 40%, #29384a, #0b1119); opacity: 0; transition: opacity .4s ease; }
+.town.in { opacity: 1; }
+.tw-win { display: flex; flex-direction: column; width: min(1120px, 100%); height: min(700px, 100%); color: var(--ink); background: var(--win);
+  border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 18px rgba(0,0,0,.55); }
+.tw-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 3fr 2fr; gap: 8px; padding: 8px; }
+.tw-map { width: 100%; height: 100%; min-height: 0; border: 1px solid #7f9db9; background: #f2ecd8; font: 13px Tahoma, Verdana, sans-serif; }
+.tw-land { fill: #f2ecd8; }
+.tw-canal { fill: none; stroke: #9cc2e5; stroke-width: 18; }
+.tw-rail { fill: none; stroke: #666; stroke-width: 3; stroke-dasharray: 10 6; }
+.tw-ring { fill: none; stroke: #e2b755; stroke-width: 8; }
+.tw-street { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; }
+.tw-block { fill: #ddd3b8; stroke: #c4b896; }
+.tw-station { fill: #c9b9a0; stroke: #8a7a60; }
+.tw-small-label { fill: #6b604a; font-size: 11px; text-anchor: middle; }
+.tw-lost { fill: #444; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.tw-pin { cursor: pointer; outline: none; }
+.tw-pin .tw-hit { fill: transparent; stroke: none; }
+.tw-pin circle:not(.tw-hit) { fill: #ffffe1; stroke: #000; stroke-width: 1.5; }
+.tw-pin text { fill: #000; font-weight: 700; paint-order: stroke; stroke: #f2ecd8; stroke-width: 4px; }
+.tw-pin:hover circle:not(.tw-hit), .tw-pin:focus-visible circle:not(.tw-hit) { fill: #ffd86b; }
+.tw-pin.on circle:not(.tw-hit) { fill: #e68b2c; }
+.tw-panel { min-height: 0; overflow-y: auto; padding: 8px 10px; background: #fff; border: 1px solid #7f9db9; }
+.tw-panel h3 { margin: 0 0 6px; font-size: 15px; }
+.tw-intro { margin: 0 0 10px; }
+.tw-item { margin: 0 0 6px; border: 1px solid #c9c9c9; background: #fcfcfe; }
+.tw-item summary { cursor: pointer; padding: 4px 8px; font-weight: 700; background: linear-gradient(#fff, #ecebe5); }
+.tw-item[open] summary { border-bottom: 1px solid #c9c9c9; }
+.tw-text { padding: 6px 8px; white-space: pre-line; }
+.tw-item > button { margin: 0 8px 8px; }
+.tw-slip { margin: 0 0 8px; padding: 8px; font: 12px/1.4 "Lucida Console", monospace; white-space: pre; overflow-x: auto; background: #fbf8ef; border: 1px dashed #b8a98a; }
+.tw-sticky { margin: 0; padding: 6px 8px; background: #fff7a8; box-shadow: 1px 2px 3px rgba(0,0,0,.2); transform: rotate(-1deg); white-space: normal; }
+.tw-cat { list-style: none; margin: 0 0 6px; padding: 0; }
+.tw-cat li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #c9c9c9; white-space: normal; }
+.tw-small { margin: 0; font-size: 11px; color: #555; }
+.tw-bar { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-top: 1px solid #fff; }
+.tw-when { flex: 1; color: #444; }
+@media (max-width: 760px) {
+  .town { padding: 0; }
+  .tw-win { height: 100%; border-radius: 0; }
+  .tw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .tw-map { height: auto; }
+}
