@@ -1923,7 +1923,7 @@
     const parts = points(g), { pts, bonus, total } = parts;
     if (!replay) {
       state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
-      recordScore(r, total, pts, g);
+      recordScore(r, total, pts, g, parts.call);
       unlock('w-scores', 'w-drill', 'bin');
       hint('scores');
       r.phase = 'score';
@@ -2274,12 +2274,15 @@
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
     const now = arcNow(day), home = { label: 'Go home: start ' + tomorrow, go: () => Office.sitDown(morning) };
+    // After your first finished week the lift can also drop you in town (js/town.js).
+    const walk = evening && townOpen() ? { label: 'Walk home through town', go: () => { Office.close(); openTown(day, tomorrow, morning); } } : null;
     if (evening && Reveal.open(now)) {
       // From the evening of the tender, button 5 works. After week 7 it is the only one that does.
       const five = { label: 'Press 5', go: () => { Office.close(); Reveal.go({ notes: Arc.notes(), onDone: () => { afterReveal(); morning(); } }); } };
       const only = Reveal.forced(now);
-      spots.lift = { label: only ? 'The lift: button 5' : 'The lift', sub: only ? 'It is the only button that lights' : 'Home, or button 5', primary: true, who: 'The lift', face: '🛗', text: only ? FIVE_ONLY : FIVE_OPEN, actions: only ? [five] : [home, five] };
-    } else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
+      spots.lift = { label: only ? 'The lift: button 5' : 'The lift', sub: only ? 'It is the only button that lights' : 'Home, or button 5', primary: true, who: 'The lift', face: '🛗', text: only ? FIVE_ONLY : FIVE_OPEN, actions: only ? [five] : [home].concat(walk || [], five) };
+    } else if (walk) spots.lift = { label: 'The lift', sub: 'Home, or through town', primary: true, who: 'The lift', face: '🛗', text: TOWN_LIFT, actions: [home, walk] };
+    else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
     const L = looks(arcNow(day));
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
@@ -2312,6 +2315,20 @@
       intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO + (evening ? FLOOR_EVENING : '') }
     };
     Office.standUp(opts);
+  }
+  const TOWN_LIFT = 'Ground floor. Straight home to bed, or the long way, through Lindeveld? Your old clients drink at The Junction, and Payroll pays on Friday.';
+  // The town needs a finished normal week behind you, and never shows in hard mode or Try one case.
+  const townOpen = () => !state.hard && !state.one && !state.final && scoreHistory().weeks.some(w => w.done && !w.hard && !w.one);
+  function openTown(day, tomorrow, after) {
+    const done = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one);
+    const card = id => state.pool.find(c => c.id === id);
+    const seen = new Set();
+    // Most recent first, one line per client.
+    const checks = done.slice().reverse().flatMap(w => w.requests.slice().sort((a, b) => b.index - a.index))
+      .filter(x => !seen.has(x.card) && seen.add(x.card)).map(x => Town.check(x, card(x.card))).filter(Boolean);
+    const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
+    Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow,
+      when: Story.day(state.weekNo, day) + ' · 18:30', onDone: after });
   }
   const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 
@@ -2713,12 +2730,12 @@
     if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined }; h.weeks.push(w); }
     return w;
   }
-  function recordScore(r, total, pts, g) {
+  function recordScore(r, total, pts, g, call) {
     const h = scoreHistory(), w = thisWeek(h), s = r.card.stakeholder;
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
-      starter: r.card.difficulty === 0, total, pts, question: g.questionNotAsked, verdict: g.verdict
+      starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict
     });
     keepScores(h);
   }
