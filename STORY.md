@@ -96,7 +96,7 @@ The lift goes to 5 (a short rendered film). The same floor in 2041: no desks, ra
 
 The simulation is the course the operator ordered. The player signs the waiver; the name field strikes itself through and becomes 1207. Set `intake-told-reveal`.
 
-In the game: `js/reveal.js` (button 5 from the evening of the tender, the only button from week 8; floor 5 is a still for now, `scene.py floor5`, the lift film can replace it). Leads add lines to a `session_1207.log` on the CRT. `tests/story.cjs` plays the reveal in week 8.
+In the game: `js/reveal.js` (button 5 from the evening of the tender, the only button from week 8; the lift film `scene.py lift5` plays first, skippable, and lands on the `scene.py floor5` still). Leads add lines to a `session_1207.log` on the CRT. `tests/story.cjs` plays the reveal in week 8.
 
 Aftermath: button 5 stays lit, the canteen TV shows its test card all day, Mieke's lamp is off with a "Participant 0031" badge on her chair, the boot screen says "archive build 2041.03", My scores.txt is headed "Exported from session 1207", the start menu has a greyed "Log off...".
 

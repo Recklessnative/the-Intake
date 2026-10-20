@@ -1258,3 +1258,7 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
 }
 
 @media (max-width: 899px) and (orientation: portrait) { #s-end, #s-settings, #s-cap { --title-pic: url(media/title-bg-phone.webp); } }
+/* The lift film plays over the floor 5 still, then fades into it. */
+.rv-film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; transition: opacity .6s ease; }
+.rv-film.out { opacity: 0; }
+.rv-stage.filming .office-tag, .rv-stage.filming .rv-glow { visibility: hidden; }
