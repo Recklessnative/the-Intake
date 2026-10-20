@@ -120,7 +120,8 @@
     machine: { who: 'Your flat', label: '3 September 2007', text: 'The answering machine, every Monday: "Monday 3 September 2007, 08:12. It is HR. Your first day is today."' },
     ticket: { who: 'City Hall', label: 'Ticket 1207', text: 'The queue ticket at City Hall says 1207. It said 1207 last time.' },
     bakery: { who: 'Mill Street', label: 'BACK AT 7', text: 'The bakery on Mill Street is never open. The sign says BACK AT 7, at any hour.' },
-    edge: { who: 'The streets', label: 'Fog', text: 'Fog at the end of every road out of town. The bus to Brussels turns back at the ring road.' }
+    edge: { who: 'The streets', label: 'Fog', text: 'Fog at the end of every road out of town. The bus to Brussels turns back at the ring road.' },
+    reader: { who: 'The Learning House', label: 'The grey reader', text: 'The machine in the corner prints index cards for books that come out years from now. The ink on the year is fresh.' }
   };
 
   function el(tag, cls, text) {
@@ -218,6 +219,8 @@
       ].concat(act >= 2 ? [{ label: 'The road out of town', text: act >= 3 ? 'Where the road should go on, there is nothing: NOT RECOVERED.'
         : 'Fog at the end of every road out of town. The bus to Brussels turns back at the ring road. The driver does not seem to mind.', note: act === 2 ? 'edge' : null }] : [])
     };
+    // The Learning House (js/clinic.js): the Case Clinic and the grey reader.
+    if (window.Clinic) P.house = Clinic.place(ctx);
     return P;
   }
 
@@ -248,7 +251,7 @@
     return e;
   }
   // Where each place sits on the 800 x 500 map, and its label.
-  const PINS = { junction: [600, 120, 'The Junction'], flat: [230, 330, 'Canal Street 12'], hall: [430, 250, 'City Hall'], streets: [320, 160, 'Mill Street'] };
+  const PINS = { junction: [600, 120, 'The Junction'], flat: [230, 330, 'Canal Street 12'], hall: [430, 250, 'City Hall'], streets: [320, 160, 'Mill Street'], house: [520, 338, 'The Learning House'] };
   function map(act, pick) {
     const s = svg('svg', { viewBox: '0 0 800 500', class: 'tw-map', role: 'group', 'aria-label': 'Map of Lindeveld' });
     // Drawn well past the 800 x 500 box, so a window of any shape shows map and not a border.
@@ -276,6 +279,7 @@
       if (act >= 3) [[20, 30], [640, 30], [20, 490], [640, 490]].forEach(([x, y]) => s.appendChild(svg('text', { x, y, class: 'tw-lost' }, 'not recovered')));
     }
     Object.entries(PINS).forEach(([id, [x, y, label]]) => {
+      if (id === 'house' && !window.Clinic) return;
       const g = svg('g', { class: 'tw-pin', tabindex: 0, role: 'button', 'data-place': id, 'aria-label': label });
       // A wider ring nobody sees, so a finger on a phone finds the pin.
       g.append(svg('circle', { cx: x, cy: y, r: 26, class: 'tw-hit' }), svg('circle', { cx: x, cy: y, r: 9 }), svg('text', { x: x + 14, y: y + 5 }, label));
@@ -286,7 +290,7 @@
     return s;
   }
 
-  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone }
+  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone, card(id), dayKey }
   function open(ctx) {
     ctx.act = ctx.revealed ? 3 : ctx.now.week >= 5 ? 2 : 1;
     const lay = el('div', 'town');
@@ -301,9 +305,10 @@
     const panel = el('div', 'tw-panel');
     panel.setAttribute('aria-live', 'polite');
     let at = 'flat';
-    const draw = id => {
+    const draw = (id, quiet) => {
       at = id;
       const P = places(ctx)[id];
+      if (id === 'house' && !quiet && window.Clinic) Clinic.arrive(ctx);
       panel.innerHTML = '';
       lay.querySelectorAll('.tw-pin').forEach(g => g.classList.toggle('on', g.dataset.place === id));
       panel.append(el('h3', null, P.title), el('p', 'tw-intro', P.intro));
@@ -323,7 +328,8 @@
         panel.appendChild(d);
       });
     };
-    ctx.redraw = () => draw(at);
+    ctx.redraw = () => draw(at, true);
+    ctx.played = ctx.checks.map(c => c.card);
     body.append(map(ctx.act, draw), panel);
     w.appendChild(body);
     const bar = el('div', 'tw-bar');

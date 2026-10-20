@@ -114,9 +114,13 @@
       '<p><button type="button" id="coe-save-pocket">💾 Save it to your computer or phone</button></p>'
   });
 
+  // Every document, with the Learning House handouts and reader cards (js/clinic.js) at the end.
+  const all = () => DOCS.concat(window.Clinic ? Clinic.docs(Coe.act()) : []);
+  let last = null;
   function render(filesEl, docEl, openId) {
+    last = [filesEl, docEl, openId];
     filesEl.innerHTML = '';
-    DOCS.forEach(d => {
+    all().forEach(d => {
       const li = document.createElement('li');
       const b = document.createElement('button');
       b.type = 'button';
@@ -126,7 +130,7 @@
       li.appendChild(b);
       filesEl.appendChild(li);
     });
-    const doc = DOCS.find(d => d.id === openId) || DOCS[0];
+    const doc = all().find(d => d.id === openId) || DOCS[0];
     docEl.innerHTML = typeof doc.html === 'function' ? doc.html() : doc.html;
     docEl.scrollTop = 0;
     const save = docEl.querySelector('#coe-save-pocket');
@@ -141,5 +145,7 @@
   }
 
   // app.js replaces `plans` with the player's saved if-then plans.
-  const Coe = window.Coe = { docs: DOCS, render, pocketFile, plans: () => [] };
+  // After the Learning House files something new: redraw the list if the folder is already open.
+  function refresh() { if (last && last[1].innerHTML) render(last[0], last[1], last[2]); }
+  const Coe = window.Coe = { docs: DOCS, render, refresh, pocketFile, plans: () => [], act: () => 1 };
 })();

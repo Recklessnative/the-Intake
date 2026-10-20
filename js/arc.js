@@ -35,7 +35,8 @@
     ['the coffee machine note and its corrected year', 'Somebody\'s idea of a joke.'],
     ['Bart\'s draft', 'Bart didn\'t write that. Ask him on Monday.'],
     ['the GMS avatar\'s list of questions', 'That is GMS. Fourteen questions, and not one of them is whether.'],
-    ['the town: the 08:56 train, the queue ticket, the bakery, the fog, the answering machine', 'Lindeveld. Nothing works here after six. Or before.']
+    ['the town: the 08:56 train, the queue ticket, the bakery, the fog, the answering machine', 'Lindeveld. Nothing works here after six. Or before.'],
+    ['the grey reader at the Learning House and the years on its cards', 'A university donated it. Never ask a university where they got something.']
   ];
   const lore = now => !now || now.off || now.week < 5 || now.week > 7 ? null : EXCUSES;
   const slot = (week, day) => week * 7 + day;
@@ -106,7 +107,11 @@
     { a: 'town:machine', b: 'darren:planner', lead: 'Every Monday is your first day.' },
     { a: 'town:regulars', b: 'morning', lead: 'Everybody repeats themselves, word for word.' },
     { a: 'town:edge', b: 'legible', lead: 'Where the archive stops, the town stops.' },
-    { a: 'town:bakery', b: 'town:regulars', lead: 'Lindeveld is on a loop.' }
+    { a: 'town:bakery', b: 'town:regulars', lead: 'Lindeveld is on a loop.' },
+    // The Learning House (js/clinic.js).
+    { a: 'town:reader', b: 'lehman', lead: 'Two things printed from years that haven\'t happened yet.' },
+    { a: 'town:reader', b: 'source', lead: 'The dates that can\'t be right all come from later.' },
+    { a: 'town:reader', b: 'town:edge', lead: 'The town stops where the archive stops, but the books keep going.' }
   ];
   const ODD_LINES = ['Could be a coincidence. Mieke says most things are.', 'You stare at them side by side. Nothing. Maybe another day.', 'Not those two. Not yet, anyway.'];
   const notes = () => { const st = read(); return { noted: st.noted || [], leads: st.leads || [], tries: st.tries || 0 }; };
