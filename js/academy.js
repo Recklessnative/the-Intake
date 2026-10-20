@@ -222,7 +222,18 @@
 
   // The course player. p is the saved progress {started, at, picks[], done}: at is the slide
   // (0..n-1 a question, n the tips). onChange saves; onDone(right, of) once, onDone(null) to close.
+  // The options of one question in an order of their own, fixed for this run of the module (p.seed),
+  // so the right answer is not always B and a redraw does not move them.
+  function order(m, slide, p) {
+    let h = p.seed >>> 0;
+    for (const ch of m.id + ':' + slide) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const ks = m.questions[slide].options.map((o, k) => k);
+    for (let i = ks.length - 1; i > 0; i--) { h = (h * 1664525 + 1013904223) >>> 0; const j = h % (i + 1); [ks[i], ks[j]] = [ks[j], ks[i]]; }
+    return ks;
+  }
+
   function render(box, m, p, onChange, onDone) {
+    if (p.seed == null) p.seed = Math.floor(Math.random() * 4294967296);
     const redraw = () => render(box, m, p, onChange, onDone);
     const n = m.questions.length;
     const no = MODULES.indexOf(m) + 1;
@@ -284,12 +295,14 @@
       stage.appendChild(head);
       stage.appendChild(el('p', 'ac-q', q.q));
       const ol = el('div', 'ac-options');
-      q.options.forEach((o, k) => {
+      order(m, slide, p).forEach((k, n) => {
+        const o = q.options[k];
         const b = el('button', 'ac-opt' + (picked != null ? (o.ok ? ' right' : k === picked ? ' wrong' : '') : ''));
         b.type = 'button';
         b.disabled = picked != null;
+        b.dataset.opt = k;
         b.setAttribute('aria-pressed', picked === k);
-        b.append(el('span', 'ac-letter', 'ABCD'[k]), el('span', 'ac-opt-t', o.t));
+        b.append(el('span', 'ac-letter', 'ABCD'[n]), el('span', 'ac-opt-t', o.t));
         if (picked != null && (o.ok || k === picked)) b.appendChild(el('span', 'ac-why', o.why));
         b.onclick = () => { p.picks[slide] = k; onChange(); redraw(); };
         ol.appendChild(b);

@@ -23,6 +23,7 @@
         <button id="btn-resume" class="primary" hidden></button>
         <button id="btn-morning" class="primary">Today's call <small>3 minutes</small></button>
         <button id="btn-start" class="primary">Clock in for the week</button>
+        <button id="btn-coffee" class="ghost">Coffee with Mieke <small>3 minutes, no key needed</small></button>
         <button id="btn-one" class="ghost">Try one case <small>about 10 minutes</small></button>
         <button id="btn-hard" class="ghost">Hard mode</button>
         <button id="btn-settings" class="ghost">Gemini key</button>
@@ -36,6 +37,11 @@
   <!-- The morning call: one stakeholder a day, no desktop -->
   <section id="s-morning" class="screen">
     <div id="morning" class="panel morning"></div>
+  </section>
+
+  <!-- Coffee with Mieke: five mixed practice items, no desktop, no Gemini -->
+  <section id="s-coffee" class="screen">
+    <div id="coffee" class="panel coffee standup" aria-live="polite"></div>
   </section>
 
   <!-- The cold open: 2007, and AI is still years away -->
@@ -230,6 +236,11 @@
       <!-- Measurement drill: one case, measurement only -->
       <div class="win" id="w-drill" data-title="Measurement drill" data-icon="🎯" data-img="drill">
         <div id="drill" class="standup" aria-live="polite"></div>
+      </div>
+
+      <!-- Coffee with Mieke: five mixed practice items -->
+      <div class="win" id="w-coffee" data-title="Coffee with Mieke" data-icon="☕" data-img="coffee">
+        <div id="coffee-desk" class="standup" aria-live="polite"></div>
       </div>
 
       <!-- The Monday stand-up: recall last week's cases before the inbox -->
@@ -477,6 +488,7 @@
           <h2 id="score-title"></h2>
           <div id="score-total" class="score-total"></div>
           <p id="score-focus" class="score-focus" hidden></p>
+          <button type="button" id="btn-score-coffee" class="link drill-link" hidden>☕ Practise it over coffee with Mieke (about 3 minutes)</button>
           <table class="score-table"><tbody id="score-rows"></tbody></table>
           <div class="debrief">
             <h3>The question you didn't ask</h3>
@@ -523,6 +535,7 @@
         <button data-open="w-coe"><img class="sm-i" src="media/icons/coe-16.webp" alt=""><span>Center of Excellence</span></button>
         <button data-open="w-academy"><img class="sm-i" src="media/icons/academy-16.webp" alt=""><span>CoE Academy</span></button>
         <button data-open="w-drill"><img class="sm-i" src="media/icons/drill-16.webp" alt=""><span>Measurement drill</span></button>
+        <button data-open="w-coffee"><img class="sm-i" src="media/icons/coffee-16.webp" alt=""><span>Coffee with Mieke</span></button>
         <button data-open="w-scores"><img class="sm-i" src="media/icons/scores-16.webp" alt=""><span>My scores</span></button>
         <button data-open="w-team" class="team-only"><img class="sm-i" src="media/icons/team-16.webp" alt=""><span>My team</span></button>
         <button data-open="w-phone"><img class="sm-i" src="media/icons/mobile-16.webp" alt=""><span>My mobile</span></button>
@@ -619,6 +632,7 @@
 <script src="js/slides.js?v=dev"></script>
 <script src="js/standup.js?v=dev"></script>
 <script src="js/drill.js?v=dev"></script>
+<script src="js/coffee.js?v=dev"></script>
 <script src="js/morning.js?v=dev"></script>
 <script src="js/tour.js?v=dev"></script>
 <script src="js/office-map.js?v=dev"></script>

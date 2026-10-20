@@ -1940,6 +1940,7 @@
     const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
     $('score-focus').hidden = !weakest || weakest.left <= 0;
     state.focus = weakest && weakest.left > 0 ? { label: weakest.label, next: weakest.next || '' } : null;
+    $('btn-score-coffee').hidden = $('score-focus').hidden || !!state.hard;
     if (weakest && weakest.left > 0) $('score-focus').textContent = 'Work on this next: ' + weakest.label.toLowerCase() + '. ' + (weakest.next || 'Open "Why this score" below and compare with the model answer.');
     const rows = $('score-rows');
     rows.innerHTML = '';
@@ -2697,6 +2698,32 @@
   }
   $('btn-morning').onclick = () => openMorning();
 
+  // ---------- Coffee with Mieke: five mixed practice items, no Gemini, no points ----------
+  // From the title screen it is its own small screen; on the desk it is a window. Both play the
+  // same round, kept in intake-coffee until the day is over.
+  async function openCoffee(onDesk, fresh) {
+    try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
+    let R = Coffee.load();
+    if (fresh || Coffee.stale(R)) { R = Coffee.build(scoreHistory(), state.pool); Coffee.keep(R); }
+    const box = $(onDesk ? 'coffee-desk' : 'coffee');
+    const env = {
+      save: Coffee.keep,
+      finish: R => { const h = scoreHistory(); Coffee.record(h, R); keepScores(h); },
+      back: () => { if (onDesk) Desktop.close('w-coffee'); else { show('s-title'); runsLeft(); } },
+      again: () => openCoffee(onDesk, true)
+    };
+    Coffee.render(box, R, state.pool, env);
+    if (onDesk) {
+      if (!Desktop.wide()) Retro.hidePhone();
+      Desktop.open('w-coffee', Desktop.floating['w-coffee']);
+      Desktop.focus('w-coffee');
+    } else show('s-coffee');
+    box.scrollTop = 0;
+  }
+  $('btn-coffee').onclick = () => openCoffee(false);
+  // From "Work on this next" on a scorecard: a round that follows the part you just lost points on.
+  $('btn-score-coffee').onclick = () => openCoffee(true, !!(Coffee.load() || {}).finished);
+
   // ---------- measurement drill: one case, measurement only, no points ----------
   // A drill in progress stays open until it is rated; the icon brings it back instead of a new one.
   async function openDrill(card) {
@@ -2781,6 +2808,7 @@
       const last = dr.slice(-5), right = last.reduce((a, d) => a + d.right, 0), of = last.reduce((a, d) => a + d.of, 0);
       para('\nMeasurement drills: ' + dr.length + ' done · last ' + last.length + ': sorted ' + right + ' of ' + of + ' right · stop rule held up ' + last.filter(d => d.rating === 'got').length + ' of ' + last.length + ' times', 'muted');
     }
+    Coffee.ledger(h).forEach((t, i) => para((i ? '' : '\n') + t, 'muted'));
     if (!all.length) { para('\nNothing here yet. Finish a request and its scorecard lands in this file.'); return; }
     const best = all.reduce((a, b) => (b.total > a.total ? b : a));
     const done = h.weeks.filter(w => w.done && !w.hard && !w.one);
@@ -2890,6 +2918,7 @@
     if (id === 'w-mieke' && state.hard) { toast('Hard mode. Mieke is on holiday, and she left no notes.', 'info'); return; }
     if (id === 'w-academy') { openAcademy(); return; }
     if (id === 'w-drill') { openDrill(); return; }
+    if (id === 'w-coffee') { openCoffee(true); return; }
     if (id === 'w-team' && !state.team) { toast(scoreHistory().promoted ? 'Your team starts on Monday. HR is still "processing".' : 'No team yet. Darren promotes you after a week of 64+ with every diagnosis at 15+, or after the week 4 tender.', 'info'); return; }
     if (id === 'w-team') renderTeam();
     if (id === 'w-call' && (!r || r.phase === 'inbox')) { toast('No call yet. Read the request in Doors Mail, then call them from there.', 'info'); return; }
