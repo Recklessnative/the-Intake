@@ -648,7 +648,7 @@
     const tonight = st.last === ctx.dayKey;
     const m = nextModel(st);
     const items = [];
-    items.push({ label: 'The Case Clinic', build: b => {
+    items.push({ label: 'The Case Clinic', at: 'table', build: b => {
       b.textContent = '';
       if (tonight) { b.appendChild(el('p', null, 'You have had tonight\'s handout. The archivist is stacking chairs. Come back another evening.')); return; }
       b.appendChild(el('p', null, 'The long table under the strip lights. Tonight\'s handout: ' + m.title + ' (' + m.by + '). Lay a case on it, sort the facts, and see whether it would have changed your call.'));
@@ -659,11 +659,11 @@
       b.appendChild(s);
       b.appendChild(el('p', 'tw-small', 'About five minutes. Not scored.'));
     } });
-    items.push({ label: 'The grey machine in the corner', note: act === 2 && st.printed.length ? 'reader' : null, build: b => reader(b, ctx) });
-    items.push({ label: 'Your handouts', text: st.handouts.length
+    items.push({ label: 'The grey machine in the corner', at: 'reader', note: act === 2 && st.printed.length ? 'reader' : null, build: b => reader(b, ctx) });
+    items.push({ label: 'Your handouts', at: 'handouts', text: st.handouts.length
       ? st.handouts.map(id => { const x = model(id), n = st.stamps[id] || 0; return x.no + '. ' + x.title + ' (' + x.by + ')' + (n ? ', stamped ' + n + 'x on your calls' : ''); }).join('\n') + '\n\nAll filed in the Center of Excellence folder on your desk.'
       : 'None yet. Each visit you take one home, and it goes in the Center of Excellence folder on your desk.' });
-    items.push({ label: 'The corkboard', text: act >= 3 ? 'Course flyers, every one for a course that ran in 2007. Under them, pinned flat, a printed page: COHORT 12 · SEATS 01 TO 24 · CLINIC ATTENDANCE: OPTIONAL.'
+    items.push({ label: 'The corkboard', at: 'corkboard', text: act >= 3 ? 'Course flyers, every one for a course that ran in 2007. Under them, pinned flat, a printed page: COHORT 12 · SEATS 01 TO 24 · CLINIC ATTENDANCE: OPTIONAL.'
       : 'Course flyers and job ads. "Managing Change, 2 days, 395 euro". "Wanted: training coordinator, must like PowerPoint". A hand-written card: "Tuesday seminar cancelled. Lecturer\'s overhead projector bulb."' });
     return {
       title: 'The Learning House',

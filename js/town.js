@@ -1,5 +1,5 @@
 // Lindeveld (STORY.md, "The town and the money"; spoilers): the evening walk home from the lift.
-// Four places on a Doors Maps window: The Junction (the station café, where your past clients drop
+// A rendered town (tools/office/town.py) with four places of its own: The Junction (the station café, where your past clients drop
 // in and tell you how it went three months later: the Monday check), your flat on Canal Street
 // (answering machine, pay envelope, scrapbook, a catalogue), City Hall (Fatima's counter) and the
 // streets. The town is faceless too: people are known by their things.
@@ -156,18 +156,18 @@
     P.junction = act >= 3 ? {
       title: 'The Junction',
       intro: 'Chairs on the tables. One lamp on over the bar. The departures board is blank, and nobody is in.',
-      items: [{ label: 'A clipboard on the bar', text: 'MONDAY CHECK, filed by the operator. Three months after each request, somebody walks through town and writes down what changed.\n\n'
+      items: [{ label: 'A clipboard on the bar', at: 'bar', text: 'MONDAY CHECK, filed by the operator. Three months after each request, somebody walks through town and writes down what changed.\n\n'
         + (checks.length ? checks.map(c => c.who + ': ' + c.line).join('\n') : 'Nothing filed for your cases yet.')
         + '\n\nThis is what the Learning House measures. Not the course. The town, three months later.' }]
     } : {
       title: 'The Junction',
       intro: 'The café on the station square: a fruit machine, beer mats, the departures board over the bar. Your old clients drop in after work, and they tell you how it went.'
         + (act >= 2 && regulars.length ? ' They always sit in the same seats.' : ''),
-      items: [{ label: 'The departures board', text: '17:52 Brussels-North · 18:07 Antwerp-Central · 18:22 Ghent-St-Peter\'s. All on time, for once.'
+      items: [{ label: 'The departures board', at: 'board', text: '17:52 Brussels-North · 18:07 Antwerp-Central · 18:22 Ghent-St-Peter\'s. All on time, for once.'
         + (act >= 2 ? '\n\nAt the top, still: 08:56 Brussels-North · DELAYED.' : ''), note: act >= 2 ? 'train' : null }]
-        .concat(regulars.length ? regulars.map(c => ({ label: c.by, text: '"' + c.said + '"\n\nThree months later: ' + c.line }))
-          : [{ label: 'The regulars', text: 'Nobody you know yet. Finish a week, and your clients start dropping in.' }])
-        .concat(act >= 2 && regulars.length ? [{ label: 'The regulars, again', text: 'You have heard every one of these sentences before. Word for word, in the same voice, from the same seat.', note: 'regulars' }] : [])
+        .concat(regulars.length ? regulars.map((c, i) => ({ label: c.by, at: 'seat' + (i + 1), text: '"' + c.said + '"\n\nThree months later: ' + c.line }))
+          : [{ label: 'The regulars', at: 'bar', text: 'Nobody you know yet. Finish a week, and your clients start dropping in.' }])
+        .concat(act >= 2 && regulars.length ? [{ label: 'The regulars, again', at: 'bar', text: 'You have heard every one of these sentences before. Word for word, in the same voice, from the same seat.', note: 'regulars' }] : [])
     };
 
     const mine = owned().map(id => CATALOGUE.find(c => c.id === id).line);
@@ -184,13 +184,13 @@
         : 'Canal Street 12, second floor. Synergix staff housing: a bed, a chair, a window onto the canal'
         + (mine.length ? ', ' + mine.join(', ') : '') + '. The rain is louder in here.',
       items: [
-        { label: 'The answering machine', text: machine, note: act === 2 && monday ? 'machine' : null },
-        ctx.weeks ? { label: 'A brown envelope from Payroll', build: box => {
+        { label: 'The answering machine', at: 'machine', text: machine, note: act === 2 && monday ? 'machine' : null },
+        ctx.weeks ? { label: 'A brown envelope from Payroll', at: 'envelope', build: box => {
           box.appendChild(payslip({ weeks: ctx.weeks, act, ending: ctx.ending }));
           if (act >= 2 && ctx.weeks >= 1) box.appendChild(el('p', 'tw-sticky', 'A yellow sticky note in Mieke\'s writing: "Nobody here gets paid for being right. That\'s why we can afford to be."'));
-        } } : { label: 'The letterbox', text: 'Nothing yet. Payroll pays on Friday, in a brown envelope.' },
-        { label: 'The scrapbook', text: (act >= 3 ? 'ARCHIVE ITEM 0977. ' : '') + (ctx.scrap.length ? 'Your cases, cut out and glued in:\n\n' + ctx.scrap.join('\n') : 'Empty so far. Your cases go in here when a week is done.') },
-        { label: 'The Lindeveld Home Catalogue', build: box => catalogue(box, ctx) }
+        } } : { label: 'The letterbox', at: 'envelope', text: 'Nothing yet. Payroll pays on Friday, in a brown envelope.' },
+        { label: 'The scrapbook', at: 'scrapbook', text: (act >= 3 ? 'ARCHIVE ITEM 0977. ' : '') + (ctx.scrap.length ? 'Your cases, cut out and glued in:\n\n' + ctx.scrap.join('\n') : 'Empty so far. Your cases go in here when a week is done.') },
+        { label: 'The Lindeveld Home Catalogue', at: 'catalogue', build: box => catalogue(box, ctx) }
       ]
     };
 
@@ -199,10 +199,10 @@
       title: 'City Hall',
       intro: act >= 3 ? 'The citizen service desk. The counter is a terminal now: green letters on black, and a cursor blinking.'
         : 'The citizen service desk. Appointment only since February; there is a queue anyway. A ticket machine by the door, five counters, one open.',
-      items: act >= 3 ? [{ label: 'The terminal', text: 'NOW SERVING: 1207\nPLEASE STATE YOUR REQUEST\n\nUnder it, very small: Monday check, citizen service desk. ' + (fatima ? fatima.line : 'Not filed.') }]
+      items: act >= 3 ? [{ label: 'The terminal', at: 'counter', text: 'NOW SERVING: 1207\nPLEASE STATE YOUR REQUEST\n\nUnder it, very small: Monday check, citizen service desk. ' + (fatima ? fatima.line : 'Not filed.') }]
         : [
-          { label: 'The ticket machine', text: act >= 2 ? 'Your ticket: 1207. Now serving: 1206.' : 'Your ticket: ' + (300 + (ctx.now.week * 37 + ctx.now.day * 11) % 500) + '. Now serving: a number a long way off.', note: act >= 2 ? 'ticket' : null },
-          { label: 'Counter 3', text: 'A name plate: F. EL AMRANI. A pot of pens, every one on a chain. A stack of complaint forms, neatly squared.'
+          { label: 'The ticket machine', at: 'ticket', text: act >= 2 ? 'Your ticket: 1207. Now serving: 1206.' : 'Your ticket: ' + (300 + (ctx.now.week * 37 + ctx.now.day * 11) % 500) + '. Now serving: a number a long way off.', note: act >= 2 ? 'ticket' : null },
+          { label: 'Counter 3', at: 'counter', text: 'A name plate: F. EL AMRANI. A pot of pens, every one on a chain. A stack of complaint forms, neatly squared.'
             + (fatima ? '\n\nThree months later: ' + fatima.line : '') }
         ]
     };
@@ -212,11 +212,11 @@
       intro: act >= 3 ? 'Mill Street, the market square, the canal. Where the streets leave town the map is grey, and the corner says: 71% recovered.'
         : 'Mill Street, the market square, the canal. Lindeveld at half past six, in the rain.' + (act >= 2 ? ' Past the ring road there is fog. There always is.' : ''),
       items: [
-        { label: 'Election posters', text: 'Posters from the June election are still up: Belgium still has no government. Somebody has torn the face off every single one.'
+        { label: 'Election posters', at: 'posters', text: 'Posters from the June election are still up: Belgium still has no government. Somebody has torn the face off every single one.'
           + (act >= 3 ? '\n\nUp close, there never were faces under them. Just the paper.' : '') },
-        { label: 'The bakery on Mill Street', text: act >= 3 ? 'BACK AT 7. The bread in the window is a picture of bread.'
+        { label: 'The bakery on Mill Street', at: 'bakery', text: act >= 3 ? 'BACK AT 7. The bread in the window is a picture of bread.'
           : act >= 2 ? 'BACK AT 7. You have never seen it open, at any hour.' : 'BACK AT 7. The bread in the window looks good.', note: act === 2 ? 'bakery' : null }
-      ].concat(act >= 2 ? [{ label: 'The road out of town', text: act >= 3 ? 'Where the road should go on, there is nothing: NOT RECOVERED.'
+      ].concat(act >= 2 ? [{ label: 'The road out of town', at: 'road', text: act >= 3 ? 'Where the road should go on, there is nothing: NOT RECOVERED.'
         : 'Fog at the end of every road out of town. The bus to Brussels turns back at the ring road. The driver does not seem to mind.', note: act === 2 ? 'edge' : null }] : [])
     };
     // The Learning House (js/clinic.js): the Case Clinic and the grey reader.
@@ -242,76 +242,200 @@
     box.appendChild(el('p', 'tw-small', 'It makes the flat nicer. It does not make you any better at your job.'));
   }
 
-  // ---------- the map ----------
-  const NS = 'http://www.w3.org/2000/svg';
-  function svg(tag, attrs, text) {
-    const e = document.createElementNS(NS, tag);
-    Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v));
-    if (text != null) e.textContent = text;
-    return e;
+  // ---------- Lindeveld, rendered ----------
+  // The town is a Blender diorama at half past six in the rain (tools/office/town.py), one picture per
+  // act; each place opens a rendered close-up with its things tagged on it, and its card beside it.
+  // js/town-map.js (generated) says where every place and thing sits on the pictures, in %.
+  const MEDIA = 'media/town/';
+  const TMAP = () => window.TOWN_MAP || { ids: [], spots: {}, shots: {}, items: {} };
+  const ORDER = ['junction', 'flat', 'hall', 'streets', 'house'];
+  const LABEL = { junction: 'The Junction', flat: 'Canal Street 12', hall: 'City Hall', streets: 'Mill Street', house: 'The Learning House' };
+  // Which picture of a place goes with an act.
+  const PIC = (id, act) => ({ junction: act >= 3 ? 'closed' : 'open', flat: act >= 3 ? 'archive' : 'base', hall: act >= 3 ? 'terminal' : 'base', streets: String(act), house: 'base' })[id];
+  // The departures board over the bar is drawn here, so its times can change without rendering again.
+  const BOARD = act => act >= 3 ? [] : (act >= 2 ? [['08:56', 'Brussels-North', 'DELAYED']] : [])
+    .concat([['17:52', 'Brussels-North', 'On time'], ['18:07', 'Antwerp-Central', 'On time'], ['18:22', 'Ghent-St-Peter\'s', 'On time']]);
+
+  // The hit mask: one grey level per place, as in js/office.js.
+  let mask = null, maskW = 0, maskH = 0;
+  function loadMask() {
+    if (mask) return;
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas');
+        c.width = maskW = img.naturalWidth; c.height = maskH = img.naturalHeight;
+        const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+        mask = g.getImageData(0, 0, maskW, maskH).data;
+      } catch (e) { mask = null; }   // file:// taints the canvas: the labels still work
+    };
+    img.src = MEDIA + 'mask.png';
   }
-  // Where each place sits on the 800 x 500 map, and its label.
-  const PINS = { junction: [600, 120, 'The Junction'], flat: [230, 330, 'Canal Street 12'], hall: [430, 250, 'City Hall'], streets: [320, 160, 'Mill Street'], house: [520, 338, 'The Learning House'] };
-  function map(act, pick) {
-    const s = svg('svg', { viewBox: '0 0 800 500', class: 'tw-map', role: 'group', 'aria-label': 'Map of Lindeveld' });
-    // Drawn well past the 800 x 500 box, so a window of any shape shows map and not a border.
-    s.appendChild(svg('rect', { x: -600, y: -400, width: 2000, height: 1300, class: 'tw-land' }));
-    // The canal, the railway, the ring road, a few streets, blocks.
-    s.appendChild(svg('path', { d: 'M-600 470 L -10 420 C 140 380 220 400 300 360 S 520 300 620 330 S 760 380 820 360 L 1400 330', class: 'tw-canal' }));
-    s.appendChild(svg('path', { d: 'M-600 50 L 1400 180', class: 'tw-rail' }));
-    s.appendChild(svg('ellipse', { cx: 400, cy: 250, rx: 370, ry: 225, class: 'tw-ring' }));
-    ['M120 250 L 700 250', 'M400 40 L 400 470', 'M180 140 L 560 380', 'M600 120 L 430 250', 'M230 330 L 430 250', 'M320 160 L 520 170']
-      .forEach(d => s.appendChild(svg('path', { d, class: 'tw-street' })));
-    [[460, 200, 60, 34], [350, 270, 40, 50], [250, 190, 50, 30], [500, 280, 70, 40], [160, 280, 44, 34], [540, 190, 40, 30], [300, 400, 60, 28], [620, 260, 50, 40]]
-      .forEach(([x, y, w, h]) => s.appendChild(svg('rect', { x, y, width: w, height: h, class: 'tw-block' })));
-    s.appendChild(svg('rect', { x: 560, y: 98, width: 90, height: 24, class: 'tw-station' }));
-    s.appendChild(svg('text', { x: 400, y: 485, class: 'tw-small-label' }, 'Synergix NV · Ring Road 4'));
-    s.appendChild(svg('text', { x: 100, y: 440, class: 'tw-small-label' }, 'Canal'));
-    s.appendChild(svg('text', { x: 605, y: 92, class: 'tw-small-label' }, 'Station'));
-    s.appendChild(svg('text', { x: 470, y: 228, class: 'tw-small-label' }, 'Market Square'));
-    // Fog past the ring road from act 2; after the reveal it is simply not there.
-    if (act >= 2) {
-      const d = svg('defs');
-      const g = svg('radialGradient', { id: 'tw-fog', gradientUnits: 'userSpaceOnUse', cx: 400, cy: 250, r: 560 });
-      g.append(svg('stop', { offset: '58%', 'stop-color': act >= 3 ? '#9a9a9a' : '#f4f4f0', 'stop-opacity': 0 }), svg('stop', { offset: '100%', 'stop-color': act >= 3 ? '#9a9a9a' : '#f4f4f0', 'stop-opacity': act >= 3 ? 1 : 0.92 }));
-      d.appendChild(g); s.appendChild(d);
-      s.appendChild(svg('rect', { x: -600, y: -400, width: 2000, height: 1300, fill: 'url(#tw-fog)', 'pointer-events': 'none' }));
-      if (act >= 3) [[20, 30], [640, 30], [20, 490], [640, 490]].forEach(([x, y]) => s.appendChild(svg('text', { x, y, class: 'tw-lost' }, 'not recovered')));
-    }
-    Object.entries(PINS).forEach(([id, [x, y, label]]) => {
-      if (id === 'house' && !window.Clinic) return;
-      const g = svg('g', { class: 'tw-pin', tabindex: 0, role: 'button', 'data-place': id, 'aria-label': label });
-      // A wider ring nobody sees, so a finger on a phone finds the pin.
-      g.append(svg('circle', { cx: x, cy: y, r: 26, class: 'tw-hit' }), svg('circle', { cx: x, cy: y, r: 9 }), svg('text', { x: x + 14, y: y + 5 }, label));
-      g.addEventListener('click', () => pick(id));
-      g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(id); } });
-      s.appendChild(g);
-    });
-    return s;
+  function placeAt(ev, stage) {
+    if (!mask) return null;
+    const r = stage.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - r.left) / r.width * maskW), y = Math.floor((ev.clientY - r.top) / r.height * maskH);
+    if (x < 0 || y < 0 || x >= maskW || y >= maskH) return null;
+    return TMAP().ids[Math.round(mask[(y * maskW + x) * 4] / 20) - 1] || null;
   }
 
-  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone, card(id), dayKey }
+  // The projective transform taking a w x h box onto four points (top left, top right, bottom right, bottom left).
+  function warp(w, h, pts) {
+    const src = [[0, 0], [w, 0], [w, h], [0, h]], A = [], b = [];
+    src.forEach(([x, y], i) => {
+      const [u, v] = pts[i];
+      A.push([x, y, 1, 0, 0, 0, -u * x, -u * y]); b.push(u);
+      A.push([0, 0, 0, x, y, 1, -v * x, -v * y]); b.push(v);
+    });
+    for (let c = 0; c < 8; c++) {
+      let m = c;
+      for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+      [A[c], A[m]] = [A[m], A[c]]; [b[c], b[m]] = [b[m], b[c]];
+      for (let r = 0; r < 8; r++) {
+        if (r === c) continue;
+        const f = A[r][c] / A[c][c];
+        for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+        b[r] -= f * b[c];
+      }
+    }
+    const q = b.map((v, i) => v / A[i][i]);
+    return 'matrix3d(' + [q[0], q[3], 0, q[6], q[1], q[4], 0, q[7], 0, 0, 1, 0, q[2], q[5], 0, 1].join(',') + ')';
+  }
+
+  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone, card(id), dayKey, when }
   function open(ctx) {
     ctx.act = ctx.revealed ? 3 : ctx.now.week >= 5 ? 2 : 1;
-    const lay = el('div', 'town');
+    const act = ctx.act, M = TMAP();
+    const lay = el('div', 'town act-' + act);
     lay.id = 'town';
     lay.setAttribute('role', 'dialog');
     lay.setAttribute('aria-label', 'Lindeveld');
-    const w = el('div', 'tw-win');
-    const head = el('div', 'titlebar');
-    head.append(el('span', null, '🗺'), el('span', 'tt', 'Lindeveld - Doors Maps' + (ctx.act >= 3 ? ' (archive 71% recovered)' : '')));
-    w.appendChild(head);
-    const body = el('div', 'tw-body');
-    const panel = el('div', 'tw-panel');
+    // The diorama fills the screen; on top of it, the PC's own controls (a taskbar with the places,
+    // a tray with the time and the way to bed), as on the office floor.
+    const stage = el('div', 'tw-stage tw-map');
+    stage.setAttribute('aria-label', 'Lindeveld, ' + (act >= 3 ? 'the archive build' : 'half past six, in the rain'));
+    const rain = el('div', 'tw-rain'); rain.setAttribute('aria-hidden', 'true');
+    const pic = el('picture');
+    const so = el('source'); so.media = '(max-width: 900px)'; so.srcset = MEDIA + 'town-' + act + '-960.webp';
+    const img = el('img', 'tw-pic'); img.src = MEDIA + 'town-' + act + '.webp';
+    img.alt = 'Lindeveld from above: the canal, Canal Street, the mill of the Learning House, Mill Street, the market square with City Hall, and the station square with The Junction.';
+    img.onerror = () => lay.classList.add('no-pic');
+    pic.append(so, img);
+    stage.append(rain, pic);
+    const glows = {}, tags = {};
+    ORDER.forEach(id => {
+      if (id === 'house' && !window.Clinic) return;
+      const sp = M.spots[id];
+      if (!sp) return;
+      const g = el('img', 'tw-glow'); g.alt = ''; g.src = MEDIA + 'glow-' + id + '.webp';
+      Object.assign(g.style, { left: sp.rect[0] + '%', top: sp.rect[1] + '%', width: (sp.rect[2] - sp.rect[0]) + '%', height: (sp.rect[3] - sp.rect[1]) + '%' });
+      const t = el('button', 'office-tag tw-tag', LABEL[id]); t.type = 'button'; t.dataset.place = id;
+      t.style.left = sp.tag[0] + '%'; t.style.top = sp.tag[1] + '%';
+      t.onclick = () => draw(id);
+      t.onmouseenter = t.onfocus = () => light(id);
+      t.onmouseleave = t.onblur = () => light(null);
+      glows[id] = g; tags[id] = t;
+      stage.append(g, t);
+    });
+    // After the reveal the corners of the map are simply not there.
+    if (act >= 3) [['2%', '4%'], ['78%', '4%'], ['2%', '88%'], ['78%', '88%']].forEach(([l, t]) => { const x = el('span', 'tw-lost', 'not recovered'); x.style.left = l; x.style.top = t; stage.appendChild(x); });
+    const look = el('div', 'tw-look'); look.hidden = true;
+    const panel = el('div', 'tw-panel'); panel.hidden = true;
     panel.setAttribute('aria-live', 'polite');
-    let at = 'flat';
-    const draw = (id, quiet) => {
+    stage.append(look, panel);
+    const line = el('p', 'office-line tw-line', act >= 3 ? 'Lindeveld, as the archive kept it. Pick a place.' : 'Lindeveld, half past six. Pick a place, or go to bed.');
+    // The taskbar: one button per place, then the tray.
+    const bar = el('div', 'office-bar tw-bar');
+    const list = el('nav', 'office-list tw-places'); list.setAttribute('aria-label', 'Places in Lindeveld');
+    ORDER.forEach(id => {
+      if (id === 'house' && !window.Clinic) return;
+      const b = el('button', 'tw-pin'); b.type = 'button'; b.dataset.place = id; b.setAttribute('aria-label', LABEL[id]);
+      b.append(el('b', null, LABEL[id]));
+      b.onclick = () => draw(id);
+      list.appendChild(b);
+    });
+    const tray = el('div', 'office-tray tw-tray');
+    tray.appendChild(el('span', 'tw-when', ctx.when || ''));
+    const bed = el('button', 'primary', 'Go to bed: start ' + (ctx.tomorrow || 'tomorrow')); bed.type = 'button';
+    bed.onclick = () => { lay.classList.remove('in'); document.removeEventListener('keydown', key); setTimeout(() => { lay.remove(); if (ctx.onDone) ctx.onDone(); }, 400); };
+    tray.appendChild(bed);
+    bar.append(list, tray);
+    lay.append(stage, line, bar);
+
+    let at = null;
+    function light(id) {
+      Object.entries(glows).forEach(([k, g]) => g.classList.toggle('on', k === id));
+      Object.entries(tags).forEach(([k, t]) => t.classList.toggle('hot', k === id));
+    }
+    stage.addEventListener('pointermove', ev => {
+      if (at || ev.target.classList.contains('tw-tag')) return;
+      const id = placeAt(ev, stage);
+      light(id && tags[id] ? id : null); stage.style.cursor = id && tags[id] ? 'pointer' : '';
+    });
+    stage.addEventListener('pointerleave', () => { if (!at) light(null); });
+    stage.addEventListener('click', ev => {
+      if (at || ev.target.closest('.tw-tag, .tw-panel, .tw-look')) return;
+      const id = placeAt(ev, stage);
+      if (id && tags[id]) draw(id);
+    });
+
+    // Back to the whole town.
+    function overview() {
+      at = null;
+      stage.classList.remove('looking');
+      look.hidden = true; look.innerHTML = '';
+      panel.hidden = true;
+      lay.querySelectorAll('.tw-pin').forEach(b => b.classList.remove('on'));
+      line.hidden = false;
+      const t = tags[ORDER.find(k => tags[k])]; if (t) t.focus({ preventScroll: true });
+    }
+    // A place: its close-up, its things tagged on it, its card beside it.
+    function draw(id, quiet) {
+      const keep = quiet ? [...panel.querySelectorAll('details[open] > summary')].map(s_ => s_.textContent) : [];
+      const scroll = quiet ? panel.scrollTop : 0;
       at = id;
+      light(null);
       const P = places(ctx)[id];
       if (id === 'house' && !quiet && window.Clinic) Clinic.arrive(ctx);
-      panel.innerHTML = '';
       lay.querySelectorAll('.tw-pin').forEach(g => g.classList.toggle('on', g.dataset.place === id));
-      panel.append(el('h3', null, P.title), el('p', 'tw-intro', P.intro));
+      stage.classList.add('looking');
+      line.hidden = true;
+      // The picture.
+      look.innerHTML = '';
+      look.hidden = false;
+      look.className = 'tw-look at-' + id;
+      const shot = (M.shots || {})[id] || { things: {} };
+      const lp = el('img', 'tw-look-pic'); lp.src = MEDIA + id + '-' + PIC(id, act) + '.webp'; lp.alt = P.title;
+      lp.onerror = () => look.classList.add('no-pic');
+      look.appendChild(lp);
+      // What you bought from the Home Catalogue stands in the flat.
+      if (id === 'flat') owned().forEach(k => {
+        const r = (M.items || {})[k];
+        if (!r) return;
+        const it = el('img', 'tw-item-pic'); it.alt = ''; it.src = MEDIA + 'item-' + k + '.webp';
+        Object.assign(it.style, { left: r[0] + '%', top: r[1] + '%', width: (r[2] - r[0]) + '%', height: (r[3] - r[1]) + '%' });
+        look.appendChild(it);
+      });
+      if (id === 'junction' && shot.board && BOARD(act).length) {
+        const bd = el('div', 'tw-board'); bd.setAttribute('aria-hidden', 'true');
+        BOARD(act).forEach(r => { const rw = el('div', 'tw-board-row' + (r[2] === 'DELAYED' ? ' late' : '')); r.forEach(c => rw.appendChild(el('span', null, c))); bd.appendChild(rw); });
+        look.appendChild(bd);
+        const fit = () => { const w = look.clientWidth, h = look.clientHeight; if (w && h) bd.style.transform = warp(600, 116, shot.board.map(([x, y]) => [x / 100 * w, y / 100 * h])); };
+        fit(); requestAnimationFrame(fit);
+        ctx._fit = fit;
+      }
+      if (id === 'streets') look.appendChild(el('div', 'tw-rain'));
+      const back = el('button', 'office-look-back tw-back', '← Lindeveld'); back.type = 'button'; back.onclick = overview;
+      look.appendChild(back);
+      // The card.
+      panel.innerHTML = '';
+      panel.hidden = false;
+      const head = el('div', 'titlebar');
+      const x = el('button', 'tb close', '×'); x.type = 'button'; x.setAttribute('aria-label', 'Back to the map'); x.onclick = overview;
+      head.append(el('span', 'tt', P.title + ' - Lindeveld'), x);
+      const body = el('div', 'tw-card-body');
+      body.append(el('h3', null, P.title), el('p', 'tw-intro', P.intro));
+      const used = new Set();
       P.items.forEach(it => {
         const d = el('details', 'tw-item');
         const sum = el('summary', null, it.label);
@@ -320,27 +444,49 @@
         if (it.build) it.build(box); else box.textContent = it.text;
         d.appendChild(box);
         if (it.note && window.Arc) {
-          const id = 'town:' + it.note, n = el('button', null, Arc.noted(id) ? '📓 In your notebook' : '📓 Note it'); n.type = 'button';
-          n.disabled = Arc.noted(id);
-          n.onclick = () => { Arc.note(id, SEAMS[it.note]); n.textContent = '📓 In your notebook'; n.disabled = true; };
+          const nid = 'town:' + it.note, n = el('button', null, Arc.noted(nid) ? '📓 In your notebook' : '📓 Note it'); n.type = 'button';
+          n.disabled = Arc.noted(nid);
+          n.onclick = () => { Arc.note(nid, SEAMS[it.note]); n.textContent = '📓 In your notebook'; n.disabled = true; };
           d.appendChild(n);
         }
-        panel.appendChild(d);
+        if (keep.includes(it.label)) d.open = true;
+        body.appendChild(d);
+        // A label on the picture where the thing is, if the render has it.
+        const th = it.at && shot.things[it.at];
+        if (th && !used.has(it.at)) {
+          used.add(it.at);
+          const t = el('button', 'office-tag thing tw-thing', it.label); t.type = 'button';
+          t.style.left = th.tag[0] + '%'; t.style.top = th.tag[1] + '%';
+          t.onclick = () => { d.open = true; d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); d.classList.remove('flash'); void d.offsetWidth; d.classList.add('flash'); };
+          look.appendChild(t);
+        }
       });
-    };
-    ctx.redraw = () => draw(at, true);
+      panel.append(head, body);
+      if (quiet) panel.scrollTop = scroll;
+      untangle(look);
+      if (!quiet) back.focus({ preventScroll: true });
+    }
+    // Labels that land on top of each other move up until they are clear.
+    function untangle(root) {
+      const ts = [...root.querySelectorAll(':scope > .tw-thing')];
+      const placed = [];
+      ts.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top).forEach(t => {
+        for (let n = 0; n < 6; n++) {
+          const r = t.getBoundingClientRect();
+          const hit = placed.find(q => r.left < q.right + 4 && r.right > q.left - 4 && r.top < q.bottom + 4 && r.bottom > q.top - 4);
+          if (!hit) break;
+          t.style.marginTop = (parseFloat(t.style.marginTop || 0) - (r.bottom - hit.top + 6)) + 'px';
+        }
+        placed.push(t.getBoundingClientRect());
+      });
+    }
+    const key = ev => { if (ev.key === 'Escape' && at && document.getElementById('town') === lay && !document.querySelector('.lh')) { ev.preventDefault(); overview(); } };
+    document.addEventListener('keydown', key);
+    window.addEventListener('resize', () => { if (ctx._fit && at === 'junction') ctx._fit(); });
+    ctx.redraw = () => { if (at) draw(at, true); };
     ctx.played = ctx.checks.map(c => c.card);
-    body.append(map(ctx.act, draw), panel);
-    w.appendChild(body);
-    const bar = el('div', 'tw-bar');
-    bar.appendChild(el('span', 'tw-when', ctx.when || ''));
-    const bed = el('button', 'primary', 'Go to bed: start ' + (ctx.tomorrow || 'tomorrow')); bed.type = 'button';
-    bed.onclick = () => { lay.classList.remove('in'); setTimeout(() => { lay.remove(); if (ctx.onDone) ctx.onDone(); }, 400); };
-    bar.appendChild(bed);
-    w.appendChild(bar);
-    lay.appendChild(w);
     document.body.appendChild(lay);
-    draw('flat');
+    loadMask();
     requestAnimationFrame(() => lay.classList.add('in'));
     bed.focus({ preventScroll: true });
   }

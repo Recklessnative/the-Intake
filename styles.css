@@ -1194,35 +1194,61 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
 .rv-end-big { font-size: 20px; line-height: 1.35; }
 .rv-end-small { font-size: 12px; opacity: .7; margin: 0 !important; }
 .ending.clockin .rv-pic { filter: saturate(.85); }
-/* Lindeveld (js/town.js): a Doors Maps window over the evening. XP chrome, a paper map, no faces. */
-.town { position: fixed; inset: 0; z-index: 100004; display: flex; align-items: center; justify-content: center; padding: 12px;
-  background: radial-gradient(ellipse at 50% 40%, #29384a, #0b1119); opacity: 0; transition: opacity .4s ease; }
+/* Lindeveld (js/town.js): the rendered town, full screen, with the PC's own taskbar, as on the office floor.
+   A place opens its rendered close-up with labels on its things, and its card (an XP window) beside it. */
+.town { position: fixed; inset: 0; z-index: 100004; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 42%, #26324a, #0a0f18 75%); opacity: 0; transition: opacity .4s ease; font: 12px Tahoma, Verdana, sans-serif; }
+.town.act-2 { background: radial-gradient(ellipse at 50% 42%, #3a4658, #8b95a3 80%); }
+.town.act-3 { background: radial-gradient(ellipse at 50% 42%, #7d7f83, #a3a4a6 80%); }
 .town.in { opacity: 1; }
-.tw-win { display: flex; flex-direction: column; width: min(1120px, 100%); height: min(700px, 100%); color: var(--ink); background: var(--win);
-  border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 18px rgba(0,0,0,.55); }
-.tw-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 3fr 2fr; gap: 8px; padding: 8px; }
-.tw-map { width: 100%; height: 100%; min-height: 0; border: 1px solid #7f9db9; background: #f2ecd8; font: 13px Tahoma, Verdana, sans-serif; }
-.tw-land { fill: #f2ecd8; }
-.tw-canal { fill: none; stroke: #9cc2e5; stroke-width: 18; }
-.tw-rail { fill: none; stroke: #666; stroke-width: 3; stroke-dasharray: 10 6; }
-.tw-ring { fill: none; stroke: #e2b755; stroke-width: 8; }
-.tw-street { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; }
-.tw-block { fill: #ddd3b8; stroke: #c4b896; }
-.tw-station { fill: #c9b9a0; stroke: #8a7a60; }
-.tw-small-label { fill: #6b604a; font-size: 11px; text-anchor: middle; }
-.tw-lost { fill: #444; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
-.tw-pin { cursor: pointer; outline: none; }
-.tw-pin .tw-hit { fill: transparent; stroke: none; }
-.tw-pin circle:not(.tw-hit) { fill: #ffffe1; stroke: #000; stroke-width: 1.5; }
-.tw-pin text { fill: #000; font-weight: 700; paint-order: stroke; stroke: #f2ecd8; stroke-width: 4px; }
-.tw-pin:hover circle:not(.tw-hit), .tw-pin:focus-visible circle:not(.tw-hit) { fill: #ffd86b; }
-.tw-pin.on circle:not(.tw-hit) { fill: #e68b2c; }
-.tw-panel { min-height: 0; overflow-y: auto; padding: 8px 10px; background: #fff; border: 1px solid #7f9db9; }
-.tw-panel h3 { margin: 0 0 6px; font-size: 15px; }
+.tw-stage { position: relative; width: min(100vw, (100vh - 36px) * 16 / 9); aspect-ratio: 16 / 9; margin-bottom: 36px; }
+.tw-stage > picture { position: relative; display: block; width: 100%; height: 100%; }
+.tw-pic { display: block; width: 100%; height: 100%; }
+.town.no-pic .tw-stage > picture { visibility: hidden; }
+.tw-glow { position: absolute; pointer-events: none; opacity: 0; transition: opacity .18s ease; mix-blend-mode: screen; z-index: 1; }
+.tw-glow.on { opacity: 1; }
+.tw-tag { z-index: 2; }
+.tw-stage.looking > .tw-tag, .tw-stage.looking > .tw-glow, .tw-stage.looking > .tw-lost { display: none; }
+.tw-lost { position: absolute; z-index: 1; padding: 2px 6px; color: #333; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; background: rgba(255,255,255,.35); pointer-events: none; }
+/* Rain over the whole town: thin streaks, no sky (the picture's edge is the model's edge). */
+.tw-rain { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: .4;
+  background: repeating-linear-gradient(104deg, transparent 0 9px, rgba(190,205,230,.35) 9px 10px, transparent 10px 23px),
+    repeating-linear-gradient(98deg, transparent 0 15px, rgba(190,205,230,.22) 15px 16px, transparent 16px 31px);
+  background-size: 120px 180px, 90px 140px; animation: tw-rain .9s linear infinite; }
+.tw-stage > .tw-rain { z-index: 1; }
+.tw-stage.looking > .tw-rain { display: none; }
+@keyframes tw-rain { to { background-position: -30px 180px, -18px 140px; } }
+/* A place, close up. */
+/* The picture keeps its 16:9 to the left of the card, so the card never covers a thing. */
+.tw-stage.looking { background: #05070b; }
+.tw-stage.looking > picture { visibility: hidden; }
+.tw-look { position: absolute; z-index: 2; left: 8px; top: 50%; width: calc(100% - min(360px, 40%) - 24px); aspect-ratio: 16 / 9; transform: translateY(-50%);
+  overflow: hidden; background: #000; box-shadow: 0 0 0 1px #000, 3px 4px 18px rgba(0,0,0,.55); }
+.tw-look[hidden] { display: none; }
+.tw-look-pic { display: block; width: 100%; height: 100%; }
+.tw-look.no-pic .tw-look-pic { visibility: hidden; }
+.tw-item-pic { position: absolute; pointer-events: none; }
+.tw-look > .tw-rain { z-index: 1; }
+.tw-board { position: absolute; left: 0; top: 0; width: 600px; height: 116px; padding: 8px 14px; box-sizing: border-box; transform-origin: 0 0; pointer-events: none;
+  font: 700 24px/1.2 "Lucida Console", "Courier New", monospace; color: #ffb43a; text-shadow: 0 0 6px rgba(255,150,30,.8); }
+.tw-board-row { display: grid; grid-template-columns: 90px 1fr 120px; gap: 10px; white-space: nowrap; }
+.tw-board-row span:last-child { text-align: right; }
+.tw-board-row.late { color: #ff6a3a; }
+.tw-thing { z-index: 3; }
+.tw-back { z-index: 3; }
+/* The place's card: an XP window docked on the right of the picture. */
+.tw-panel { position: absolute; z-index: 4; top: 8px; right: 8px; bottom: 8px; width: min(360px, 40%); box-sizing: border-box; display: flex; flex-direction: column; color: var(--ink);
+  background: var(--win); border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 18px rgba(0,0,0,.55); }
+.tw-panel[hidden] { display: none; }
+.tw-panel .titlebar .tt { flex: 1; }
+.tw-card-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 10px; background: #fff; }
+.tw-card-body h3 { margin: 0 0 6px; font-size: 15px; }
 .tw-intro { margin: 0 0 10px; }
 .tw-item { margin: 0 0 6px; border: 1px solid #c9c9c9; background: #fcfcfe; }
 .tw-item summary { cursor: pointer; padding: 4px 8px; font-weight: 700; background: linear-gradient(#fff, #ecebe5); }
 .tw-item[open] summary { border-bottom: 1px solid #c9c9c9; }
+.tw-item.flash { animation: tw-flash 1s ease; }
+@keyframes tw-flash { 0%, 40% { box-shadow: 0 0 0 3px #ffd86b; } 100% { box-shadow: none; } }
 .tw-text { padding: 6px 8px; white-space: pre-line; }
 .tw-item > button { margin: 0 8px 8px; }
 .tw-slip { margin: 0 0 8px; padding: 8px; font: 12px/1.4 "Lucida Console", monospace; white-space: pre; overflow-x: auto; background: #fbf8ef; border: 1px dashed #b8a98a; }
@@ -1230,13 +1256,25 @@ body.aero .reveal .titlebar { height: 28px; padding: 0 4px 0 8px; color: #fff; t
 .tw-cat { list-style: none; margin: 0 0 6px; padding: 0; }
 .tw-cat li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #c9c9c9; white-space: normal; }
 .tw-small { margin: 0; font-size: 11px; color: #555; }
-.tw-bar { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-top: 1px solid #fff; }
-.tw-when { flex: 1; color: #444; }
+/* The taskbar and tray: the office floor's (.office-bar, .office-list, .office-tray), fixed to the screen. */
+.tw-bar { position: fixed; }
+.tw-places button.on { background: linear-gradient(#2a5fd4, #1e4fc0 50%, #1a45ae); box-shadow: inset 1px 1px 2px rgba(0,0,0,.45); }
+.tw-tray .primary { height: 26px; min-height: 0; padding: 0 10px; }
+.tw-when { white-space: nowrap; }
+.tw-line { position: fixed; }
+.tw-line[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .tw-rain { animation: none; } }
 @media (max-width: 760px) {
-  .town { padding: 0; }
-  .tw-win { height: 100%; border-radius: 0; }
-  .tw-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .tw-map { height: auto; }
+  .town { flex-direction: column; justify-content: flex-start; }
+  .tw-stage { width: 100vw; margin-bottom: 0; }
+  .tw-stage.looking { overflow: visible; }
+  .tw-look { left: 0; top: 0; width: 100%; transform: none; }
+  .tw-panel { position: fixed; top: calc(100vw * 9 / 16); left: 0; right: 0; bottom: 36px; width: auto; border-radius: 0; }
+  .tw-when { display: none; }
+  .tw-bar { flex-direction: row; height: 36px; margin: 0; }
+  .tw-places { flex-direction: row; align-items: center; gap: 3px; padding: 0 6px; overflow-x: auto; }
+  .tw-places button { flex: none; height: 28px; min-height: 0; padding: 0 8px; font-size: 12px; }
+  .tw-tray { height: 36px; }
 }
 
 /* The Learning House (js/clinic.js): the phone call, the Case Clinic in the Academy shell, the reader's cards. */
