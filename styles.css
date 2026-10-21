@@ -170,6 +170,16 @@ label.check input { width: auto; }
   background: linear-gradient(#3a80f3, var(--task-a) 15%, var(--task-a) 85%, var(--task-b)); }
 .start-btn { height: 36px; padding: 0 22px 0 16px; border: 0; border-radius: 0 12px 12px 0; color: #fff; font-style: italic; font-weight: 700;
   font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,.5); background: linear-gradient(#5bc35b, var(--start-a) 30%, var(--start-b)); }
+/* XP's Quick Launch: one button, to stand up from the desk and walk the floor. */
+.quick-launch { display: flex; align-items: center; height: 100%; padding: 0 6px 0 4px; border-right: 1px solid #0c4fb0; box-shadow: 1px 0 0 rgba(255,255,255,.18); }
+.quick-launch button { min-height: 0; height: 26px; padding: 0 8px 0 5px; display: flex; align-items: center; gap: 4px; color: #fff; font-size: 12px;
+  background: transparent; border: 1px solid transparent; border-radius: 3px; box-shadow: none; cursor: pointer; }
+.quick-launch button:hover, .quick-launch button:focus-visible { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.16); }
+.quick-launch button i { font-style: normal; font-size: 17px; line-height: 1; }
+.quick-launch button:active { background: rgba(0,0,0,.18); box-shadow: inset 1px 1px 2px rgba(0,0,0,.4); }
+.quick-launch button[aria-disabled="true"] { opacity: .55; cursor: default; }
+body.no-stand .quick-launch, body.no-stand #btn-standup-menu { display: none; }
+.start-menu .sm-emoji { display: inline-block; text-align: center; font-size: 15px; line-height: 20px; }
 .task-buttons { flex: 1; display: flex; gap: 4px; overflow-x: auto; min-width: 0; }
 .task { color: #fff; border: 1px solid #1b4fbd; border-radius: 3px; min-height: 0; height: 28px; padding: 0 10px; max-width: 180px; flex: 0 1 auto;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; background: linear-gradient(#5b9bf6, #3c80ef); }
@@ -614,6 +624,7 @@ body.hard .btn-mieke, body.hard .desk-icon[data-app="w-mieke"], body.hard #start
   .win .tb.max { display: none; }
   .tray #os-step { display: none; }
   .start-btn { padding: 0 12px; font-size: 16px; }
+  .quick-launch button span { display: none; }
   .start-menu { position: fixed; bottom: 36px; }
   .msg { max-width: 94%; }
   .mail-client { grid-template-columns: 1fr; }

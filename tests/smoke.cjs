@@ -333,6 +333,23 @@ async function followUp() {
       if (await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('call transcript not restored');
       if (await p.$$eval('#chat-log .msg.you .qtag', l => l.length) !== 2) throw new Error('question ratings not restored');
       if (!MOBILE) await visible('#w-call');
+      // Stand up in the middle of the call: the floor, then back to the desk exactly as it was.
+      await p.fill('#chat-input', 'Half a question');
+      await p.evaluate(() => { Gemini.busy = 1; });
+      await p.click('#btn-standup');
+      if (!(await p.textContent('#toast')).includes('Wait for the reply') || await p.isVisible('#s-office')) throw new Error('stood up while a reply was coming');
+      await p.evaluate(() => { Gemini.busy = 0; });
+      const before = await p.evaluate(() => ({ clock: window.__intake.state.run.clock, visits: JSON.parse(localStorage.getItem('intake-floor')).visits }));
+      await p.click('#btn-standup');
+      await p.waitForSelector('#s-office.active');
+      const desk = await p.textContent('#office-list button[data-spot="desk"]');
+      if (!desk.includes('where you left it') || await p.$('#office-list button[data-spot="lift"]')) throw new Error('mid-request floor wrong: ' + desk);
+      if (JSON.parse(await p.evaluate(() => localStorage.getItem('intake-floor'))).visits !== before.visits) throw new Error('a mid-request walk opened new places');
+      await p.click('#office-list button[data-spot="desk"]');
+      await p.waitForSelector('#s-desk.active');
+      if (await p.inputValue('#chat-input') !== 'Half a question' || await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('the call did not wait where it was');
+      if (await p.evaluate(() => window.__intake.state.run.clock) !== before.clock + 5) throw new Error('the clock did not move while you were away');
+      await p.fill('#chat-input', '');
     }
     if (req === 0) {
       await p.click('#chat-log .msg.them .pin');
