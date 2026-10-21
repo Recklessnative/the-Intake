@@ -58,10 +58,16 @@
       try { if (s) { s.setItem('intake-key', key); s.setItem('intake-model', model || DEFAULT_MODEL); } } catch (e) { /* ignore */ }
     },
 
+    // How many calls are out right now: you can't stand up from the desk while someone is answering.
+    busy: 0,
+    async json(args) {
+      this.busy++;
+      try { return await this.ask(args); } finally { this.busy--; }
+    },
     // Ask for JSON matching `schema`. `turns` is [{role:'user'|'model', text}].
     // No temperature: Gemini 3.5+ ignores it (and later models reject it); determinism comes from the prompts.
     // maxTokens covers thinking tokens too, so it is generous.
-    async json({ system, turns, schema, maxTokens = 2000 }) {
+    async ask({ system, turns, schema, maxTokens = 2000 }) {
       const key = this.key;
       if (!key && !(this.hasBackend && this.runId)) throw new Error('No Gemini key set. Add one under "Gemini key" on the title screen.');
       const body = {

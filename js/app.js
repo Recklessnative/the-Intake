@@ -448,6 +448,8 @@
     const card = r.card;
     show('s-desk');
     deskIcons();
+    // The floor is no place for hard mode, Try one case or the operator's week.
+    document.body.classList.toggle('no-stand', !!(state.hard || state.one || state.final));
     tick(0);
     $('notes').value = r.notes || '';
     $('chat-log').innerHTML = '';
@@ -2129,6 +2131,37 @@
     } else floor(false, true);
   };
 
+  // ---------- standing up in the middle of a request ----------
+  // The quick-launch button beside start (and the start menu) takes you out to the floor at any
+  // point. The request does not move while you are away: every window stays as it was, and the
+  // clock moves on a few minutes when you sit back down.
+  function canStand() {
+    if (!state.run || !$('s-desk').classList.contains('active')) return null;
+    if (state.hard || state.one || state.final) return 'Not this week: the desk is all there is.';
+    if ($('p-board').classList.contains('active')) return 'Not now: the board is waiting for you.';
+    if (Tour.open) return 'Finish Mieke\'s tour first.';
+    if (Gemini.busy) return 'Wait for the reply first: getting up mid-sentence is rude.';
+    return '';
+  }
+  const waiting = r => r.grade ? 'Your scorecard is still open' : (r.card.stakeholder.name || 'Your request') + ' waits';
+  function standFromDesk() {
+    $('start-menu').hidden = true;
+    const no = canStand();
+    if (no == null) return;
+    if (no) { toast(no, 'info'); return; }
+    save();
+    floor(false, false, true);
+  }
+  function backToDesk() {
+    show('s-desk');
+    tick(5);
+    save();
+  }
+  $('btn-standup').onclick = standFromDesk;
+  $('btn-standup-menu').onclick = standFromDesk;
+  // The button looks dimmed while you can't go (a reply is coming, the board is in session), but still says why when clicked.
+  setInterval(() => { const b = $('btn-standup'); if (b && $('s-desk').classList.contains('active')) b.setAttribute('aria-disabled', canStand() ? 'true' : 'false'); }, 500);
+
   // ---------- the office floor, between requests ----------
   // A breath between two requests: you stand up, and the places you could go are lit. Your desk
   // moves the game on; everyone else says one thing. Nothing here costs a question or a Gemini call.
@@ -2200,9 +2233,11 @@
   }
   function keepLook(st) { try { localStorage.setItem('intake-floor', JSON.stringify(st)); } catch (e) { /* storage blocked */ } }
   // A thing with `later` reads differently once its arc hint has landed, and counts as new again.
-  function looks(now) {
+  // `peek`: a walk in the middle of a request shows what is already there; only the walk between
+  // requests opens new places (or the very first time out, so there is something to look at).
+  function looks(now, peek) {
     const st = lookState();
-    st.visits++;
+    if (!peek || !st.visits) st.visits++;
     keepLook(st);
     const out = {}, entries = [];
     let of = 0;
@@ -2221,6 +2256,7 @@
     keepLook(st);
   }
 
+  const FLOOR_INTRO_PAUSED = 'Stretching your legs? Good. This is the floor: any time the desk gets too much, you can wander out here for a minute.\n\nYour request waits on your desk exactly as you left it, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.';
   const FLOOR_INTRO = 'Up you get. This is the floor: between two requests we all wander out here for a minute.\n\nYour desk always has the next request, and nothing out here is graded. But you learn a lot about people from their desks. Have a closer look at mine if you like. I will pretend not to notice.'
   // A "Note it" button for an arc hint on the floor.
   const arcNote = id => ({ done: () => Arc.noted(id), add: () => Arc.note(id) });
@@ -2245,10 +2281,11 @@
   }
   // `evening`: the day you just finished is over. The floor is the evening, and the lift takes you home
   // to the next morning; your desk waits until then.
-  function floor(evening, last) {
+  // `paused`: you stood up in the middle of a request; it waits on your desk exactly as you left it.
+  function floor(evening, last, paused) {
     const i = state.index, r = state.run;
     const day = state.days[evening ? i - 1 : i] || 0;
-    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + 40);
+    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + (paused ? 0 : 40));
     const tomorrow = dayOf(i);
     // The morning after: the lift up and the rain, each said once; most days it is the coffee machine.
     const morning = () => {
@@ -2268,6 +2305,7 @@
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
         : evening ? Object.assign({ label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }, Arc.offer('badge', arcNow(day)) ? { text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning.' + BADGE, note: arcNote('badge') } : {})
+        : paused ? { label: 'Your desk', sub: waiting(r) + ' where you left it', primary: true, go: () => Office.sitDown(backToDesk) }
         : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
@@ -2289,7 +2327,8 @@
     } else if (walk) spots.lift = { label: 'The lift', sub: 'Home, or through town', primary: true, who: 'The lift', face: '🛗', text: TOWN_LIFT, actions: [home, walk] };
     else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
-    const L = looks(arcNow(day));
+    if (paused) delete spots.lift;
+    const L = looks(arcNow(day), paused);
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
     if (Reveal.seen() && !now.off && Reveal.ending() !== 'clockin') {
@@ -2314,10 +2353,11 @@
       evening: !!evening,
       line: last ? 'That was the last request of the week. The board is gathering.' + (spots.lift ? ' Behind you, the lift goes ding. Nobody gets out.' : '')
         : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
+        : paused ? 'You stretch your legs. ' + waiting(r) + ' on your desk, exactly where you left it.' + teamLine()
         : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
       spots,
       // The first time out here, Mieke tells you what the floor is for.
-      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: FLOOR_INTRO + (evening ? FLOOR_EVENING : '') }
+      intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: (paused ? FLOOR_INTRO_PAUSED : FLOOR_INTRO) + (evening ? FLOOR_EVENING : '') }
     };
     Office.standUp(opts);
   }
