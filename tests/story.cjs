@@ -117,7 +117,7 @@ async function townText(p) {
     out[id] = await p.textContent('#town .tw-panel');
   }
   out.map = await p.textContent('#town .tw-map');
-  out.notes = await p.$$eval('#town .tw-panel button', bs => bs.map(b => b.textContent));
+  out.notes = await p.$$eval('#town .tw-panel details > button', bs => bs.map(b => b.textContent));
   return out;
 }
 

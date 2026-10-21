@@ -62,3 +62,26 @@ python3 title_post.py ../..                 # -> media/title/title-<day|rain|nig
 Each takes about five minutes on four cores. The menu, the subtitle and the rain are drawn by the
 game (`js/title.js`), so no text is ever rendered into the pictures.
 
+
+## Lindeveld
+
+`town.py` builds the town the evening lift walks you through: the canal and Canal Street (your flat at
+no. 12), the mill of the Learning House on the north quay, Mill Street with the bakery, the market square
+with City Hall and its belfry, and the station square with The Junction. Flemish row houses come from one
+generator, each with its own dice, so a house looks the same in every act and every shot. Nobody is out.
+
+```sh
+./render_town.sh                     # everything below, about 45 minutes on four cores
+python3 town.py town 1 1920 1080 128      # the diorama at 18:30 in the rain (2: fog past the ring road, 3: the archive) -> out/town_<act>.png
+python3 town.py townmask 1920 1080        # one flat colour per place -> out/town_mask.png
+python3 town.py shot junction open 1600 900 96   # a place close up: junction open|closed, flat base|archive,
+                                                 # hall base|terminal, house base, streets 1|2|3
+python3 town.py shotmask junction 1600 900       # its things, for the labels
+python3 town.py item lamp 1600 900 64     # one Home Catalogue thing alone (RGBA), laid over the flat when bought
+python3 town_post.py ../..                # -> media/town/*.webp, mask.png, glows, js/town-map.js
+```
+
+The departures board over the bar is blank in the render: the game draws the times and bends them onto
+its corners (`tshot_junction_board.json`), so act 2's "08:56 DELAYED" needs no second render. Every word
+rendered into a picture is English (signs, posters, the BACK AT 7 card); election posters have the face
+torn off, as STORY.md has it.
