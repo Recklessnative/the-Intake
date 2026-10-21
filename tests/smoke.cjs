@@ -117,7 +117,8 @@ async function academy() {
   if (!(await p.$('#academy .ac-hero')) || await p.$$eval('.ac-obj li', l => l.length) !== 3) throw new Error('academy welcome slide incomplete');
   await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + (MOBILE ? '/academy-mobile.png' : '/academy-welcome.png') });
   await p.click('#academy .ac-btn.go');                       // Start
-  await p.click('.ac-opt >> nth=0');                         // wrong on purpose
+  // The options are shuffled: the right one is not always B any more.
+  await p.click('.ac-opt[data-opt="' + await p.evaluate(() => Academy.MODULES[0].questions[0].options.findIndex(o => !o.ok)) + '"]'); // wrong on purpose
   if (!(await p.$('.ac-opt.wrong')) || !(await p.$('.ac-opt.right .ac-why'))) throw new Error('no feedback after a wrong answer');
   if (await p.isDisabled('#ac-next')) throw new Error('Next stays off after answering');
   await p.waitForTimeout(700);
@@ -128,7 +129,7 @@ async function academy() {
   if (!(await p.$('.ac-opt.wrong'))) throw new Error('academy answer not restored');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/academy.png' });
   await p.click('#ac-next');
-  for (let i = 1; i < 4; i++) { const k = await p.evaluate(i => Academy.MODULES[0].questions[i].options.findIndex(o => o.ok), i); await p.click('.ac-opt >> nth=' + k); await p.click('#ac-next'); }
+  for (let i = 1; i < 4; i++) { const k = await p.evaluate(i => Academy.MODULES[0].questions[i].options.findIndex(o => o.ok), i); await p.click('.ac-opt[data-opt="' + k + '"]'); await p.click('#ac-next'); }
   const score = await p.textContent('.ac-score');
   if (score !== '3 of 4 right' || await p.$$eval('.ac-tips li', l => l.length) !== 3) throw new Error('academy end wrong: ' + score);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/academy-tips.png' });
@@ -398,6 +399,7 @@ async function followUp() {
       // The part with the most points left comes first, with its next level; the table does not repeat it.
       const focus = await p.textContent('#score-focus'), rowsText = await p.textContent('#score-rows');
       if (!focus.startsWith('Work on this next: ')) throw new Error('no work-on-this-next line');
+      if (!(await p.isVisible('#btn-score-coffee'))) throw new Error('no coffee link under work-on-this-next');
       if (!(focus + rowsText).includes('Name the cause in one line.') || (focus.includes('Name the cause') && rowsText.includes('Next level: Name the cause'))) throw new Error('next-level line missing or repeated');
       if ((await p.$$('#score-rows details.model')).length < 4) throw new Error('model answers missing');
       await p.fill('#redo-q', 'Which shifts and which people were involved?');
@@ -603,6 +605,24 @@ async function followUp() {
   await p.click('#drill-again');
   if (await p.evaluate(() => window.__intake.state.drill.R.rating)) throw new Error('another case did not start a new drill');
   await p.click('#w-drill .tb.close');
+  // Coffee with Mieke on the desk: five mixed items, each answered then rated; kept in My scores.
+  await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-coffee"]');
+  await visible('#w-coffee');
+  for (let i = 0; i < 5; i++) {
+    const type = await p.evaluate(() => { const R = Coffee.load(); return R.items[R.now].type; });
+    const B = '#coffee-desk ';
+    if (type === 'recall' || type === 'first') { await p.fill(B + 'textarea', 'Which shifts does it happen on, and since when?'); if (type === 'recall') await p.click(B + '[data-call="partly"]'); await p.click(B + '#cf-check'); await p.click(B + '[data-rate="got"]'); }
+    if (type === 'rule') { await p.fill(B + 'textarea', 'Pilot with one team. If errors have not dropped by a third by the end of March, we stop.'); await p.click(B + '#cf-check'); await p.click(B + '[data-rate="partly"]'); }
+    if (type === 'lever') { await p.click(B + '#cf-check'); if (!(await p.textContent(B + '.su-why')).includes('fact')) throw new Error('coffee lever let an empty answer through'); await p.click(B + '[data-fact="0"]'); await p.click(B + '[data-call="no"]'); await p.click(B + '#cf-check'); await p.click(B + '#cf-next'); }
+    if (type === 'flaw') { await p.click(B + '[data-line="0"]'); await p.click(B + '#cf-next'); }
+    if (type === 'quiz') { await p.click(B + '.ac-opt >> nth=0'); await p.click(B + '#cf-next'); }
+  }
+  await p.waitForSelector('#coffee-desk #cf-done');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/coffee.png' });
+  const cf = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).coffee);
+  if (!cf || cf.length !== 1 || cf[0].items.length !== 5 || cf[0].items.some(x => !x.ok)) throw new Error('coffee not recorded: ' + JSON.stringify(cf));
+  await p.click('#coffee-desk #cf-done');
+  if (await p.isVisible('#w-coffee')) throw new Error('Done did not close the coffee');
   // The module is still there, from the mail or the desktop.
   if (MOBILE) { await p.click('#btn-startmenu'); await p.click('#start-menu [data-open="w-academy"]'); } else await p.click('.desk-icon[data-app="w-academy"]');
   await visible('#w-academy');
