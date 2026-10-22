@@ -1,0 +1,2 @@
+// Generated from the Blender render (tools/office/friday_post.py): where each thing on your Friday desk sits, in % of the picture.
+window.FRIDAY_MAP = {"w":1600,"h":900,"things":{"coat":{"rect":[18.688,12.333,31.938,46.333],"tag":[24.792,12.333]},"memo":{"rect":[27.062,55.667,45.312,70.778],"tag":[39.573,55.667]},"mug":{"rect":[33.188,48.556,36.938,57.111],"tag":[34.978,48.556]},"report":{"rect":[42.438,59.222,70.875,75.111],"tag":[52.181,59.222]},"screen":{"rect":[50.5,27.111,73.625,62.111],"tag":[59.955,27.111]}}};

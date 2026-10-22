@@ -371,7 +371,7 @@ async function followUp() {
       // Stand up in the middle of the call: the floor, then back to the desk exactly as it was.
       await p.fill('#chat-input', 'Half a question');
       await p.evaluate(() => { Gemini.busy = 1; });
-      await p.click('#btn-standup');
+      await p.click('#btn-standup', { force: true });   // it looks dimmed (aria-disabled) while a reply is coming, but still says why
       if (!(await p.textContent('#toast')).includes('Wait for the reply') || await p.isVisible('#s-office')) throw new Error('stood up while a reply was coming');
       await p.evaluate(() => { Gemini.busy = 0; });
       const before = await p.evaluate(() => ({ clock: window.__intake.state.run.clock, visits: JSON.parse(localStorage.getItem('intake-floor')).visits }));
@@ -613,6 +613,23 @@ async function followUp() {
   if ((await p.textContent('#im-pop .im-text')) !== 'second') throw new Error('second pop-up lost');
   await popAway();
   if (!(await p.$('#share-img canvas')) || await p.isVisible('#btn-linkedin') || !(await p.textContent('#share-text')).includes('hidden facts')) throw new Error('share card wrong on a normal week');
+  // Friday on your desk: the rendered desk at 18:00; each thing opens its part of the week report.
+  if (!MOBILE) {
+    await p.waitForSelector('#friday-pic .office-tag[data-thing="report"]');
+    if (await p.isVisible('#end-panel')) throw new Error('the week report should wait on the keyboard');
+    await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/friday.png' });
+    await p.click('#friday-pic .office-tag[data-thing="report"]');
+    if (!(await p.isVisible('#end-title')) || await p.isVisible('#end-memo') || await p.isVisible('#share-text')) throw new Error('week report window wrong');
+    await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/friday-report.png' });
+    await p.click('#end-close');
+    await p.click('#friday-pic .fd-hot[data-thing="memo"]');
+    if (!(await p.isVisible('#end-memo')) || await p.isVisible('#end-title')) throw new Error('memo window wrong');
+    await p.keyboard.press('Escape');
+    if (await p.isVisible('#end-panel')) throw new Error('Escape did not put the memo down');
+    await p.click('#friday-pic .office-tag[data-thing="screen"]');
+    if (!(await p.isVisible('#share-text'))) throw new Error('share card window wrong');
+    await p.click('#end-close');
+  }
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });
   if (boardCalls !== 2) throw new Error('expected two board calls, got ' + boardCalls);
   if (corridor !== 1 || callbacks !== 1) throw new Error('coffee machine or callback prompt missing: ' + corridor + ' ' + callbacks);

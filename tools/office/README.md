@@ -25,6 +25,9 @@ python3 post.py ../..                        # hub(-evening).webp, mask.png, glo
 python3 scene.py floor5 1600 900 128           # the reveal: floor 5 in 2041 from the lift -> out/floor5.png + out/floor5_screen.json
 python3 floor5_post.py ../..                 # -> media/office/floor5(-960).webp; copy the screen box into SCREEN in js/reveal.js
 python3 scene.py lift5 960 540 24             # the lift film up to floor 5 (125 frames, ~1 min a frame on CPU) -> out/lift5/; encode.sh -> media/office/lift5.*
+python3 scene.py shot friday 1600 900 96        # Friday on your desk at 18:00: the week report, Darren's memo, your screen, your coat -> out/shot_friday.png
+python3 scene.py shotmask friday 1600 900       # their click mask
+python3 friday_post.py ../..                 # -> media/office/friday(-960).webp and js/friday-map.js
 ```
 
 On four CPU cores the hub takes about 20 minutes the walk-in about two hours and the stand-up about 45 minutes.

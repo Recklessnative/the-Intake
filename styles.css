@@ -61,6 +61,27 @@ label.check input { width: auto; }
   color: #fff;
 }
 #s-end button.ghost { color: #fff; }
+/* Friday on your desk: the render fills the screen above an XP taskbar; each thing on the desk opens
+   its part of the week report in a small XP window. */
+#s-end.friday { position: relative; padding: 0; background: #0b0f14; height: 100vh; overflow: hidden; }
+.friday[hidden] { display: none; }
+.friday { position: absolute; inset: 0 0 36px 0; }
+.fd-stage { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.fd-pic { position: relative; width: min(100vw, calc((100vh - 36px) * 16 / 9)); aspect-ratio: 16 / 9; }
+.fd-pic img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.fd-hot { position: absolute; min-height: 0; padding: 0; border: 0; border-radius: 4px; background: transparent; box-shadow: none; }
+.fd-hot:hover, .fd-hot:focus-visible { box-shadow: none; outline: 2px dotted #ffd84a; outline-offset: 2px; background: rgba(255, 216, 74, .08); }
+.fd-pic .office-tag { z-index: 2; }
+.fd-bar .start-btn { pointer-events: none; }
+.fd-hint { flex: 1; color: #fff; font-size: 12px; text-shadow: 1px 1px 1px rgba(0,0,0,.5); }
+.fd-bar .tray { display: flex; gap: 10px; }
+#s-end.friday #end-panel { position: absolute; z-index: 4; left: 50%; top: 5vh; transform: translateX(-50%); width: min(520px, 94vw); max-height: calc(100vh - 36px - 10vh); overflow-y: auto;
+  padding: 0 14px 14px; color: var(--ink); background: var(--win); border: 3px solid var(--title-a); border-top: 0; border-radius: 8px 8px 0 0; box-shadow: 3px 4px 14px rgba(0,0,0,.45); text-align: left; }
+#s-end.friday #end-panel[hidden] { display: none; }
+#s-end.friday .end-bar { position: sticky; top: 0; z-index: 1; margin: 0 -14px 10px; color: #fff; }
+#s-end.friday #end-panel .eyebrow, #s-end.friday #end-panel button.ghost { color: var(--ink); }
+#s-end.friday .share button.ghost { color: #1a3e8c; }
+.fri-off { display: none !important; }
 .subtitle { font-style: italic; color: #e8eeff; margin: 0 0 30px; font-size: 18px; }
 #s-title { --t-ink: #eef1f4; --t-dim: rgba(238, 241, 244, .66); --t-mark: #e8a656;
   position: relative; overflow: hidden; background: #0b0f14; color: var(--t-ink);

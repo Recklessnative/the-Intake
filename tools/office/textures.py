@@ -264,3 +264,21 @@ d.text((200, 500), 'Board 31/08', font=f('LiberationSans-Italic.ttf', 28), fill=
 im.save(f'{OUT}/flipchart.png')
 note('projnote', ['Remote:', "Darren's", 'drawer.', 'Darren:', 'Frankfurt.'], (255, 226, 80), 54)
 print('more close-up textures ok')
+
+# ---------- Friday on your desk ----------
+# The week report: a manila folder label, typed, with the Synergix stamp.
+im, d = paper(560, 200, (232, 205, 140))
+d.rectangle([40, 50, 520, 150], fill=(250, 248, 238), outline=(150, 120, 70), width=3)
+d.text((280, 84), 'WEEK REPORT', font=f('LiberationMono-Bold.ttf', 44), fill=ink, anchor='mm')
+d.text((280, 126), 'Learning team  ·  confidential', font=f('LiberationMono-Regular.ttf', 20), fill=ink, anchor='mm')
+d.ellipse([440, 8, 540, 64], outline=red, width=4); d.text((490, 36), 'FRIDAY', font=f('LiberationSans-Bold.ttf', 18), fill=red, anchor='mm')
+im.save(f'{OUT}/weekreport.png')
+# Darren's Friday memo: letterhead, a few typed lines, his initials in blue pen.
+im, d = paper(420, 594)
+d.rectangle([0, 0, 420, 54], fill=(10, 70, 200)); d.text((24, 14), 'SYNERGIX  ·  MEMO', font=f('LiberationSans-Bold.ttf', 24), fill='white')
+d.text((24, 74), 'From: Darren (CEO)\nTo: Learning team\nRe: Friday', font=f('LiberationSans-Regular.ttf', 20), fill=ink, spacing=6)
+for i in range(9):
+    y = 190 + i * 30
+    d.rectangle([24, y, 24 + random.randint(250, 370), y + 10], fill=(150, 150, 155))
+d.text((300, 500), 'D.', font=f('LiberationSerif-Italic.ttf', 64), fill=blue)
+im.save(f'{OUT}/memo_friday.png')

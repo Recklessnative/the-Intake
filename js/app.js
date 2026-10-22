@@ -1483,6 +1483,7 @@
     'w-coe': { target: '#w-coe', text: 'The Center of Excellence folder. What you earn lands here: pocket cards, Academy tips, handouts. Open one before a call if it helps. That is what it is for.' },
     'w-academy': { target: '#w-academy', text: 'The CoE Academy. One short module a week: a few questions and a few tips from people who learned it the hard way. It does not count towards your score, so guess freely.' },
     'w-drill': { target: '#w-drill', text: 'The measurement drill. Sort the measures: which ones show the problem moved, and which only show people sat in a room. Then write when you would stop. No points, just practice.' },
+    'friday': { target: '#friday-pic .office-tag[data-thing="report"]', text: 'Friday, six o\'clock. Darren\'s PA leaves the week report on your keyboard, so nobody can miss it. His memo is next to it, your share card is still on your screen, and your coat takes you home.' },
     'w-second': { target: '#w-second', text: 'An old client, back with something new. A short call, like the Morning Call. How they open depends on how the first one went: get it right and they give you more. It does not count towards your week.' },
     'w-coffee': { target: '#w-coffee', text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.' },
     's-coffee': { text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.', key: 'look-w-coffee' },
@@ -2625,6 +2626,54 @@
       onDone: choice => { afterReveal(); Desktop.reset(); state.run = null; if (choice === 'clockin') startWeek(false, false); else show('s-title'); }
     });
   }
+  // ---------- Friday on your desk ----------
+  // A normal week ends at your desk at 18:00, rendered in Blender (tools/office, shot 'friday'): the
+  // week report on your keyboard, Darren's memo beside it, your share card on the screen and your
+  // coat on the panel. Each opens its part of the week report in a small XP window; the coat goes
+  // home (another week). Hard mode, Try one case and retests keep the plain end screen.
+  const FRIDAY_THINGS = { report: 'Week report', memo: 'Darren\'s memo', screen: 'Your share card', coat: 'Go home' };
+  function friday(on) {
+    const map = window.FRIDAY_MAP, use = !!(on && map && map.things);
+    $('s-end').classList.toggle('friday', use);
+    $('friday').hidden = !use;
+    $('end-bar').hidden = !use;
+    if (!use) { endPart(null); return; }
+    const pic = $('friday-pic');
+    pic.querySelector('img').src = 'media/office/' + (window.innerWidth < 1100 ? 'friday-960.webp' : 'friday.webp');
+    pic.querySelectorAll('.fd-hot, .office-tag').forEach(b => b.remove());
+    // Bigger things first, so a smaller one on top of them (the folder in front of the screen) stays clickable.
+    const area = id => { const r = (map.things[id] || {}).rect || [0, 0, 0, 0]; return (r[2] - r[0]) * (r[3] - r[1]); };
+    Object.entries(FRIDAY_THINGS).sort((a, b) => area(b[0]) - area(a[0])).forEach(([id, label]) => {
+      const t = map.things[id];
+      if (!t) return;
+      const go = () => { if (id === 'coat') $('btn-again').click(); else endPart(id); };
+      const hot = document.createElement('button');
+      hot.type = 'button'; hot.className = 'fd-hot'; hot.dataset.thing = id; hot.setAttribute('aria-label', label);
+      Object.assign(hot.style, { left: t.rect[0] + '%', top: t.rect[1] + '%', width: (t.rect[2] - t.rect[0]) + '%', height: (t.rect[3] - t.rect[1]) + '%' });
+      hot.onclick = go;
+      const tag = document.createElement('button');
+      tag.type = 'button'; tag.className = 'office-tag' + (id === 'report' ? ' primary' : ''); tag.dataset.thing = id; tag.textContent = label;
+      Object.assign(tag.style, { left: t.tag[0] + '%', top: t.tag[1] + '%' });
+      tag.onclick = go;
+      pic.append(hot, tag);
+    });
+    $('friday-when').textContent = Story.day(state.weekNo, 4);
+    $('friday-hint').textContent = 'The floor is empty. Your week report is on your keyboard.';
+    endPart(null);
+    Sound.scene('evening');
+    setTimeout(() => firstLook('friday'), 700);
+  }
+  // One part of the week report in the window, or none (the desk).
+  function endPart(part) {
+    const on = $('s-end').classList.contains('friday');
+    $('end-panel').hidden = on && !part;
+    document.querySelectorAll('#end-panel [data-part]').forEach(e => e.classList.toggle('fri-off', on && e.dataset.part !== part));
+    $('end-bar-title').textContent = { report: 'Week report - ' + Story.day(state.weekNo, 4), memo: 'Memo from Darren (CEO)', screen: 'Your share card' }[part] || '';
+    if (on && part) $('end-close').focus();
+  }
+  $('end-close').onclick = () => endPart(null);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-end').classList.contains('friday') && !$('end-panel').hidden) endPart(null); });
+
   function endRun() {
     try { localStorage.removeItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
     const avg = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));
@@ -2660,6 +2709,7 @@
     if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted, state.team ? Team.memoLine(state.team, Team.grownFrom(teamLog()).filter(id => state.team.drafts.some(d => d.junior === id && d.grown))) : '');
     shareCard(score, title);
     show('s-end');
+    friday(!state.hard && !state.one && !state.retest);
   }
 
   // ---------- the board room: Friday, once per week ----------
