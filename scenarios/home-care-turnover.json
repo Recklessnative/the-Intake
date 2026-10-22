@@ -49,11 +49,9 @@
       "reveal_line": "We do exit interviews, yes. I haven't... let me see the summary. Schedule, travel, schedule. Burden of care, 12%. Hm. That's less than I would have said.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:org"],
       "data_doc": "Main reason for leaving, 96 exit interviews last year: schedule, travel or unpaid gaps 65; emotional burden of care 12; pay level 9; physical complaints 6; other 4.",
-      "data_source": "HR exit interview summary, last year"
+      "data_source": "HR file: leavers and their exit interviews, last year"
     },
     {
       "id": "unpaid_travel",

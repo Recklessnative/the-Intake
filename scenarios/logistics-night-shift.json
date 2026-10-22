@@ -62,11 +62,9 @@
       "reveal_line": "Mostly agency. New ones. Nine out of eleven, if I'm honest. The old hands could drive these aisles blindfolded. Please don't quote me on blindfolded.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:org"],
       "data_doc": "9 of 11 near-misses involved agency drivers, 8 of them in their first 6 weeks on site.",
-      "data_source": "Near-miss log joined with HR"
+      "data_source": "Night shift roster joined with the near-miss log"
     },
     {
       "id": "video_induction",

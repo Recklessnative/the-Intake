@@ -20,8 +20,8 @@
     "org": "Samen Ouder, an NGO against loneliness among older people",
     "voice": "Warm, energetic, slightly overwhelmed; talks fast and laughs at her own chaos. Deeply loyal to the mission. Gets careful and loyal when the founder is mentioned.",
     "patience": 4,
-    "risk_appetite": 2,
-    "risk_appetite_label": "Medium"
+    "risk_appetite": 3,
+    "risk_appetite_label": "High"
   },
   "frontline": {
     "name": "Wim Dewulf",
@@ -48,11 +48,9 @@
       "reveal_line": "When? Mostly early. Two thirds go in the first three months. If they survive that, they stay forever. We have a volunteer who's been here since 1998. She's 91.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:org"],
       "data_doc": "Leavers in the last 12 months: 214. Left within 3 months: 146 (68%). Volunteers active more than a year: average tenure 6.5 years.",
-      "data_source": "Volunteer database"
+      "data_source": "Volunteer register: who leaves, and after how long"
     },
     {
       "id": "phone_line_rule",
@@ -204,7 +202,7 @@
   "actor_notes": [
     "Hanne is open and chatty; she reveals most facts readily, except the founder dynamic, which she defends loyally until asked directly.",
     "She doesn't see the phone-line rule as a problem until the player connects it to the exit reasons; play that realisation.",
-    "Medium risk appetite: she likes bold ideas but fears conflict with Jos; plans that honour the founder lower her resistance.",
+    "High risk appetite: she likes bold ideas and bold concepts rarely trigger a defence round with her, but she fears conflict with Jos; plans that honour the founder lower her resistance.",
     "If the player suggests skipping background checks, trust drops sharply."
   ],
   "flavour_lines": [

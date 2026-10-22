@@ -49,11 +49,9 @@
       "reveal_line": "Where? The slicers, mostly. At start-up. Before anyone has touched a lasagne. Hm. Eigenlijk, that's before my operators even arrive.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:process"],
       "data_doc": "Failed ATP and Listeria-indicator swabs, last 6 months: 11 failures. Timing: 11 of 11 at pre-start-up check (05:30-06:00). Location: slicer 1 (5), slicer 2 (4), tray sealer (2). Swabs during production: 2 borderline, 0 failed.",
-      "data_source": "Internal swab programme and audit annex, last 6 months"
+      "data_source": "Cleaning schedule and swab programme, last 6 months"
     },
     {
       "id": "dutch_only",
