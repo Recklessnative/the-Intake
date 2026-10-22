@@ -188,7 +188,7 @@ body.no-stand .quick-launch, body.no-stand #btn-standup-menu { display: none; }
   background: var(--tray); border-left: 1px solid #0c59b9; }
 .start-menu { position: absolute; left: 0; bottom: 0; z-index: 100001; width: 260px; display: flex; flex-direction: column;
   background: #fff; border: 2px solid var(--task-a); border-radius: 8px 8px 0 0; box-shadow: 4px 0 16px rgba(0,0,0,.4); }
-.start-menu[hidden] { display: none; }
+.start-menu[hidden], .start-menu button[hidden], .quick-launch[hidden], .tray-phone[hidden] { display: none; }
 .start-head { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(var(--title-b), var(--title-a)); border-radius: 6px 6px 0 0; }
 .start-menu button { text-align: left; border: 0; border-radius: 0; background: #fff; padding: 9px 14px; }
 .start-menu .sm-i { width: 20px; height: 20px; vertical-align: -5px; margin-right: 7px; }

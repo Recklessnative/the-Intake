@@ -101,10 +101,37 @@
     });
   }
 
+  // ---------- one interruption at a time ----------
+  // Pop-ups, texts, Staply and late notices wait their turn: nothing new appears while something
+  // else is on screen (a pop-up, Staply, a toast, one of Mieke's bubbles, the slide show), and the
+  // screen stays quiet for a few seconds in between, so each one lands. Expired items are dropped.
+  const calmQ = [];
+  const QUIET = 3000;
+  let quietSince = 0;
+  const shown = id => { const e = $(id); return !!e && !e.hidden; };
+  function busy() {
+    return shown('im-pop') || shown('staply') || !!document.querySelector('#toast.show') || !!(window.Tour && Tour.open) || !!$('slideshow');
+  }
+  // Mieke's first-look bubbles explain the screen in front of you, so they wait less (`ms`).
+  function calm(ms) {
+    if (busy()) quietSince = Date.now();
+    return Date.now() - quietSince >= (ms == null ? QUIET : ms);
+  }
+  function later(fn, keep) {
+    calmQ.push({ fn, until: keep ? Infinity : Date.now() + (keep === false ? 30000 : 90000) });
+  }
+  setInterval(() => {
+    while (calmQ.length && calmQ[0].until < Date.now()) calmQ.shift();
+    if (!calmQ.length || !calm()) return;
+    calmQ.shift().fn();
+    quietSince = Date.now();
+  }, 300);
+
   // ---------- Doors Messenger: pop-ups and nudges ----------
   let toastFn = () => {};
   const PICS = ['mieke', 'darren', 'bart', 'priya', 'jens'];
-  function im(from, text, onOpen, sound) {
+  function im(from, text, onOpen, sound) { later(() => imNow(from, text, onOpen, sound)); }
+  function imNow(from, text, onOpen, sound) {
     const box = $('im-pop');
     box.querySelector('.im-from').textContent = from + ' says:';
     // People you work with have a display picture: a thing from their desk, never a face.
@@ -134,7 +161,12 @@
   // The inbox survives a reload, like a real SIM card (the last eight texts).
   let texts = [];
   try { texts = JSON.parse(store.get('intake-texts', '[]')) || []; } catch (e) { texts = []; }
+  // The text is stored at once (it is on the SIM), the buzz and the badge wait their turn.
+  let onEarned = () => {};  // tells the desk that something new (the phone, Staply) has been met
   function sms(from, text, quiet) {
+    later(() => smsNow(from, text, quiet), true);
+  }
+  function smsNow(from, text, quiet) {
     texts.unshift({ from, text });
     texts = texts.slice(0, 8);
     store.set('intake-texts', JSON.stringify(texts));
@@ -144,6 +176,7 @@
     if (t) { t.textContent = String((+t.textContent || 0) + 1); t.hidden = false; }
     if (!quiet && window.Sound && Sound.sms) Sound.sms();
     if (phone.view === 'texts') renderPhone();
+    onEarned();
   }
   const phone = { view: 'menu', snake: null };
   function renderPhone() {
@@ -291,6 +324,12 @@
   function staply(trigger) {
     if (!staplyOn() || seen.has(trigger) || !TIPS[trigger]) return false;
     seen.add(trigger);
+    // He is a joke, so he only turns up while the joke still fits: within 30 seconds.
+    later(() => staplyNow(trigger), false);
+    return true;
+  }
+  function staplyNow(trigger) {
+    store.set('intake-staply-met', '1');
     const box = $('staply');
     box.querySelector('.st-text').textContent = TIPS[trigger];
     box.querySelector('.st-actions').hidden = false;
@@ -301,7 +340,7 @@
     // Ignored long enough, he wanders off.
     clearTimeout(staplySay.t);
     staplySay.t = setTimeout(() => { box.hidden = true; }, 20000);
-    return true;
+    onEarned();
   }
   function staplySay(t) {
     const box = $('staply');
@@ -314,6 +353,7 @@
 
   function init(opts) {
     toastFn = opts.toast || toastFn;
+    onEarned = opts.onEarned || onEarned;
     const box = $('staply');
     box.querySelector('[data-st="yes"]').onclick = () => { staplySay(YES[Math.floor(Math.random() * YES.length)]); if (opts.onStaplyYes) opts.onStaplyYes(); };
     box.querySelector('[data-st="no"]').onclick = () => { box.hidden = true; };
@@ -331,5 +371,5 @@
     renderPhone();
   }
 
-  window.Retro = { WALLPAPERS, setLevel, setAero, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, showPhone, hidePhone, phoneOpen, staply, staplyOn, setStaply, init, resetStaply: () => seen.clear() };
+  window.Retro = { WALLPAPERS, setLevel, setAero, wallpaper, renderDisplay, im, nudge, sms, renderPhone, stopSnake, phone, showPhone, hidePhone, phoneOpen, staply, staplyOn, setStaply, init, later, calm, texts: () => texts.length, resetStaply: () => seen.clear() };
 })();

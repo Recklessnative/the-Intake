@@ -50,6 +50,7 @@
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') { resumeButton(); titleScreen(); }
+    if (id === 's-desk' && state.run) deskIcons();
     firstLook(id);
     window.scrollTo(0, 0);
   }
@@ -826,7 +827,7 @@
     const of = r.card.hiddenFacts.length, n = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length;
     Sound.found();
     // The field stamp: a Learning House handout whose question would have found this fact (js/clinic.js).
-    if (!state.hard) Clinic.stamp(r.card.id, fresh).slice(0, 1).forEach(x => setTimeout(() => toast('📑 Stamp ' + x.n + ' on your Learning House handout "' + x.title + '": ' + x.question, 'info'), 1600));
+    if (!state.hard) Clinic.stamp(r.card.id, fresh).slice(0, 1).forEach(x => Retro.later(() => toast('📑 Stamp ' + x.n + ' on your Learning House handout "' + x.title + '": ' + x.question, 'info')));
     const s = $('stamp');
     s.querySelector('.stamp-n').textContent = n + ' of ' + of + ' facts';
     s.hidden = false;
@@ -1204,6 +1205,20 @@
     const all = (h.weeks || []).reduce((n, w) => n + (w.requests || []).length, 0) >= 3;
     const open = DESK_START.concat(deskUnlocked());
     document.querySelectorAll('.desk-icon').forEach(b => b.classList.toggle('locked', !all && !open.includes(b.dataset.app)));
+    // The Start menu and the tray grow the same way: on day one they hold what the desk holds and
+    // the clock. The mobile turns up with the first text, Staply's switch once you have met him,
+    // standing up once Mieke has shown you the floor, Coffee and Display once you have a scorecard.
+    const has = k => { try { return !!localStorage.getItem(k); } catch (e) { return true; } };
+    const earned = {
+      'w-phone': Retro.texts() > 0, 'w-coffee': open.includes('w-scores'), 'w-display': open.includes('w-scores'),
+      staply: has('intake-staply-met'), standup: has('intake-told-floor')
+    };
+    const got = id => all || (id in earned ? earned[id] : open.includes(id));
+    document.querySelectorAll('#start-menu [data-open]').forEach(b => { b.hidden = !got(b.dataset.open); });
+    $('btn-staply').hidden = !got('staply');
+    $('btn-standup-menu').hidden = !got('standup');
+    document.querySelector('.quick-launch').hidden = !got('standup');
+    $('btn-phone').hidden = !got('w-phone');
   }
   function unlock(...ids) {
     const got = deskUnlocked();
@@ -1411,7 +1426,7 @@
   // One bubble at a time, checked twice a second; anything else on screen (the tour, the slide
   // show) goes first. On the very first morning her welcome tour rings first (`lookHold`).
   function nextLook() {
-    if (!lookQueue.length || lookBusy || Tour.open || Date.now() < lookHold || $('slideshow') || lookQueue[0].at > Date.now()) return;
+    if (!lookQueue.length || lookBusy || !Retro.calm(1000) || Date.now() < lookHold || lookQueue[0].at > Date.now()) return;
     const q = lookQueue.shift();
     if (told(q.key)) return;
     lookBusy = true;
@@ -1434,7 +1449,8 @@
   Retro.init({
     toast,
     onStaplyYes: () => { if (!state.hard) setTimeout(() => { const t = 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.'; miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 5200); },
-    onStaplyChange: staplyLabel
+    onStaplyChange: staplyLabel,
+    onEarned: () => { if (state.run) deskIcons(); }
   });
   staplyLabel();
   // Wallpapers unlock with the best title you have finished a week with.
