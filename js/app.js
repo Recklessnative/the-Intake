@@ -2395,7 +2395,8 @@
   // lean back from it whenever you like, and stand up from the desk. Things on the desk say one thing each.
   const PLANT = ['A plant on its last legs. One leaf has given up and lies on the desk. You keep meaning to water it.',
     'The plant. Somebody has watered it while you were out, with what smells like cold coffee. It looks no better and no worse.'];
-  function deskThings() {
+  // `out`: the way out of the office from here, for the coat (once the town is open).
+  function deskThings(out) {
     const i = state.index, day = state.days[i] || 0, n = state.cards.length;
     return {
       sticky: { label: 'Sticky note', face: '📝', text: 'ASK WHY, in capitals. Mieke stuck it on your monitor on your first morning. It has outlasted the plant\'s good years.' },
@@ -2406,7 +2407,8 @@
       pens: { label: 'Pen pot', face: '🖊', text: 'Three pens. One works. You never know which.' },
       tray: { label: 'Printouts', face: '📄', text: 'This week\'s printouts: ' + n + ' requests, the pocket card from the CoE folder, and a form from HR you have filled in twice.' },
       binders: { label: 'Binders', face: '📚', text: 'PROCESS 2005, PROCESS 2006 and PROCESS (NEW). The first two are full. The new one is empty and has been since January.' },
-      coat: { label: 'Your coat', face: '🧥', text: 'Your coat, still damp from this morning. Home time is half past five; the lift will still be there.' }
+      coat: out && townOpen() ? { label: 'Your coat', face: '🧥', text: 'Your coat, still damp from this morning. Lindeveld is five minutes away; whatever is on your screen will wait.', actions: [{ label: 'Go into town', primary: true, go: out }] }
+        : { label: 'Your coat', face: '🧥', text: 'Your coat, still damp from this morning. Home time is half past five; the lift will still be there.' }
     };
   }
   // The clock when the next request comes in: forty minutes after the last one, or 08:57 on a new day.
@@ -2416,8 +2418,9 @@
   }
   // `screen` opens whatever is on the screen; it runs under the zoom out of the CRT.
   function sitAt(screen, o) {
+    Office.preload(['hub', 'stand']);
     Seat.show({
-      show, when: o.when, line: o.line || '', from: o.from || null, things: deskThings(),
+      show, when: o.when, line: o.line || '', from: o.from || null, things: deskThings(o.out),
       screen: { label: 'Your screen', sub: o.sub, go: () => Seat.zoomIn(screen) },
       stand: o.stand === false ? null : { label: 'Stand up', sub: o.standSub || 'Walk around the floor', go: o.stand || standFromSeat }
     });
@@ -2425,12 +2428,12 @@
   // Sitting down for the next request: it comes in when you look at the screen.
   function sitNext() {
     const i = state.index, day = state.days[i] || 0;
-    sitAt(() => startRequest(), { when: Story.day(state.weekNo, day) + ' · ' + clockText(nextClock()), sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is in', stand: () => floor(false, false, false, true) });
+    sitAt(() => startRequest(), { when: Story.day(state.weekNo, day) + ' · ' + clockText(nextClock()), sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is in', stand: () => floor(false, false, false, true), out: () => goOut(day, false) });
   }
   // Sitting down in the middle of a request: it is on the screen, as you left it.
   function sitPaused(from) {
     const r = state.run;
-    sitAt(backToDesk, { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from });
+    sitAt(backToDesk, { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from, out: () => outFromSeat() });
   }
   function standFromSeat() {
     const no = canStand();
@@ -2447,7 +2450,14 @@
     if (Tour.open) { toast('Finish Mieke\'s tour first.', 'info'); return; }
     save();
     const r = state.run;
-    sitAt(() => show('s-desk'), { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from: $('s-desk') });
+    sitAt(() => show('s-desk'), { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from: $('s-desk'), out: () => outFromSeat() });
+  }
+  // Out of the door from the desk in the middle of a request: the same rules as standing up.
+  function outFromSeat() {
+    const no = canStand();
+    if (no) { toast(no, 'info'); return; }
+    save();
+    goOut(state.days[state.index] || 0, true);
   }
   $('btn-leanback').onclick = leanBack;
   $('btn-leanback-menu').onclick = leanBack;
@@ -2577,7 +2587,8 @@
   // to the next morning; your desk waits until then.
   // `paused`: you stood up in the middle of a request; it waits on your desk exactly as you left it.
   // `again`: you sat down and stood straight up again; nothing new has turned up on the floor since.
-  function floor(evening, last, paused, again) {
+  // `back`: you walked in from town, so no stand-up film: the floor is simply there.
+  function floor(evening, last, paused, again, back) {
     const i = state.index, r = state.run;
     const day = state.days[evening ? i - 1 : i] || 0;
     const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(paused ? r.clock : nextClock());
@@ -2622,7 +2633,9 @@
     } else if (walk) spots.lift = { label: 'The lift', sub: 'Home, or through town', primary: true, who: 'The lift', face: '🛗', text: TOWN_LIFT, actions: [home, walk] };
     else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
-    if (paused) delete spots.lift;
+    // During the day the lift takes you out too: town, the Learning House, your flat. Whatever is on your desk waits.
+    else if (!last) spots.lift = townOpen() ? { label: 'The lift', sub: 'Out into Lindeveld', who: 'The lift', face: '🛗', text: LIFT_DAY, actions: [{ label: 'Go into town', go: () => { Office.close(); goOut(day, paused); } }] }
+      : { label: 'The lift', who: 'The lift', face: '🛗', text: LIFT_PROBATION };
     const L = looks(arcNow(day), paused || again);
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
@@ -2654,12 +2667,22 @@
       // The first time out here, Mieke tells you what the floor is for.
       intro: told('floor') ? null : { who: 'Mieke', face: '☕', at: 'mieke', text: (paused ? FLOOR_INTRO_PAUSED : FLOOR_INTRO) + (evening ? FLOOR_EVENING : '') }
     };
-    Office.standUp(opts);
+    Office.day(state.weekId + ':' + day);
+    Office.preload(['desk', 'sit']);
+    if (back) Office.show(opts); else Office.standUp(opts);
+  }
+  const LIFT_DAY = 'Ground floor, and five minutes through the rain to the canal. Your desk will wait; nobody here counts the minutes but Priya.';
+  const LIFT_PROBATION = 'Ground floor and the rain. Darren likes to see new people at their desks in their first week. After Friday you can slip out into town whenever you like.';
+  // Out of the office in the middle of the day: town, and back to the floor as you left it. It takes half an hour.
+  function goOut(day, paused) {
+    const r = state.run, i = state.index;
+    const time = paused ? r.clock : nextClock();
+    openTown(day, null, null, () => { if (r) r.clock += 30; save(); floor(false, false, paused, true, true); }, clockText(time + 15));
   }
   const TOWN_LIFT = 'Ground floor. Straight home to bed, or the long way, through Lindeveld? Your old clients drink at The Junction, and Payroll pays on Friday.';
   // The town needs a finished normal week behind you, and never shows in hard mode or Try one case.
   const townOpen = () => !state.hard && !state.one && !state.final && scoreHistory().weeks.some(w => w.done && !w.hard && !w.one);
-  function openTown(day, tomorrow, after) {
+  function openTown(day, tomorrow, after, back, at) {
     const done = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one);
     const card = id => state.pool.find(c => c.id === id);
     const seen = new Set();
@@ -2669,7 +2692,7 @@
     const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
     setTimeout(() => firstLook('town'), 900);
     Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow, card, dayKey: state.weekId + ':' + day,
-      when: Story.day(state.weekNo, day) + ' · 18:30', onDone: after });
+      when: Story.day(state.weekNo, day) + ' · ' + (at || '18:30'), onDone: after, back });
   }
   const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
 

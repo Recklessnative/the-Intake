@@ -1168,11 +1168,11 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 /* Standing up from your desk: a film over the page that fades into the floor. */
 .office-film { position: fixed; inset: 0; z-index: 9000; background: #000; opacity: 0; transition: opacity .25s ease; cursor: pointer; }
 .office-film.in { opacity: 1; }
-.office-film.out { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.office-film.out { opacity: 0; transition: opacity .3s ease; pointer-events: none; }
 .office-film video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.office-stage.arrive { animation: office-arrive .7s ease-out; }
-@keyframes office-arrive { from { opacity: 0; transform: scale(1.08); filter: blur(4px); } }
-@media (prefers-reduced-motion: reduce) { .office-stage.arrive { animation: none; } }
+.office-stage.arrive, .screen.seat.arrive .seat-stage { animation: office-arrive .32s ease-out; }
+@keyframes office-arrive { from { opacity: 0; transform: scale(1.05); filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) { .office-stage.arrive, .screen.seat.arrive .seat-stage { animation: none; } }
 
 /* The walk-in film: full bleed, a caption at the bottom, Skip in the corner. */
 .screen.walkin { position: relative; padding: 0; background: #000; overflow: hidden; }

@@ -210,7 +210,7 @@
     P.streets = {
       title: 'The streets',
       intro: act >= 3 ? 'Mill Street, the market square, the canal. Where the streets leave town the map is grey, and the corner says: 71% recovered.'
-        : 'Mill Street, the market square, the canal. Lindeveld at half past six, in the rain.' + (act >= 2 ? ' Past the ring road there is fog. There always is.' : ''),
+        : 'Mill Street, the market square, the canal. Lindeveld at ' + (ctx.back ? 'lunchtime' : 'half past six') + ', in the rain.' + (act >= 2 ? ' Past the ring road there is fog. There always is.' : ''),
       items: [
         { label: 'Election posters', at: 'posters', text: 'Posters from the June election are still up: Belgium still has no government. Somebody has torn the face off every single one.'
           + (act >= 3 ? '\n\nUp close, there never were faces under them. Just the paper.' : '') },
@@ -302,7 +302,8 @@
     return 'matrix3d(' + [q[0], q[3], 0, q[6], q[1], q[4], 0, q[7], 0, 0, 1, 0, q[2], q[5], 0, 1].join(',') + ')';
   }
 
-  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone, card(id), dayKey, when }
+  // ctx: { now: arcNow, weeks: finished normal weeks, checks, scrap, revealed, ending, tomorrow, onDone, card(id), dayKey, when,
+  //        back: during the working day, the way back to the office (no bed then) }
   function open(ctx) {
     ctx.act = ctx.revealed ? 3 : ctx.now.week >= 5 ? 2 : 1;
     const act = ctx.act, M = TMAP();
@@ -343,7 +344,7 @@
     const panel = el('div', 'tw-panel'); panel.hidden = true;
     panel.setAttribute('aria-live', 'polite');
     stage.append(look, panel);
-    const line = el('p', 'office-line tw-line', act >= 3 ? 'Lindeveld, as the archive kept it. Pick a place.' : 'Lindeveld, half past six. Pick a place, or go to bed.');
+    const line = el('p', 'office-line tw-line', act >= 3 ? 'Lindeveld, as the archive kept it. Pick a place.' : ctx.back ? 'Lindeveld, lunchtime. Pick a place; your desk waits.' : 'Lindeveld, half past six. Pick a place, or go to bed.');
     // The taskbar: one button per place, then the tray.
     const bar = el('div', 'office-bar tw-bar');
     const list = el('nav', 'office-list tw-places'); list.setAttribute('aria-label', 'Places in Lindeveld');
@@ -356,8 +357,9 @@
     });
     const tray = el('div', 'office-tray tw-tray');
     tray.appendChild(el('span', 'tw-when', ctx.when || ''));
-    const bed = el('button', 'primary', 'Go to bed: start ' + (ctx.tomorrow || 'tomorrow')); bed.type = 'button';
-    bed.onclick = () => { lay.classList.remove('in'); document.removeEventListener('keydown', key); setTimeout(() => { lay.remove(); if (ctx.onDone) ctx.onDone(); }, 400); };
+    // In the evening the way out is bed (the next morning); during the day, back to the office.
+    const bed = el('button', 'primary', ctx.back ? 'Back to the office' : 'Go to bed: start ' + (ctx.tomorrow || 'tomorrow')); bed.type = 'button';
+    bed.onclick = () => { lay.classList.remove('in'); document.removeEventListener('keydown', key); setTimeout(() => { lay.remove(); const f = ctx.back || ctx.onDone; if (f) f(); }, 200); };
     tray.appendChild(bed);
     bar.append(list, tray);
     lay.append(stage, line, bar);

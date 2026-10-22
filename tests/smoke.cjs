@@ -9,7 +9,7 @@ let p, visible, MOBILE, shot = 0;
 // The case board: five short steps, each locked in (some with feedback first), then the memo.
 // The bet before the stakeholder reads the concept. The first time, check the rules: both picks
 // are required, and a bold concept needs a way back.
-let betChecked = false;
+let betChecked = false, townByDay = false;
 // Sitting down lands on your desk (js/seat.js); the screen is one click further.
 async function toScreen() {
   await p.waitForSelector('#s-seat.active');
@@ -402,7 +402,11 @@ async function followUp() {
       await p.click('#btn-standup');
       await p.waitForSelector('#s-office.active');
       const desk = await p.textContent('#office-list button[data-spot="desk"]');
-      if (!desk.includes('where you left it') || await p.$('#office-list button[data-spot="lift"]')) throw new Error('mid-request floor wrong: ' + desk);
+      if (!desk.includes('where you left it') || await p.$('#office-list button.primary[data-spot="lift"]')) throw new Error('mid-request floor wrong: ' + desk);
+      // The lift is there in the middle of the day too; in the first week it says why the town waits.
+      await p.click('#office-list button[data-spot="lift"]');
+      if (!(await p.textContent('#office-card')).includes('first week')) throw new Error('the lift in week 1 does not say why town waits');
+      await p.click('#office-card .row button');
       if (JSON.parse(await p.evaluate(() => localStorage.getItem('intake-floor'))).visits !== before.visits) throw new Error('a mid-request walk opened new places');
       await p.click('#office-list button[data-spot="desk"]');
       await toScreen();
@@ -561,8 +565,9 @@ async function followUp() {
     await p.click('#office-list button.primary');
     // Back to the desk: you sit down (a short film), then the next request opens.
     if (req < 2) {
-      await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
-      if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
+      await p.waitForFunction(() => /^sit-(played|failed|quick)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
+      // The film plays once a day; after that sitting down is a quick cut.
+      if (!/^sit-(played|quick)$/.test(await p.evaluate(() => document.body.dataset.film))) throw new Error('the sit-down film did not play');
       await p.waitForSelector('#office-film', { state: 'detached' });
       await toScreen();
       if (evening && !(await p.textContent('#toast')).includes('08:57')) throw new Error('no good-morning line after going home');
@@ -768,11 +773,24 @@ async function followUp() {
   console.log('autofill request', await p.textContent('#score-total'));
   // Week 3 and later: a blank one-pager instead of the board (tried here on the next full case).
   await p.click('#btn-next');
-  await p.waitForSelector('#s-office.active'); await p.click('#office-list button.primary');
+  await p.waitForSelector('#s-office.active');
+  // With a finished week behind you, the lift by day goes into town, and town has the way back.
+  if (await p.$('#office-list button[data-spot="lift"]:not(.primary)')) {
+    await p.click('#office-list button[data-spot="lift"]');
+    await p.click('#office-card button:has-text("Go into town")');
+    await p.waitForSelector('#town.in');
+    if (!(await p.textContent('#town .tw-line')).includes('lunchtime')) throw new Error('town by day does not say so');
+    await p.click('#town button:has-text("Back to the office")');
+    await p.waitForSelector('#town', { state: 'detached' });
+    await p.waitForSelector('#s-office.active');
+    townByDay = true;
+  }
+  await p.click('#office-list button.primary');
   // With a finished week behind you the lift asks: home, or through town.
   if (await p.isVisible('#office-card button:has-text("Go home")')) await p.click('#office-card button:has-text("Go home")');
-  await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
+  await p.waitForFunction(() => /^sit-(played|failed|quick)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
   await toScreen();
+  console.log('town by day tried:', townByDay);
   // Help fades with how you do: four strong requests take the board away.
   await p.evaluate(strong, ['test-strong-2', 4]);
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
