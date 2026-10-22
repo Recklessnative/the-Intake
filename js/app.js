@@ -1591,6 +1591,9 @@
     });
     renderOwners();
     if (b.step === 'memo') memo(boardWriteup());
+    const ex = $('board-example');
+    ex.hidden = !b.example || b.locked || !EXAMPLE_LINES[b.step];
+    ex.textContent = ex.hidden ? '' : EXAMPLE_LINES[b.step];
     const fb = $('board-feedback');
     $('board-why').textContent = '';
     fb.hidden = !b.feedback;
@@ -1742,11 +1745,28 @@
       b.locked = false;
       b.feedback = '';
     }
+    if (b.step === 'concept') workedExample(b);
     renderBoard();
     save();
     // Mieke's feedback and the Next button sit at the bottom: bring them up. A new step starts at the top.
     if (b.locked && b.feedback) $('board-next').scrollIntoView({ block: 'end', behavior: 'smooth' });
     else $('w-write').querySelector('.win-body').scrollTop = 0;
+  };
+
+  // Your very first request: a completion case. You diagnose, pick the lever and measure; Mieke
+  // fills in the concept and the risks (the card's `worked_example`) so you see a finished board
+  // once. You can change anything. The scorecard says those parts were hers.
+  function workedExample(b) {
+    const r = state.run, X = r.card.example;
+    if (!X || b.example || b.mode !== 'board' || state.hard || state.one || !firstEver() || r.card.difficulty !== 0 || told('example')) return;
+    Object.assign(b, { example: true, idea: X.idea, formats: X.formats.slice(), why: X.why, not: X.not });
+    b.owners = b.owners || {};
+    b.tags.forEach(t => { if ((X.owners || {})[t]) b.owners[t] = Object.assign({ by: '', who: '' }, X.owners[t]); });
+    b.risks = X.risks.filter(x => b.tiles.some(t => t.who === x.who)).map(x => ({ who: x.who, mitigation: x.mitigation }));
+  }
+  const EXAMPLE_LINES = {
+    concept: 'Mieke: Your first one, so I filled in the concept myself: this is what a finished one looks like. Read it against your diagnosis. Change anything you disagree with. From the next request it is all yours.',
+    risks: 'Mieke: The risks are mine too: two people who could stop this, and what we do about each. Notice that neither of them is a course.'
   };
 
   // Facts the player cited on the case board: diagnosis evidence and the measurement rungs.
@@ -1985,7 +2005,9 @@
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
     // One thing to work on: the part with the most points left on the table, and its next level.
-    const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
+    // On the worked example the concept and the risks were Mieke's: those parts are not yours to work on.
+    const hers = r.board && r.board.example ? ['fit', 'nextLevel', 'risks'] : [];
+    const weakest = DIMENSIONS.filter(([k]) => !hers.includes(k)).map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
     $('score-focus').hidden = !weakest || weakest.left <= 0;
     state.focus = weakest && weakest.left > 0 ? { label: weakest.label, next: weakest.next || '' } : null;
     $('btn-score-coffee').hidden = $('score-focus').hidden || !!state.hard;
@@ -1996,10 +2018,10 @@
       const tr = document.createElement('tr');
       const a = document.createElement('td');
       const name = document.createElement('div');
-      name.textContent = label;
+      name.textContent = label + (hers.includes(k) ? ' (Mieke\'s example)' : '');
       a.appendChild(name);
       // Teach, not just grade: the next level stays in view; why, the checks and a model answer fold away.
-      if (g[k].next && pts[k] < max && k !== weakest.k) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      if (g[k].next && pts[k] < max && (!weakest || k !== weakest.k) && !hers.includes(k)) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
       const more = document.createElement('details'); more.className = 'why';
       const ms = document.createElement('summary'); ms.textContent = 'Why this score';
       const ev = document.createElement('div');
@@ -2854,7 +2876,8 @@
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
-      starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict
+      starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict,
+      assisted: r.board && r.board.example ? 'example' : undefined
     });
     keepScores(h);
   }

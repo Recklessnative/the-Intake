@@ -147,5 +147,33 @@
   "flavour_lines": [
     "My site managers can read a construction drawing upside down in the rain. A spreadsheet, less so.",
     "Finance calls it 'estimate to complete'. On site we call it 'we'll see'."
-  ]
+  ],
+  "worked_example": {
+    "note": "Mieke's worked example for your very first request: she fills in the concept and the risks so you see a finished case board once.",
+    "idea": "Teach the six newer site managers to forecast the remaining cost on their own project, with the finance controller, then check their next two reports.",
+    "formats": [
+      "Practice or simulation",
+      "Coaching"
+    ],
+    "why": "They can use Excel. What they never learned is estimating the cost still to come, and nobody checks it with them.",
+    "not": "Not an Excel course, and not all 20 managers: the experienced ones already get it right.",
+    "owners": {
+      "skill": {
+        "by": "us"
+      },
+      "process": {
+        "by": "client"
+      }
+    },
+    "risks": [
+      {
+        "who": "Finance controller",
+        "mitigation": "Ask them to co-teach, and to show what a good forecast looks like."
+      },
+      {
+        "who": "Experienced site managers",
+        "mitigation": "Agree with Pieter that each sits with a newer manager on the next report."
+      }
+    ]
+  }
 }

@@ -147,5 +147,34 @@
   "flavour_lines": [
     "I have dashboards for my dashboards.",
     "Our hold music is Vivaldi. Customers hear a lot of Vivaldi."
-  ]
+  ],
+  "worked_example": {
+    "note": "Mieke's worked example for your very first request: she fills in the concept and the risks so you see a finished case board once.",
+    "idea": "Put the 25-euro credit limit back on the card, let new agents practise billing calls with it, and have supervisors coach instead of taking over.",
+    "formats": [
+      "Job aid",
+      "Practice or simulation",
+      "Coaching"
+    ],
+    "why": "New agents don't know they may give a small credit, so they transfer the call. Knowing the limit and practising it fixes that.",
+    "not": "Not more product training: they know the products. These calls are about billing.",
+    "owners": {
+      "skill": {
+        "by": "us"
+      },
+      "process": {
+        "by": "client"
+      }
+    },
+    "risks": [
+      {
+        "who": "Team supervisors",
+        "mitigation": "Ines asks them to coach the next five billing calls, not take them over."
+      },
+      {
+        "who": "Knowledge base owner",
+        "mitigation": "Get the limit back on the card and the policy page before the practice session."
+      }
+    ]
+  }
 }

@@ -50,6 +50,20 @@ async function caseBoard(req) {
   await p.selectOption('[data-rung-ev="baseline"]', { index: 2 });
   await p.fill('[data-rung="metric"]', 'Night incident rate down by a third.');
   await lockAndGo();
+  // The very first request is a worked example: Mieke has filled in the concept and the risks.
+  if (req === 0) {
+    const ex = await p.evaluate(() => window.__intake.state.run.card.example);
+    if (!ex || (await p.inputValue('#b-idea')) !== ex.idea || !(await p.isVisible('#board-example'))) throw new Error('no worked example on the first request');
+    if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/example.png' });
+    // She fills in owners only for the causes she would have named; the rest are yours.
+    for (const row of await p.$$('#owners .owner-row')) if (!(await row.$('[aria-pressed="true"]'))) await (await row.$('[data-owner="us"]')).click();
+    await lockAndGo();
+    if (!(await p.textContent('#board-example')).includes('risks are mine') || await p.$$eval('#mitigations input', l => l.filter(i => i.value).length) !== 2) throw new Error('risks not filled in by Mieke');
+    await lockAndGo();
+    if (!(await p.textContent('#memo')).includes('Big idea: ' + ex.idea)) throw new Error('memo lost the example');
+    await next();
+    return;
+  }
   await p.fill('#b-idea', 'A ten-minute buddy walk on every newcomer\'s first three nights.');
   await p.click('#formats [data-format="On-the-job huddle"]');
   await p.fill('#b-why', 'It puts a person next to the newcomer when it matters.'); await p.fill('#b-not', 'Not another video.');

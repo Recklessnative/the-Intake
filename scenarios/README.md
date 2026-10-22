@@ -62,6 +62,7 @@ Tier 0 cards are starters for a player's first intake: a friendly stakeholder, o
 | `question_you_didnt_ask` | Debrief | The one question that unlocks the most. Shown on the scorecard if the player never asked anything like it. |
 | `actor_notes[]` | Actor | How to play this person: what they hide, what earns or costs trust. |
 | `flavour_lines[]` | Actor | Dry-humour lines to drop in naturally, at most one or two per conversation. |
+| `worked_example` | Board | Tier 0 only. Mieke's filled-in concept and risks for the player's very first request (a completion case): `idea` (max 220 characters), `formats[]` (the board's format labels), `why` (200), `not` (160), `owners` per root cause type (`{ by: us \| client \| other, who? }`) and two `risks[]` (`who` exactly as in `dependencies[]`, `mitigation` max 180). The scorecard marks concept fit, ambition and risks as hers. |
 
 ## Notes for the actor and judge prompts
 
