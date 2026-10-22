@@ -19,6 +19,8 @@
 
   let z = 10;
   let current = null;
+  // Tells the game a window was put in front of you, so Mieke can explain it the first time.
+  const look = id => document.dispatchEvent(new CustomEvent('desk-look', { detail: id }));
   const wins = () => [...document.querySelectorAll('#desktop .win')];
 
   // Build the title bar for every window from its data attributes.
@@ -37,7 +39,7 @@
     bar.querySelector('.close').onclick = e => { e.stopPropagation(); minimise(w.id); };
     bar.querySelector('.max').onclick = e => { e.stopPropagation(); w.classList.toggle('max'); };
     bar.ondblclick = () => w.classList.toggle('max');
-    w.addEventListener('pointerdown', () => focus(w.id));
+    w.addEventListener('pointerdown', () => { focus(w.id); look(w.id); });
     drag(w, bar);
   });
 
@@ -73,6 +75,7 @@
     w.classList.remove('minimised');
     focus(id);
     taskbar();
+    look(id);
   }
   function minimise(id) {
     const w = $(id);
@@ -102,6 +105,7 @@
     Object.keys(L).forEach(id => focus(id));
     if (focusId) focus(focusId);
     taskbar();
+    look(focusId || Object.keys(L).pop());
   }
   function tidy() {
     if (!current) return;

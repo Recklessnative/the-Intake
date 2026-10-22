@@ -31,6 +31,7 @@
     root.id = 'tour';
     root.setAttribute('role', 'dialog');
     if (tip) root.classList.add('tip'); else root.setAttribute('aria-modal', 'true');
+    if (tip && steps[0] && steps[0].look) root.dataset.look = steps[0].look;
     root.setAttribute('aria-label', 'Mieke shows you around');
     document.body.appendChild(root);
     document.addEventListener('keydown', keys, true);

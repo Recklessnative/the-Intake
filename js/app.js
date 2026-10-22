@@ -40,13 +40,17 @@
 
   const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, one: false, board: null, academy: null, team: null };
 
+  // Mieke's first-look bubbles (see firstLook): one showing, and held back while her tour rings.
+  let lookBusy = false, lookHold = 0;
+
   // ---------- screens and panes ----------
-  Office.init({ show: id => show(id) });
+  Office.init({ show: id => show(id), look: id => firstLook(id) });
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') { resumeButton(); titleScreen(); }
+    firstLook(id);
     window.scrollTo(0, 0);
   }
   function step(text) { $('os-step').textContent = text; }
@@ -57,6 +61,7 @@
     if ($('s-desk').classList.contains('active')) Sound.scene(id === 'p-board' ? 'board' : 'desk');
     Desktop.title('w-dialog', { 'p-bet': 'Before you send it', 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
+    firstLook(id);
     if (stepText) step(stepText);
   }
   // The office clock moves as you work.
@@ -1304,7 +1309,7 @@
     const moduleFirst = mondayFirst() === 'module';
     if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
-    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
+    if (firstEver() && !told('tour')) { lookHold = Date.now() + 4000; setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
     const again = !state.index && Arc.offer('morning', arcNow());
     if (again) Arc.note('morning');
     const hello = again ? 'Morning again! ' : 'Morning! ';
@@ -1336,21 +1341,62 @@
     if (!state.run || Tour.open) return;
     Desktop.focus('w-inbox');
     const phone = !$('desk-icons').offsetParent;
-    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, () => { if (after) miekePing(after); });
+    // A finished tour covers the inbox and Messenger, so their first-look bubbles are not needed.
+    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, finished => { if (finished) { told('look-w-inbox'); told('look-w-mieke'); } if (after) miekePing(after); });
   }
   $('btn-tour').onclick = () => miekeTour(false);
-  // Mieke explains each part of the desk once, the first time you need it, in one bubble that
-  // does not block anything. Not in hard mode: she is on holiday.
-  const HINTS = {
-    call: { target: '#w-call .meters', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
-    leads: { target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
-    write: { target: '#board-steps', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
-    scores: { target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' }
+  // Mieke explains each screen once, the first time it is in front of you, in one bubble that
+  // does not block anything. Not in hard mode: she is on holiday. Keys are window, pane or screen
+  // ids; `key` keeps the told-flag of the older hints, so nobody hears the same line twice.
+  const FIRST_LOOKS = {
+    'w-inbox': { target: '#w-inbox', text: 'Doors Mail. Client requests land here, newest on top. Read what they ask for, and notice what they already think the answer is. The paperclip opens the case file.' },
+    'w-case': { target: '#w-case', text: 'This is your case file: what you need to know about their world before you call. It is background, not the answer. The request tells you what they think the problem is. Not what it is. That is what the call is for.' },
+    'w-notes': { target: '#w-notes', text: 'Your notes. Pin a good answer from the call with the pin, or type here. They come with you to the case board, and nobody grades them.' },
+    'w-call': { key: 'hint-call', target: '#w-call .meters', alt: '#w-call', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
+    'w-leads': { key: 'hint-leads', target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
+    'w-write': { key: 'hint-write', target: '#board-steps', alt: '#w-write', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
+    'w-mieke': { target: '#w-mieke', text: 'Me, on Messenger. Ask me anything about the request. I have time for a few questions each time, and I only know what you have seen so far. No, I will not write it for you.' },
+    'w-scores': { target: '#w-scores', text: 'My scores. Every scorecard ends up here, with your weekly trend and your weakest part. Watch the line, not the number. Nobody aces the first week.' },
+    'w-coe': { target: '#w-coe', text: 'The Center of Excellence folder. What you earn lands here: pocket cards, Academy tips, handouts. Open one before a call if it helps. That is what it is for.' },
+    'w-academy': { target: '#w-academy', text: 'The CoE Academy. One short module a week: a few questions and a few tips from people who learned it the hard way. It does not count towards your score, so guess freely.' },
+    'w-drill': { target: '#w-drill', text: 'The measurement drill. Sort the measures: which ones show the problem moved, and which only show people sat in a room. Then write when you would stop. No points, just practice.' },
+    'w-coffee': { target: '#w-coffee', text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.' },
+    's-coffee': { text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.', key: 'look-w-coffee' },
+    'w-standup': { target: '#w-standup', text: 'The Monday stand-up. Before new work we look back at an old case: what did you ask first, what was the lever? Rate yourself honestly. What you got drops out; what you missed comes back.' },
+    'w-team': { target: '#w-team', text: 'Your team\'s drafts. Bart, Priya and Jens each wrote one, and each has one flaw from the case\'s own traps. Do not rewrite it for them: say what to fix and why. The coaching is what gets graded.' },
+    'p-bet': { target: '#bet-form', alt: '#w-dialog', text: 'Before you send it: say how bold your plan is, and how much risk this client can take. Points go to fit, not to bold. Going further than they like? Then give them a way back.' },
+    'p-defence': { target: '#defence-form', alt: '#w-dialog', text: 'The defence round. You went bolder than they like, so they push back. Answer with what you found on the call, not with what sounds good. Changing your plan for a good reason counts too.' },
+    'p-score': { target: '#score-focus', alt: '#w-dialog', text: 'Your scorecard. Start with the one thing to work on, at the top. Underneath: what each part needed, the question you did not ask, and "Ask it now" to try it with hindsight. Free of charge.' },
+    'p-board': { target: '#boardroom', alt: '#w-dialog', text: 'The board room, Friday. Take one concept from this week and put it on one slide. The board says approved, a pilot, or no. They care about what it changes in the business, not what it looks like.' },
+    's-morning': { text: 'The Morning Call. Everybody gets the same caller today: three questions, then name the lever and the real need. Short, and it never uses up a free week.' },
+    'town': { text: 'Lindeveld. The lift brings you here after work. Pick one place on the map each evening. Nothing here is scored. Your old clients drink at The Junction, and they tell you how it went.' },
+    'notebook': { text: 'Your notebook. What you find on the floor goes in here. Some of it is just office life. Some of it does not add up. You will know which, eventually.' }
   };
-  function hint(k) {
-    if (state.hard || !HINTS[k] || told('hint-' + k)) return;
-    setTimeout(() => { if (!Tour.open) Tour.hint(HINTS[k]); }, 500);
+  const lookQueue = [];
+  function firstLook(id) {
+    const s = FIRST_LOOKS[id];
+    // After the reveal Mieke is not at her desk any more, and nobody explains anything.
+    if (state.hard || !s || Reveal.seen()) return;
+    const key = s.key || 'look-' + id;
+    if (lookQueue.some(q => q.key === key)) return;
+    try { if (localStorage.getItem('intake-told-' + key)) return; } catch (e) { return; }
+    lookQueue.push({ key, step: s, at: Date.now() + 500 });
   }
+  // One bubble at a time, checked twice a second; anything else on screen (the tour, the slide
+  // show) goes first. On the very first morning her welcome tour rings first (`lookHold`).
+  function nextLook() {
+    if (!lookQueue.length || lookBusy || Tour.open || Date.now() < lookHold || $('slideshow') || lookQueue[0].at > Date.now()) return;
+    const q = lookQueue.shift();
+    if (told(q.key)) return;
+    lookBusy = true;
+    Tour.hint(Object.assign({ look: q.key }, q.step), () => { lookBusy = false; });
+  }
+  setInterval(nextLook, 500);
+  document.addEventListener('desk-look', e => firstLook(e.detail));
+  // The older hints, now in the same queue. My scores points at its desk icon after a scorecard.
+  FIRST_LOOKS['scores-icon'] = { key: 'hint-scores', target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' };
+  const HINT_AT = { call: 'w-call', leads: 'w-leads', write: 'w-write', scores: 'scores-icon' };
+  function hint(k) { firstLook(HINT_AT[k]); }
   // Staply turns up at most once per request, never in hard mode, and not before the last request of week 1.
   function staply(trigger) {
     const r = state.run;
@@ -2372,6 +2418,7 @@
     const checks = done.slice().reverse().flatMap(w => w.requests.slice().sort((a, b) => b.index - a.index))
       .filter(x => !seen.has(x.card) && seen.add(x.card)).map(x => Town.check(x, card(x.card))).filter(Boolean);
     const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
+    setTimeout(() => firstLook('town'), 900);
     Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow, card, dayKey: state.weekId + ':' + day,
       when: Story.day(state.weekNo, day) + ' · 18:30', onDone: after });
   }
@@ -2587,6 +2634,7 @@
   // The slide show: full screen, one box per click, the board reacting in the front row.
   function playShow() {
     const B = state.board;
+    if (Tour.open) Tour.close();   // the show is full screen: no bubble on top of it
     Slides.show(B, boardCard(), BOARD, () => {
       if (state.board !== B || B.stage !== 'show') return;
       B.stage = 'questions';

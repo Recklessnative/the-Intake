@@ -107,7 +107,7 @@ async function retro() {
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
 // Mieke explains a part of the desk the first time you use it, in one bubble that does not block.
 async function tip(what) {
-  await p.waitForSelector('.tour.tip', { timeout: 3000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });
+  await p.waitForSelector('.tour.tip:not([data-look^="look-"])', { timeout: 8000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });   // after any first looks in the queue
   await p.click('#tour-next');
   if (await p.$('.tour')) throw new Error('hint for ' + what + ' did not close');
 }
@@ -182,6 +182,7 @@ async function followUp() {
 (async () => {
   MOBILE = process.argv.includes('--mobile');
   const b = await chromium.launch(); p = await b.newPage({ viewport: MOBILE ? { width: 390, height: 844 } : { width: 1366, height: 768 } });
+  await require('./looks.cjs')(p);
   visible = async sel => { if (!(await p.isVisible(sel))) throw new Error(sel + ' should be visible'); };
   let mieke = 0;
   const errs = []; p.on('pageerror', e => errs.push(e.message)); p.on('console', m => m.type() === 'error' && errs.push(m.text()));
@@ -559,6 +560,9 @@ async function followUp() {
   if (!(await p.textContent('#end-memo-body')).includes('A pilot. That is not a no') || !(await p.textContent('#end-memo-body')).includes('week 1 of 4')) throw new Error('Friday memo wrong: ' + await p.textContent('#end-memo-body'));
   if (!(await p.textContent('#end-board')).includes('Approved as a pilot') || !(await p.textContent('#share-text')).includes('as a pilot')) throw new Error('board result missing on the end screen');
   console.log('END', await p.textContent('#end-title'), await p.textContent('#end-score'), 'gemini calls', calls, 'mieke', mieke);
+  // Mieke explained each new screen once, the first time it was in front of you.
+  const told = await p.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('intake-told-look-')).map(k => k.slice(12)));
+  for (const k of ['look-w-case', 'look-w-notes', 'look-p-bet', 'look-p-score', 'look-p-board']) if (!told.includes(k)) throw new Error('no first look for ' + k + ': ' + told);
   if (!mieke) throw new Error('Mieke was never asked');
   if (!(await p.$('#share-img canvas')) || await p.isVisible('#btn-linkedin') || !(await p.textContent('#share-text')).includes('hidden facts')) throw new Error('share card wrong on a normal week');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });

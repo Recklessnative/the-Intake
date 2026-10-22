@@ -32,6 +32,7 @@ const history = (n, cards, hard) => ({ promoted: n >= 4 ? { week: 4 } : undefine
 // `arc`: hints that already landed in earlier weeks.
 async function playWeek(b, n, opt, onFloor) {
   const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
+  await require('./looks.cjs')(p);
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const prompts = [];
   await p.route('https://generativelanguage.googleapis.com/**', route => { prompts.push(JSON.parse(route.request().postData()).systemInstruction.parts[0].text); return mock(route); });

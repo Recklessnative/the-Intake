@@ -62,6 +62,7 @@ const history = { weeks: [{ id: 'seed0', started: Date.UTC(2026, 0, 1), done: tr
 
 async function page(b, mobile) {
   const p = await b.newPage({ viewport: mobile ? { width: 390, height: 844 } : { width: 1400, height: 900 } });
+  await require('./looks.cjs')(p);
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.addInitScript(h => {
     if (sessionStorage.getItem('seeded')) return;
