@@ -947,6 +947,9 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 #desktop[data-phase="inbox"] .case-call { display: inline-block; }
 
 /* The morning call: one window, no desktop. */
+.second-call { flex: 1; min-height: 0; overflow: auto; background: #fbf8f1; font-size: 13px; }
+.second-call .mc-top { position: sticky; top: 0; z-index: 1; }
+#mail-second[hidden] { display: none; }
 .panel.morning { max-width: 600px; width: 100%; padding: 0; border-top-width: 3px; overflow: hidden; }
 .mc-top { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 8px 14px; color: #fff; background: linear-gradient(var(--title-b), var(--title-a)); }
 .mc-body { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }

@@ -210,5 +210,34 @@
   "flavour_lines": [
     "We had a stress day with breathing exercises. They use them on the bike, uphill, in the rain.",
     "Our carers know every client's grandchildren by name. They don't know each other's."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "New carers struggle in their first months. I want a coaching course for the 14 team leaders.",
+    "after_right": "Neighbourhood rounds work: fewer carers leave. The board asked me how. I said you asked the right questions. So, again.",
+    "after_wrong": "Everyone did the resilience training, and eleven more left. I am still here. So are you, apparently.",
+    "is_training_the_lever": "partly",
+    "need_statement": "New carers do their first visits alone, because joint visits are not billable and team leaders stopped doing them.",
+    "real_problem": "New carers do their first visits alone from day two. Team leaders have not done a joint visit since central planning, because joint visits are not billable hours. Experienced carers have offered to take a new one along, but planning will not book two carers on one visit.",
+    "hidden_facts": [
+      {
+        "id": "alone_day_two",
+        "fact": "New carers visit clients alone from their second day.",
+        "unlocks_when": "asks how new carers start",
+        "reveal_line": "Day one is paperwork. Day two they are on their own."
+      },
+      {
+        "id": "not_billable",
+        "fact": "Joint visits are not billable, so team leaders stopped doing them when central planning came.",
+        "unlocks_when": "asks what team leaders do with new carers",
+        "reveal_line": "Joint visits do not bill. Planning took them out."
+      },
+      {
+        "id": "buddies_offered",
+        "fact": "Experienced carers have offered to take new ones along, but planning will not book two carers on one visit.",
+        "unlocks_when": "asks whether colleagues could help",
+        "reveal_line": "Some of the old ones offered to take a newbie along. Planning says no, two on one visit."
+      }
+    ],
+    "question_you_didnt_ask": "What does a new carer's first week look like?"
+  }
 }

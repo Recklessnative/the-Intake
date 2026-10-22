@@ -214,5 +214,34 @@
   "flavour_lines": [
     "Last year's speaker climbed Everest. Q1 went down 9%. Maybe it was the mountain.",
     "We're not a sales team, we're a family. A family with quotas."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "The Pro tier still does not sell. I want a product training on Pro for all 60 reps.",
+    "after_right": "The clawback rule is fixed and the reps sell the right deals. Q4 looks good. Pro does not.",
+    "after_wrong": "The off-site was great, everyone says so, and the discounted deals still sit in the pipeline. Now Pro.",
+    "is_training_the_lever": "partly",
+    "need_statement": "New reps lose Pro deals in the price conversation because nobody coaches them on it, and there is no Benelux reference customer to point to.",
+    "real_problem": "Experienced reps close Pro deals; the reps hired this year lose them at the price conversation. Sales managers carry their own quota and stopped deal reviews in the summer. Procurement departments ask for a reference customer, and there is none in the Benelux yet. The reps know the product well.",
+    "hidden_facts": [
+      {
+        "id": "new_reps_lose",
+        "fact": "Experienced reps close Pro deals; reps hired this year lose them at the price conversation.",
+        "unlocks_when": "asks which reps sell Pro or where deals are lost",
+        "reveal_line": "The old guard sells it. The new ones lose it on price."
+      },
+      {
+        "id": "no_reviews",
+        "fact": "Sales managers carry their own quota and stopped deal reviews in the summer.",
+        "unlocks_when": "asks about coaching or the managers",
+        "reveal_line": "Deal reviews? The managers have their own numbers to hit. We stopped in June."
+      },
+      {
+        "id": "no_reference",
+        "fact": "Procurement asks for a Benelux reference customer for Pro, and there is none yet.",
+        "unlocks_when": "asks why procurement stalls",
+        "reveal_line": "Procurement wants a reference. We have none in Benelux. Yet."
+      }
+    ],
+    "question_you_didnt_ask": "Who does sell Pro, and where exactly do the others lose the deal?"
+  }
 }

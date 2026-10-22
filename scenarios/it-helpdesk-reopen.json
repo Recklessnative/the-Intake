@@ -216,5 +216,34 @@
   "flavour_lines": [
     "Our closure rate is 96%. Our reopen rate is 34%. Both are excellent at being numbers.",
     "I have the ITIL books on my shelf. All five. With tabs. The tabs are colour-coded. I'm not sure that helped anybody either."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Users log their tickets badly. I want a short training for all 1,400 staff on how to report a problem.",
+    "after_right": "The provider is paid for tickets that stay closed now; reopens are down. Purchasing thinks it was their idea. So, you again.",
+    "after_wrong": "Forty people are ITIL certified, and the reopens are where they were. Different problem today.",
+    "is_training_the_lever": "no",
+    "need_statement": "Badly logged tickets come from the new self-service form, which has no category for the most common problem and does not tell users their ticket number.",
+    "real_problem": "Half the badly logged tickets come from the self-service web form launched in July. It has no category for Lotus Notes, the most common problem, so users pick 'Other' and write 'broken'. The form never shows a ticket number, so users log the same problem again. Phone tickets are logged well, because first line asks the questions.",
+    "hidden_facts": [
+      {
+        "id": "web_form",
+        "fact": "Half the badly logged tickets come from the self-service form launched in July.",
+        "unlocks_when": "asks where the bad tickets come from",
+        "reveal_line": "Since the web form, it is worse. Phone tickets are fine."
+      },
+      {
+        "id": "no_notes",
+        "fact": "The form has no category for Lotus Notes, the most common problem.",
+        "unlocks_when": "asks what users can choose on the form",
+        "reveal_line": "There is no Notes category. Everybody picks 'Other'."
+      },
+      {
+        "id": "no_number",
+        "fact": "The form does not show users their ticket number, so they log the same problem again.",
+        "unlocks_when": "asks what users see after they log a ticket",
+        "reveal_line": "They get a thank-you page. No number. So they log it again."
+      }
+    ],
+    "question_you_didnt_ask": "Which tickets are logged badly, and through what?"
+  }
 }

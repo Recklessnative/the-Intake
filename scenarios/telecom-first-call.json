@@ -176,5 +176,34 @@
         "mitigation": "Get the limit back on the card and the policy page before the practice session."
       }
     ]
+  },
+  "second_request": {
+    "opening_message": "Customers are calling about shock bills for mobile internet. I want a training for agents on the new data bundles.",
+    "after_right": "The agents give the credit themselves now, and transfers halved. My boss smiled in a meeting. So, next one.",
+    "after_wrong": "More product training, and they still transfer every billing complaint. This one is about data.",
+    "is_training_the_lever": "yes",
+    "need_statement": "Agents do not know they can set a data spending cap from the account screen, new since September and announced only by e-mail.",
+    "real_problem": "The shock bills are mostly from customers using mobile internet abroad. Since September agents can set a 50-euro data cap from the account screen, which stops it happening again, but this was announced in one e-mail during the holidays. Agents cannot see data use in real time, so they also cannot warn anyone, and the 25-euro credit does not come near a 300-euro bill.",
+    "hidden_facts": [
+      {
+        "id": "abroad",
+        "fact": "Most shock bills are for mobile internet used abroad.",
+        "unlocks_when": "asks what the bills are for",
+        "reveal_line": "Roaming. People check their e-mail in Spain. Three hundred euros."
+      },
+      {
+        "id": "cap_exists",
+        "fact": "Since September agents can set a 50-euro data cap from the account screen.",
+        "unlocks_when": "asks what agents can do about it",
+        "reveal_line": "There is a cap you can set, I believe. Fifty euros. Since September."
+      },
+      {
+        "id": "one_email",
+        "fact": "The cap was announced in one e-mail during the holidays; most agents do not know it exists.",
+        "unlocks_when": "asks how agents were told about it",
+        "reveal_line": "It was in an e-mail. In August. Nobody reads e-mail in August."
+      }
+    ],
+    "question_you_didnt_ask": "What can an agent actually do on the account screen today?"
   }
 }

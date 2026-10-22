@@ -219,5 +219,34 @@
   "flavour_lines": [
     "We have fourteen mandatory e-learnings. The fifteenth will surely be the one they read.",
     "My nurses can spot a septic patient from the corridor. They just can't make a registrar pick up nicely."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Complaints about discharge are rising. I want a communication training for nurses on the surgical wards.",
+    "after_right": "Night nurses call on the score now, and the transfers come earlier. The medical director bought cake. So I am back.",
+    "after_wrong": "Everyone completed the e-learning and the nurses still wait at night. Let us try something else.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Patients leave on Friday afternoon before their discharge letter and medication list are ready, and nurses do not know how to give a safe interim explanation.",
+    "real_problem": "The complaints are almost all about Friday afternoon discharges from surgery. The doctor's discharge letter and the pharmacy's medication list usually arrive after the patient has left. Nurses are told not to explain medication without the list, so patients go home with nothing. A few nurses use a printed interim sheet they made themselves.",
+    "hidden_facts": [
+      {
+        "id": "fridays",
+        "fact": "Most discharge complaints concern Friday afternoon discharges from the surgical wards.",
+        "unlocks_when": "asks when the complaints happen",
+        "reveal_line": "Fridays. Surgery wants the beds empty for the weekend."
+      },
+      {
+        "id": "letters_late",
+        "fact": "The discharge letter and the medication list usually arrive after the patient has left.",
+        "unlocks_when": "asks what the patient gets when they leave",
+        "reveal_line": "The letter comes Monday, often. The pharmacy list too. The patient is long gone."
+      },
+      {
+        "id": "interim_sheet",
+        "fact": "A few nurses hand out an interim sheet they made themselves; their patients do not complain.",
+        "unlocks_when": "asks whether any ward or nurse does it differently",
+        "reveal_line": "Two nurses on ward 4 made their own sheet. Their patients are fine. It is not official."
+      }
+    ],
+    "question_you_didnt_ask": "What does a patient get in their hand when they leave on a Friday?"
+  }
 }

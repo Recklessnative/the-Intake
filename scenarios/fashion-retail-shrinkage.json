@@ -209,5 +209,34 @@
   "flavour_lines": [
     "Our customers are very honest. They only steal from the shop floor. Someone else steals from the stockroom.",
     "We had a security consultant once. He told us to watch the fitting rooms. Our fitting rooms have a curtain and a chair."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Conversion is down in twelve stores. I want a sales training for those store managers.",
+    "after_right": "The stores count deliveries again and shrinkage is back to normal. The COO even said it was his idea. So yes, I am calling you.",
+    "after_wrong": "Four hundred staff can spot a shoplifter. The stock still disappears. Anyway. New problem.",
+    "is_training_the_lever": "no",
+    "need_statement": "In twelve stores the Saturday rota leaves too few staff to open the fitting rooms, so customers who would buy leave.",
+    "real_problem": "The twelve stores are the ones whose hours were cut in August to pay for in-store tagging. On Saturdays they run with two people, so the fitting rooms are closed half the day. Conversion fell only on Saturdays. Several of the twelve managers are the chain's best sellers.",
+    "hidden_facts": [
+      {
+        "id": "saturday_only",
+        "fact": "Conversion in the twelve stores fell on Saturdays; weekdays are unchanged.",
+        "unlocks_when": "asks when conversion drops",
+        "reveal_line": "It is the Saturdays. Weekdays look fine."
+      },
+      {
+        "id": "rota_cut",
+        "fact": "The twelve stores lost hours in August to pay for tagging time, and run with two staff on Saturday.",
+        "unlocks_when": "asks about staffing or what changed in those stores",
+        "reveal_line": "They lost hours in August, for the tagging. Two people on a Saturday."
+      },
+      {
+        "id": "fitting_rooms",
+        "fact": "With two staff the fitting rooms are closed for half of Saturday.",
+        "unlocks_when": "asks what customers experience in the store",
+        "reveal_line": "With two people they lock the fitting rooms. You cannot sell jeans without a fitting room."
+      }
+    ],
+    "question_you_didnt_ask": "When does conversion drop, and who is in the store at that moment?"
+  }
 }

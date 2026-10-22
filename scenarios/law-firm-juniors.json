@@ -228,5 +228,34 @@
   "flavour_lines": [
     "Our young colleagues have excellent degrees. They write like their thesis supervisors. That's the problem.",
     "I correct drafts at night. It's very relaxing. My wife disagrees."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "The juniors do not record their hours. I want a time-recording discipline course for all 22 of them.",
+    "after_right": "A senior reads the corporate drafts again and the rewrites are down. My partners are sleeping. So: hours.",
+    "after_wrong": "Twenty-two juniors did the writing course and the partners still rewrite at night. Hours, then.",
+    "is_training_the_lever": "no",
+    "need_statement": "Juniors record their hours at month end because the time system only runs on the office network and they work at client sites three or four days a week.",
+    "real_problem": "The time-recording system only works on the office network. Corporate juniors spend three or four days a week in client data rooms, so they keep notes on paper and enter everything at month end, when half of it is forgotten. The litigation juniors, who are in the office, record daily.",
+    "hidden_facts": [
+      {
+        "id": "office_only",
+        "fact": "The time-recording system only works on the office network.",
+        "unlocks_when": "asks how or where hours are recorded",
+        "reveal_line": "It runs on the network here. Not from outside."
+      },
+      {
+        "id": "data_rooms",
+        "fact": "Corporate juniors spend three or four days a week in client data rooms.",
+        "unlocks_when": "asks where the juniors work",
+        "reveal_line": "Corporate are in data rooms half the week. Due diligence season."
+      },
+      {
+        "id": "litigation_fine",
+        "fact": "The litigation juniors, who work in the office, record their hours daily.",
+        "unlocks_when": "asks whether some juniors do record properly",
+        "reveal_line": "Litigation records fine. They are at their desks."
+      }
+    ],
+    "question_you_didnt_ask": "Where are the juniors when they should be recording?"
+  }
 }

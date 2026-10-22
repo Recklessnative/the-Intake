@@ -210,12 +210,14 @@ async function townText(p) {
   if (!w5.mails.includes('Recall: Lehman Brothers files for bankruptcy')) fail('week 5: no recalled Lehman headline');
   // Pilot results come back: a client from two finished weeks ago writes how it went.
   if (!w5.mails.includes('First results: ')) fail('week 5: no first-results mail: ' + w5.mails);
+  if (!w5.mails.includes('and one more thing')) fail('week 5: no second request from an old client: ' + w5.mails);
   if (!coffee.includes('corrected the 0 to a 2')) fail('week 5: coffee note not corrected: ' + coffee);
   if (!/tape is gone/.test(w5.lift || '') || !/Go home/.test(w5.lift)) fail('week 5: the lift does not offer button 5 after the tender: ' + w5.lift);
   if (w5.errs.length) fail('week 5 errors: ' + w5.errs);
   console.log('week 5 ok');
   // Week 6: a bounce whose source is from much later; Thursday's case file is a restored scan.
   let source = '', normal = '', legible = '';
+  const second = {};
   const w6b = await playWeek(b, 5, { arc: Object.assign({ lehman: 35, coffee: 38 }, ACT1), atDesk: async p => {
     await p.click('#mail-rows tr:has-text("Undeliverable")');
     await p.click('[data-mail="source"]');
@@ -224,6 +226,25 @@ async function townText(p) {
     await p.click('#mail-rows tr:has-text("Coffee machine")');
     await p.click('[data-mail="source"]');
     normal = await p.textContent('#mail-body');
+    // A second request: the client from three weeks back has something new. No lever call last
+    // time, so they doubt you: two questions. A short call, recorded but not scored.
+    await p.click('#mail-rows tr:has-text("and one more thing")');
+    await p.click('#btn-second');
+    await p.waitForSelector('#w-second.open #mc-input');
+    second.intro = await p.textContent('#w-second .su-mieke');
+    second.meters = await p.textContent('#w-second .mc-meters');
+    await p.fill('#mc-input', 'Where exactly does it happen?'); await p.click('#w-second .mc-ask button[type=submit]');
+    await p.waitForFunction(() => document.querySelectorAll('#w-second .mc-log .msg.you').length === 1);
+    await p.click('#mc-enough');
+    await p.click('#w-second [data-lever="no"]');
+    await p.fill('#mc-need', 'The real problem is not a training problem at all.');
+    await p.click('#mc-reveal');
+    await p.waitForSelector('#second-hangup');
+    second.verdict = await p.textContent('#w-second .mc-verdict');
+    await p.screenshot({ path: SHOTS + '/second-request.png' });
+    second.saved = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).seconds);
+    await p.click('#second-hangup');
+    second.done = await p.textContent('#mail-rows tr:has-text("and one more thing")');
   }, onDesk: async (p, req) => { if (req === 1) legible = await p.textContent('#briefing'); }, onTown: async p => {
     // Act 2 in town, on a Monday evening: the 3 September message, the 08:56 train, ticket 1207.
     const t = await townText(p);
@@ -240,6 +261,9 @@ async function townText(p) {
   if (!/14 Mar 2041/.test(source) || !/71% recovered/.test(source)) fail('week 6: bounce source wrong: ' + source);
   if (/2041|recovered/.test(normal) || !/2007/.test(normal)) fail('week 6: an ordinary mail source gives it away: ' + normal);
   if (!/71% legible/.test(legible) || !/REDACTED: ARCHIVE/.test(legible)) fail('week 6: Thursday case file is not a restored scan: ' + legible);
+  if (!/Two questions/.test(second.intro || '') || !/Questions left 2/.test(second.meters || '')) fail('week 6: the doubting client should give two questions: ' + JSON.stringify(second));
+  if (!/Not quite|Right call|One step off/.test(second.verdict || '') || !(second.saved || []).length || second.saved[0].trust !== 0) fail('week 6: the second request did not finish or record: ' + JSON.stringify(second));
+  if (!(second.done || '').includes('✓')) fail('week 6: the second request mail is not ticked off: ' + second.done);
   if (w6b.errs.length) fail('week 6 errors: ' + w6b.errs);
   console.log('week 6 ok');
   // Week 7: Bart's empty draft on Monday; Max's intake log in Thursday's case file.

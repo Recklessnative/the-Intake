@@ -208,5 +208,34 @@
   "flavour_lines": [
     "Our SOPs are so thorough that SOP-001 explains how to read SOPs.",
     "Everyone has read the procedure. That's what their signatures say."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "We had a labelling mix-up in the warehouse. I want a GMP refresher for all warehouse staff.",
+    "after_right": "Buddies at the line worked: deviations on line 4 are down. The inspector noted it. So: the warehouse.",
+    "after_wrong": "A hundred and forty operators signed 23 SOPs again and line 4 had two deviations in August. Now the warehouse.",
+    "is_training_the_lever": "partly",
+    "need_statement": "The mix-up came from two near-identical labels from a new supplier, received at night while the scanner was down, by a temporary worker who had never seen either.",
+    "real_problem": "The mix-up happened at night receiving: two components from a new supplier have almost identical labels, and the barcode scanner that tells them apart was down for three weeks. The receiver was a temporary worker in his first week, who had only done read-and-sign. Day staff know the difference by sight.",
+    "hidden_facts": [
+      {
+        "id": "same_labels",
+        "fact": "Two components from a new supplier have nearly identical labels.",
+        "unlocks_when": "asks what was mixed up or about the labels",
+        "reveal_line": "Two items, same supplier, same layout, one digit different."
+      },
+      {
+        "id": "scanner_down",
+        "fact": "The barcode scanner at receiving was down for three weeks.",
+        "unlocks_when": "asks what checks should have caught it",
+        "reveal_line": "The scanner was broken. Three weeks. The ticket is still open."
+      },
+      {
+        "id": "temp_night",
+        "fact": "The receiver was a temporary worker in his first week on nights, trained by read-and-sign only.",
+        "unlocks_when": "asks who received it or how they were trained",
+        "reveal_line": "A temp, first week, nights. He signed the SOPs, of course."
+      }
+    ],
+    "question_you_didnt_ask": "Who received it, at what time, and what should have told the two apart?"
+  }
 }

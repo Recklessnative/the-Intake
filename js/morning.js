@@ -81,19 +81,23 @@
   }
 
   // env: { Gemini, Prompts, Sound, toast, claim(), url, record(R, card), monthCount(), fullCase(card), back(), debug }
+  // A second request from an old stakeholder plays the same call on the desk: env.top, env.intro,
+  // env.keep and env.outro replace the morning's own header, opening line, storage and ending.
   function render(box, R, card, env) {
+    const save = env.keep || keep, max = R.max || QUESTIONS;
     box.innerHTML = '';
     const top = el('div', 'mc-top');
-    top.append(el('b', null, 'Morning call no. ' + R.no), el('span', null, date07(R.no)));
+    const head = env.top || ['Morning call no. ' + R.no, date07(R.no)];
+    top.append(el('b', null, head[0]), el('span', null, head[1]));
     box.appendChild(top);
     const body = el('div', 'mc-body');
     box.appendChild(body);
     const facts = callFacts(card), found = () => facts.filter(f => R.revealed.includes(f.id)).length;
 
-    body.appendChild(el('p', 'su-mieke', R.asked.length || R.done ? 'Mieke: "' + first(card) + ' again. Go on."'
+    body.appendChild(el('p', 'su-mieke', env.intro ? env.intro(R) : R.asked.length || R.done ? 'Mieke: "' + first(card) + ' again. Go on."'
       : 'Mieke: "Morning! ' + card.stakeholder.name + ', ' + card.stakeholder.role + (org(card) ? ' at ' + org(card) : '') + ', is on line 2. You have three questions before the next meeting starts. Find out what is really going on."'));
     const meters = el('p', 'mc-meters');
-    const paint = () => { meters.textContent = 'Questions left ' + (QUESTIONS - R.asked.length) + ' · Facts found ' + found() + ' of ' + facts.length; };
+    const paint = () => { meters.textContent = 'Questions left ' + (max - R.asked.length) + ' · Facts found ' + found() + ' of ' + facts.length; };
     paint();
     body.appendChild(meters);
     const log = el('div', 'mc-log');
@@ -110,7 +114,7 @@
     body.appendChild(log);
 
     // Step 1: three questions.
-    if (!R.done && R.asked.length < QUESTIONS && R.lever == null) {
+    if (!R.done && !R.stop && R.asked.length < max && R.lever == null) {
       const form = el('form', 'mc-ask');
       const input = el('textarea');
       input.rows = 2; input.maxLength = 300; input.id = 'mc-input';
@@ -119,7 +123,7 @@
       send.type = 'submit';
       const enough = btn('I have enough', 'ghost', 'mc-enough');
       enough.hidden = !R.asked.length;
-      enough.onclick = () => { R.stop = true; keep(R); render(box, R, card, env); };
+      enough.onclick = () => { R.stop = true; save(R); render(box, R, card, env); };
       const row = el('div', 'row');
       row.append(send, enough);
       form.append(input, row);
@@ -141,7 +145,7 @@
           R.asked.push({ q, a: out.reply, quality: out.quality, why: String(out.qualityWhy || '').slice(0, 80), facts: got });
           R.revealed = R.revealed.concat(got);
           if (got.length && env.Sound) env.Sound.found();
-          keep(R);
+          save(R);
           render(box, R, card, env);
           const next = document.getElementById('mc-input');
           if (next) next.focus();
@@ -159,13 +163,13 @@
 
     // Step 2: the lever call and the need, in your words.
     if (!R.done) {
-      body.appendChild(el('p', 'su-q', (R.asked.length < QUESTIONS ? '' : 'That was your last question. ') + 'Is training the answer here?'));
+      body.appendChild(el('p', 'su-q', (R.asked.length < max ? '' : 'That was your last question. ') + 'Is training the answer here?'));
       const chips = el('div', 'chips');
       Object.entries(LEVER).forEach(([k, label]) => {
         const b = btn(label);
         b.dataset.lever = k;
         b.setAttribute('aria-pressed', R.lever === k);
-        b.onclick = () => { R.lever = k; keep(R); chips.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); };
+        b.onclick = () => { R.lever = k; save(R); chips.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); };
         chips.appendChild(b);
       });
       body.appendChild(chips);
@@ -174,7 +178,7 @@
       need.rows = 2; need.maxLength = 300; need.id = 'mc-need';
       need.placeholder = 'One sentence: who does what, and why.';
       need.value = R.need;
-      need.oninput = () => { R.need = need.value; keep(R); };
+      need.oninput = () => { R.need = need.value; save(R); };
       body.appendChild(need);
       const why = el('p', 'board-why');
       why.setAttribute('role', 'status');
@@ -182,7 +186,7 @@
       go.onclick = () => {
         if (!R.lever) { why.textContent = 'Make the call first: yes, partly or no.'; return; }
         if (R.need.trim().length < 10) { why.textContent = 'One sentence on the real problem. A guess counts.'; need.focus(); return; }
-        R.done = true; R.at = Date.now(); keep(R);
+        R.done = true; R.at = Date.now(); save(R);
         env.record(R, card);
         render(box, R, card, env);
         box.scrollTop = 0;
@@ -212,6 +216,8 @@
     if (elsewhere) body.appendChild(el('p', 'fine', elsewhere + (elsewhere === 1 ? ' more fact sits' : ' more facts sit') + ' in their data or on the floor. That is the full case.'));
     if (card.questionHint) body.appendChild(el('p', 'mc-hint', 'The question that opens it up: "' + card.questionHint + '"'));
 
+    if (env.outro) { env.outro(body, R); return; }
+
     // Share, opt in to your best question.
     const share = el('div', 'mc-share');
     const pre = el('pre', 'mc-share-text');
@@ -221,7 +227,7 @@
     const lab = el('label', 'check');
     const cb = el('input'); cb.type = 'checkbox'; cb.checked = !!R.best; cb.id = 'mc-best';
     cb.disabled = !bestQuestion(R);
-    cb.onchange = () => { R.best = cb.checked; keep(R); paintShare(); };
+    cb.onchange = () => { R.best = cb.checked; save(R); paintShare(); };
     lab.append(cb, ' Add my best question');
     const copy = btn('Copy', null, 'mc-copy');
     copy.onclick = async () => {

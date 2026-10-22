@@ -63,6 +63,7 @@ Tier 0 cards are starters for a player's first intake: a friendly stakeholder, o
 | `actor_notes[]` | Actor | How to play this person: what they hide, what earns or costs trust. |
 | `flavour_lines[]` | Actor | Dry-humour lines to drop in naturally, at most one or two per conversation. |
 | `worked_example` | Board | Tier 0 only. Mieke's filled-in concept and risks for the player's very first request (a completion case): `idea` (max 220 characters), `formats[]` (the board's format labels), `why` (200), `not` (160), `owners` per root cause type (`{ by: us \| client \| other, who? }`) and two `risks[]` (`who` exactly as in `dependencies[]`, `mitigation` max 180). The scorecard marks concept fit, ambition and risks as hers. |
+| `second_request` | Desk | The same stakeholder's next request, a few weeks after the results mail: a short call on the desk (Morning Call length). `opening_message` (the new ask), `after_right` and `after_wrong` (how they open, depending on whether your lever call on the first request was right), `is_training_the_lever`, `need_statement`, `real_problem`, three `hidden_facts` (`id`, `fact`, `unlocks_when`, `reveal_line`, all on the call) and `question_you_didnt_ask`. A right call earns a fourth question, a wrong one costs one; a measurement plan of 12/20 or more means they bring the numbers (the first fact is given). Not scored. |
 
 ## Notes for the actor and judge prompts
 

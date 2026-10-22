@@ -203,5 +203,34 @@
   "flavour_lines": [
     "We have a safety mascot from 2005. A seagull in a hard hat. He's held up better than the programme.",
     "Thirty-two moves an hour. You'd be amazed what people skip to get to thirty-three."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Since the double-shift cap, the foremen cannot plan their gangs. I want a planning course for the foremen.",
+    "after_right": "Capped double shifts and a bonus for safe moves: late-shift incidents are down. The shipping lines did not notice. Now the foremen complain.",
+    "after_wrong": "The posters are up, and the incidents still come at the end of double shifts. And now the foremen are unhappy too.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Foremen get the pool's list of available dockworkers half an hour before the shift and were never shown how to plan gangs around the cap.",
+    "real_problem": "The pool's list of available dockworkers arrives at 06:30 for a 07:00 shift, so foremen plan in thirty minutes. Since the cap, they can no longer fill gaps with whoever stayed on, and nobody showed them how to plan a shift with fixed limits. One foreman on the night shift plans the day before from the provisional list, and his gangs start on time.",
+    "hidden_facts": [
+      {
+        "id": "late_list",
+        "fact": "The pool's list of available dockworkers arrives at 06:30 for a 07:00 shift.",
+        "unlocks_when": "asks when foremen know who is coming",
+        "reveal_line": "The pool list comes at half past six. The shift starts at seven."
+      },
+      {
+        "id": "no_fill",
+        "fact": "Since the cap, foremen can no longer fill gaps with dockworkers who stay on.",
+        "unlocks_when": "asks what changed with the cap",
+        "reveal_line": "Before, they kept people on. Now they cannot."
+      },
+      {
+        "id": "provisional",
+        "fact": "One foreman plans the day before from the provisional list; his gangs start on time.",
+        "unlocks_when": "asks whether any foreman manages",
+        "reveal_line": "Rudi uses the provisional list the night before. His gangs are always ready."
+      }
+    ],
+    "question_you_didnt_ask": "When does a foreman know who is coming, and does anyone manage it?"
+  }
 }
