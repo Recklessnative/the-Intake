@@ -96,6 +96,8 @@
 
   <!-- The office floor between requests (js/office.js). -->
   <section id="s-office" class="screen office"></section>
+  <!-- Your desk: sitting down lands here, the screen is one click further (js/seat.js) -->
+  <section id="s-seat" class="screen office seat"></section>
 
   <!-- Boot: the office PC starts up while you settle in -->
   <section id="s-cubicle" class="screen boot">
@@ -549,6 +551,7 @@
         <button data-open="w-team" class="team-only"><img class="sm-i" src="media/icons/team-16.webp" alt=""><span>My team</span></button>
         <button data-open="w-phone"><img class="sm-i" src="media/icons/mobile-16.webp" alt=""><span>My mobile</span></button>
         <button data-open="w-display"><img class="sm-i" src="media/icons/display-16.webp" alt=""><span>Display properties</span></button>
+        <button id="btn-leanback-menu"><span class="sm-i sm-emoji" aria-hidden="true">🪑</span><span>Lean back from the screen</span></button>
         <button id="btn-standup-menu"><span class="sm-i sm-emoji" aria-hidden="true">🚶</span><span>Stand up from your desk</span></button>
         <button id="btn-staply">📎 Staply: on</button>
         <button id="btn-sound">🔊 Sound: on</button>
@@ -581,7 +584,7 @@
     <div id="stamp" class="stamp" hidden aria-live="polite"><span class="stamp-t">💡 FOUND</span><span class="stamp-n"></span></div>
     <footer class="taskbar">
       <button id="btn-startmenu" class="start-btn">start</button>
-      <div class="quick-launch"><button type="button" id="btn-standup" title="Stand up and walk around the floor. Your request waits where you left it." aria-label="Stand up from your desk"><i aria-hidden="true">🚶</i><span>Stand up</span></button></div>
+      <div class="quick-launch"><button type="button" id="btn-leanback" title="Lean back from the screen and look at your desk." aria-label="Lean back from the screen"><i aria-hidden="true">🪑</i><span>Desk</span></button><button type="button" id="btn-standup" title="Stand up and walk around the floor. Your request waits where you left it." aria-label="Stand up from your desk"><i aria-hidden="true">🚶</i><span>Stand up</span></button></div>
       <div id="task-buttons" class="task-buttons"></div>
       <div class="tray">
         <button type="button" id="btn-phone" class="tray-phone" title="Your mobile (in your pocket)" aria-label="Your mobile">📱<span id="tray-sms" class="tray-badge" hidden></span></button>
@@ -659,6 +662,8 @@
 <script src="js/tour.js?v=dev"></script>
 <script src="js/office-map.js?v=dev"></script>
 <script src="js/friday-map.js?v=dev"></script>
+<script src="js/desk-map.js?v=dev"></script>
+<script src="js/seat.js?v=dev"></script>
 <script src="js/office.js?v=dev"></script>
 <script src="js/title.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>

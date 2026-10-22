@@ -957,6 +957,7 @@ elif MODE in ('shot', 'shotmask'):
         'pitch': ((2.5, 8.95, 1.45), (2.5, 11.9, 1.68), 27),          # the slide show: the screen, big
         'pitchwide': ((2.5, 8.12, 2.1), (2.5, 11.0, 1.12), 16),       # questions and verdict: the board's places too
         'friday': ((11.72, 3.9, 1.26), (11.62, 5.0, 0.88), 19),       # your desk, Friday evening, from your chair
+        'desk': ((11.72, 3.9, 1.26), (11.62, 5.0, 0.88), 19),         # your desk by day, the same view: you sit down, then look at the screen
     }
     name = ARGS[0]
     e, g, lens = SHOTS[name]
@@ -997,6 +998,53 @@ elif MODE in ('shot', 'shotmask'):
         for o in S.objects:
             if o.name.startswith('you_chair'): o.hide_render = True   # you are sitting in it
         for o in ('you_crt_front', 'you_crt_screen'): THING[o] = ('friday', 'screen')
+    if name == 'desk':
+        # Any working day: the screen on, the mug of the morning, the things on your desk that have
+        # something to say. The welcome note is from your first morning only.
+        bpy.data.objects['you_crt_screen'].data.materials[0] = img_mat('scr_desk', 'screen_desk.png', 1.2)
+        bpy.data.objects['you_welcome'].hide_render = True
+        for o in S.objects:
+            if o.name.startswith('you_chair'): o.hide_render = True
+        # From Friday's set: your coat on the side panel and the round mug; not the report or the memo.
+        hide('friday', False)
+        for o in ('fri_folder', 'fri_label', 'fri_memo', 'you_mug'): bpy.data.objects[o].hide_render = True
+        for o in ('fri_coat', 'fri_collar'): THING[o] = ('desk', 'coat')
+        for o in ('fri_mug', 'fri_mug_handle'): THING[o] = ('desk', 'mug')
+        # The plant on its last legs, in view beside the phone: three bare stems, a few drooping
+        # yellow leaves, one already on the desk.
+        for o in S.objects:
+            if o.name.startswith(('you_plant', 'you_leaf')): o.hide_render = True
+        CUR[0] = 'deskday'
+        px, py, pz = 12.42, 5.5 - 0.2, 0.745
+        THING[cyl('dd_pot', px, py, pz, 0.062, 0.1, POT, 32, r2=0.075).name] = ('desk', 'plant')
+        THING[cyl('dd_soil', px, py, pz + 0.085, 0.07, 0.008, mat('soil', (0.08, 0.05, 0.03), 0.95), 32).name] = ('desk', 'plant')
+        STEM = mat('stem', (0.25, 0.22, 0.08), 0.8)
+        LEAF = [mat('leafy', (0.45, 0.4, 0.08), 0.6), mat('leafo', (0.38, 0.26, 0.06), 0.7), DEADLEAF]
+        for i, (a, tall, lean) in enumerate(((0.4, 0.2, 0.25), (2.3, 0.15, 0.4), (4.2, 0.24, 0.15))):
+            top = (px + math.cos(a) * lean * tall, py + math.sin(a) * lean * tall, pz + 0.09 + tall)
+            THING[rod(f'dd_stem{i}', (px, py, pz + 0.09), top, 0.004, STEM, 6).name] = ('desk', 'plant')
+            for k in range(2 if i != 1 else 1):
+                lf = ball(f'dd_leaf{i}_{k}', top[0] + math.cos(a + k * 1.6) * 0.03, top[1] + math.sin(a + k * 1.6) * 0.03, top[2] - 0.02 - k * 0.03, 0.04, LEAF[(i + k) % 3], 1, 0.38, 0.1)
+                lf.rotation_euler = (0.9 + 0.3 * k, 0.2, a + k * 1.6)
+                THING[lf.name] = ('desk', 'plant')
+        # A pen pot and a tray of this week's printouts, left of the keyboard.
+        THING[cyl('dd_pens', 11.42, 5.5 - 0.22, pz, 0.035, 0.1, mat('penpot', (0.12, 0.13, 0.15), 0.5), 24).name] = ('desk', 'pens')
+        for i, (dx, dy, c) in enumerate(((0.01, 0.005, (0.1, 0.2, 0.6)), (-0.012, 0.01, (0.7, 0.1, 0.1)), (0.004, -0.012, (0.1, 0.1, 0.1)))):
+            THING[rod(f'dd_pen{i}', (11.42 + dx, 5.5 - 0.22 + dy, pz + 0.02), (11.42 + dx * 4, 5.5 - 0.22 + dy * 4, pz + 0.17), 0.004, mat(f'pen{i}', c, 0.4), 6).name] = ('desk', 'pens')
+        TRAY = mat('traygrey', (0.2, 0.2, 0.22), 0.5)
+        THING[turn(box('dd_tray', 10.92, 5.5 - 0.96, pz, 11.2, 5.5 - 0.6, pz + 0.008, TRAY, 0.002), (0, 0, 0.1)).name] = ('desk', 'tray')
+        for k in range(5):
+            THING[turn(box(f'dd_print{k}', 10.94, 5.5 - 0.94, pz + 0.008 + k * 0.004, 11.18, 5.5 - 0.62, pz + 0.011 + k * 0.004, PAPER, 0.0005), (0, 0, 0.1 + 0.05 * (k % 2) - 0.02 * k)).name] = ('desk', 'tray')
+        fl = ball('dd_fallen', px - 0.14, py - 0.08, pz + 0.004, 0.035, DEADLEAF, 1, 0.4, 0.08)
+        fl.rotation_euler = (0, 0, 0.7); THING[fl.name] = ('desk', 'plant')
+        for o in ('you_crt_front', 'you_crt_screen'): THING[o] = ('desk', 'screen')
+        THING['you_sticky'] = ('desk', 'sticky')
+        THING['you_calendar'] = ('desk', 'calendar')
+        for o in ('you_phone', 'you_handset'): THING[o] = ('desk', 'phone')
+        for o in S.objects:
+            if o.name.startswith('you_plant') or o.name.startswith('you_leaf'): THING[o.name] = ('desk', 'plant')
+        for o in S.objects:
+            if o.name.startswith('you_bm') or o.name.startswith('you_binder'): THING[o.name] = ('desk', 'binders')
     suffix = '_' + variant if variant else ''
     if MODE == 'shotmask':
         key = 'pitch' if PITCH else name   # both board day shots share the board's places

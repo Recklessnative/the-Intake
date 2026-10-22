@@ -10,6 +10,20 @@ let p, visible, MOBILE, shot = 0;
 // The bet before the stakeholder reads the concept. The first time, check the rules: both picks
 // are required, and a bold concept needs a way back.
 let betChecked = false;
+// Sitting down lands on your desk (js/seat.js); the screen is one click further.
+async function toScreen() {
+  await p.waitForSelector('#s-seat.active');
+  await p.click('#seat-list button[data-go="screen"]');
+  await p.waitForSelector('#s-seat:not(.active)');
+}
+// The start of a week: the desk, then the boot screen, then Log on.
+async function logOn() {
+  for (let i = 0; i < 20 && !(await p.isVisible('#s-desk.active')); i++) {
+    if (await p.isVisible('#s-seat.active')) await p.click('#seat-list button[data-go="screen"]');
+    else if (await p.isVisible('#s-cubicle.active')) await p.click('#btn-sit');
+    else await p.waitForTimeout(200);
+  }
+}
 async function bet() {
   await p.waitForSelector('#p-bet.active');
   if (!betChecked) {
@@ -248,13 +262,23 @@ async function followUp() {
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/intro.png' });
   await p.click('#btn-intro-go');
   // Your first morning: the walk from the lift to your desk, skippable, then the boot screen.
-  await p.waitForSelector('#s-walkin.active, #s-cubicle.active');
+  await p.waitForSelector('#s-walkin.active, #s-seat.active');
   if (await p.isVisible('#s-walkin')) {
     if (!(await p.isVisible('#btn-walkin-skip'))) throw new Error('walk-in has no Skip');
     await p.waitForFunction(() => { const v = document.querySelector('#s-walkin video'); return !v || v.currentTime > 2 || !document.getElementById('s-walkin').classList.contains('active'); }, null, { timeout: 10000 });
     if (!MOBILE && await p.isVisible('#s-walkin')) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/walkin.png' });
     if (await p.isVisible('#btn-walkin-skip')) await p.click('#btn-walkin-skip');
   }
+  // You sit down at your desk first: the render, its things, and the screen to click.
+  await p.waitForSelector('#s-seat.active');
+  const deskThings = await p.$$eval('#seat-pic .office-tag', l => l.map(b => b.dataset.thing).sort().join(' '));
+  if (deskThings !== 'binders calendar coat mug pens phone plant screen sticky tray') throw new Error('desk things wrong: ' + deskThings);
+  if (!(await p.textContent('#seat-list')).includes('Log on')) throw new Error('the desk does not say the screen logs you on');
+  await p.click('#seat-pic .office-tag[data-thing="plant"]');
+  if (!(await p.textContent('#seat-card')).includes('plant')) throw new Error('the plant says nothing');
+  await p.click('#seat-card .row button');
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/desk.png' });
+  await p.click('#seat-pic .office-tag[data-thing="screen"]');
   await p.waitForSelector('#s-cubicle.active');
   if (await p.evaluate(() => document.body.dataset.walkin) !== 'played') throw new Error('the walk-in film did not play: ' + await p.evaluate(() => document.body.dataset.walkin));
   await p.waitForSelector('#s-cubicle.active');
@@ -381,9 +405,16 @@ async function followUp() {
       if (!desk.includes('where you left it') || await p.$('#office-list button[data-spot="lift"]')) throw new Error('mid-request floor wrong: ' + desk);
       if (JSON.parse(await p.evaluate(() => localStorage.getItem('intake-floor'))).visits !== before.visits) throw new Error('a mid-request walk opened new places');
       await p.click('#office-list button[data-spot="desk"]');
+      await toScreen();
       await p.waitForSelector('#s-desk.active');
       if (await p.inputValue('#chat-input') !== 'Half a question' || await p.$$eval('#chat-log .msg.you', l => l.length) !== 2) throw new Error('the call did not wait where it was');
       if (await p.evaluate(() => window.__intake.state.run.clock) !== before.clock + 5) throw new Error('the clock did not move while you were away');
+      // Lean back from the screen: the desk, and the call still there when you look again.
+      await p.click('#btn-leanback');
+      await p.waitForSelector('#s-seat.active');
+      if (!(await p.textContent('#seat-list')).includes('on the screen')) throw new Error('the desk does not say the request is on the screen');
+      await toScreen();
+      if (await p.inputValue('#chat-input') !== 'Half a question') throw new Error('leaning back lost the call');
       await p.fill('#chat-input', '');
     }
     if (req === 0) {
@@ -533,6 +564,7 @@ async function followUp() {
       await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || ''), null, { timeout: 15000 });
       if (await p.evaluate(() => document.body.dataset.film) !== 'sit-played') throw new Error('the sit-down film did not play');
       await p.waitForSelector('#office-film', { state: 'detached' });
+      await toScreen();
       if (evening && !(await p.textContent('#toast')).includes('08:57')) throw new Error('no good-morning line after going home');
       // The first morning after going home, the lift has a taped-over button 5; after that it is the coffee machine again.
       if (evening && !(await p.textContent('#toast')).includes(req === 0 ? 'button 5' : 'coffee machine')) throw new Error('morning line wrong: ' + await p.textContent('#toast'));
@@ -641,7 +673,7 @@ async function followUp() {
   await p.goto('http://localhost:8765/?debug=1');
   p.once('dialog', d => d.accept());
   await p.click('#btn-start');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   if (await p.evaluate(() => window.__intake.state.cards.some(c => c.difficulty === 0))) throw new Error('starters in a second week');
   if (await p.isVisible('#w-coe')) throw new Error('the CoE folder should only open by itself in the first week');
   // Week 2: the Monday stand-up waits on top: last week's full case, recalled from memory.
@@ -740,6 +772,7 @@ async function followUp() {
   // With a finished week behind you the lift asks: home, or through town.
   if (await p.isVisible('#office-card button:has-text("Go home")')) await p.click('#office-card button:has-text("Go home")');
   await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
+  await toScreen();
   // Help fades with how you do: four strong requests take the board away.
   await p.evaluate(strong, ['test-strong-2', 4]);
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
@@ -772,7 +805,7 @@ async function followUp() {
   if (!(await p.evaluate(() => document.body.classList.contains('aero')))) throw new Error('Doors Aero gone after a reload');
   p.once('dialog', d => d.accept().catch(() => {}));
   await p.click('#btn-start');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   const tw = await p.evaluate(() => ({ n: window.__intake.state.cards.length, team: window.__intake.state.team && window.__intake.state.team.drafts.map(d => d.junior + ':' + d.flaw + ':' + d.lines.length), clash: window.__intake.state.team && window.__intake.state.team.drafts.some(d => window.__intake.state.cards.some(c => c.id === d.card)) }));
   if (tw.n !== 2 || !tw.team || tw.team.length !== 3 || tw.clash) throw new Error('team week wrong: ' + JSON.stringify(tw));
   // The team week is announced on Monday morning, not discovered in the week report.
@@ -815,7 +848,7 @@ async function followUp() {
   p.on('dialog', d => d.accept().catch(() => {}));
   const weeksBefore = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.filter(w => w.requests.length).length);
   await p.click('#btn-one');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   const os = await p.evaluate(() => { const s = window.__intake.state; return { one: s.one, tiers: s.cards.map(c => c.difficulty), q: s.run.questionsLeft, standup: !!s.standup, academy: !!s.academy, team: !!s.team }; });
   if (!os.one || os.tiers.join() !== '1' || os.q !== 7 || os.standup || os.academy || os.team) throw new Error('one case wrong: ' + JSON.stringify(os));
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open');
@@ -840,7 +873,7 @@ async function followUp() {
   await p.goto('http://localhost:8765/?debug=1');
   const rt = await p.evaluate(() => { const b = document.querySelector('#scores .retests button'); if (!b) return null; b.click(); return b.dataset.card; });
   if (!rt || !(await p.textContent('#scores')).includes('=== Progress')) throw new Error('no progress or retest in My scores');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   const rs = await p.evaluate(() => { const s = window.__intake.state; return { one: s.one, ids: s.cards.map(c => c.id), retest: s.retest }; });
   if (!rs.one || rs.ids.join() !== rt || !rs.retest || rs.retest.card !== rt) throw new Error('retest is not that case: ' + JSON.stringify(rs) + ' vs ' + rt);
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open, #w-write.open');
@@ -888,14 +921,14 @@ async function followUp() {
   await p.click('#btn-morning'); await p.waitForSelector('.mc-verdict');
   // ...and the full case is the same stakeholder, as one case.
   await p.click('#mc-full');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   const mf = await p.evaluate(() => ({ one: window.__intake.state.one, ids: window.__intake.state.cards.map(c => c.id) }));
   if (!mf.one || mf.ids.join() !== mcCard) throw new Error('full case is not the morning card: ' + JSON.stringify(mf) + ' vs ' + mcCard);
   console.log('morning call', mcShare.split('\n')[1]);
   // Hard mode: three tough cases, 6 questions, no case file, no Mieke, a 150-word memo, a LinkedIn card.
   await p.goto('http://localhost:8765/?debug=1');
   await p.click('#btn-hard');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  await logOn();
   // Hard mode is off the story: no arc hints in the inbox, even after a finished week.
   if ((await p.textContent('#mail-rows')).includes('Lift, floor 5')) throw new Error('an arc hint in hard mode');
   const hs = await p.evaluate(() => ({ hard: window.__intake.state.hard, tiers: window.__intake.state.cards.map(c => c.difficulty), q: window.__intake.state.run.questionsLeft, brief: document.getElementById('briefing-points').children.length }));

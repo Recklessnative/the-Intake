@@ -28,6 +28,9 @@ python3 scene.py lift5 960 540 24             # the lift film up to floor 5 (125
 python3 scene.py shot friday 1600 900 96        # Friday on your desk at 18:00: the week report, Darren's memo, your screen, your coat -> out/shot_friday.png
 python3 scene.py shotmask friday 1600 900       # their click mask
 python3 friday_post.py ../..                 # -> media/office/friday(-960).webp and js/friday-map.js
+python3 scene.py shot desk 1600 900 96          # your desk by day, same camera: where sitting down lands (js/seat.js)
+python3 scene.py shotmask desk 1600 900         # its click mask: screen, coat, mug, pens, tray, phone, plant, sticky, calendar, binders
+python3 friday_post.py ../.. desk            # -> media/office/desk(-960).webp and js/desk-map.js
 ```
 
 On four CPU cores the hub takes about 20 minutes the walk-in about two hours and the stand-up about 45 minutes.

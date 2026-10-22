@@ -48,7 +48,7 @@
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
-    if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
+    if (id !== 's-office') Sound.scene(id === 's-desk' || id === 's-seat' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') { resumeButton(); titleScreen(); }
     if (id === 's-desk' && state.run) deskIcons();
     firstLook(id);
@@ -286,8 +286,10 @@
     [9.0, 'Yours. Grey fabric walls, a plant on its last legs, a sticky note that says ASK WHY.']
   ];
   function arrive() {
-    if (state.hard || state.one || state.weekNo !== 1 || told('walkin')) { cubicle(); return; }
-    Office.walkIn(played => cubicle(played), WALK_CAPTIONS);
+    if (state.hard || state.one || state.final) { cubicle(); return; }
+    const sit = played => sitAt(() => cubicle(played), { when: Story.day(state.weekNo, 0) + ' · 08:56', sub: 'Log on', line: 'Monday morning. Your screen is on; the week starts when you log on.' });
+    if (state.weekNo !== 1 || told('walkin')) { sit(false); return; }
+    Office.walkIn(played => sit(played), WALK_CAPTIONS);
   }
 
   // ---------- the cold open: plays once before your first week, and from the title screen ----------
@@ -1299,7 +1301,7 @@
     document.querySelectorAll('#start-menu [data-open]').forEach(b => { b.hidden = !got(b.dataset.open); });
     $('btn-staply').hidden = !got('staply');
     $('btn-standup-menu').hidden = !got('standup');
-    document.querySelector('.quick-launch').hidden = !got('standup');
+    $('btn-standup').hidden = !got('standup');
     $('btn-phone').hidden = !got('w-phone');
   }
   function unlock(...ids) {
@@ -1483,6 +1485,7 @@
     'w-coe': { target: '#w-coe', text: 'The Center of Excellence folder. What you earn lands here: pocket cards, Academy tips, handouts. Open one before a call if it helps. That is what it is for.' },
     'w-academy': { target: '#w-academy', text: 'The CoE Academy. One short module a week: a few questions and a few tips from people who learned it the hard way. It does not count towards your score, so guess freely.' },
     'w-drill': { target: '#w-drill', text: 'The measurement drill. Sort the measures: which ones show the problem moved, and which only show people sat in a room. Then write when you would stop. No points, just practice.' },
+    's-seat': { target: '#seat-pic .office-tag[data-thing="screen"]', text: 'Your desk. The work is on your screen: click it when you are ready. You can lean back from it any time, and stand up to walk around. Whatever you were doing waits where you left it.' },
     'friday': { target: '#friday-pic .office-tag[data-thing="report"]', text: 'Friday, six o\'clock. Darren\'s PA leaves the week report on your keyboard, so nobody can miss it. His memo is next to it, your share card is still on your screen, and your coat takes you home.' },
     'w-second': { target: '#w-second', text: 'An old client, back with something new. A short call, like the Morning Call. How they open depends on how the first one went: get it right and they give you more. It does not count towards your week.' },
     'w-coffee': { target: '#w-coffee', text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.' },
@@ -2365,7 +2368,7 @@
   // point. The request does not move while you are away: every window stays as it was, and the
   // clock moves on a few minutes when you sit back down.
   function canStand() {
-    if (!state.run || !$('s-desk').classList.contains('active')) return null;
+    if (!state.run || !($('s-desk').classList.contains('active') || Seat.open)) return null;
     if (state.hard || state.one || state.final) return 'Not this week: the desk is all there is.';
     if ($('p-board').classList.contains('active')) return 'Not now: the board is waiting for you.';
     if (Tour.open) return 'Finish Mieke\'s tour first.';
@@ -2386,6 +2389,68 @@
     tick(5);
     save();
   }
+
+  // ---------- your desk (js/seat.js) ----------
+  // Sitting down lands on your desk, not on your screen: you look at the screen when you are ready,
+  // lean back from it whenever you like, and stand up from the desk. Things on the desk say one thing each.
+  const PLANT = ['A plant on its last legs. One leaf has given up and lies on the desk. You keep meaning to water it.',
+    'The plant. Somebody has watered it while you were out, with what smells like cold coffee. It looks no better and no worse.'];
+  function deskThings() {
+    const i = state.index, day = state.days[i] || 0, n = state.cards.length;
+    return {
+      sticky: { label: 'Sticky note', face: '📝', text: 'ASK WHY, in capitals. Mieke stuck it on your monitor on your first morning. It has outlasted the plant\'s good years.' },
+      calendar: { label: 'Calendar', face: '📅', text: Story.day(state.weekNo, day) + '. Darren\'s PA circles today on everyone\'s calendar, in red, every morning, so nobody can say they did not know what day it was.' },
+      phone: { label: 'Desk phone', face: '☎', text: 'Your desk phone. Stakeholders call you through the screen. This one only rings for Darren\'s PA, and she prefers e-mail.' },
+      mug: { label: 'Mug', face: '☕', text: 'Instant coffee from Mieke\'s jar. The machine is still broken.' },
+      plant: { label: 'Plant', face: '🪴', text: PLANT[(state.weekNo + day) % PLANT.length] },
+      pens: { label: 'Pen pot', face: '🖊', text: 'Three pens. One works. You never know which.' },
+      tray: { label: 'Printouts', face: '📄', text: 'This week\'s printouts: ' + n + ' requests, the pocket card from the CoE folder, and a form from HR you have filled in twice.' },
+      binders: { label: 'Binders', face: '📚', text: 'PROCESS 2005, PROCESS 2006 and PROCESS (NEW). The first two are full. The new one is empty and has been since January.' },
+      coat: { label: 'Your coat', face: '🧥', text: 'Your coat, still damp from this morning. Home time is half past five; the lift will still be there.' }
+    };
+  }
+  // The clock when the next request comes in: forty minutes after the last one, or 08:57 on a new day.
+  function nextClock() {
+    const r = state.run, i = state.index;
+    return r && i && state.days[i] === state.days[i - 1] ? r.clock + 40 : 8 * 60 + 57;
+  }
+  // `screen` opens whatever is on the screen; it runs under the zoom out of the CRT.
+  function sitAt(screen, o) {
+    Seat.show({
+      show, when: o.when, line: o.line || '', from: o.from || null, things: deskThings(),
+      screen: { label: 'Your screen', sub: o.sub, go: () => Seat.zoomIn(screen) },
+      stand: o.stand === false ? null : { label: 'Stand up', sub: o.standSub || 'Walk around the floor', go: o.stand || standFromSeat }
+    });
+  }
+  // Sitting down for the next request: it comes in when you look at the screen.
+  function sitNext() {
+    const i = state.index, day = state.days[i] || 0;
+    sitAt(() => startRequest(), { when: Story.day(state.weekNo, day) + ' · ' + clockText(nextClock()), sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is in', stand: () => floor(false, false, false, true) });
+  }
+  // Sitting down in the middle of a request: it is on the screen, as you left it.
+  function sitPaused(from) {
+    const r = state.run;
+    sitAt(backToDesk, { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from });
+  }
+  function standFromSeat() {
+    const no = canStand();
+    if (no == null) return;
+    if (no) { toast(no, 'info'); return; }
+    save();
+    floor(false, false, true);
+  }
+  // From the screen back to the desk: nothing moves, the request stays on the screen.
+  function leanBack() {
+    $('start-menu').hidden = true;
+    if (!state.run || !$('s-desk').classList.contains('active') || state.hard || state.one || state.final) return;
+    if ($('p-board').classList.contains('active')) { toast('Not now: the board is waiting for you.', 'info'); return; }
+    if (Tour.open) { toast('Finish Mieke\'s tour first.', 'info'); return; }
+    save();
+    const r = state.run;
+    sitAt(() => show('s-desk'), { when: Story.day(state.weekNo, state.days[state.index] || 0) + ' · ' + clockText(r.clock), sub: waiting(r) + ' on the screen', from: $('s-desk') });
+  }
+  $('btn-leanback').onclick = leanBack;
+  $('btn-leanback-menu').onclick = leanBack;
   $('btn-standup').onclick = standFromDesk;
   $('btn-standup-menu').onclick = standFromDesk;
   // The button looks dimmed while you can't go (a reply is coming, the board is in session), but still says why when clicked.
@@ -2511,10 +2576,11 @@
   // `evening`: the day you just finished is over. The floor is the evening, and the lift takes you home
   // to the next morning; your desk waits until then.
   // `paused`: you stood up in the middle of a request; it waits on your desk exactly as you left it.
-  function floor(evening, last, paused) {
+  // `again`: you sat down and stood straight up again; nothing new has turned up on the floor since.
+  function floor(evening, last, paused, again) {
     const i = state.index, r = state.run;
     const day = state.days[evening ? i - 1 : i] || 0;
-    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(r.clock + (paused ? 0 : 40));
+    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(paused ? r.clock : nextClock());
     const tomorrow = dayOf(i);
     // The morning after: the lift up and the rain, each said once; most days it is the coffee machine.
     const morning = () => {
@@ -2525,8 +2591,8 @@
       const lit = !tape && !rain && Reveal.seen() && !now.off && !told('lift-lit');
       const line = lit ? 'In the lift, button 5 is still lit. You press 4. It is the same rain at 08:56.' : tape ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
         : rain ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
-      startRequest();
-      toast(tomorrow + ', 08:57. ' + line, 'info');
+      sitAt(() => { startRequest(); toast(tomorrow + ', 08:57. ' + line, 'info'); },
+        { when: Story.day(state.weekNo, state.days[i]) + ' · 08:56', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is in', line: tomorrow + ' morning. Your screen is on.', stand: () => floor(false, false, false, true) });
     };
     const story = Story.storyMail(state.weekNo);
     const news = Story.news(state.weekNo, day).slice(-1)[0];
@@ -2534,8 +2600,8 @@
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
         : evening ? Object.assign({ label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }, Arc.offer('badge', arcNow(day)) ? { text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning.' + BADGE, note: arcNote('badge') } : {})
-        : paused ? { label: 'Your desk', sub: waiting(r) + ' where you left it', primary: true, go: () => Office.sitDown(backToDesk) }
-        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => startRequest(true)) },
+        : paused ? { label: 'Your desk', sub: waiting(r) + ' where you left it', primary: true, go: () => Office.sitDown(() => sitPaused()) }
+        : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => sitNext()) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
       darren: { label: 'Darren\'s office', who: 'Darren\'s door', face: '🚪', title: story.subject, text: 'Shut. He is at the airport. Again. His mail from this morning, printed and taped to the door:\n\n' + firstPara },
       tv: news ? { label: 'Canteen TV', who: 'Canteen TV', face: '📺', title: news.subject, text: news.body }
@@ -2557,7 +2623,7 @@
     else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
     if (paused) delete spots.lift;
-    const L = looks(arcNow(day), paused);
+    const L = looks(arcNow(day), paused || again);
     spots.mieke.look = L.looks.mieke; spots.darren.look = L.looks.darren;
     spots.mieke.label = 'Mieke\'s desk'; spots.darren.label = 'Darren\'s office';
     if (Reveal.seen() && !now.off && Reveal.ending() !== 'clockin') {
