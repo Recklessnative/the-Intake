@@ -49,7 +49,12 @@ async function playWeek(b, n, opt, onFloor) {
   }, [history(n, ['hotel-upgrades', 'telecom-first-call', 'logistics-night-shift'], opt.hard), { shown: opt.arc || {}, noted: opt.noted || [] }, opt.storage]);
   await p.goto('http://localhost:8766/?debug=1');
   await p.click('#btn-start');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  // The desk first (js/seat.js), then the boot screen, then Log on.
+  for (let i = 0; i < 40 && !(await p.isVisible('#s-desk.active')); i++) {
+    if (await p.isVisible('#s-seat.active')) await p.click('#seat-list button[data-go="screen"]');
+    else if (await p.isVisible('#s-cubicle.active')) await p.click('#btn-sit');
+    else await p.waitForTimeout(150);
+  }
   const seen = { mails: await p.textContent('#mail-rows'), mieke: [], toasts: [], floors: [] };
   const grabMieke = async () => seen.mieke.push(await p.evaluate(() => document.getElementById('mieke-log').textContent));
   await p.waitForTimeout(1600);
@@ -77,6 +82,12 @@ async function playWeek(b, n, opt, onFloor) {
     await p.click('#btn-next');
     await p.waitForSelector('#s-office.active');
     await p.waitForFunction(() => !document.getElementById('office-film'));
+    // After the last request it is Thursday evening first: home, then Friday morning and the board.
+    if (last && await p.$('#office-stage.evening')) {
+      await p.click('#office-list button.primary');
+      if (await p.isVisible('#office-card button:has-text("Go home")')) await p.click('#office-card button:has-text("Go home")');
+      await p.waitForFunction(() => (document.getElementById('office-line').textContent || '').startsWith('Friday.'), null, { timeout: 15000 });
+    }
     const f = await p.evaluate(() => ({
       line: document.getElementById('office-line').textContent,
       spots: [...document.querySelectorAll('#office-list button')].map(b => b.dataset.spot)
@@ -96,8 +107,11 @@ async function playWeek(b, n, opt, onFloor) {
       if (opt.onTown && !seen.town) { await p.click('#office-card button:has-text("Walk home through town")'); await p.waitForSelector('#town.in'); seen.town = await opt.onTown(p, seen); await p.click('#town .tw-bar button.primary'); revealed = true; }
       else await p.click('#office-card button:has-text("Go home")');
     }
-    if (revealed) await p.waitForSelector('#s-desk', { state: 'visible' });
-    else await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
+    if (!revealed) await p.waitForFunction(() => /^sit-(played|failed|quick)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
+    // Sitting down lands on the desk; the morning starts when you look at the screen.
+    await p.waitForSelector('#s-seat.active', { timeout: 15000 });
+    await p.click('#seat-list button[data-go="screen"]');
+    await p.waitForSelector('#s-desk.active');
     seen.toasts.push(await p.textContent('#toast'));
     await p.waitForTimeout(1600);
     await grabMieke();
