@@ -31,6 +31,18 @@ async function bet() {
   await p.click('#bet-form button[type=submit]');
 }
 
+// Two strong requests in My scores (60+, diagnosis 15+): one step less help on the next board.
+function strong([id, n]) {
+  const h = JSON.parse(localStorage.getItem('intake-scores'));
+  h.weeks.push({ id, started: Date.now(), requests: [...Array(n).keys()].map(i => ({ index: i, at: Date.now(), card: 'hotel-upgrades', who: 'Test', role: 'Test', org: 'Test', total: 80, pts: { diagnosis: 20 }, help: 'full' })) });
+  localStorage.setItem('intake-scores', JSON.stringify(h));
+}
+// ...and out again once the board has been dealt, so the rest of the run counts only real requests.
+function unstrong() {
+  const h = JSON.parse(localStorage.getItem('intake-scores'));
+  h.weeks = h.weeks.filter(w => !/^test-strong/.test(w.id));
+  localStorage.setItem('intake-scores', JSON.stringify(h));
+}
 async function caseBoard(req) {
   const next = () => p.click('#board-next');
   const lockAndGo = async () => { await next(); if (await p.isVisible('#board-feedback')) { if (!(await p.textContent('#board-feedback')).startsWith('Mieke:')) throw new Error('feedback without Mieke'); if (req === 0 && !MOBILE && !shot++) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/feedback.png' }); await next(); } };
@@ -664,13 +676,16 @@ async function followUp() {
   await p.click('#btn-debug'); await p.click('#btn-debug');   // autofill: start, answer the first question
   if (!(await p.$('.ac-opt.right'))) throw new Error('academy autofill did not answer');
   await p.click('#w-academy .tb.close');
+  // Help fades with how you do: two strong requests take the chips off the board.
+  await p.evaluate(strong, ['test-strong-1', 2]);
   await p.click('#btn-debug');                       // inbox -> scripted call -> follow-up
   await p.waitForSelector('#w-leads.open');
   await p.click('#btn-debug');                       // data requests and the coffee machine, scripted
   if (!(await p.$$eval('#data-docs .data-doc', l => l.length))) throw new Error('autofill asked for no data');
   await p.click('#btn-leads-done');
   await p.waitForSelector('#w-write.open');
-  if (!(await p.$('#board.fade2')) || await p.isVisible('#formats') || await p.isVisible('[data-rung-ev="baseline"]')) throw new Error('week 2 board still shows the measure and concept chips');
+  if (!(await p.$('#board.fade2')) || await p.isVisible('#formats') || await p.isVisible('[data-rung-ev="baseline"]')) throw new Error('board after strong requests still shows the measure and concept chips');
+  await p.evaluate(unstrong);
   if (await p.evaluate(() => window.__intake.state.run.revealed.size) < 3) throw new Error('autofill call revealed too little');
   await p.click('#btn-debug');                       // fills every step, lands on the memo
   if (!(await p.isVisible('.bstep[data-step="memo"]'))) throw new Error('autofill did not reach the memo');
@@ -686,10 +701,12 @@ async function followUp() {
   // With a finished week behind you the lift asks: home, or through town.
   if (await p.isVisible('#office-card button:has-text("Go home")')) await p.click('#office-card button:has-text("Go home")');
   await p.waitForFunction(() => /^sit-(played|failed)/.test(document.body.dataset.film || '') && !document.getElementById('office-film'), null, { timeout: 15000 });
-  await p.evaluate(() => { window.__intake.state.weekNo = 3; });
+  // Help fades with how you do: four strong requests take the board away.
+  await p.evaluate(strong, ['test-strong-2', 4]);
   await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open'); await p.click('#btn-leads-done');
   await p.waitForSelector('#memo4-form:not([hidden])');
-  if (await p.isVisible('#board')) throw new Error('board shown in week 3');
+  if (await p.isVisible('#board')) throw new Error('board shown after strong requests');
+  await p.evaluate(unstrong);
   await p.click('#btn-debug');
   if (!(await p.inputValue('#memo4-form [name=need]'))) throw new Error('memo autofill empty');
   await p.click('#memo4-form button[type=submit]');

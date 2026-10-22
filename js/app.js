@@ -1459,13 +1459,44 @@
   const board = () => state.run.board;
   const listText = xs => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs.at(-1);
 
+  // How much help the case board gives: 1 the full board, 2 chips on the diagnosis only, 3 a blank
+  // one-pager. Two strong requests in a row (60+, diagnosis 15+) take one step of help away; two
+  // weak ones (under 45) give it back. Hard mode, Try one case and Mieke's worked example don't count.
+  function helpLevel(h) {
+    let lvl = 1, good = 0, weak = 0;
+    h.weeks.filter(w => !w.hard && !w.one).flatMap(w => w.requests.slice().sort((a, b) => a.index - b.index)).filter(x => x.help !== 'example').forEach(x => {
+      good = x.total >= 60 && ((x.pts || {}).diagnosis || 0) >= 15 ? good + 1 : 0;
+      weak = x.total < 45 ? weak + 1 : 0;
+      if (good >= 2 && lvl < 3) { lvl++; good = 0; }
+      if (weak >= 2 && lvl > 1) { lvl--; weak = 0; }
+    });
+    return lvl;
+  }
+  const HELP_NEWS = {
+    up2: 'Two strong ones in a row. I took my hints off the board: from now on you name the cause yourself, without the chips.',
+    up3: 'You don\'t need the board any more. One page, four headings, your own words. If you miss it, the board is one click away.',
+    down: 'Let\'s put more of the board back for a bit. No shame in it: I still use it on the hard ones.'
+  };
+  // The level for this request, and Mieke's word when it changed since the last one she told you about.
+  function helpNow() {
+    const h = scoreHistory(), lvl = helpLevel(h);
+    if (!state.hard && !state.one && !state.final && h.help && h.help !== lvl && state.run && !state.run.helpTold) {
+      state.run.helpTold = true;
+      const t = HELP_NEWS[lvl > h.help ? 'up' + lvl : 'down'];
+      setTimeout(() => { miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 600);
+    }
+    if (h.help !== lvl && !state.hard && !state.one) { h.help = lvl; keepScores(h); }
+    return lvl;
+  }
   function newBoard(r) {
     const deps = (r.card.dependencies || []).map(d => d.who).filter(Boolean);
     const decoys = DECOYS.filter(d => !deps.some(x => x.toLowerCase().includes(d.split(' ')[0].toLowerCase()))).sort(() => Math.random() - 0.5).slice(0, 3);
     const tiles = deps.map(who => ({ who, real: true })).concat(decoys.map(who => ({ who, real: false }))).sort(() => Math.random() - 0.5);
     return {
       // Help fades: week 1 the full board, week 2 chips on the diagnosis only, then a blank memo.
-      mode: state.hard ? 'hard' : state.weekNo >= 3 && !state.final ? 'memo4' : 'board', hardMemo: '', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
+      // Help fades with how you do, not with the calendar (helpLevel): the full board with Mieke's
+      // version, then chips on the diagnosis only, then a blank one-pager.
+      mode: state.hard ? 'hard' : helpNow() >= 3 && !state.final ? 'memo4' : 'board', hardMemo: '', fade: state.hard ? 3 : helpNow(), memo4: { need: '', measure: '', concept: '', risks: '' },
       step: 'diagnose', locked: false, feedback: '',
       evidence: [], tags: [], problem: '', lever: '', leverWhy: '', accountable: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
@@ -2875,13 +2906,18 @@
     if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined }; h.weeks.push(w); }
     return w;
   }
+  // What help the write-up had: Mieke's worked example, the full board, the board with less on it, or none.
+  function helpUsed(r) {
+    const b = r.board || {};
+    return b.example ? 'example' : b.mode !== 'board' ? 'none' : (b.fade || 1) <= 1 ? 'full' : 'some';
+  }
   function recordScore(r, total, pts, g, call) {
     const h = scoreHistory(), w = thisWeek(h), s = r.card.stakeholder;
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
       starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict,
-      assisted: r.board && r.board.example ? 'example' : undefined
+      help: helpUsed(r)
     });
     keepScores(h);
   }
