@@ -797,6 +797,26 @@ async function followUp() {
   if (oh.length !== weeksBefore + 1 || !oh.at(-1).one) throw new Error('one case not recorded as one case');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end-one.png' });
   console.log('one case', await p.textContent('#end-score'));
+  // A retest from My scores: a case from two or more weeks back, as one case, against your first score.
+  await p.goto('http://localhost:8765/?debug=1');
+  const rt = await p.evaluate(() => { const b = document.querySelector('#scores .retests button'); if (!b) return null; b.click(); return b.dataset.card; });
+  if (!rt || !(await p.textContent('#scores')).includes('=== Progress')) throw new Error('no progress or retest in My scores');
+  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  const rs = await p.evaluate(() => { const s = window.__intake.state; return { one: s.one, ids: s.cards.map(c => c.id), retest: s.retest }; });
+  if (!rs.one || rs.ids.join() !== rt || !rs.retest || rs.retest.card !== rt) throw new Error('retest is not that case: ' + JSON.stringify(rs) + ' vs ' + rt);
+  await p.click('#btn-debug'); await p.waitForSelector('#w-leads.open, #w-write.open');
+  if (await p.isVisible('#w-leads')) { await p.click('#btn-debug'); await p.click('#btn-leads-done'); }
+  await p.waitForSelector('#w-write.open');
+  await p.click('#btn-debug');
+  if (await p.isVisible('#memo4-form')) await p.click('#memo4-form button[type=submit]'); else await p.click('#board-next');
+  await bet();
+  await p.waitForSelector('#p-defence.active, #p-score.active');
+  if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
+  await p.waitForSelector('#p-score.active');
+  await p.click('#btn-next'); await p.waitForSelector('#s-end.active');
+  if (!(await p.textContent('#end-note')).startsWith('Retest: ')) throw new Error('retest end note wrong: ' + await p.textContent('#end-note'));
+  if (!(await p.textContent('#scores')).includes('Retest, ')) throw new Error('retest not in My scores');
+  console.log('retest', await p.textContent('#end-note'));
   // The morning call: a weekend is closed; a weekday is three questions, the lever, the need, the reveal.
   await p.goto('http://localhost:8765/?debug=1&morning=2026-10-17');
   await p.click('#btn-morning'); await p.waitForSelector('#s-morning.active #mc-one');

@@ -376,6 +376,7 @@ body.no-stand .quick-launch, body.no-stand #btn-standup-menu { display: none; }
 .scores h3 { font: inherit; font-weight: 700; margin: 14px 0 2px; }
 .scores p { margin: 0; white-space: pre-wrap; }
 .scores .muted { color: #777; }
+.scores .retests { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; white-space: normal; }
 .tray .debug { min-height: 0; height: 24px; padding: 0 8px; font-size: 12px; color: #fff; background: #b5432a; border: 1px solid #fff; }
 
 /* ---------- narrow screens: one window at a time, the taskbar switches ---------- */

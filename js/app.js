@@ -255,6 +255,9 @@
     dropSave();
     state.hard = !!hard;
     state.one = !hard && !!one;
+    // A retest from My scores is a one-case run on a case you played weeks ago.
+    state.retest = state.one ? state.nextRetest || null : null;
+    state.nextRetest = null;
     // The week after the reveal is one request: the operator's. Your lever call on it is the ending.
     state.final = !state.hard && !state.one && Reveal.seen() && !Reveal.ending();
     document.body.classList.toggle('hard', state.hard);
@@ -373,7 +376,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, final: state.final, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, final: state.final, retest: state.retest, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -402,6 +405,7 @@
     state.hard = !!s.hard;
     state.one = !!s.one;
     state.final = !!s.final;
+    state.retest = s.retest || null;
     state.board = s.board || null;
     state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
     state.academy = s.academy || (s.hard || s.one ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
@@ -2511,7 +2515,8 @@
     $('end-score').textContent = score + ' / 100';
     $('end-board').hidden = !br;
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
-    $('end-note').textContent = state.one ? 'One case: ' + state.cards[0].stakeholder.name + '. A full week has three or four requests, a Monday stand-up and the board room on Friday, and it is where you can earn a promotion.'
+    $('end-note').textContent = state.retest ? 'Retest: ' + state.cards[0].stakeholder.name + '. The first time ' + state.retest.first + '/100, now ' + avg + '/100. ' + (avg > state.retest.first + 4 ? 'That is what getting better looks like.' : avg < state.retest.first - 4 ? 'Lower than the first time: open My scores and compare the parts.' : 'About the same. Look at which part moved.')
+      : state.one ? 'One case: ' + state.cards[0].stakeholder.name + '. A full week has three or four requests, a Monday stand-up and the board room on Friday, and it is where you can earn a promotion.'
       : 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
     $('end-eyebrow').textContent = state.one ? 'One case, done' : 'End of the week';
     $('btn-again').textContent = state.one ? 'Another case' : 'Another week';
@@ -2903,7 +2908,7 @@
   }
   function thisWeek(h) {
     let w = h.weeks.find(x => x.id === state.weekId);
-    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined }; h.weeks.push(w); }
+    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined, retest: state.retest ? state.retest.first : undefined }; h.weeks.push(w); }
     return w;
   }
   // What help the write-up had: Mieke's worked example, the full board, the board with less on it, or none.
@@ -2968,6 +2973,7 @@
       para('\nYour weeks so far: ' + done.map(w => bars[Math.max(1, Math.round(w.avg / 100 * 8))]).join('') + '  (' + done[0].avg + ' → ' + done[done.length - 1].avg + ')');
     }
     scoreCharts(box, h);
+    progress(box, h, para);
     para('\nRequests handled: ' + all.length + ' · average ' + Math.round(all.reduce((a, b) => a + b.total, 0) / all.length) + '/100 · best ' + best.total + '/100 (' + best.who + ')');
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
@@ -2978,12 +2984,58 @@
       if (w.standup && w.standup.of) para('Monday stand-up: recalled ' + w.standup.got + ' of ' + w.standup.of, 'muted');
       if (w.academy && w.academy.of) para('CoE Academy: ' + w.academy.title + ' · ' + w.academy.right + ' of ' + w.academy.of + ' right', 'muted');
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
-        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
+        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (HELP_TAG[x.help] || '') + ': ' + x.total + '/100' + (w.retest != null ? ' (first time ' + w.retest + ')' : ''));
         para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
         if (x.question) para('   The question you didn\'t ask: ' + x.question);
         if (x.verdict) para('   Their verdict: ' + x.verdict);
       });
     });
+  }
+
+  // Progress: what you can do on your own against what you did with help, each score part early on
+  // against lately, and up to three old cases to retest (played two or more weeks ago).
+  const HELP_TAG = { example: ' [Mieke\'s example]', full: ' [full board]', some: ' [board, fewer hints]' };
+  function retestable(h) {
+    const weeks = h.weeks.filter(w => !w.hard && !w.one && w.requests.length), first = {};
+    weeks.forEach((w, wi) => w.requests.forEach(x => { if (!first[x.card]) first[x.card] = { card: x.card, who: x.who, org: x.org, first: x.total, wi }; }));
+    const redone = new Set(h.weeks.filter(w => w.retest != null).flatMap(w => w.requests.map(x => x.card)));
+    return Object.values(first).filter(x => weeks.length - x.wi >= 2 && !redone.has(x.card) && x.card !== 'operator-2041').slice(0, 3);
+  }
+  function progress(box, h, para) {
+    const norm = h.weeks.filter(w => !w.hard && !w.one).flatMap(w => w.requests.slice().sort((a, b) => a.index - b.index)).filter(x => x.help !== 'example');
+    const avg = xs => Math.round(xs.reduce((a, x) => a + x.total, 0) / xs.length);
+    const head = document.createElement('h3'); head.textContent = '=== Progress'; box.appendChild(head);
+    const own = norm.filter(x => x.help === 'none').slice(-5), helped = norm.filter(x => x.help === 'full' || x.help === 'some').slice(-5);
+    if (own.length && helped.length) para('On your own (one-pager): ' + avg(own) + '/100 over your last ' + own.length + ' · with the case board: ' + avg(helped) + '/100 over ' + helped.length);
+    else if (helped.length) para('All your requests so far had the case board. It thins out after two strong requests in a row.', 'muted');
+    if (norm.length >= 6) {
+      const share = (xs, k, max) => Math.round(100 * xs.reduce((a, x) => a + ((x.pts || {})[k] || 0), 0) / (max * xs.length));
+      const a = norm.slice(0, 3), b = norm.slice(-3);
+      para('Your first three requests against your last three:');
+      DIMENSIONS.forEach(([k, label, max]) => { const x = share(a, k, max), y = share(b, k, max); para('   ' + label + ' ' + x + '% → ' + y + '%' + (y - x >= 10 ? '  ▲' : x - y >= 10 ? '  ▼' : '')); });
+    } else para('After six requests this shows each part early on against lately.', 'muted');
+    h.weeks.filter(w => w.retest != null && w.requests.length).forEach(w => para('Retest, ' + w.requests[0].who + ': ' + w.retest + ' → ' + w.requests[0].total + '/100'));
+    const can = retestable(h);
+    if (!can.length) return;
+    para('Retest an old case: same client, weeks later, as one case. It does not count as a week.');
+    const row = document.createElement('p'); row.className = 'retests';
+    can.forEach(x => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.card = x.card;
+      b.textContent = x.who + (x.org ? ', ' + x.org : '') + ' (' + x.first + ')';
+      b.onclick = () => retest(x);
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+  async function retest(x) {
+    try { await loadCards(); } catch (e) { return; }
+    const card = state.pool.find(c => c.id === x.card);
+    if (!card) { toast('That case is no longer in the game.', 'info'); return; }
+    state.oneCard = card;
+    state.nextRetest = { card: x.card, first: x.first };
+    Desktop.minimise('w-scores');
+    await startWeek(false, true);
+    if (!state.retest) { state.oneCard = null; state.nextRetest = null; }   // the saved week was kept
   }
 
   // Two charts on top of scores.txt: every request over time, and the score parts as a share of
