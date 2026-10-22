@@ -87,7 +87,7 @@
   function wait(line) { $('wait-line').textContent = line; pane('p-wait'); }
   $('btn-logoff').onclick = () => {
     $('start-menu').hidden = true;
-    if (window.confirm('Log off? Your week is saved in this browser; resume it from the title screen.')) { save(); Desktop.reset(); show('s-title'); runsLeft(); }
+    if (window.confirm('Log off? Nothing is lost: your week is saved in this browser, and Resume on the title screen brings you back to exactly this point.')) { save(); Desktop.reset(); show('s-title'); runsLeft(); }
   };
 
   // ---------- scenarios ----------
@@ -1551,7 +1551,7 @@
     if (!Reveal.seen()) return;
     const foot = document.querySelector('.boot-foot');
     if (foot) foot.textContent = 'Doors OS · archive build 2041.03 · Copyright © Doors Corp.';
-    $('btn-logoff').querySelector('span').textContent = 'Clock out (quit this week)';
+    $('btn-logoff').querySelector('span').textContent = 'Clock out (save and log off)';
     if (!$('btn-logoff-2041')) {
       const b = document.createElement('button'); b.id = 'btn-logoff-2041'; b.className = 'logoff'; b.type = 'button';
       b.textContent = '⏻ Log off...'; b.disabled = true; b.title = 'Not available in this session.';
@@ -2360,7 +2360,8 @@
       const newDay = state.days[state.index] !== state.days[state.index - 1];
       // You stand up; at the end of a day the floor is the evening, and the lift takes you home.
       floor(newDay, false);
-    } else floor(false, true);
+    } else if ((state.days[state.index] || 0) < 4) floor(true, 'eve');   // the evening before the board: home first
+    else floor(false, true);
   };
 
   // ---------- standing up in the middle of a request ----------
@@ -2588,11 +2589,15 @@
   // `paused`: you stood up in the middle of a request; it waits on your desk exactly as you left it.
   // `again`: you sat down and stood straight up again; nothing new has turned up on the floor since.
   // `back`: you walked in from town, so no stand-up film: the floor is simply there.
+  // `last` === 'eve': the evening after the last request; the lift home leads to Friday morning and the board.
   function floor(evening, last, paused, again, back) {
+    const eve = last === 'eve';
+    if (eve) last = false;
+    const friday = last && fridayMorning;
     const i = state.index, r = state.run;
-    const day = state.days[evening ? i - 1 : i] || 0;
-    const time = last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(paused ? r.clock : nextClock());
-    const tomorrow = dayOf(i);
+    const day = state.days[evening && !eve ? i - 1 : i] || 0;
+    const time = friday ? '09:30' : last ? '17:10' : evening ? '17:40' : !r ? '08:57' : clockText(paused ? r.clock : nextClock());
+    const tomorrow = eve ? 'Friday' : dayOf(i);
     // The morning after: the lift up and the rain, each said once; most days it is the coffee machine.
     const morning = () => {
       const now = arcNow(state.days[i]);
@@ -2602,6 +2607,7 @@
       const lit = !tape && !rain && Reveal.seen() && !now.off && !told('lift-lit');
       const line = lit ? 'In the lift, button 5 is still lit. You press 4. It is the same rain at 08:56.' : tape ? 'In the lift, someone has put grey tape over button 5: OUT OF ORDER. The building has four floors.'
         : rain ? 'It started raining at 08:56. Yesterday it started at 08:56 too.' : 'The coffee machine is still broken.';
+      if (eve) { fridayMorning = true; floor(false, true, false, false, true); fridayMorning = false; toast('Friday, 09:30. ' + line, 'info'); return; }
       sitAt(() => { startRequest(); toast(tomorrow + ', 08:57. ' + line, 'info'); },
         { when: Story.day(state.weekNo, state.days[i]) + ' · 08:56', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is in', line: tomorrow + ' morning. Your screen is on.', stand: () => floor(false, false, false, true) });
     };
@@ -2610,7 +2616,7 @@
     const firstPara = story.body.split('\n\n').filter(t => !/^Darren\n/.test(t)).slice(0, 2).join('\n\n');
     const spots = {
       desk: last ? { label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Clear, for once. Your plant has given up entirely. Everyone else is drifting towards the board room.' }
-        : evening ? Object.assign({ label: 'Your desk', who: 'Your desk', face: '🖥', text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }, Arc.offer('badge', arcNow(day)) ? { text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning.' + BADGE, note: arcNote('badge') } : {})
+        : evening ? Object.assign({ label: 'Your desk', who: 'Your desk', face: '🖥', text: eve ? 'Screen off, chair pushed in. That was the last request of the week: tomorrow is Friday, and the board. Take the lift home when you are done looking around.' : 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning. Take the lift home when you are done looking around.' }, Arc.offer('badge', arcNow(day)) ? { text: 'Screen off, chair pushed in. Request ' + (i + 1) + ' of ' + state.cards.length + ' comes in tomorrow morning.' + BADGE, note: arcNote('badge') } : {})
         : paused ? { label: 'Your desk', sub: waiting(r) + ' where you left it', primary: true, go: () => Office.sitDown(() => sitPaused()) }
         : { label: 'Your desk', sub: 'Request ' + (i + 1) + ' of ' + state.cards.length + ' is waiting', primary: true, go: () => Office.sitDown(() => sitNext()) },
       mieke: { label: 'Mieke', who: 'Mieke', face: '☕', text: miekeFloor() },
@@ -2622,7 +2628,7 @@
       meeting: last ? { label: 'Board room: Friday', sub: 'Pitch your best case of the week', primary: true, go: () => { show('s-desk'); toBoard(); } }
         : { label: 'Board room', who: 'The board room', face: '📋', text: 'Friday the board meets in here. You pitch your best case of the week, on one slide. The whiteboard still says ASK WHY. Nobody dares to wipe it.' }
     };
-    const now = arcNow(day), home = { label: 'Go home: start ' + tomorrow, go: () => Office.sitDown(morning) };
+    const now = arcNow(day), home = { label: 'Go home: start ' + tomorrow, go: () => eve ? morning() : Office.sitDown(morning) };
     // After your first finished week the lift can also drop you in town (js/town.js).
     const walk = evening && townOpen() ? { label: 'Walk home through town', go: () => { Office.close(); openTown(day, tomorrow, morning); } } : null;
     if (evening && Reveal.open(now)) {
@@ -2631,7 +2637,7 @@
       const only = Reveal.forced(now);
       spots.lift = { label: only ? 'The lift: button 5' : 'The lift', sub: only ? 'It is the only button that lights' : 'Home, or button 5', primary: true, who: 'The lift', face: '🛗', text: only ? FIVE_ONLY : FIVE_OPEN, actions: only ? [five] : [home].concat(walk || [], five) };
     } else if (walk) spots.lift = { label: 'The lift', sub: 'Home, or through town', primary: true, who: 'The lift', face: '🛗', text: TOWN_LIFT, actions: [home, walk] };
-    else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
+    else if (evening) spots.lift = { label: home.label, sub: Reveal.seen() && !now.off ? 'Button 5 stays lit' : eve ? 'Tomorrow: the board room' : 'Tomorrow at 08:57, request ' + (i + 1), primary: true, go: home.go };
     else if (last && Arc.once('flicker', arcNow(day))) spots.lift = { label: 'The lift', who: 'The lift', face: '🛗', text: FLICKER, note: arcNote('flicker') };
     // During the day the lift takes you out too: town, the Learning House, your flat. Whatever is on your desk waits.
     else if (!last) spots.lift = townOpen() ? { label: 'The lift', sub: 'Out into Lindeveld', who: 'The lift', face: '🛗', text: LIFT_DAY, actions: [{ label: 'Go into town', go: () => { Office.close(); goOut(day, paused); } }] }
@@ -2659,8 +2665,9 @@
         const nb = document.getElementById('office-notebook'); if (nb) nb.textContent = '📓 Notebook ' + opts.notebook.entries.length + '/' + opts.notebook.of; },
       when: Story.day(state.weekNo, day) + ' · ' + time,
       evening: !!evening,
-      line: last ? 'That was the last request of the week. The board is gathering.' + (spots.lift ? ' Behind you, the lift goes ding. Nobody gets out.' : '')
-        : evening ? 'That\'s ' + dayOf(i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
+      line: friday ? 'Friday. The board meets in the glass room at ten; walk in when you are ready.' + (spots.lift ? ' Behind you, the lift goes ding. Nobody gets out.' : '')
+        : last ? 'That was the last request of the week. The board is gathering.' + (spots.lift ? ' Behind you, the lift goes ding. Nobody gets out.' : '')
+        : evening ? 'That\'s ' + dayOf(eve ? i : i - 1) + ' done. Take the lift home to start ' + tomorrow + ', or have a look around first.' + teamLine()
         : paused ? 'You stretch your legs. ' + waiting(r) + ' on your desk, exactly where you left it.' + teamLine()
         : 'You stretch your legs. The next request is on your desk when you are.' + teamLine(),
       spots,
@@ -2671,6 +2678,7 @@
     Office.preload(['desk', 'sit']);
     if (back) Office.show(opts); else Office.standUp(opts);
   }
+  let fridayMorning = false;
   const LIFT_DAY = 'Ground floor, and five minutes through the rain to the canal. Your desk will wait; nobody here counts the minutes but Priya.';
   const LIFT_PROBATION = 'Ground floor and the rain. Darren likes to see new people at their desks in their first week. After Friday you can slip out into town whenever you like.';
   // Out of the office in the middle of the day: town, and back to the floor as you left it. It takes half an hour.
@@ -2694,7 +2702,7 @@
     Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow, card, dayKey: state.weekId + ':' + day,
       when: Story.day(state.weekNo, day) + ' · ' + (at || '18:30'), onDone: after, back });
   }
-  const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one ? 'Done for today' : 'Friday: the board room');
+  const nextLabel = () => (state.final ? 'The operator is waiting' : state.index + 1 < state.cards.length ? 'Next request' : state.one || !state.hard ? 'Done for today' : 'Friday: the board room');
 
   // The sentence from a write-up most worth quoting on a share card.
   function bestLine(w) {
@@ -2735,7 +2743,7 @@
     Object.entries(FRIDAY_THINGS).sort((a, b) => area(b[0]) - area(a[0])).forEach(([id, label]) => {
       const t = map.things[id];
       if (!t) return;
-      const go = () => { if (id === 'coat') $('btn-again').click(); else endPart(id); };
+      const go = () => endPart(id);
       const hot = document.createElement('button');
       hot.type = 'button'; hot.className = 'fd-hot'; hot.dataset.thing = id; hot.setAttribute('aria-label', label);
       Object.assign(hot.style, { left: t.rect[0] + '%', top: t.rect[1] + '%', width: (t.rect[2] - t.rect[0]) + '%', height: (t.rect[3] - t.rect[1]) + '%' });
@@ -2757,10 +2765,25 @@
     const on = $('s-end').classList.contains('friday');
     $('end-panel').hidden = on && !part;
     document.querySelectorAll('#end-panel [data-part]').forEach(e => e.classList.toggle('fri-off', on && e.dataset.part !== part));
-    $('end-bar-title').textContent = { report: 'Week report - ' + Story.day(state.weekNo, 4), memo: 'Memo from Darren (CEO)', screen: 'Your share card' }[part] || '';
+    $('end-bar-title').textContent = { report: 'Week report - ' + Story.day(state.weekNo, 4), memo: 'Memo from Darren (CEO)', screen: 'Your share card', coat: 'Going home' }[part] || '';
+    $('end-coat').hidden = !(on && part === 'coat');
+    if (part === 'coat') $('btn-weekend-town').hidden = !scoreHistory().weeks.some(w => w.done && !w.hard && !w.one);
     if (on && part) $('end-close').focus();
   }
   $('end-close').onclick = () => endPart(null);
+  // Your coat on Friday: the weekend, through town or straight to Monday. Nothing starts until you say so.
+  $('btn-weekend-town').onclick = () => {
+    const done = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one);
+    const card = id => state.pool.find(c => c.id === id);
+    const seen = new Set();
+    const checks = done.slice().reverse().flatMap(w => w.requests.slice().sort((a, b) => b.index - a.index))
+      .filter(x => !seen.has(x.card) && seen.add(x.card)).map(x => Town.check(x, card(x.card))).filter(Boolean);
+    const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
+    endPart(null);
+    Town.open({ now: arcNow(4), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow: 'Monday', card, dayKey: state.weekId + ':4',
+      when: Story.day(state.weekNo, 4) + ' · 18:30', onDone: () => startWeek(false, false) });
+  };
+  $('btn-weekend-monday').onclick = () => $('btn-again').click();
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-end').classList.contains('friday') && !$('end-panel').hidden) endPart(null); });
 
   function endRun() {

@@ -522,7 +522,7 @@ async function followUp() {
       if (!/done\. Take the lift home/.test(await p.textContent('#office-line'))) throw new Error('the evening floor does not say the day is done');
     }
     // Each place has its own quiet sound: rain and wind by day, the same plus a low note at 17:40.
-    if (await p.evaluate(() => Sound.place) !== (evening && req < 2 ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
+    if (await p.evaluate(() => Sound.place) !== ((await p.$('#office-stage.evening')) ? 'evening' : 'floor')) throw new Error('floor sound wrong: ' + await p.evaluate(() => Sound.place));
     if (req === 0) {
       // The speaker in the floor's tray mutes everything, and comes back on.
       await p.click('#s-office .tray-sound');
@@ -532,7 +532,7 @@ async function followUp() {
     }
     const spots = await p.$$eval('#office-list button', l => l.map(b => b.dataset.spot + (b.classList.contains('primary') ? '*' : '')));
     // A new place opens most visits: Bart's desk on the second, the canteen on the third.
-    if (spots.join(' ') !== ['lift* desk mieke darren meeting tv coffee', 'lift* desk mieke bart darren meeting tv coffee', 'meeting* desk mieke bart darren canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
+    if (spots.join(' ') !== ['lift* desk mieke darren meeting tv coffee', 'lift* desk mieke bart darren meeting tv coffee', 'lift* desk mieke bart darren meeting canteen tv coffee'][req]) throw new Error('office floor places wrong: ' + spots);
     if (req === 0) {
       // First time on the floor: Mieke says what it is for.
       if (!(await p.textContent('#office-card')).includes('This is the floor')) throw new Error('no floor intro from Mieke');
@@ -576,6 +576,10 @@ async function followUp() {
     }
   }
   if (!stood) throw new Error('you never stood up from your desk: no stand-up film between two requests');
+  // After the last request it is Thursday evening: home first, and the board on Friday morning.
+  await p.waitForFunction(() => (document.getElementById('office-line').textContent || '').startsWith('Friday.'), null, { timeout: 15000 });
+  if (await p.textContent('#office-list button.primary b') !== 'Board room: Friday') throw new Error('Friday morning does not lead to the board');
+  await p.click('#office-list button.primary');
   // Friday: the board room. Pick a concept, the slide comes prefilled from the write-up.
   await p.waitForSelector('#p-board.active .board-pick');
   if (await p.$$eval('.board-pick', l => l.length) !== 3) throw new Error('board pick should list the three full cases');
@@ -665,6 +669,11 @@ async function followUp() {
     if (await p.isVisible('#end-panel')) throw new Error('Escape did not put the memo down');
     await p.click('#friday-pic .office-tag[data-thing="screen"]');
     if (!(await p.isVisible('#share-text'))) throw new Error('share card window wrong');
+    await p.click('#end-close');    // The coat asks first: nothing starts a new week until you choose to go home.
+    const weeksBefore = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.length);
+    await p.click('#friday-pic .office-tag[data-thing="coat"]');
+    if (!(await p.isVisible('#btn-weekend-monday')) || await p.isVisible('#end-title')) throw new Error('the coat does not ask before going home');
+    if (!(await p.isVisible('#s-end.active')) || await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.length) !== weeksBefore) throw new Error('the coat started a week');
     await p.click('#end-close');
   }
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });
