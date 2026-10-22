@@ -176,5 +176,34 @@
         "mitigation": "Agree prices and the report with them first, so we can see the effect per receptionist."
       }
     ]
+  },
+  "second_request": {
+    "opening_message": "Guests complain at night and the night receptionists cannot handle it. I want a complaint-handling training for them.",
+    "after_right": "The upgrade offer is on the first screen now, and upgrades are back. The owner wants to know who you are. So, next one.",
+    "after_wrong": "Everyone can upsell, and the offer is still two screens deep. This one is different, I promise.",
+    "is_training_the_lever": "yes",
+    "need_statement": "Night receptionists do not know they may override a room's 'dirty' status to move a guest, so they cannot solve the noise complaints.",
+    "real_problem": "The night complaints are about noise from the rooms above the bar. The fix is to move the guest, but after 23:00 the system shows the free rooms as 'dirty' until housekeeping checks them. The duty manager can override that status, and so can night receptionists since the April system, but the four night receptionists hired since April were never told.",
+    "hidden_facts": [
+      {
+        "id": "above_bar",
+        "fact": "The night complaints are about noise in the rooms above the bar.",
+        "unlocks_when": "asks what guests complain about",
+        "reveal_line": "Noise. The rooms above the bar. Thursday to Saturday."
+      },
+      {
+        "id": "dirty_status",
+        "fact": "After 23:00 free rooms show as 'dirty' in the system, so receptionists think they cannot move a guest.",
+        "unlocks_when": "asks why they do not move the guest",
+        "reveal_line": "They say there are no clean rooms. The system says 'dirty' until housekeeping checks in the morning."
+      },
+      {
+        "id": "override",
+        "fact": "Night receptionists may override the 'dirty' status since April; the four hired since then were never told.",
+        "unlocks_when": "asks what receptionists are allowed to do or how they were trained",
+        "reveal_line": "They can override it, actually. The old ones know. The new ones had the one-hour demo."
+      }
+    ],
+    "question_you_didnt_ask": "Why don't they just move the guest?"
   }
 }

@@ -217,5 +217,34 @@
   "flavour_lines": [
     "Our bankers are customer-focused. Very focused. Some customers have never seen a competitor's price.",
     "We don't tie anything. We just make the alternative very lonely."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Our new savings account is not selling. I want a sales training for the 600 personal bankers.",
+    "after_right": "The bundle is out of the targets and the complaints are thin. The regulator stopped calling. So: something new.",
+    "after_wrong": "Everyone passed the refresher, and customers still hear the insurance is compulsory. I know. This is a different one.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Bankers can open the account for new customers only, and they cannot explain its withdrawal rule, so they avoid offering it.",
+    "real_problem": "The bankers do sell the account to new customers. For existing customers the system refuses to open it on accounts older than 2007, which nobody told the branches. The product sheet arrived two weeks after launch, and most bankers cannot explain the rule that withdrawals in the first year lose the loyalty bonus.",
+    "hidden_facts": [
+      {
+        "id": "old_accounts",
+        "fact": "The system will not open the savings account for customers whose current account dates from before 2007.",
+        "unlocks_when": "asks who it does or does not sell to",
+        "reveal_line": "New customers, it sells. Existing ones, the system says no. Something with old account numbers."
+      },
+      {
+        "id": "late_sheet",
+        "fact": "The product sheet reached the branches two weeks after the launch.",
+        "unlocks_when": "asks how the bankers learned about the product",
+        "reveal_line": "The sheet came two weeks late. Marketing was proud of the colours."
+      },
+      {
+        "id": "bonus_rule",
+        "fact": "Most bankers cannot explain that a withdrawal in the first year loses the loyalty bonus.",
+        "unlocks_when": "asks what bankers find hard to explain",
+        "reveal_line": "The loyalty bonus. If you take money out in year one, it goes. They hate explaining that."
+      }
+    ],
+    "question_you_didnt_ask": "Who does it sell to, and who does it not?"
+  }
 }

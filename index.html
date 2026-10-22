@@ -180,6 +180,9 @@
               <div id="mail-team" hidden>
                 <button type="button" id="btn-team" class="primary">👥 Open the drafts</button>
               </div>
+              <div id="mail-second" hidden>
+                <button type="button" id="btn-second" class="primary">☎ Call them back</button>
+              </div>
               <div id="mail-note" hidden>
                 <button type="button" id="btn-mail-note">📌 Note it</button>
               </div>
@@ -241,6 +244,11 @@
       <!-- Coffee with Mieke: five mixed practice items -->
       <div class="win" id="w-coffee" data-title="Coffee with Mieke" data-icon="☕" data-img="coffee">
         <div id="coffee-desk" class="standup" aria-live="polite"></div>
+      </div>
+
+      <!-- An old stakeholder, back with a second request: a short call, like the Morning Call -->
+      <div class="win" id="w-second" data-title="Call back" data-icon="☎" data-img="phone">
+        <div id="second-call" class="second-call" aria-live="polite"></div>
       </div>
 
       <!-- The Monday stand-up: recall last week's cases before the inbox -->
@@ -586,18 +594,28 @@
   </section>
   <!-- End of run -->
   <section id="s-end" class="screen">
-    <div class="panel narrow">
-      <p class="eyebrow" id="end-eyebrow">End of the week</p>
-      <h2 id="end-title"></h2>
-      <p id="end-score" class="score-total"></p>
-      <p id="end-board" class="end-board" hidden></p>
-      <p id="end-team" class="end-board" hidden></p>
-      <p id="end-note"></p>
-      <div id="end-memo" class="end-memo" hidden>
+    <!-- Friday on your desk: a normal week ends at your desk at 18:00 (rendered in tools/office) -->
+    <div id="friday" class="friday" hidden>
+      <div class="fd-stage"><div id="friday-pic" class="fd-pic"><img src="" alt="Your desk on Friday evening: the week report on your keyboard, Darren's memo beside it, your screen still on, your coat on the panel."></div></div>
+      <footer class="taskbar fd-bar">
+        <button type="button" class="start-btn" tabindex="-1" aria-hidden="true">start</button>
+        <span id="friday-hint" class="fd-hint"></span>
+        <div class="tray"><span id="friday-when"></span><span>18:02</span></div>
+      </footer>
+    </div>
+    <div class="panel narrow" id="end-panel">
+      <div id="end-bar" class="titlebar end-bar" hidden><span class="tt" id="end-bar-title"></span><button type="button" class="tb close" id="end-close" aria-label="Close">×</button></div>
+      <p class="eyebrow" id="end-eyebrow" data-part="report">End of the week</p>
+      <h2 id="end-title" data-part="report"></h2>
+      <p id="end-score" class="score-total" data-part="report"></p>
+      <p id="end-board" class="end-board" data-part="report" hidden></p>
+      <p id="end-team" class="end-board" data-part="report" hidden></p>
+      <p id="end-note" data-part="report"></p>
+      <div id="end-memo" class="end-memo" data-part="memo" hidden>
         <p class="end-memo-head"><b>From:</b> Darren (CEO) · <b>Subject:</b> Friday</p>
         <p id="end-memo-body"></p>
       </div>
-      <div class="share">
+      <div class="share" data-part="screen">
         <p class="eyebrow">Your share card <span id="share-badge" class="badge" hidden>HARD MODE</span></p>
         <div id="share-img" class="share-img"></div>
         <p id="share-text" class="share-text"></p>
@@ -608,9 +626,9 @@
         </div>
         <p id="share-hint" class="fine"></p>
       </div>
-      <p class="fine">Every request is kept in <b>My scores</b> on the desktop.</p>
-      <button id="btn-again" class="primary">Another week</button>
-      <button id="btn-full-week" class="ghost" hidden>Clock in for a full week</button>
+      <p class="fine" data-part="report">Every request is kept in <b>My scores</b> on the desktop.</p>
+      <button id="btn-again" class="primary" data-part="report">Another week</button>
+      <button id="btn-full-week" class="ghost" data-part="report" hidden>Clock in for a full week</button>
     </div>
   </section>
 
@@ -640,6 +658,7 @@
 <script src="js/morning.js?v=dev"></script>
 <script src="js/tour.js?v=dev"></script>
 <script src="js/office-map.js?v=dev"></script>
+<script src="js/friday-map.js?v=dev"></script>
 <script src="js/office.js?v=dev"></script>
 <script src="js/title.js?v=dev"></script>
 <script src="js/app.js?v=dev"></script>

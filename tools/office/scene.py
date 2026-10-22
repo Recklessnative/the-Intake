@@ -437,6 +437,23 @@ for i in range(5):
 plane_img('you_calendar', 12.55, b - 0.035, 1.2, 0.27, 0.36, img_mat('calendar', 'calendar.png', 0, 0.8), '-y', 'desk')
 box('you_mug', 11.2, b - 0.45, 0.745, 11.28, b - 0.37, 0.84, mat('mugwhite', (0.85, 0.85, 0.82), 0.2), 0.01, hot='desk')
 box('you_welcome', 11.3, b - 0.75, 0.745, 11.55, b - 0.6, 0.75, PAPER, 0.001, hot='desk')
+# Friday evening (close-up 'friday', only in that shot): the week report on your keyboard, Darren's
+# memo beside it, your screen on, and your coat over the side panel for going home.
+CUR[0] = 'friday'; SHOT[0] = 'friday'
+MANILA = mat('manila', (0.72, 0.58, 0.33), 0.75)
+thing(turn(box('fri_folder', 11.52, b - 0.86, 0.768, 11.98, b - 0.55, 0.781, MANILA, 0.002), (0, 0, 0.06)), 'report')
+thing(turn(box('fri_label', 11.6, b - 0.774, 0.781, 11.9, b - 0.667, 0.7815, img_mat('weekreport', 'weekreport.png', 0, 0.7), 0), (0, 0, 0.06)), 'report')
+thing(turn(box('fri_memo', 11.22, b - 0.77, 0.745, 11.48, b - 0.4, 0.747, img_mat('memo_friday', 'memo_friday.png', 0, 0.7), 0.0005), (0, 0, -0.12)), 'memo')
+COAT = mat('coat', (0.42, 0.3, 0.17), 0.9, bump=0.2, scale=250)   # a camel raincoat
+ct = box('fri_coat', 10.66, b - 0.1, 0.78, 11.02, b - 0.035, 1.3, COAT, 0.03)
+sd = ct.modifiers.new('soft', 'SUBSURF'); sd.levels = sd.render_levels = 2
+dp = ct.modifiers.new('drape', 'DISPLACE'); dp.texture = bpy.data.textures['drape']; dp.strength = 0.03; dp.mid_level = 0.5
+thing(ct, 'coat')
+thing(box('fri_collar', 10.7, b - 0.11, 1.24, 10.98, b - 0.03, 1.34, COAT, 0.03), 'coat')
+MUGW = mat('mugwhite', (0.85, 0.85, 0.82), 0.2)
+thing(cyl('fri_mug', 11.24, b - 0.41, 0.745, 0.042, 0.1, MUGW, 32), 'mug')
+rod('fri_mug_handle', (11.2, b - 0.36, 0.77), (11.2, b - 0.36, 0.83), 0.008, MUGW, 8)
+CUR[0] = 'cubicles'
 
 # Row two: three more desks, one with a screen on.
 # Priya behind Mieke, an empty desk, Jens behind you.
@@ -791,6 +808,8 @@ def hide(name, flag=True):
 # ---------- modes ----------
 PITCH = MODE in ('shot', 'shotmask') and ARGS[:1] in (['pitch'], ['pitchwide'])
 if not PITCH: hide('pitch')
+FRIDAY = MODE in ('shot', 'shotmask') and ARGS[:1] == ['friday']
+if not FRIDAY: hide('friday')
 
 def evening():
     """17:40: most of the troffers off, dusk outside, the desk lamps and screens carry the room."""
@@ -937,6 +956,7 @@ elif MODE in ('shot', 'shotmask'):
         'board': ((3.9, 8.4, 1.7), (1.6, 10.8, 1.0), 18),
         'pitch': ((2.5, 8.95, 1.45), (2.5, 11.9, 1.68), 27),          # the slide show: the screen, big
         'pitchwide': ((2.5, 8.12, 2.1), (2.5, 11.0, 1.12), 16),       # questions and verdict: the board's places too
+        'friday': ((11.72, 3.9, 1.26), (11.62, 5.0, 0.88), 19),       # your desk, Friday evening, from your chair
     }
     name = ARGS[0]
     e, g, lens = SHOTS[name]
@@ -969,6 +989,14 @@ elif MODE in ('shot', 'shotmask'):
             gl.energy = 40 if variant == 'dim' else 10; gl.color = (0.8, 0.86, 1.0)
             go = bpy.data.objects.new('screen_spill', gl); go.location = ((SCREEN[0] + SCREEN[1]) / 2, SCREEN_Y - 0.05, (SCREEN[2] + SCREEN[3]) / 2)
             go.rotation_euler = (-math.pi / 2, 0, 0); coll('lights').objects.link(go)
+    if FRIDAY:
+        # 18:00 on Friday: the floor half dark, your screen on, the welcome note long gone.
+        evening()
+        bpy.data.objects['you_crt_screen'].data.materials[0] = img_mat('scr_desk', 'screen_desk.png', 1.2)
+        for o in ('you_welcome', 'you_mug'): bpy.data.objects[o].hide_render = True
+        for o in S.objects:
+            if o.name.startswith('you_chair'): o.hide_render = True   # you are sitting in it
+        for o in ('you_crt_front', 'you_crt_screen'): THING[o] = ('friday', 'screen')
     suffix = '_' + variant if variant else ''
     if MODE == 'shotmask':
         key = 'pitch' if PITCH else name   # both board day shots share the board's places

@@ -50,6 +50,7 @@
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') { resumeButton(); titleScreen(); }
+    if (id === 's-desk' && state.run) deskIcons();
     firstLook(id);
     window.scrollTo(0, 0);
   }
@@ -555,6 +556,84 @@
         + '\n\n' + x.who + '\n\n---\nFiled with your scorecard from week ' + (weeks.indexOf(w) + 1) + ': your lever call was ' + (!x.call ? 'not made' : right ? 'right' : 'off') + ', measurement ' + ((x.pts || {}).measurement || 0) + '/20.'
     };
   }
+  // ---------- second requests: an old stakeholder comes back ----------
+  // The week after their results mail, the same stakeholder sends a new, smaller request: a short
+  // call on the desk, played like the Morning Call. How they open is the consequence of the first
+  // one: a right lever call earns trust and a fourth question, a wrong one costs a question, and a
+  // baseline agreed last time means they bring the numbers. Not scored; My scores keeps a line.
+  const SECOND_KEY = 'intake-second';
+  const TRUST = 'Last time this learning professional asked the right questions and what they proposed worked. You trust them: answer openly and a little warmer than usual.';
+  const DOUBT = 'Last time the solution you got did not fix the problem. You are sceptical and a bit short: a vague question gets a short answer, a sharp one wins you back.';
+  function secondPick() {
+    if (state.hard || state.one || state.final || Reveal.seen()) return null;
+    const weeks = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one && w.id !== state.weekId);
+    const w = weeks[weeks.length - 3];
+    if (!w) return null;
+    // The same request whose results came in last week (see laterMail).
+    const reqs = w.requests.filter(x => Town.CHECK[x.card] && state.pool.some(c => c.id === x.card)).sort((a, b) => a.index - b.index);
+    if (!reqs.length) return null;
+    const x = reqs[(state.weekNo - 1) % reqs.length], card = state.pool.find(c => c.id === x.card);
+    if (!card.second) return null;
+    return { x, card, s: card.second, first: x.who.split(' ')[0], lever: x.call ? Scoring.lever(card, x.call) : 0, meas: ((x.pts || {}).measurement || 0) >= 12 };
+  }
+  function secondSaved() {
+    try { const v = JSON.parse(localStorage.getItem(SECOND_KEY) || 'null'); return v && v.weekId === state.weekId ? v : null; } catch (e) { return null; }
+  }
+  function secondMail() {
+    const p = secondPick();
+    if (!p) return null;
+    const saved = secondSaved();
+    return {
+      from: p.x.who, subject: 'Re: ' + (p.card.subject || 'your request').replace(/\.$/, '') + ', and one more thing', second: p.card.id, done: !!(saved && saved.R.done),
+      body: 'Hi again,\n\n' + (p.lever === 1 ? p.s.afterRight : p.s.afterWrong) + '\n\n' + p.s.ask + '\n\nCan you give me a ring this week? Ten minutes.\n\n' + p.x.who
+    };
+  }
+  function openSecond() {
+    const p = secondPick();
+    if (!p) return;
+    const { s, first } = p;
+    const card = Object.assign({}, p.card, {
+      surfaceAsk: (p.lever === 1 ? s.afterRight : s.afterWrong) + ' ' + s.ask, learningIsTheAnswer: s.lever, needStatement: s.need, realProblem: s.problem,
+      hiddenFacts: s.facts, questionHint: s.hint, volunteered: [], flavourLines: [],
+      actorNotes: [p.lever === 1 ? TRUST : DOUBT, 'This is a new request. The old one is settled; talk about it only if asked.']
+    });
+    const saved = secondSaved();
+    let R = saved && saved.card === p.card.id ? saved.R : null;
+    if (!R) {
+      R = Morning.fresh(0, card);
+      R.max = p.lever === 1 ? 4 : p.lever ? 3 : 2;
+      if (p.meas) R.revealed = [s.facts[0].id];
+    }
+    const keepR = x => { try { localStorage.setItem(SECOND_KEY, JSON.stringify({ weekId: state.weekId, card: p.card.id, R: x })); } catch (e) { /* storage blocked */ } };
+    keepR(R);
+    $('morning').innerHTML = '';   // one call on screen at a time: the boxes share their ids
+    Morning.render($('second-call'), R, card, {
+      Gemini, Prompts, Sound, toast, claim: async () => true, keep: keepR,
+      top: ['Call with ' + p.x.who, 'A second request'],
+      intro: x => x.asked.length || x.done ? first + ' is still on the line.'
+        : (p.lever === 1 ? first + ' trusts you after last time: four questions.' : p.lever ? 'Last time was nearly right, and ' + first + ' remembers: three questions.' : first + ' remembers that last time did not work. Two questions, so make them count.')
+          + (p.meas ? ' Because you agreed a baseline last time, ' + first + ' brought the numbers: ' + s.facts[0].fact : ''),
+      record: x => {
+        const h = scoreHistory();
+        h.seconds = (h.seconds || []).filter(z => z.weekId !== state.weekId).concat({ weekId: state.weekId, card: p.card.id, who: p.x.who, trust: p.lever, right: x.lever === s.lever, found: x.revealed.length, of: s.facts.length, asked: x.asked.map(a => a.quality) });
+        keepScores(h);
+        const m = (state.run.mails || []).find(z => z.second);
+        if (m) { m.done = true; renderMail(); }
+      },
+      outro: body => {
+        body.appendChild(Object.assign(document.createElement('p'), { className: 'fine', textContent: 'A second request does not count towards your week. My scores keeps a line on it.' }));
+        const b = Object.assign(document.createElement('button'), { type: 'button', className: 'primary', id: 'second-hangup', textContent: '☎ Hang up' });
+        b.onclick = () => Desktop.close('w-second');
+        body.appendChild(b);
+      }
+    });
+    Desktop.open('w-second', Desktop.floating['w-second']);
+    Desktop.focus('w-second');
+    const input = $('mc-input');
+    if (input) input.focus();
+  }
+  $('btn-second').onclick = openSecond;
+
   function mailbox() {
     const r = state.run;
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
@@ -578,6 +657,8 @@
     }
     const later = laterMail();
     if (later) mails.push(Object.assign({ read: seen(later.subject), day: 0, at: 8 * 60 + 4 }, later));
+    const second = secondMail();
+    if (second) mails.push(Object.assign({ read: seen(second.subject), day: 0, at: 8 * 60 + 21 }, second));
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
     try { aeroNews = !!localStorage.getItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
@@ -627,7 +708,7 @@
   }
   function selectMail(m) {
     const r = state.run;
-    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; $('mail-team').hidden = true; $('mail-note').hidden = true; renderMail(); return; }
+    if (!m) { $('mail-from').textContent = ''; $('mail-role').textContent = ''; $('mail-subject').textContent = ''; $('mail-body').textContent = 'Select a message to read it.'; $('mail-attach').hidden = true; $('mail-actions').hidden = true; $('mail-academy').hidden = true; $('mail-team').hidden = true; $('mail-note').hidden = true; $('mail-second').hidden = true; renderMail(); return; }
     if (m.current && r.phase === 'inbox' && !r.readMail.current) Desktop.layout('inbox', 'w-inbox');   // calm Monday: the case file joins
     r.selected = m;
     if (!m.read) { m.read = true; if (m.current) r.readMail.current = true; else if (!m.request) r.readMail[m.subject] = true; }
@@ -642,6 +723,8 @@
     $('mail-academy').hidden = !m.academy;
     $('mail-team').hidden = !m.team;
     $('mail-note').hidden = !m.arc;
+    $('mail-second').hidden = !m.second;
+    if (m.second) $('btn-second').textContent = m.done ? '☎ How the call went' : '☎ Call ' + m.from.split(' ')[0] + ' back';
     if (m.arc) { const b = $('btn-mail-note'), done = Arc.noted(m.arc); b.textContent = done ? '📌 Noted' : '📌 Note it'; b.disabled = done; }
     if (m.academy) $('btn-academy').textContent = state.academy.done ? '🎓 See the tips again' : state.academy.started ? '🎓 Carry on with the module' : '🎓 Open the module';
     renderMail();
@@ -826,7 +909,7 @@
     const of = r.card.hiddenFacts.length, n = r.card.hiddenFacts.filter(f => r.revealed.has(f.id)).length;
     Sound.found();
     // The field stamp: a Learning House handout whose question would have found this fact (js/clinic.js).
-    if (!state.hard) Clinic.stamp(r.card.id, fresh).slice(0, 1).forEach(x => setTimeout(() => toast('📑 Stamp ' + x.n + ' on your Learning House handout "' + x.title + '": ' + x.question, 'info'), 1600));
+    if (!state.hard) Clinic.stamp(r.card.id, fresh).slice(0, 1).forEach(x => Retro.later(() => toast('📑 Stamp ' + x.n + ' on your Learning House handout "' + x.title + '": ' + x.question, 'info')));
     const s = $('stamp');
     s.querySelector('.stamp-n').textContent = n + ' of ' + of + ' facts';
     s.hidden = false;
@@ -1204,6 +1287,20 @@
     const all = (h.weeks || []).reduce((n, w) => n + (w.requests || []).length, 0) >= 3;
     const open = DESK_START.concat(deskUnlocked());
     document.querySelectorAll('.desk-icon').forEach(b => b.classList.toggle('locked', !all && !open.includes(b.dataset.app)));
+    // The Start menu and the tray grow the same way: on day one they hold what the desk holds and
+    // the clock. The mobile turns up with the first text, Staply's switch once you have met him,
+    // standing up once Mieke has shown you the floor, Coffee and Display once you have a scorecard.
+    const has = k => { try { return !!localStorage.getItem(k); } catch (e) { return true; } };
+    const earned = {
+      'w-phone': Retro.texts() > 0, 'w-coffee': open.includes('w-scores'), 'w-display': open.includes('w-scores'),
+      staply: has('intake-staply-met'), standup: has('intake-told-floor')
+    };
+    const got = id => all || (id in earned ? earned[id] : open.includes(id));
+    document.querySelectorAll('#start-menu [data-open]').forEach(b => { b.hidden = !got(b.dataset.open); });
+    $('btn-staply').hidden = !got('staply');
+    $('btn-standup-menu').hidden = !got('standup');
+    document.querySelector('.quick-launch').hidden = !got('standup');
+    $('btn-phone').hidden = !got('w-phone');
   }
   function unlock(...ids) {
     const got = deskUnlocked();
@@ -1386,6 +1483,8 @@
     'w-coe': { target: '#w-coe', text: 'The Center of Excellence folder. What you earn lands here: pocket cards, Academy tips, handouts. Open one before a call if it helps. That is what it is for.' },
     'w-academy': { target: '#w-academy', text: 'The CoE Academy. One short module a week: a few questions and a few tips from people who learned it the hard way. It does not count towards your score, so guess freely.' },
     'w-drill': { target: '#w-drill', text: 'The measurement drill. Sort the measures: which ones show the problem moved, and which only show people sat in a room. Then write when you would stop. No points, just practice.' },
+    'friday': { target: '#friday-pic .office-tag[data-thing="report"]', text: 'Friday, six o\'clock. Darren\'s PA leaves the week report on your keyboard, so nobody can miss it. His memo is next to it, your share card is still on your screen, and your coat takes you home.' },
+    'w-second': { target: '#w-second', text: 'An old client, back with something new. A short call, like the Morning Call. How they open depends on how the first one went: get it right and they give you more. It does not count towards your week.' },
     'w-coffee': { target: '#w-coffee', text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.' },
     's-coffee': { text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.', key: 'look-w-coffee' },
     'w-standup': { target: '#w-standup', text: 'The Monday stand-up. Before new work we look back at an old case: what did you ask first, what was the lever? Rate yourself honestly. What you got drops out; what you missed comes back.' },
@@ -1411,7 +1510,7 @@
   // One bubble at a time, checked twice a second; anything else on screen (the tour, the slide
   // show) goes first. On the very first morning her welcome tour rings first (`lookHold`).
   function nextLook() {
-    if (!lookQueue.length || lookBusy || Tour.open || Date.now() < lookHold || $('slideshow') || lookQueue[0].at > Date.now()) return;
+    if (!lookQueue.length || lookBusy || !Retro.calm(1000) || Date.now() < lookHold || lookQueue[0].at > Date.now()) return;
     const q = lookQueue.shift();
     if (told(q.key)) return;
     lookBusy = true;
@@ -1434,7 +1533,8 @@
   Retro.init({
     toast,
     onStaplyYes: () => { if (!state.hard) setTimeout(() => { const t = 'Did you just say yes to the stapler? Please tell me you did not say yes to the stapler.'; miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 5200); },
-    onStaplyChange: staplyLabel
+    onStaplyChange: staplyLabel,
+    onEarned: () => { if (state.run) deskIcons(); }
   });
   staplyLabel();
   // Wallpapers unlock with the best title you have finished a week with.
@@ -2526,6 +2626,54 @@
       onDone: choice => { afterReveal(); Desktop.reset(); state.run = null; if (choice === 'clockin') startWeek(false, false); else show('s-title'); }
     });
   }
+  // ---------- Friday on your desk ----------
+  // A normal week ends at your desk at 18:00, rendered in Blender (tools/office, shot 'friday'): the
+  // week report on your keyboard, Darren's memo beside it, your share card on the screen and your
+  // coat on the panel. Each opens its part of the week report in a small XP window; the coat goes
+  // home (another week). Hard mode, Try one case and retests keep the plain end screen.
+  const FRIDAY_THINGS = { report: 'Week report', memo: 'Darren\'s memo', screen: 'Your share card', coat: 'Go home' };
+  function friday(on) {
+    const map = window.FRIDAY_MAP, use = !!(on && map && map.things);
+    $('s-end').classList.toggle('friday', use);
+    $('friday').hidden = !use;
+    $('end-bar').hidden = !use;
+    if (!use) { endPart(null); return; }
+    const pic = $('friday-pic');
+    pic.querySelector('img').src = 'media/office/' + (window.innerWidth < 1100 ? 'friday-960.webp' : 'friday.webp');
+    pic.querySelectorAll('.fd-hot, .office-tag').forEach(b => b.remove());
+    // Bigger things first, so a smaller one on top of them (the folder in front of the screen) stays clickable.
+    const area = id => { const r = (map.things[id] || {}).rect || [0, 0, 0, 0]; return (r[2] - r[0]) * (r[3] - r[1]); };
+    Object.entries(FRIDAY_THINGS).sort((a, b) => area(b[0]) - area(a[0])).forEach(([id, label]) => {
+      const t = map.things[id];
+      if (!t) return;
+      const go = () => { if (id === 'coat') $('btn-again').click(); else endPart(id); };
+      const hot = document.createElement('button');
+      hot.type = 'button'; hot.className = 'fd-hot'; hot.dataset.thing = id; hot.setAttribute('aria-label', label);
+      Object.assign(hot.style, { left: t.rect[0] + '%', top: t.rect[1] + '%', width: (t.rect[2] - t.rect[0]) + '%', height: (t.rect[3] - t.rect[1]) + '%' });
+      hot.onclick = go;
+      const tag = document.createElement('button');
+      tag.type = 'button'; tag.className = 'office-tag' + (id === 'report' ? ' primary' : ''); tag.dataset.thing = id; tag.textContent = label;
+      Object.assign(tag.style, { left: t.tag[0] + '%', top: t.tag[1] + '%' });
+      tag.onclick = go;
+      pic.append(hot, tag);
+    });
+    $('friday-when').textContent = Story.day(state.weekNo, 4);
+    $('friday-hint').textContent = 'The floor is empty. Your week report is on your keyboard.';
+    endPart(null);
+    Sound.scene('evening');
+    setTimeout(() => firstLook('friday'), 700);
+  }
+  // One part of the week report in the window, or none (the desk).
+  function endPart(part) {
+    const on = $('s-end').classList.contains('friday');
+    $('end-panel').hidden = on && !part;
+    document.querySelectorAll('#end-panel [data-part]').forEach(e => e.classList.toggle('fri-off', on && e.dataset.part !== part));
+    $('end-bar-title').textContent = { report: 'Week report - ' + Story.day(state.weekNo, 4), memo: 'Memo from Darren (CEO)', screen: 'Your share card' }[part] || '';
+    if (on && part) $('end-close').focus();
+  }
+  $('end-close').onclick = () => endPart(null);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('s-end').classList.contains('friday') && !$('end-panel').hidden) endPart(null); });
+
   function endRun() {
     try { localStorage.removeItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
     const avg = Math.round(state.results.reduce((a, x) => a + x.total, 0) / (state.results.length || 1));
@@ -2561,6 +2709,7 @@
     if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted, state.team ? Team.memoLine(state.team, Team.grownFrom(teamLog()).filter(id => state.team.drafts.some(d => d.junior === id && d.grown))) : '');
     shareCard(score, title);
     show('s-end');
+    friday(!state.hard && !state.one && !state.retest);
   }
 
   // ---------- the board room: Friday, once per week ----------
@@ -2833,6 +2982,7 @@
   async function openMorning() {
     try { await loadCards(); } catch (e) { toast('Could not load the scenarios. The game needs to be served over http, not opened as a file.'); return; }
     const t = Morning.today(), no = Morning.number(t), box = $('morning');
+    $('second-call').innerHTML = '';
     show('s-morning');
     const env = {
       Gemini, Prompts, Sound, toast, url: GAME_URL, debug: !$('btn-debug').hidden,
@@ -3039,6 +3189,7 @@
       DIMENSIONS.forEach(([k, label, max]) => { const x = share(a, k, max), y = share(b, k, max); para('   ' + label + ' ' + x + '% → ' + y + '%' + (y - x >= 10 ? '  ▲' : x - y >= 10 ? '  ▼' : '')); });
     } else para('After six requests this shows each part early on against lately.', 'muted');
     h.weeks.filter(w => w.retest != null && w.requests.length).forEach(w => para('Retest, ' + w.requests[0].who + ': ' + w.retest + ' → ' + w.requests[0].total + '/100'));
+    (h.seconds || []).slice(-5).forEach(z => para('Second request, ' + z.who + ': ' + (z.trust === 1 ? 'trusted you' : 'remembered last time') + ', lever ' + (z.right ? 'right' : 'off') + ', facts ' + z.found + ' of ' + z.of));
     const can = retestable(h);
     if (!can.length) return;
     para('Retest an old case: same client, weeks later, as one case. It does not count as a week.');

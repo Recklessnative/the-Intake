@@ -206,5 +206,34 @@
   "flavour_lines": [
     "Bags don't care about the course. They go where the kid with the bags puts them.",
     "We're a regional airport. Our rush hour is two aircraft and a pigeon."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Medisol says our agents are rude at the aircraft steps. I want a customer service course for all 62 ramp agents before the winter schedule.",
+    "after_right": "You again. The audit passed, by the way, and the hold chart is still taped in the cabs. So I am asking you first this time.",
+    "after_wrong": "The certificates are lovely. A bag still went to Faro. I am told I should call you anyway, so here I am.",
+    "is_training_the_lever": "no",
+    "need_statement": "Passengers boarding at remote stand 7 walk to the aircraft in the rain with no cover and no information, and the agents at the steps take the anger for it.",
+    "real_problem": "All the complaints come from remote stand 7, used since the bus contract with the airport was cut in September. Passengers walk 200 metres in the open, nobody tells them which aircraft is theirs, and the ramp agents at the steps are the first people they can shout at. The complaints were written by Medisol's own cabin crew, not by passengers.",
+    "hidden_facts": [
+      {
+        "id": "stand_seven",
+        "fact": "Every complaint since September is from flights boarding at remote stand 7.",
+        "unlocks_when": "asks where or when the complaints happen",
+        "reveal_line": "Now you mention it, it is always stand 7. The far one."
+      },
+      {
+        "id": "no_bus",
+        "fact": "Since the airport cut the bus contract in September, passengers walk 200 metres to stand 7 in the open, with no signs.",
+        "unlocks_when": "asks what changed for passengers or at that stand",
+        "reveal_line": "The bus stopped in September. Cost saving at the airport. They walk now. In October. In Kempen."
+      },
+      {
+        "id": "crew_wrote",
+        "fact": "The complaints come from Medisol's cabin crew reports, not from passengers, and they describe wet, angry passengers arriving at the door.",
+        "unlocks_when": "asks who complained or what the complaints actually say",
+        "reveal_line": "The reports are from their cabin crew. Wet passengers, angry at the door. They blame whoever is standing at the steps."
+      }
+    ],
+    "question_you_didnt_ask": "Where do the complaints come from: which flights, which stand?"
+  }
 }

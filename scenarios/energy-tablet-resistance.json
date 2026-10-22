@@ -261,5 +261,34 @@
   "flavour_lines": [
     "We're on a change journey. Some of us are on it in a basement.",
     "The system has a beautiful management report. It shows adoption. Every morning. For the jobs that had signal."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Now that the jobs are on the handhelds, the planning is a mess. I want the 40 dispatch planners trained in the scheduling tool.",
+    "after_right": "The coverage maps worked; the jobs close on the handheld now. My board liked the graph. So, next one.",
+    "after_wrong": "Three hundred and twenty mindset certificates. The rural jobs are still on paper. Let us not dwell on it.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Planners give rural jobs city durations, because the tool's default is the city norm and the new planners have never seen a rural job.",
+    "real_problem": "The planners use the tool correctly. Its default job duration is the city norm and cannot be set per region, so rural jobs are planned too short and the day overruns. The planners hired this year have never ridden along with a rural technician; the old planners, who did, correct the durations by hand.",
+    "hidden_facts": [
+      {
+        "id": "city_default",
+        "fact": "The tool's default job duration is the city norm and cannot be set per region.",
+        "unlocks_when": "asks how job durations are set in the tool",
+        "reveal_line": "The tool fills in the duration itself. City norm. You can change it per job if you think of it."
+      },
+      {
+        "id": "new_planners",
+        "fact": "Most overruns are planned by the planners hired this year; the older planners correct rural durations by hand.",
+        "unlocks_when": "asks which planners or plans go wrong",
+        "reveal_line": "It is mostly the new ones. The old hands fiddle with the times, they know the routes."
+      },
+      {
+        "id": "never_rode",
+        "fact": "The new planners have never ridden along with a technician on a rural route.",
+        "unlocks_when": "asks how planners learn the job or what they know of the field",
+        "reveal_line": "Ride along? We stopped that. The new ones have never been in a van."
+      }
+    ],
+    "question_you_didnt_ask": "Which planners' days overrun, and how did they learn what a rural job takes?"
+  }
 }

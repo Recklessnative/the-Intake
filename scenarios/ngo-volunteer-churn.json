@@ -208,5 +208,34 @@
   "flavour_lines": [
     "We lose volunteers like a colander loses water. Actually, a colander is more consistent.",
     "Our recruitment campaign is excellent. It recruits people into a six-week waiting list."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "New volunteers now start with home visits, but some feel lost. I want a training for new volunteers on the first visit.",
+    "after_right": "Volunteers can start with a home visit now, and more of them stay. Jos even agreed. So you get the next one.",
+    "after_wrong": "The coordinators did the leadership course and volunteers still leave in month three. We changed the start anyway. Now this.",
+    "is_training_the_lever": "yes",
+    "need_statement": "New volunteers do not know how to handle a first visit to someone with early dementia, which they used to pick up from stories on the phone line.",
+    "real_problem": "The volunteers who feel lost all visited people with early dementia, about a third of the clients. On the old phone line, new volunteers heard the stories of experienced ones and picked up how to handle confusion; that disappeared with the rule. Experienced volunteers have offered to take a new one along on a first visit.",
+    "hidden_facts": [
+      {
+        "id": "dementia",
+        "fact": "The volunteers who feel lost all visited clients with early dementia, about a third of the clients.",
+        "unlocks_when": "asks which visits go wrong",
+        "reveal_line": "It is the visits to people with early dementia. A third of our clients."
+      },
+      {
+        "id": "phone_stories",
+        "fact": "On the old phone line new volunteers picked up how to handle confusion from the stories of experienced ones.",
+        "unlocks_when": "asks what the phone line period gave them",
+        "reveal_line": "Funny, the phone line was where they heard the stories. That is gone now."
+      },
+      {
+        "id": "take_along",
+        "fact": "Experienced volunteers have offered to take a new one along on a first visit.",
+        "unlocks_when": "asks whether others could help",
+        "reveal_line": "Maria and a few others said they would take a new one along."
+      }
+    ],
+    "question_you_didnt_ask": "Which first visits go wrong, and what did new volunteers used to learn on the phone line?"
+  }
 }

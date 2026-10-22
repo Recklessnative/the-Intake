@@ -228,5 +228,34 @@
   "flavour_lines": [
     "We had a time management course in 2005. Everyone got a very nice planner. Some still have it. Unopened.",
     "Motor is easy. A car has four sides. A house has a cellar."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Repair costs on water damage are up. I want a negotiation course for the claims handlers.",
+    "after_right": "The mentors and the checklist worked: household files take 30 days. My board was nearly cheerful. So I called you.",
+    "after_wrong": "A hundred and forty time management certificates, and the files still take 47 days. Fine. New problem.",
+    "is_training_the_lever": "yes",
+    "need_statement": "Handlers accept the first contractor quote because they do not know what a leak search should cost and the preferred contractor list has lapsed.",
+    "real_problem": "Since the preferred contractor agreement expired in June, handlers accept whatever quote the contractor sends. The former motor handlers in particular have no feel for what a leak search or a replastered wall costs; the household veterans push back and pay a third less. Nobody gave the newcomers reference prices.",
+    "hidden_facts": [
+      {
+        "id": "list_lapsed",
+        "fact": "The preferred contractor agreement expired in June and was not renewed.",
+        "unlocks_when": "asks what changed with contractors",
+        "reveal_line": "The preferred list ran out in June. Procurement is 'reviewing'."
+      },
+      {
+        "id": "first_quote",
+        "fact": "Handlers accept the first quote; the former household handlers push back and pay about a third less.",
+        "unlocks_when": "asks who pays more or how quotes are handled",
+        "reveal_line": "The household veterans haggle. The others pay what is on the paper."
+      },
+      {
+        "id": "no_prices",
+        "fact": "Nobody gave the former motor handlers reference prices for a leak search or plastering.",
+        "unlocks_when": "asks what handlers know about repair prices",
+        "reveal_line": "Motor people know what a bumper costs. A leak search? No idea, nobody told them."
+      }
+    ],
+    "question_you_didnt_ask": "Which handlers pay more, and how would they know what a fair price is?"
+  }
 }

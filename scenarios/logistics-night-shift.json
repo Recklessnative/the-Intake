@@ -231,5 +231,34 @@
   "flavour_lines": [
     "We have a safety poster in nine languages. One of them might be Klingon. Nobody has checked.",
     "Our record is 41 days without an incident. The sign goes up to 99. Optimistic."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Damaged pallets are up on the day shift. I want a forklift refresher for the day drivers.",
+    "after_right": "The buddies on nights worked: near-misses are down. The agency even asked how. So I thought of you.",
+    "after_wrong": "Everybody watched the refresher, and the near-misses are still at two in the morning. Day shift, now.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Damage comes from the new cold store, where drivers from the dry warehouse drive old reach trucks with worn forks and were never shown the cold-store racking.",
+    "real_problem": "Nearly all day-shift damage is in the new cold-store zone, opened in August. It runs the old reach trucks moved over from the dry warehouse; their forks are worn and maintenance is booked for 'after peak'. Drivers were moved in from the dry side without being shown the cold store's narrower beams.",
+    "hidden_facts": [
+      {
+        "id": "cold_store",
+        "fact": "Nearly all the day-shift damage is in the new cold-store zone opened in August.",
+        "unlocks_when": "asks where the damage happens",
+        "reveal_line": "The cold store. The new bit."
+      },
+      {
+        "id": "old_trucks",
+        "fact": "The cold store runs the old reach trucks from the dry warehouse; their forks are worn and repair is planned after peak.",
+        "unlocks_when": "asks about the equipment",
+        "reveal_line": "They got the old trucks. The forks are worn. Maintenance is after Christmas."
+      },
+      {
+        "id": "never_shown",
+        "fact": "Drivers moved in from the dry warehouse were never shown the cold store's narrower beams.",
+        "unlocks_when": "asks how drivers started in that zone",
+        "reveal_line": "They just moved them over. Same truck, they said. Not the same racking."
+      }
+    ],
+    "question_you_didnt_ask": "Where does the damage happen, and on what equipment?"
+  }
 }

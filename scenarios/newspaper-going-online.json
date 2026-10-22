@@ -213,5 +213,34 @@
   "flavour_lines": [
     "Web 2.0! I was in Amsterdam at a conference. The man had no tie. Very convincing.",
     "Our website is very up to date. It's up to date as of last night."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "The group wants video on our website. I want a video training for all 64 journalists.",
+    "after_right": "Web stories count in the morning meeting now, and the site has the news first. The group noticed. Now they want video.",
+    "after_wrong": "Everyone can write for the web and they still save it for print. And now the group wants video. Naturally.",
+    "is_training_the_lever": "no",
+    "need_statement": "The newsroom has one camera, the photographers' union claims video work, and the web system cannot host clips over 10 MB.",
+    "real_problem": "The newsroom owns one consumer video camera, kept in the photo department. The photographers' union delegate has said video is photographers' work under the agreement. The web system cannot take files over 10 MB, so a minute of video does not fit.",
+    "hidden_facts": [
+      {
+        "id": "one_camera",
+        "fact": "The newsroom has one video camera, kept in the photo department.",
+        "unlocks_when": "asks about equipment",
+        "reveal_line": "We have one camera. The photographers keep it."
+      },
+      {
+        "id": "union_claim",
+        "fact": "The photographers' union delegate says video is photographers' work under the agreement.",
+        "unlocks_when": "asks who would make the videos or about the union",
+        "reveal_line": "The photographers say video is theirs. Their delegate wrote me a letter."
+      },
+      {
+        "id": "ten_mb",
+        "fact": "The web system cannot take files over 10 MB.",
+        "unlocks_when": "asks how video would get on the site",
+        "reveal_line": "The web system takes ten megabytes. A minute of video is more than that, I am told."
+      }
+    ],
+    "question_you_didnt_ask": "What would a journalist need to put one video online tomorrow?"
+  }
 }

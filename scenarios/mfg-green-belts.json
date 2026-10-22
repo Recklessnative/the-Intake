@@ -246,5 +246,34 @@
   "flavour_lines": [
     "We make boxes. Very good boxes. Slowly.",
     "The last consultant left us a maturity model. It's laminated."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Line 3's changeover project works on days, not on nights. I want the night operators trained in the new changeover method.",
+    "after_right": "Two hours a week per team lead, and line 3 opened the first project since 2006. Changeovers on days are down to 25 minutes. Nights, not so much.",
+    "after_wrong": "Twenty-two second Green Belts, and not one project. Then Wim on line 3 started one in his own time. Now nights need help.",
+    "is_training_the_lever": "yes",
+    "need_statement": "Night operators were never shown the new changeover steps; they exist only in the day team lead's notebook.",
+    "real_problem": "The day team lead worked out the new changeover with his own operators and shows it at the line; changeovers on days dropped from 70 to 25 minutes. The night shift was never shown it and the steps exist only in his notebook. The night operators are willing and asked for it.",
+    "hidden_facts": [
+      {
+        "id": "day_only",
+        "fact": "Changeovers dropped from 70 to 25 minutes on days only; nights are unchanged.",
+        "unlocks_when": "asks which shifts do it",
+        "reveal_line": "Days, 25 minutes. Nights, still over an hour."
+      },
+      {
+        "id": "notebook",
+        "fact": "The new changeover steps exist only in the day team lead's notebook.",
+        "unlocks_when": "asks where the method is written down",
+        "reveal_line": "It is in Wim's notebook. A black one. He guards it."
+      },
+      {
+        "id": "never_shown",
+        "fact": "The night operators were never shown the new steps and have asked for it.",
+        "unlocks_when": "asks what the night shift knows or wants",
+        "reveal_line": "Nights never saw it. They asked me in the canteen."
+      }
+    ],
+    "question_you_didnt_ask": "Who has seen the new changeover done, and where is it written down?"
+  }
 }

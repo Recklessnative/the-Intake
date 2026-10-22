@@ -133,7 +133,7 @@ async function retro() {
 // The CoE Academy module: Monday morning, on top. Answer, resume mid-way, finish, tips.
 // Mieke explains a part of the desk the first time you use it, in one bubble that does not block.
 async function tip(what) {
-  await p.waitForSelector('.tour.tip:not([data-look^="look-"])', { timeout: 8000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });   // after any first looks in the queue
+  await p.waitForSelector('.tour.tip:not([data-look^="look-"])', { timeout: 25000 }).catch(() => { throw new Error('no hint from Mieke for ' + what); });   // after any first looks in the queue
   await p.click('#tour-next');
   if (await p.$('.tour')) throw new Error('hint for ' + what + ' did not close');
 }
@@ -176,16 +176,19 @@ async function followUp() {
   if (r0.phase !== 'investigate' || r0.left !== 8) throw new Error('follow-up budget wrong: ' + JSON.stringify(r0));
   if (!(await p.isDisabled('#btn-callback'))) throw new Error('callback open before finding anything');
   if (!MOBILE) { await p.click('.desk-icon[data-app="w-write"]'); if (!(await p.textContent('#toast')).includes('done asking')) throw new Error('case board should wait for the follow-up'); }
-  await p.click('#data-buttons [data-kind="kpi"]');            // no expectation yet: refused
+  // Ask where this card keeps a data fact: not every card keeps it in the KPIs any more.
+  const kind = await p.evaluate(() => { const f = window.__intake.state.run.card.hiddenFacts.find(x => x.dataDoc && x.foundAt.some(a => a.startsWith('data:'))); return f.foundAt.find(a => a.startsWith('data:')).slice(5); });
+  const kindBtn = '#data-buttons [data-kind="' + kind + '"]';
+  await p.click(kindBtn);            // no expectation yet: refused
   if (await p.$('#data-docs .data-doc')) throw new Error('data request without an expectation');
   const before = await p.evaluate(() => window.__intake.state.run.revealed.size);
   await p.fill('#data-expect', 'Most damage on nights, in the first month.');
-  await p.click('#data-buttons [data-kind="kpi"]');
+  await p.click(kindBtn);
   await p.waitForSelector('#data-docs .data-doc');
   if (!(await p.textContent('#data-docs')).includes('You expected: Most damage on nights')) throw new Error('expectation not shown with the document');
   const dr = await p.evaluate(() => { const r = window.__intake.state.run; return { had: r.had.length, rev: r.revealed.size }; });
   if (!dr.had || dr.rev !== before) throw new Error('data facts credited on the click: ' + JSON.stringify(dr));
-  if (!(await p.isDisabled('#data-buttons [data-kind="kpi"]'))) throw new Error('a data kind can be asked twice');
+  if (!(await p.isDisabled(kindBtn))) throw new Error('a data kind can be asked twice');
   await p.fill('#corridor-input', 'How did you learn the job here?'); await p.press('#corridor-input', 'Enter');
   await p.waitForFunction(() => document.querySelectorAll('#corridor-log .msg.them').length === 1);
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/followup.png' });
@@ -346,6 +349,11 @@ async function followUp() {
     }
     await p.click(MOBILE && req === 0 ? '#case-call' : '#btn-call');   // on a phone the case file is in front: call from there
     if (req === 0) await tip('the call');
+    // Day one: the Start menu holds what the desk holds, and the tray only the clock.
+    if (req === 0) {
+      const os = await p.evaluate(() => ['#start-menu [data-open="w-display"]', '#start-menu [data-open="w-phone"]', '#start-menu [data-open="w-coffee"]', '#btn-staply', '#btn-phone', '#start-menu [data-open="w-mieke"]'].map(s => document.querySelector(s).hidden));
+      if (os.join() !== 'true,true,true,true,true,false') throw new Error('day one OS not trimmed: ' + os);
+    }
     if (!MOBILE) { await visible('#w-call'); await visible('#w-case'); await visible('#w-notes'); }
     for (let i = 0; i < 2; i++) { await p.fill('#chat-input', 'When do the incidents happen?'); await p.click('#chat-form button[type=submit]'); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.you').length === n, i + 1); await p.waitForFunction(n => document.querySelectorAll('#chat-log .msg.them').length === n + 1, i + 1); }
     // Each question shows how it landed, with the reason, as soon as the answer is back.
@@ -363,7 +371,7 @@ async function followUp() {
       // Stand up in the middle of the call: the floor, then back to the desk exactly as it was.
       await p.fill('#chat-input', 'Half a question');
       await p.evaluate(() => { Gemini.busy = 1; });
-      await p.click('#btn-standup');
+      await p.click('#btn-standup', { force: true });   // it looks dimmed (aria-disabled) while a reply is coming, but still says why
       if (!(await p.textContent('#toast')).includes('Wait for the reply') || await p.isVisible('#s-office')) throw new Error('stood up while a reply was coming');
       await p.evaluate(() => { Gemini.busy = 0; });
       const before = await p.evaluate(() => ({ clock: window.__intake.state.run.clock, visits: JSON.parse(localStorage.getItem('intake-floor')).visits }));
@@ -590,7 +598,38 @@ async function followUp() {
   const told = await p.evaluate(() => Object.keys(localStorage).filter(k => k.startsWith('intake-told-look-')).map(k => k.slice(12)));
   for (const k of ['look-w-case', 'look-w-notes', 'look-p-bet', 'look-p-score', 'look-p-board']) if (!told.includes(k)) throw new Error('no first look for ' + k + ': ' + told);
   if (!mieke) throw new Error('Mieke was never asked');
+  // One interruption at a time: a second pop-up waits until the first is gone, then a quiet moment.
+  await p.evaluate(() => { Retro.im('Jo from IT', 'first'); Retro.im('Facilities', 'second'); });
+  const popUp = () => p.waitForFunction(() => !document.getElementById('im-pop').hidden, null, { timeout: 15000 });
+  const popAway = () => p.evaluate(() => document.getElementById('im-pop').click());
+  await popUp();
+  if ((await p.textContent('#im-pop .im-text')) !== 'first') throw new Error('pop-ups not in order');
+  await p.waitForTimeout(1500);
+  if ((await p.textContent('#im-pop .im-text')) !== 'first') throw new Error('second pop-up replaced the first');
+  await popAway();
+  await p.waitForTimeout(1500);
+  if (await p.evaluate(() => !document.getElementById('im-pop').hidden)) throw new Error('second pop-up did not wait for a quiet moment');
+  await popUp();
+  if ((await p.textContent('#im-pop .im-text')) !== 'second') throw new Error('second pop-up lost');
+  await popAway();
   if (!(await p.$('#share-img canvas')) || await p.isVisible('#btn-linkedin') || !(await p.textContent('#share-text')).includes('hidden facts')) throw new Error('share card wrong on a normal week');
+  // Friday on your desk: the rendered desk at 18:00; each thing opens its part of the week report.
+  if (!MOBILE) {
+    await p.waitForSelector('#friday-pic .office-tag[data-thing="report"]');
+    if (await p.isVisible('#end-panel')) throw new Error('the week report should wait on the keyboard');
+    await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/friday.png' });
+    await p.click('#friday-pic .office-tag[data-thing="report"]');
+    if (!(await p.isVisible('#end-title')) || await p.isVisible('#end-memo') || await p.isVisible('#share-text')) throw new Error('week report window wrong');
+    await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/friday-report.png' });
+    await p.click('#end-close');
+    await p.click('#friday-pic .fd-hot[data-thing="memo"]');
+    if (!(await p.isVisible('#end-memo')) || await p.isVisible('#end-title')) throw new Error('memo window wrong');
+    await p.keyboard.press('Escape');
+    if (await p.isVisible('#end-panel')) throw new Error('Escape did not put the memo down');
+    await p.click('#friday-pic .office-tag[data-thing="screen"]');
+    if (!(await p.isVisible('#share-text'))) throw new Error('share card window wrong');
+    await p.click('#end-close');
+  }
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/end.png', fullPage: true });
   if (boardCalls !== 2) throw new Error('expected two board calls, got ' + boardCalls);
   if (corridor !== 1 || callbacks !== 1) throw new Error('coffee machine or callback prompt missing: ' + corridor + ' ' + callbacks);

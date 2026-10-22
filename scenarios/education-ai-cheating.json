@@ -268,5 +268,34 @@
   "flavour_lines": [
     "We wrote a beautiful article 41bis. It has been used nine times. I've had more fire drills.",
     "The detection software is 98% accurate, according to the detection software's brochure."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "The accreditation panel visits in March. I want a course on activating teaching for all 600 lecturers.",
+    "after_right": "The business programmes rewrote their assignments and the cases halved. The dean mentioned it in a speech. With my name. So you get the next one.",
+    "after_wrong": "Nine thousand students clicked through the module, and the fraud stayed in the same 31 units. Still, the panel is coming, and I need help.",
+    "is_training_the_lever": "partly",
+    "need_statement": "Students in three programmes get grades without written feedback, because the feedback field on the platform is hidden and part-time lecturers have no paid hours for it.",
+    "real_problem": "The panel's preliminary report does not criticise teaching methods at all; it criticises feedback: in the three business programmes students get a grade with no comment. On the learning platform the feedback field sits under 'Advanced options', and part-time lecturers are paid for contact hours only. The lecturers who do give feedback were shown it by a colleague.",
+    "hidden_facts": [
+      {
+        "id": "report_says",
+        "fact": "The panel's preliminary report criticises missing feedback on assignments, not teaching methods.",
+        "unlocks_when": "asks what the panel actually wrote or criticised",
+        "reveal_line": "Honestly? The preliminary report is about feedback. Students get a grade and nothing else."
+      },
+      {
+        "id": "hidden_field",
+        "fact": "On the learning platform the feedback field is hidden under 'Advanced options'.",
+        "unlocks_when": "asks how lecturers give feedback or about the platform",
+        "reveal_line": "There is a feedback box on the platform, somewhere under 'Advanced options'. I found it once."
+      },
+      {
+        "id": "no_hours",
+        "fact": "Part-time lecturers are paid for contact hours only, so feedback is unpaid work.",
+        "unlocks_when": "asks about workload or contracts",
+        "reveal_line": "The part-timers are paid per contact hour. Feedback is not a contact hour."
+      }
+    ],
+    "question_you_didnt_ask": "What exactly did the panel's report criticise?"
+  }
 }

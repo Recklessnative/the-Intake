@@ -241,5 +241,34 @@
   "flavour_lines": [
     "Our staff are very friendly. They're friendly when they send people home, too.",
     "We had a smile campaign in 2003. There were badges. Some still wear them, ironically."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "We have aggression at the walk-in mornings. I want an aggression training for the counter staff.",
+    "after_right": "Walk-in mornings are back twice a week, and complaints are down. The alderman took the credit. Now there is shouting at eleven.",
+    "after_wrong": "Thirty-five clerks did the friendliness training. The queue is still outside. And now we have shouting too.",
+    "is_training_the_lever": "no",
+    "need_statement": "At 11:00 the doors close on walk-in mornings with people still queuing who have no way of knowing whether they will be seen.",
+    "real_problem": "The incidents all happen around 11:00, when the walk-in morning ends and the doors close on whoever is still queuing. There is no ticket system, so people who waited an hour find out at the door. Staff did an aggression course in 2006 and handle it well; the trigger is the closing.",
+    "hidden_facts": [
+      {
+        "id": "eleven",
+        "fact": "All the incidents happen around 11:00, when the walk-in morning ends.",
+        "unlocks_when": "asks when the incidents happen",
+        "reveal_line": "Eleven o'clock. Every time."
+      },
+      {
+        "id": "no_tickets",
+        "fact": "There is no ticket system, so people in the queue cannot know whether they will be seen.",
+        "unlocks_when": "asks what people in the queue know",
+        "reveal_line": "They just stand there. No tickets. They find out at the door."
+      },
+      {
+        "id": "trained_2006",
+        "fact": "Staff did an aggression course in 2006 and colleagues say they handle it well.",
+        "unlocks_when": "asks what staff already know",
+        "reveal_line": "They did the aggression course in 2006. They are good at it, sadly."
+      }
+    ],
+    "question_you_didnt_ask": "When does it happen, and what does the person in the queue know at that moment?"
+  }
 }

@@ -175,5 +175,34 @@
         "mitigation": "Agree with Pieter that each sits with a newer manager on the next report."
       }
     ]
+  },
+  "second_request": {
+    "opening_message": "Subcontractors keep turning up on the wrong day. I want an MS Project planning course for the 20 site managers.",
+    "after_right": "The forecasts come in on time since the afternoon with finance. Finance sent me flowers. Well, an e-mail. So I thought of you.",
+    "after_wrong": "They can all do pivot tables now. The forecast column is still empty. But this is a different problem, so let us see.",
+    "is_training_the_lever": "no",
+    "need_statement": "Subcontractors work from a week plan faxed on Friday afternoon after their offices close, and changes during the week never reach them.",
+    "real_problem": "The planning itself is fine. Site managers fax the week plan to subcontractors on Friday afternoon, when most subcontractor offices are already closed until Monday, and the plan changes daily on site but only the Friday version is ever sent. The two site managers who phone their subcontractors every Thursday have almost no wrong-day visits.",
+    "hidden_facts": [
+      {
+        "id": "friday_fax",
+        "fact": "Site managers fax the week plan on Friday afternoon; most subcontractor offices close at noon on Friday.",
+        "unlocks_when": "asks how the subcontractors get the plan",
+        "reveal_line": "Every Friday afternoon, by fax. Policy. The subcontractors' offices are shut by then, mostly."
+      },
+      {
+        "id": "only_friday",
+        "fact": "The plan changes almost daily on site, but only the Friday version is ever sent out.",
+        "unlocks_when": "asks what happens when the plan changes during the week",
+        "reveal_line": "It changes all the time. Concrete is late, rain. But we send it once, on Friday."
+      },
+      {
+        "id": "thursday_calls",
+        "fact": "Two site managers phone their subcontractors every Thursday; their projects have almost no wrong-day visits.",
+        "unlocks_when": "asks whether some sites or managers have no problem",
+        "reveal_line": "Bart and Hilde never have it. They ring round on Thursdays, old school."
+      }
+    ],
+    "question_you_didnt_ask": "How does a subcontractor find out which day to come, and when?"
   }
 }

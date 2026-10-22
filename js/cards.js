@@ -76,7 +76,18 @@
       actorNotes: list(raw.actor_notes),
       flavourLines: list(raw.flavour_lines),
       // Starter cards only: Mieke's filled-in concept and risks for your very first request.
-      example: raw.worked_example || null
+      example: raw.worked_example || null,
+      // A few weeks after the results mail, the same stakeholder comes back with a new, smaller request.
+      second: !raw.second_request ? null : {
+        ask: raw.second_request.opening_message,
+        afterRight: raw.second_request.after_right,
+        afterWrong: raw.second_request.after_wrong,
+        lever: raw.second_request.is_training_the_lever,
+        need: raw.second_request.need_statement,
+        problem: raw.second_request.real_problem,
+        hint: raw.second_request.question_you_didnt_ask,
+        facts: list(raw.second_request.hidden_facts).map(f => ({ id: f.id, fact: f.fact, unlockedBy: f.unlocks_when, revealLine: f.reveal_line, weight: 1, critical: false, foundAt: ['call'] }))
+      }
     };
   }
 

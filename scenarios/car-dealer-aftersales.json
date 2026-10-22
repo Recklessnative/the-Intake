@@ -230,5 +230,34 @@
   "flavour_lines": [
     "Our advisors smile. They smile a lot at four o'clock, when they phone to say the car is not ready.",
     "The importer sends us a coffee machine standard. Sixty pages. The coffee is excellent. The cars are late."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "Nobody signs up for our maintenance contracts. I want a sales technique course for the 14 service advisors.",
+    "after_right": "The advisors phone customers when a job runs late, and the complaints halved. The owner noticed. So: new problem, and you get first go.",
+    "after_wrong": "They smile beautifully now. The cars are still late. Let us try again, on something else.",
+    "is_training_the_lever": "no",
+    "need_statement": "Customers who want a maintenance contract at the desk cannot sign one there, because the form needs the sales manager's signature and he is in the showroom only in the afternoon.",
+    "real_problem": "Customers ask about the contracts often enough. The contract is a six-page importer form that must be countersigned by the sales manager, who works in the showroom in the afternoons, while most cars are dropped off before nine. The desk shows the importer's list price, which is higher than the group's own offer in the showroom. At Wavre, where the sales manager starts at eight, sign-ups are at the regional level.",
+    "hidden_facts": [
+      {
+        "id": "signature",
+        "fact": "The contract form needs the sales manager's signature, and he is only in from the afternoon, while most customers drop their car before nine.",
+        "unlocks_when": "asks what happens when a customer says yes at the desk",
+        "reveal_line": "They cannot sign it at the desk. The sales manager countersigns. He comes in after lunch, the customers come in at eight."
+      },
+      {
+        "id": "two_prices",
+        "fact": "The desk shows the importer's list price for the contract; the showroom offers the group's own, cheaper price.",
+        "unlocks_when": "asks about the price or what customers are told",
+        "reveal_line": "The desk has the importer's price list. The showroom has ours. Ours is cheaper. Do not ask me why."
+      },
+      {
+        "id": "wavre_signs",
+        "fact": "At Wavre, where the sales manager starts at eight, contract sign-ups are at the regional average.",
+        "unlocks_when": "asks whether any site does better",
+        "reveal_line": "Wavre sells them, funnily enough. Their sales manager is an early bird."
+      }
+    ],
+    "question_you_didnt_ask": "What happens, step by step, when a customer at the desk says yes?"
+  }
 }

@@ -197,5 +197,34 @@
   "flavour_lines": [
     "Our lasagne has twelve layers. The audit report has fourteen pages. I've read both carefully.",
     "The auditor wore a hairnet over her hairnet. That's when I knew."
-  ]
+  ],
+  "second_request": {
+    "opening_message": "A customer found a foreign body in a lasagne. I want a food safety training for the new packaging line operators.",
+    "after_right": "The night crew's checklist in their own languages did it: the swabs pass. The auditor smiled. Once. So, you again.",
+    "after_wrong": "All 160 passed the test, the swabs still fail. And now this. Go on, ask.",
+    "is_training_the_lever": "no",
+    "need_statement": "Blue glove tips get into the product because purchasing switched to gloves that the metal detector cannot find, not because operators break a rule.",
+    "real_problem": "The foreign body was the tip of a blue glove. Since purchasing changed supplier in July, the new line's dispenser holds plain vinyl gloves instead of metal-detectable ones, so the metal detector cannot catch a torn tip. The operators followed every rule they were given.",
+    "hidden_facts": [
+      {
+        "id": "glove_tip",
+        "fact": "The foreign body was the tip of a blue glove.",
+        "unlocks_when": "asks what the foreign body was",
+        "reveal_line": "It was a glove tip. Blue. In a lasagne."
+      },
+      {
+        "id": "new_gloves",
+        "fact": "Since July purchasing buys plain vinyl gloves for the new line instead of metal-detectable ones.",
+        "unlocks_when": "asks about the gloves or what changed in supplies",
+        "reveal_line": "Purchasing changed supplier in July. Cheaper gloves. I signed it, I think."
+      },
+      {
+        "id": "detector_blind",
+        "fact": "The metal detector cannot find plain vinyl; the old gloves had metal in them for exactly this.",
+        "unlocks_when": "asks why the detector or checks did not catch it",
+        "reveal_line": "The old gloves had metal in them so the detector would find a piece. These do not."
+      }
+    ],
+    "question_you_didnt_ask": "What was the foreign body, and why did nothing catch it?"
+  }
 }
