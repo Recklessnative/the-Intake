@@ -49,11 +49,9 @@
       "reveal_line": "A pattern? Let me look at what the prevention advisor sent. End of shift. Second shifts. Hm. That's... quite a lot of second shifts.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:org"],
       "data_doc": "Incidents and near misses this year: 41. Last two hours of shift: 29. Person involved on a second consecutive shift: 23. Night shift: 18. Involving lashing or twistlocks: 14. Involving straddle carriers: 15.",
-      "data_source": "Prevention advisor's incident and near-miss register, this year"
+      "data_source": "Shift roster joined with the prevention advisor's incident register"
     },
     {
       "id": "move_bonus",

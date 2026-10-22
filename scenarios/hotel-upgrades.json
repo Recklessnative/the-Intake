@@ -147,5 +147,34 @@
   "flavour_lines": [
     "The old system had a little star when an upgrade was free. We all miss the star.",
     "We're a hotel, not a car showroom. Although our suites do have heated floors."
-  ]
+  ],
+  "worked_example": {
+    "note": "Mieke's worked example for your very first request: she fills in the concept and the risks so you see a finished case board once.",
+    "idea": "Show the nine new receptionists where upgrades sit in the new system, at the desk, and get the upgrade alert back on the check-in screen.",
+    "formats": [
+      "On-the-job huddle",
+      "Process or tool change"
+    ],
+    "why": "The new hires were never shown the upgrade screen, and the system hides it. Offering is easy once they can find it.",
+    "not": "Not a selling course for all 24: the receptionists who were here before April still sell upgrades fine.",
+    "owners": {
+      "skill": {
+        "by": "us"
+      },
+      "system": {
+        "by": "other",
+        "who": "The system supplier"
+      }
+    },
+    "risks": [
+      {
+        "who": "Property management system supplier",
+        "mitigation": "Lien asks them this week to move the alert back; we run the session once it is there."
+      },
+      {
+        "who": "Revenue manager",
+        "mitigation": "Agree prices and the report with them first, so we can see the effect per receptionist."
+      }
+    ]
+  }
 }

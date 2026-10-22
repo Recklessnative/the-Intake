@@ -104,7 +104,7 @@ function calMaterial(it) {
   const t = it.transcript.map((x, i) => x.src === 'data' ? `D${i + 1} [Data] ${x.q}\n${x.a}` : `Q${i + 1} [${SRC[x.src] || 'Call'}]: """${x.q}"""\nA${i + 1}: ${x.a}`).join('\n');
   return ['INTAKE TRANSCRIPT (player questions with the answers, from the call, a callback, the coffee machine with a front-line employee, and data requests; each data request cost one question):', t || '(the player asked no questions)', '',
     'WRITE-UP:', '"""', it.writeup, '"""', '', 'DEFENCE ROUND:', '(none, the stakeholder accepted the concept)', '',
-    'DATA FACTS the player received in documents (report in factsUsed the ids the write-up uses):', '(none)', '',
+    'FACTS the player heard or received (report in factsUsed the ids the write-up uses):', '(none)', '',
     'WAY BACK (if it does not work, how do you back out?):', (it.wayBack || '').trim() ? '"""' + it.wayBack.trim() + '"""' : '(none given)'].join('\n');
 }
 

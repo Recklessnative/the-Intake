@@ -20,8 +20,8 @@
     "org": "Vespera Pharma, a sterile injectables plant near Wavre with 650 staff",
     "voice": "Exact, calm, slightly formal; thinks in deviations, CAPAs and inspection readiness. Bilingual French and English. Dry, under-the-breath humour about paperwork. Appreciates precise questions.",
     "patience": 4,
-    "risk_appetite": 1,
-    "risk_appetite_label": "Low"
+    "risk_appetite": 0,
+    "risk_appetite_label": "Very low"
   },
   "frontline": {
     "name": "Sanne De Clercq",
@@ -47,11 +47,9 @@
       "reveal_line": "Fourteen of the sixteen are on Line 4, the new isolator. Lines 1 and 2 are practically boring. I like boring.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:process"],
       "data_doc": "Line 1: 1, Line 2: 1, Line 4 (isolator): 14.",
-      "data_source": "Deviation log, last quarter, aseptic interventions"
+      "data_source": "Line set-up and deviation log, last quarter, aseptic interventions"
     },
     {
       "id": "new_operators",
@@ -204,7 +202,7 @@
   "actor_notes": [
     "Nathalie suspects read-and-sign won't work but needs a defensible CAPA; she rewards players who give her a better one that still survives an inspection.",
     "She answers precise questions precisely and gets curt with vague ones ('could you be more specific?').",
-    "Low risk appetite: anything that sounds like it weakens documentation triggers pushback; framing it as a stronger GMP record lowers resistance.",
+    "Very low risk appetite: after the last inspection finding, even a modest change gets a defence round, and anything that sounds like it weakens documentation triggers pushback; framing it as a stronger GMP record lowers resistance.",
     "She mentions the mock-up only when asked about practice facilities, with mild embarrassment."
   ],
   "flavour_lines": [

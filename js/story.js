@@ -57,7 +57,7 @@
   }
 
   // Friday: Darren reacts to the board. Week 4 is the tender.
-  function memo(weekNo, decision, promoted) {
+  function memo(weekNo, decision, promoted, team) {
     const tender = weekNo === 4;
     const lines = {
       approved: tender ? 'We WON Halvorsen. I may have hugged the receptionist. Drinks on me (one drink each).' : 'Approved! That is what I am talking about. Drinks on me (one drink).',
@@ -67,6 +67,7 @@
     };
     let t = lines[decision] || lines.none;
     if (weekNo <= 4 && !tender) t += '\n\nProbation: week ' + weekNo + ' of 4 done.';
+    if (team) t += '\n\n' + team;
     if (promoted) t += '\n\nP.S. Consider this your promotion to Team Lead. Your team starts as soon as HR finishes "processing". It is HR, so it could be a while.';
     return t + SIGN;
   }

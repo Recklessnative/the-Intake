@@ -10,6 +10,7 @@
   const MEDIA = 'media/office/';
   const MAP = window.OFFICE_MAP || { spots: {} };
   let show = id => {};
+  let look = id => {};
   let mask = null, maskW = 0, maskH = 0, current = null, hover = null;
 
   function el(tag, cls, text) {
@@ -208,6 +209,7 @@
     const text = N.entries.length ? N.entries.map(e => e.who + ' · ' + e.label + '\n' + e.text).join('\n\n')
       : 'Nothing yet. Have a closer look at people\'s desks between requests.';
     const odd = N.odd && N.odd.count() > 0;
+    look('notebook');
     if (!odd || tab !== 'odd') say('notebook', { face: '📓', who: 'Your notebook', title: N.entries.length + ' of ' + N.of + ' found', text }, [30, 4, 32, 10], 'Close');
     else { say('notebook', { face: '📓', who: 'Your notebook' }, [30, 4, 32, 10], 'Close'); const c = $('office-card'), box = el('div', 'nb-page'); c.insertBefore(box, c.querySelector('.row')); N.odd.draw(box); }
     if (!odd) return;
@@ -390,5 +392,5 @@
   // From the floor back to your desk: the same shot backwards, a little quicker.
   function sitDown(then) { closeCard(); film('sit', () => then(), 1.25); }
 
-  window.Office = { init: o => { show = o.show; }, show: showFloor, standUp, sitDown, walkIn, close: closeCard };
+  window.Office = { init: o => { show = o.show; look = o.look || (() => {}); }, show: showFloor, standUp, sitDown, walkIn, close: closeCard };
 })();

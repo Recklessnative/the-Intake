@@ -46,11 +46,9 @@
       "reveal_line": "I've only ever seen the total. Let me ask the exam board secretary for the breakdown... Oh. Thirty-one course units. That is not 'exploding'. That is a neighbourhood.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:org"],
       "data_doc": "212 suspected plagiarism cases, academic year to date. By programme: Business Management 74, Communication Management 49, Office Management 28, all other 19 programmes 61. The 151 cases in the three business programmes come from 31 course units; 27 of these are taught by part-time lecturers appointed 2003-2007. Assessment format of all units with cases: single final take-home submission 192 cases; staged drafts or oral component 4 cases; other 16.",
-      "data_source": "Exam board case register, broken down by course unit and lecturer contract"
+      "data_source": "Lecturer contracts joined with the exam board case register"
     },
     {
       "id": "appeals",

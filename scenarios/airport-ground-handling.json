@@ -48,11 +48,9 @@
       "reveal_line": "Let me pull the list... huh. All five on the Medisol 800, all before half past seven. I hadn't put them next to each other like that.",
       "weight": 3,
       "critical": true,
-      "found_at": [
-        "data:kpi"
-      ],
+      "found_at": ["data:process"],
       "data_doc": "Load discrepancies: 07/09 MSL411 B737-800 dep 06:10; 14/09 MSL415 B737-800 dep 06:40; 22/09 MSL411 B737-800 dep 06:10. Handling delays: 18/09 MSL417 B737-800 dep 07:25 (+19 min); 27/09 MSL411 B737-800 dep 06:10 (+12 min). Other airlines and cargo: 0 handling events.",
-      "data_source": "Station occurrence log, September"
+      "data_source": "Turnaround log by aircraft type, September"
     },
     {
       "id": "type_change",

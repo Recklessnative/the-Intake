@@ -40,13 +40,17 @@
 
   const state = { pool: [], cards: [], days: [], index: 0, results: [], run: null, charged: false, weekId: '', weekNo: 1, hard: false, one: false, board: null, academy: null, team: null };
 
+  // Mieke's first-look bubbles (see firstLook): one showing, and held back while her tour rings.
+  let lookBusy = false, lookHold = 0;
+
   // ---------- screens and panes ----------
-  Office.init({ show: id => show(id) });
+  Office.init({ show: id => show(id), look: id => firstLook(id) });
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
     // The floor sets its own sound (day or evening); the desk hums unless the board is in session.
     if (id !== 's-office') Sound.scene(id === 's-desk' ? ($('p-board').classList.contains('active') ? 'board' : 'desk') : id === 's-walkin' ? 'floor' : null);
     if (id === 's-title') { resumeButton(); titleScreen(); }
+    firstLook(id);
     window.scrollTo(0, 0);
   }
   function step(text) { $('os-step').textContent = text; }
@@ -57,6 +61,7 @@
     if ($('s-desk').classList.contains('active')) Sound.scene(id === 'p-board' ? 'board' : 'desk');
     Desktop.title('w-dialog', { 'p-bet': 'Before you send it', 'p-defence': 'Defence round', 'p-wait': 'Please wait...', 'p-score': 'Scorecard', 'p-board': 'Board room' }[id], 'THE INTAKE');
     Desktop.layout(id === 'p-defence' ? 'defence' : 'dialog', 'w-dialog');
+    firstLook(id);
     if (stepText) step(stepText);
   }
   // The office clock moves as you work.
@@ -250,6 +255,9 @@
     dropSave();
     state.hard = !!hard;
     state.one = !hard && !!one;
+    // A retest from My scores is a one-case run on a case you played weeks ago.
+    state.retest = state.one ? state.nextRetest || null : null;
+    state.nextRetest = null;
     // The week after the reveal is one request: the operator's. Your lever call on it is the ending.
     state.final = !state.hard && !state.one && Reveal.seen() && !Reveal.ending();
     document.body.classList.toggle('hard', state.hard);
@@ -265,7 +273,7 @@
     state.academy = state.hard || state.one || state.final ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
     const recall = state.hard || state.one || state.final || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
-    state.team = !state.one && !state.final && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0))) } : null;
+    state.team = !state.one && !state.final && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0)), Team.grownFrom(teamLog())) } : null;
     state.run = null;
     if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
   }
@@ -368,7 +376,7 @@
     r.notes = $('notes').value;
     r.draft = Object.fromEntries(new FormData($('write-form')).entries());
     const run = Object.assign({}, r, { card: r.card.id, revealed: [...r.revealed], mails: undefined, selected: undefined });
-    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, final: state.final, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
+    const s = { v: 1, at: Date.now(), runId: Gemini.runId, cards: state.cards.map(c => c.id), days: state.days, weekNo: state.weekNo, hard: state.hard, one: state.one, final: state.final, retest: state.retest, board: state.board, academy: state.academy, standup: state.standup, team: state.team, index: state.index, results: state.results, charged: state.charged, weekId: state.weekId, run };
     try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* storage full or blocked: play on unsaved */ }
   }
   function saveSoon() { clearTimeout(saveSoon.t); saveSoon.t = setTimeout(save, 600); }
@@ -397,6 +405,7 @@
     state.hard = !!s.hard;
     state.one = !!s.one;
     state.final = !!s.final;
+    state.retest = s.retest || null;
     state.board = s.board || null;
     state.team = s.team && s.team.drafts.every(d => state.pool.some(c => c.id === d.card)) ? s.team : null;
     state.academy = s.academy || (s.hard || s.one ? null : { id: Academy.moduleFor(s.weekNo || 1).id, started: false, at: 0, picks: [], done: false });
@@ -526,6 +535,26 @@
     source: ['Date: Thu, 14 Mar 2041 03:12:09 +0100', 'From: Mail Delivery System <MAILER-DAEMON@synergix.be>', 'X-Restored-From: synergix_pst_2007.bak (71% recovered)'] };
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
+  // Pilot results come back: each week a client from two finished weeks ago writes how it went.
+  // The outcome follows your lever call (the same lines as the Monday check in town), the second
+  // paragraph your measurement. Not in hard mode, Try one case, the operator's week or after the reveal.
+  function laterMail() {
+    if (state.hard || state.one || state.final || Reveal.seen()) return null;
+    const weeks = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one && w.id !== state.weekId);
+    const w = weeks[weeks.length - 2];
+    if (!w) return null;
+    const reqs = w.requests.filter(x => Town.CHECK[x.card] && state.pool.some(c => c.id === x.card)).sort((a, b) => a.index - b.index);
+    if (!reqs.length) return null;
+    const x = reqs[state.weekNo % reqs.length], card = state.pool.find(c => c.id === x.card), c = Town.CHECK[x.card];
+    const right = x.call && x.call === card.learningIsTheAnswer, meas = ((x.pts || {}).measurement || 0) >= 12;
+    return {
+      from: x.who, subject: 'First results: ' + (card.subject || 'your request').replace(/\.$/, ''), later: true,
+      body: 'Hi,\n\nA quick update, since you asked us to let you know.\n\n' + (x.call ? (right ? c.right : c.wrong) : 'We are still working on it. Nobody quite agreed on what we were fixing.') + '\n\n'
+        + (meas ? 'And because we agreed a baseline up front, I could show the before and after. My director asked for more of this.'
+          : 'My director asked how we know it worked. I said it feels better. That did not go down well. Next time, can we agree up front what we measure?')
+        + '\n\n' + x.who + '\n\n---\nFiled with your scorecard from week ' + (weeks.indexOf(w) + 1) + ': your lever call was ' + (!x.call ? 'not made' : right ? 'right' : 'off') + ', measurement ' + ((x.pts || {}).measurement || 0) + '/20.'
+    };
+  }
   function mailbox() {
     const r = state.run;
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
@@ -547,6 +576,8 @@
       // The recalled headline is that week's news only.
       if (Arc.offer('lehman', now) && Arc.landed('lehman') === now.week) LEHMAN.forEach(m => mails.push(Object.assign({ read: seen(m.subject), day: 0 }, m)));
     }
+    const later = laterMail();
+    if (later) mails.push(Object.assign({ read: seen(later.subject), day: 0, at: 8 * 60 + 4 }, later));
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
     try { aeroNews = !!localStorage.getItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
@@ -1304,7 +1335,7 @@
     const moduleFirst = mondayFirst() === 'module';
     if (state.index && !moduleFirst && state.weekNo > 1) Retro.sms(t[0], t[1]); else state.run.laterText = t;
     // Your very first morning: Mieke calls over and shows you round the desk instead of a pop-up.
-    if (firstEver() && !told('tour')) { setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
+    if (firstEver() && !told('tour')) { lookHold = Date.now() + 4000; setTimeout(() => miekeTour(true, 'Over to you. Your first request is in the inbox: read it, open the case file, then call them back. Shout if you get stuck.'), 1200); return; }
     const again = !state.index && Arc.offer('morning', arcNow());
     if (again) Arc.note('morning');
     const hello = again ? 'Morning again! ' : 'Morning! ';
@@ -1336,21 +1367,62 @@
     if (!state.run || Tour.open) return;
     Desktop.focus('w-inbox');
     const phone = !$('desk-icons').offsetParent;
-    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, () => { if (after) miekePing(after); });
+    // A finished tour covers the inbox and Messenger, so their first-look bubbles are not needed.
+    Tour.start(phone ? TOUR_PHONE : TOUR_DESK, { call }, finished => { if (finished) { told('look-w-inbox'); told('look-w-mieke'); } if (after) miekePing(after); });
   }
   $('btn-tour').onclick = () => miekeTour(false);
-  // Mieke explains each part of the desk once, the first time you need it, in one bubble that
-  // does not block anything. Not in hard mode: she is on holiday.
-  const HINTS = {
-    call: { target: '#w-call .meters', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
-    leads: { target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
-    write: { target: '#board-steps', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
-    scores: { target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' }
+  // Mieke explains each screen once, the first time it is in front of you, in one bubble that
+  // does not block anything. Not in hard mode: she is on holiday. Keys are window, pane or screen
+  // ids; `key` keeps the told-flag of the older hints, so nobody hears the same line twice.
+  const FIRST_LOOKS = {
+    'w-inbox': { target: '#w-inbox', text: 'Doors Mail. Client requests land here, newest on top. Read what they ask for, and notice what they already think the answer is. The paperclip opens the case file.' },
+    'w-case': { target: '#w-case', text: 'This is your case file: what you need to know about their world before you call. It is background, not the answer. The request tells you what they think the problem is. Not what it is. That is what the call is for.' },
+    'w-notes': { target: '#w-notes', text: 'Your notes. Pin a good answer from the call with the pin, or type here. They come with you to the case board, and nobody grades them.' },
+    'w-call': { key: 'hint-call', target: '#w-call .meters', alt: '#w-call', text: 'The call. Questions left, their patience, and the hidden facts you have found. Open questions find facts; leading ones cost patience. Pin a good answer to your notes with the pin.' },
+    'w-leads': { key: 'hint-leads', target: '#w-leads', text: 'Follow-up. Before you write anything: ask for data (say what you expect first), catch someone from the work floor, or call the client back once. Each costs a question.' },
+    'w-write': { key: 'hint-write', target: '#board-steps', alt: '#w-write', text: 'The case board. One step at a time: the real problem, whether training is even the answer, how you will know it worked, your plan, what can block it. Each step locks before the next.' },
+    'w-mieke': { target: '#w-mieke', text: 'Me, on Messenger. Ask me anything about the request. I have time for a few questions each time, and I only know what you have seen so far. No, I will not write it for you.' },
+    'w-scores': { target: '#w-scores', text: 'My scores. Every scorecard ends up here, with your weekly trend and your weakest part. Watch the line, not the number. Nobody aces the first week.' },
+    'w-coe': { target: '#w-coe', text: 'The Center of Excellence folder. What you earn lands here: pocket cards, Academy tips, handouts. Open one before a call if it helps. That is what it is for.' },
+    'w-academy': { target: '#w-academy', text: 'The CoE Academy. One short module a week: a few questions and a few tips from people who learned it the hard way. It does not count towards your score, so guess freely.' },
+    'w-drill': { target: '#w-drill', text: 'The measurement drill. Sort the measures: which ones show the problem moved, and which only show people sat in a room. Then write when you would stop. No points, just practice.' },
+    'w-coffee': { target: '#w-coffee', text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.' },
+    's-coffee': { text: 'Coffee with me. Three minutes, five quick ones, no phone calls. I pick what you are weakest at, twice, and what you missed comes back another day.', key: 'look-w-coffee' },
+    'w-standup': { target: '#w-standup', text: 'The Monday stand-up. Before new work we look back at an old case: what did you ask first, what was the lever? Rate yourself honestly. What you got drops out; what you missed comes back.' },
+    'w-team': { target: '#w-team', text: 'Your team\'s drafts. Bart, Priya and Jens each wrote one, and each has one flaw from the case\'s own traps. Do not rewrite it for them: say what to fix and why. The coaching is what gets graded.' },
+    'p-bet': { target: '#bet-form', alt: '#w-dialog', text: 'Before you send it: say how bold your plan is, and how much risk this client can take. Points go to fit, not to bold. Going further than they like? Then give them a way back.' },
+    'p-defence': { target: '#defence-form', alt: '#w-dialog', text: 'The defence round. You went bolder than they like, so they push back. Answer with what you found on the call, not with what sounds good. Changing your plan for a good reason counts too.' },
+    'p-score': { target: '#score-focus', alt: '#w-dialog', text: 'Your scorecard. Start with the one thing to work on, at the top. Underneath: what each part needed, the question you did not ask, and "Ask it now" to try it with hindsight. Free of charge.' },
+    'p-board': { target: '#boardroom', alt: '#w-dialog', text: 'The board room, Friday. Take one concept from this week and put it on one slide. The board says approved, a pilot, or no. They care about what it changes in the business, not what it looks like.' },
+    's-morning': { text: 'The Morning Call. Everybody gets the same caller today: three questions, then name the lever and the real need. Short, and it never uses up a free week.' },
+    'town': { text: 'Lindeveld. The lift brings you here after work. Pick one place on the map each evening. Nothing here is scored. Your old clients drink at The Junction, and they tell you how it went.' },
+    'notebook': { text: 'Your notebook. What you find on the floor goes in here. Some of it is just office life. Some of it does not add up. You will know which, eventually.' }
   };
-  function hint(k) {
-    if (state.hard || !HINTS[k] || told('hint-' + k)) return;
-    setTimeout(() => { if (!Tour.open) Tour.hint(HINTS[k]); }, 500);
+  const lookQueue = [];
+  function firstLook(id) {
+    const s = FIRST_LOOKS[id];
+    // After the reveal Mieke is not at her desk any more, and nobody explains anything.
+    if (state.hard || !s || Reveal.seen()) return;
+    const key = s.key || 'look-' + id;
+    if (lookQueue.some(q => q.key === key)) return;
+    try { if (localStorage.getItem('intake-told-' + key)) return; } catch (e) { return; }
+    lookQueue.push({ key, step: s, at: Date.now() + 500 });
   }
+  // One bubble at a time, checked twice a second; anything else on screen (the tour, the slide
+  // show) goes first. On the very first morning her welcome tour rings first (`lookHold`).
+  function nextLook() {
+    if (!lookQueue.length || lookBusy || Tour.open || Date.now() < lookHold || $('slideshow') || lookQueue[0].at > Date.now()) return;
+    const q = lookQueue.shift();
+    if (told(q.key)) return;
+    lookBusy = true;
+    Tour.hint(Object.assign({ look: q.key }, q.step), () => { lookBusy = false; });
+  }
+  setInterval(nextLook, 500);
+  document.addEventListener('desk-look', e => firstLook(e.detail));
+  // The older hints, now in the same queue. My scores points at its desk icon after a scorecard.
+  FIRST_LOOKS['scores-icon'] = { key: 'hint-scores', target: '.desk-icon[data-app="w-scores"]', alt: '#btn-startmenu', text: 'Every scorecard lands in My scores.txt, here on the desk, so you can see yourself get better. Nobody aces the first one.', altText: 'Every scorecard lands in My scores, in the start menu, so you can see yourself get better. Nobody aces the first one.' };
+  const HINT_AT = { call: 'w-call', leads: 'w-leads', write: 'w-write', scores: 'scores-icon' };
+  function hint(k) { firstLook(HINT_AT[k]); }
   // Staply turns up at most once per request, never in hard mode, and not before the last request of week 1.
   function staply(trigger) {
     const r = state.run;
@@ -1413,13 +1485,44 @@
   const board = () => state.run.board;
   const listText = xs => xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs.at(-1);
 
+  // How much help the case board gives: 1 the full board, 2 chips on the diagnosis only, 3 a blank
+  // one-pager. Two strong requests in a row (60+, diagnosis 15+) take one step of help away; two
+  // weak ones (under 45) give it back. Hard mode, Try one case and Mieke's worked example don't count.
+  function helpLevel(h) {
+    let lvl = 1, good = 0, weak = 0;
+    h.weeks.filter(w => !w.hard && !w.one).flatMap(w => w.requests.slice().sort((a, b) => a.index - b.index)).filter(x => x.help !== 'example').forEach(x => {
+      good = x.total >= 60 && ((x.pts || {}).diagnosis || 0) >= 15 ? good + 1 : 0;
+      weak = x.total < 45 ? weak + 1 : 0;
+      if (good >= 2 && lvl < 3) { lvl++; good = 0; }
+      if (weak >= 2 && lvl > 1) { lvl--; weak = 0; }
+    });
+    return lvl;
+  }
+  const HELP_NEWS = {
+    up2: 'Two strong ones in a row. I took my hints off the board: from now on you name the cause yourself, without the chips.',
+    up3: 'You don\'t need the board any more. One page, four headings, your own words. If you miss it, the board is one click away.',
+    down: 'Let\'s put more of the board back for a bit. No shame in it: I still use it on the hard ones.'
+  };
+  // The level for this request, and Mieke's word when it changed since the last one she told you about.
+  function helpNow() {
+    const h = scoreHistory(), lvl = helpLevel(h);
+    if (!state.hard && !state.one && !state.final && h.help && h.help !== lvl && state.run && !state.run.helpTold) {
+      state.run.helpTold = true;
+      const t = HELP_NEWS[lvl > h.help ? 'up' + lvl : 'down'];
+      setTimeout(() => { miekePing(t); Retro.im('Mieke', t, () => openApp('w-mieke')); }, 600);
+    }
+    if (h.help !== lvl && !state.hard && !state.one) { h.help = lvl; keepScores(h); }
+    return lvl;
+  }
   function newBoard(r) {
     const deps = (r.card.dependencies || []).map(d => d.who).filter(Boolean);
     const decoys = DECOYS.filter(d => !deps.some(x => x.toLowerCase().includes(d.split(' ')[0].toLowerCase()))).sort(() => Math.random() - 0.5).slice(0, 3);
     const tiles = deps.map(who => ({ who, real: true })).concat(decoys.map(who => ({ who, real: false }))).sort(() => Math.random() - 0.5);
     return {
       // Help fades: week 1 the full board, week 2 chips on the diagnosis only, then a blank memo.
-      mode: state.hard ? 'hard' : state.weekNo >= 3 && !state.final ? 'memo4' : 'board', hardMemo: '', fade: Math.min(state.weekNo, 3), memo4: { need: '', measure: '', concept: '', risks: '' },
+      // Help fades with how you do, not with the calendar (helpLevel): the full board with Mieke's
+      // version, then chips on the diagnosis only, then a blank one-pager.
+      mode: state.hard ? 'hard' : helpNow() >= 3 && !state.final ? 'memo4' : 'board', hardMemo: '', fade: state.hard ? 3 : helpNow(), memo4: { need: '', measure: '', concept: '', risks: '' },
       step: 'diagnose', locked: false, feedback: '',
       evidence: [], tags: [], problem: '', lever: '', leverWhy: '', accountable: '',
       rungs: { baseline: { text: '', ev: '' }, behaviour: { text: '', ev: '' }, metric: { text: '', ev: '' }, collect: { text: '', ev: '' } },
@@ -1545,6 +1648,9 @@
     });
     renderOwners();
     if (b.step === 'memo') memo(boardWriteup());
+    const ex = $('board-example');
+    ex.hidden = !b.example || b.locked || !EXAMPLE_LINES[b.step];
+    ex.textContent = ex.hidden ? '' : EXAMPLE_LINES[b.step];
     const fb = $('board-feedback');
     $('board-why').textContent = '';
     fb.hidden = !b.feedback;
@@ -1647,6 +1753,8 @@
       if (lost) parts.push(lost === 1 ? 'And one important thing never came up in your call.' : 'And ' + lost + ' important things never came up in your call.');
       const unused = r.card.hiddenFacts.filter(f => f.critical && (r.had || []).includes(f.id) && !r.revealed.has(f.id) && !citedFacts().includes(f.id)).length;
       if (unused) parts.push('One of your documents says something important that you did not cite. Look again before you send this.');
+      const crit = r.card.hiddenFacts.filter(f => f.critical && r.revealed.has(f.id));
+      if (crit.length && !crit.some(f => citedFacts().includes(f.id))) parts.push('You heard something important that is not on your board yet. A fact only counts once you use it.');
       // In the first week Mieke also shows her own version, once yours is locked in.
       if ((b.fade || 1) === 1 && r.card.needStatement) parts.push('My version: "' + r.card.needStatement + '"');
       return 'Mieke: ' + parts.map(cap).join(' ');
@@ -1696,11 +1804,28 @@
       b.locked = false;
       b.feedback = '';
     }
+    if (b.step === 'concept') workedExample(b);
     renderBoard();
     save();
     // Mieke's feedback and the Next button sit at the bottom: bring them up. A new step starts at the top.
     if (b.locked && b.feedback) $('board-next').scrollIntoView({ block: 'end', behavior: 'smooth' });
     else $('w-write').querySelector('.win-body').scrollTop = 0;
+  };
+
+  // Your very first request: a completion case. You diagnose, pick the lever and measure; Mieke
+  // fills in the concept and the risks (the card's `worked_example`) so you see a finished board
+  // once. You can change anything. The scorecard says those parts were hers.
+  function workedExample(b) {
+    const r = state.run, X = r.card.example;
+    if (!X || b.example || b.mode !== 'board' || state.hard || state.one || !firstEver() || r.card.difficulty !== 0 || told('example')) return;
+    Object.assign(b, { example: true, idea: X.idea, formats: X.formats.slice(), why: X.why, not: X.not });
+    b.owners = b.owners || {};
+    b.tags.forEach(t => { if ((X.owners || {})[t]) b.owners[t] = Object.assign({ by: '', who: '' }, X.owners[t]); });
+    b.risks = X.risks.filter(x => b.tiles.some(t => t.who === x.who)).map(x => ({ who: x.who, mitigation: x.mitigation }));
+  }
+  const EXAMPLE_LINES = {
+    concept: 'Mieke: Your first one, so I filled in the concept myself: this is what a finished one looks like. Read it against your diagnosis. Change anything you disagree with. From the next request it is all yours.',
+    risks: 'Mieke: The risks are mine too: two people who could stop this, and what we do about each. Notice that neither of them is a course.'
   };
 
   // Facts the player cited on the case board: diagnosis evidence and the measurement rungs.
@@ -1890,6 +2015,8 @@
     pane('p-defence', 'Request ' + (state.index + 1) + ' · Defence round');
   }
 
+  // Every hidden fact that reached the player: heard on a call or at the coffee machine, or held in a document.
+  const heardFacts = r => r.card.hiddenFacts.filter(f => r.revealed.has(f.id) || (r.had || []).includes(f.id));
   async function judge() {
     const r = state.run;
     wait('The examiner is reading the transcript. The examiner has read a lot of transcripts.');
@@ -1903,8 +2030,8 @@
       'DEFENCE ROUND:',
       r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)',
       '',
-      'DATA FACTS the player received in documents (report in factsUsed the ids the write-up uses):',
-      (r.had || []).length ? r.card.hiddenFacts.filter(f => r.had.includes(f.id)).map(f => `[${f.id}] ${f.fact}`).join('\n') : '(none)',
+      'FACTS the player heard or received (report in factsUsed the ids the write-up uses):',
+      heardFacts(r).length ? heardFacts(r).map(f => `[${f.id}] ${f.fact}`).join('\n') : '(none)',
       '',
       'WAY BACK (if it does not work, how do you back out?):',
       r.bet && (r.bet.exit || '').trim() ? '"""' + r.bet.exit.trim() + '"""' : '(none given)'
@@ -1926,7 +2053,7 @@
     const r = state.run;
     const parts = points(g), { pts, bonus, total } = parts;
     if (!replay) {
-      state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
+      state.results.push({ id: r.card.id, total, found: parts.heard.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g, parts.call);
       unlock('w-scores', 'w-drill', 'bin');
       hint('scores');
@@ -1939,7 +2066,9 @@
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
     // One thing to work on: the part with the most points left on the table, and its next level.
-    const weakest = DIMENSIONS.map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
+    // On the worked example the concept and the risks were Mieke's: those parts are not yours to work on.
+    const hers = r.board && r.board.example ? ['fit', 'nextLevel', 'risks'] : [];
+    const weakest = DIMENSIONS.filter(([k]) => !hers.includes(k)).map(([k, label, max]) => ({ k, label, left: max - pts[k], next: g[k].next })).sort((x, y) => y.left - x.left)[0];
     $('score-focus').hidden = !weakest || weakest.left <= 0;
     state.focus = weakest && weakest.left > 0 ? { label: weakest.label, next: weakest.next || '' } : null;
     $('btn-score-coffee').hidden = $('score-focus').hidden || !!state.hard;
@@ -1950,10 +2079,10 @@
       const tr = document.createElement('tr');
       const a = document.createElement('td');
       const name = document.createElement('div');
-      name.textContent = label;
+      name.textContent = label + (hers.includes(k) ? ' (Mieke\'s example)' : '');
       a.appendChild(name);
       // Teach, not just grade: the next level stays in view; why, the checks and a model answer fold away.
-      if (g[k].next && pts[k] < max && k !== weakest.k) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
+      if (g[k].next && pts[k] < max && (!weakest || k !== weakest.k) && !hers.includes(k)) { const n = document.createElement('div'); n.className = 'next'; n.textContent = 'Next level: ' + g[k].next; a.appendChild(n); }
       const more = document.createElement('details'); more.className = 'why';
       const ms = document.createElement('summary'); ms.textContent = 'Why this score';
       const ev = document.createElement('div');
@@ -2036,9 +2165,9 @@
       const li = document.createElement('li');
       if (parts.unused.includes(f.id)) {
         // The in-between case teaches the most: you had it in your hands.
-        const doc = (r.docs || []).find(d => d.text === f.dataDoc);
+        const doc = (r.had || []).includes(f.id) && (r.docs || []).find(d => d.text === f.dataDoc);
         li.className = 'unused';
-        li.textContent = 'You had this in ' + (doc ? doc.source : 'a document') + ' but did not use it: ' + f.fact;
+        li.textContent = (doc ? 'You had this in ' + doc.source : 'You heard this') + ' but did not use it: ' + f.fact;
       } else li.textContent = f.fact + (touchpoints(r.card) ? ' (Findable ' + listText(f.foundAt.map(placeOf)).replace(/ and /g, ' or ') + '.)' : '');
       missed.appendChild(li);
     });
@@ -2372,6 +2501,7 @@
     const checks = done.slice().reverse().flatMap(w => w.requests.slice().sort((a, b) => b.index - a.index))
       .filter(x => !seen.has(x.card) && seen.add(x.card)).map(x => Town.check(x, card(x.card))).filter(Boolean);
     const scrap = done.map((w, n) => 'Week ' + (n + 1) + ': ' + w.requests.slice().sort((a, b) => a.index - b.index).map(x => x.who + ', ' + x.org + ' (' + x.total + '/100)').join('; '));
+    setTimeout(() => firstLook('town'), 900);
     Town.open({ now: arcNow(day), weeks: done.length, checks, scrap, revealed: Reveal.seen(), ending: Reveal.ending(), tomorrow, card, dayKey: state.weekId + ':' + day,
       when: Story.day(state.weekNo, day) + ' · 18:30', onDone: after });
   }
@@ -2407,7 +2537,8 @@
     $('end-score').textContent = score + ' / 100';
     $('end-board').hidden = !br;
     if (br) $('end-board').textContent = 'The board: ' + DECISIONS[br.decision] + ' ' + br.points.total + '/100 for your pitch on "' + boardCard().subject + '".';
-    $('end-note').textContent = state.one ? 'One case: ' + state.cards[0].stakeholder.name + '. A full week has three or four requests, a Monday stand-up and the board room on Friday, and it is where you can earn a promotion.'
+    $('end-note').textContent = state.retest ? 'Retest: ' + state.cards[0].stakeholder.name + '. The first time ' + state.retest.first + '/100, now ' + avg + '/100. ' + (avg > state.retest.first + 4 ? 'That is what getting better looks like.' : avg < state.retest.first - 4 ? 'Lower than the first time: open My scores and compare the parts.' : 'About the same. Look at which part moved.')
+      : state.one ? 'One case: ' + state.cards[0].stakeholder.name + '. A full week has three or four requests, a Monday stand-up and the board room on Friday, and it is where you can earn a promotion.'
       : 'Week ' + state.weekNo + '. Requests: ' + avg + '/100 over ' + state.results.length + (br ? '. Board: ' + br.points.total + '/100. They count half each.' : '.');
     $('end-eyebrow').textContent = state.one ? 'One case, done' : 'End of the week';
     $('btn-again').textContent = state.one ? 'Another case' : 'Another week';
@@ -2427,7 +2558,7 @@
       $('end-team').textContent = 'Your team: ' + t.total + '/' + t.of + ' for your reviews' + (t.reviewed < state.team.drafts.length ? ', with ' + (state.team.drafts.length - t.reviewed) + ' draft(s) sent out unreviewed.' : '.') + ' It does not change your title, but Darren reads it.';
     }
     $('end-memo').hidden = state.hard || state.one;
-    if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
+    if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted, state.team ? Team.memoLine(state.team, Team.grownFrom(teamLog()).filter(id => state.team.drafts.some(d => d.junior === id && d.grown))) : '');
     shareCard(score, title);
     show('s-end');
   }
@@ -2587,6 +2718,7 @@
   // The slide show: full screen, one box per click, the board reacting in the front row.
   function playShow() {
     const B = state.board;
+    if (Tour.open) Tour.close();   // the show is full screen: no bubble on top of it
     Slides.show(B, boardCard(), BOARD, () => {
       if (state.board !== B || B.stage !== 'show') return;
       B.stage = 'questions';
@@ -2798,15 +2930,21 @@
   }
   function thisWeek(h) {
     let w = h.weeks.find(x => x.id === state.weekId);
-    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined }; h.weeks.push(w); }
+    if (!w) { w = { id: state.weekId, started: Date.now(), requests: [], hard: state.hard || undefined, one: state.one || undefined, retest: state.retest ? state.retest.first : undefined }; h.weeks.push(w); }
     return w;
+  }
+  // What help the write-up had: Mieke's worked example, the full board, the board with less on it, or none.
+  function helpUsed(r) {
+    const b = r.board || {};
+    return b.example ? 'example' : b.mode !== 'board' ? 'none' : (b.fade || 1) <= 1 ? 'full' : 'some';
   }
   function recordScore(r, total, pts, g, call) {
     const h = scoreHistory(), w = thisWeek(h), s = r.card.stakeholder;
     w.requests = w.requests.filter(x => x.index !== state.index);
     w.requests.push({
       index: state.index, at: Date.now(), card: r.card.id, who: s.name, role: s.role, org: (s.org || '').split(',')[0],
-      starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict
+      starter: r.card.difficulty === 0, total, pts, call: call || undefined, question: g.questionNotAsked, verdict: g.verdict,
+      help: helpUsed(r)
     });
     keepScores(h);
   }
@@ -2824,10 +2962,12 @@
     w.academy = { title: Academy.MODULES.find(m => m.id === A.id).title, right: A.right, of: A.of };
     keepScores(h);
   }
+  // Every draft you reviewed, all weeks: what the team remembers about your coaching.
+  const teamLog = () => scoreHistory().weeks.flatMap(w => (w.team && w.team.by) || []);
   function recordTeam() {
     if (!state.team) return;
     const h = scoreHistory(), w = thisWeek(h);
-    w.team = Team.score(state.team);
+    w.team = Object.assign(Team.score(state.team), { by: Team.memory(state.team) });
     keepScores(h);
   }
   function recordWeek(avg, title, board) {
@@ -2857,6 +2997,7 @@
       para('\nYour weeks so far: ' + done.map(w => bars[Math.max(1, Math.round(w.avg / 100 * 8))]).join('') + '  (' + done[0].avg + ' → ' + done[done.length - 1].avg + ')');
     }
     scoreCharts(box, h);
+    progress(box, h, para);
     para('\nRequests handled: ' + all.length + ' · average ' + Math.round(all.reduce((a, b) => a + b.total, 0) / all.length) + '/100 · best ' + best.total + '/100 (' + best.who + ')');
     const fmt = t => new Date(t).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     h.weeks.slice().reverse().filter(w => w.requests.length).forEach(w => {
@@ -2867,12 +3008,58 @@
       if (w.standup && w.standup.of) para('Monday stand-up: recalled ' + w.standup.got + ' of ' + w.standup.of, 'muted');
       if (w.academy && w.academy.of) para('CoE Academy: ' + w.academy.title + ' · ' + w.academy.right + ' of ' + w.academy.of + ' right', 'muted');
       w.requests.slice().sort((a, b) => a.index - b.index).forEach(x => {
-        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + ': ' + x.total + '/100');
+        para((x.index + 1) + '. ' + x.who + ' (' + x.role + (x.org ? ', ' + x.org : '') + ')' + (x.starter ? ' [starter]' : '') + (HELP_TAG[x.help] || '') + ': ' + x.total + '/100' + (w.retest != null ? ' (first time ' + w.retest + ')' : ''));
         para('   ' + DIMENSIONS.map(([k, label, max]) => label + ' ' + (x.pts[k] || 0) + '/' + max).join(' · '), 'muted');
         if (x.question) para('   The question you didn\'t ask: ' + x.question);
         if (x.verdict) para('   Their verdict: ' + x.verdict);
       });
     });
+  }
+
+  // Progress: what you can do on your own against what you did with help, each score part early on
+  // against lately, and up to three old cases to retest (played two or more weeks ago).
+  const HELP_TAG = { example: ' [Mieke\'s example]', full: ' [full board]', some: ' [board, fewer hints]' };
+  function retestable(h) {
+    const weeks = h.weeks.filter(w => !w.hard && !w.one && w.requests.length), first = {};
+    weeks.forEach((w, wi) => w.requests.forEach(x => { if (!first[x.card]) first[x.card] = { card: x.card, who: x.who, org: x.org, first: x.total, wi }; }));
+    const redone = new Set(h.weeks.filter(w => w.retest != null).flatMap(w => w.requests.map(x => x.card)));
+    return Object.values(first).filter(x => weeks.length - x.wi >= 2 && !redone.has(x.card) && x.card !== 'operator-2041').slice(0, 3);
+  }
+  function progress(box, h, para) {
+    const norm = h.weeks.filter(w => !w.hard && !w.one).flatMap(w => w.requests.slice().sort((a, b) => a.index - b.index)).filter(x => x.help !== 'example');
+    const avg = xs => Math.round(xs.reduce((a, x) => a + x.total, 0) / xs.length);
+    const head = document.createElement('h3'); head.textContent = '=== Progress'; box.appendChild(head);
+    const own = norm.filter(x => x.help === 'none').slice(-5), helped = norm.filter(x => x.help === 'full' || x.help === 'some').slice(-5);
+    if (own.length && helped.length) para('On your own (one-pager): ' + avg(own) + '/100 over your last ' + own.length + ' · with the case board: ' + avg(helped) + '/100 over ' + helped.length);
+    else if (helped.length) para('All your requests so far had the case board. It thins out after two strong requests in a row.', 'muted');
+    if (norm.length >= 6) {
+      const share = (xs, k, max) => Math.round(100 * xs.reduce((a, x) => a + ((x.pts || {})[k] || 0), 0) / (max * xs.length));
+      const a = norm.slice(0, 3), b = norm.slice(-3);
+      para('Your first three requests against your last three:');
+      DIMENSIONS.forEach(([k, label, max]) => { const x = share(a, k, max), y = share(b, k, max); para('   ' + label + ' ' + x + '% → ' + y + '%' + (y - x >= 10 ? '  ▲' : x - y >= 10 ? '  ▼' : '')); });
+    } else para('After six requests this shows each part early on against lately.', 'muted');
+    h.weeks.filter(w => w.retest != null && w.requests.length).forEach(w => para('Retest, ' + w.requests[0].who + ': ' + w.retest + ' → ' + w.requests[0].total + '/100'));
+    const can = retestable(h);
+    if (!can.length) return;
+    para('Retest an old case: same client, weeks later, as one case. It does not count as a week.');
+    const row = document.createElement('p'); row.className = 'retests';
+    can.forEach(x => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.card = x.card;
+      b.textContent = x.who + (x.org ? ', ' + x.org : '') + ' (' + x.first + ')';
+      b.onclick = () => retest(x);
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+  }
+  async function retest(x) {
+    try { await loadCards(); } catch (e) { return; }
+    const card = state.pool.find(c => c.id === x.card);
+    if (!card) { toast('That case is no longer in the game.', 'info'); return; }
+    state.oneCard = card;
+    state.nextRetest = { card: x.card, first: x.first };
+    Desktop.minimise('w-scores');
+    await startWeek(false, true);
+    if (!state.retest) { state.oneCard = null; state.nextRetest = null; }   // the saved week was kept
   }
 
   // Two charts on top of scores.txt: every request over time, and the score parts as a share of

@@ -3,6 +3,7 @@
 const { chromium } = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage();
+  await require('./looks.cjs')(p);
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   p.on('dialog', d => d.accept());
   await p.route('**/js/config.js*', r => r.fulfill({ contentType: 'text/javascript', body: "window.INTAKE_CONFIG = { api: 'api/index.php', donateUrl: 'https://example.test/coffee' };" }));

@@ -285,6 +285,7 @@ body.no-stand .quick-launch, body.no-stand #btn-standup-menu { display: none; }
 .board-steps li.done { color: var(--good); border-color: var(--good); }
 .board-steps li.done::before { content: "✓ "; }
 .board-sofar { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.board-example { margin: 0 0 8px; }
 .board-sofar p { margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bstep h3 { margin: 4px 0 6px; font-size: 16px; color: #1a3f8f; }
 .bstep .hint { margin: 10px 0 6px; color: var(--muted); font-size: 13px; }
@@ -375,6 +376,7 @@ body.no-stand .quick-launch, body.no-stand #btn-standup-menu { display: none; }
 .scores h3 { font: inherit; font-weight: 700; margin: 14px 0 2px; }
 .scores p { margin: 0; white-space: pre-wrap; }
 .scores .muted { color: #777; }
+.scores .retests { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; white-space: normal; }
 .tray .debug { min-height: 0; height: 24px; padding: 0 8px; font-size: 12px; color: #fff; background: #b5432a; border: 1px solid #fff; }
 
 /* ---------- narrow screens: one window at a time, the taskbar switches ---------- */

@@ -74,7 +74,9 @@
         : { headline: raw.briefing.headline || 'Case file', points: list(raw.briefing.points) },
       questionHint: raw.question_you_didnt_ask,
       actorNotes: list(raw.actor_notes),
-      flavourLines: list(raw.flavour_lines)
+      flavourLines: list(raw.flavour_lines),
+      // Starter cards only: Mieke's filled-in concept and risks for your very first request.
+      example: raw.worked_example || null
     };
   }
 
