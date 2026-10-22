@@ -1696,6 +1696,8 @@
       if (lost) parts.push(lost === 1 ? 'And one important thing never came up in your call.' : 'And ' + lost + ' important things never came up in your call.');
       const unused = r.card.hiddenFacts.filter(f => f.critical && (r.had || []).includes(f.id) && !r.revealed.has(f.id) && !citedFacts().includes(f.id)).length;
       if (unused) parts.push('One of your documents says something important that you did not cite. Look again before you send this.');
+      const crit = r.card.hiddenFacts.filter(f => f.critical && r.revealed.has(f.id));
+      if (crit.length && !crit.some(f => citedFacts().includes(f.id))) parts.push('You heard something important that is not on your board yet. A fact only counts once you use it.');
       // In the first week Mieke also shows her own version, once yours is locked in.
       if ((b.fade || 1) === 1 && r.card.needStatement) parts.push('My version: "' + r.card.needStatement + '"');
       return 'Mieke: ' + parts.map(cap).join(' ');
@@ -1956,6 +1958,8 @@
     pane('p-defence', 'Request ' + (state.index + 1) + ' · Defence round');
   }
 
+  // Every hidden fact that reached the player: heard on a call or at the coffee machine, or held in a document.
+  const heardFacts = r => r.card.hiddenFacts.filter(f => r.revealed.has(f.id) || (r.had || []).includes(f.id));
   async function judge() {
     const r = state.run;
     wait('The examiner is reading the transcript. The examiner has read a lot of transcripts.');
@@ -1969,8 +1973,8 @@
       'DEFENCE ROUND:',
       r.defence.length ? r.defence.map(d => `Objection: ${d.objection}\nAnswer: """${d.answer || '(no answer)'}"""`).join('\n') : '(none, the stakeholder accepted the concept)',
       '',
-      'DATA FACTS the player received in documents (report in factsUsed the ids the write-up uses):',
-      (r.had || []).length ? r.card.hiddenFacts.filter(f => r.had.includes(f.id)).map(f => `[${f.id}] ${f.fact}`).join('\n') : '(none)',
+      'FACTS the player heard or received (report in factsUsed the ids the write-up uses):',
+      heardFacts(r).length ? heardFacts(r).map(f => `[${f.id}] ${f.fact}`).join('\n') : '(none)',
       '',
       'WAY BACK (if it does not work, how do you back out?):',
       r.bet && (r.bet.exit || '').trim() ? '"""' + r.bet.exit.trim() + '"""' : '(none given)'
@@ -1992,7 +1996,7 @@
     const r = state.run;
     const parts = points(g), { pts, bonus, total } = parts;
     if (!replay) {
-      state.results.push({ id: r.card.id, total, found: parts.found.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
+      state.results.push({ id: r.card.id, total, found: parts.heard.length, of: r.card.hiddenFacts.length, line: bestLine(r.writeup), defence: r.defence.length ? g.defenceOutcome : '', slide: slideFrom(r.writeup) });
       recordScore(r, total, pts, g, parts.call);
       unlock('w-scores', 'w-drill', 'bin');
       hint('scores');
@@ -2104,9 +2108,9 @@
       const li = document.createElement('li');
       if (parts.unused.includes(f.id)) {
         // The in-between case teaches the most: you had it in your hands.
-        const doc = (r.docs || []).find(d => d.text === f.dataDoc);
+        const doc = (r.had || []).includes(f.id) && (r.docs || []).find(d => d.text === f.dataDoc);
         li.className = 'unused';
-        li.textContent = 'You had this in ' + (doc ? doc.source : 'a document') + ' but did not use it: ' + f.fact;
+        li.textContent = (doc ? 'You had this in ' + doc.source : 'You heard this') + ' but did not use it: ' + f.fact;
       } else li.textContent = f.fact + (touchpoints(r.card) ? ' (Findable ' + listText(f.foundAt.map(placeOf)).replace(/ and /g, ' or ') + '.)' : '');
       missed.appendChild(li);
     });

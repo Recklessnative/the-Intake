@@ -12,7 +12,7 @@ const grade = (n, extra) => Object.assign({
   nextLevel: { score: n, evidence: '' }, risks: { score: n, evidence: '' }, pitch: { score: n, evidence: '' },
   defenceOutcome: 'none', leverCall: 'partly', questionNotAsked: 'q' + n, verdict: 'v' + n
 }, extra);
-const run = (kind, extra) => Object.assign({ revealed: new Set(['a']), writeup: kind === 'board' ? { kind, lever: 'partly' } : { kind }, bet: { appetite: 1, bold: 1 }, reaction: { boldness: 1 }, defence: [] }, extra);
+const run = (kind, extra) => Object.assign({ revealed: new Set(['a']), cited: ['a', 'b', 'c'], writeup: kind === 'board' ? { kind, lever: 'partly' } : { kind }, bet: { appetite: 1, bold: 1 }, reaction: { boldness: 1 }, defence: [] }, extra);
 
 // The same grade and the same lever call score the same on the case board and in a memo.
 const board = S.points(card, run('board'), grade(3)), memo = S.points(card, run('memo4'), grade(3)), hard = S.points(card, run('hard'), grade(3));
@@ -72,14 +72,18 @@ assert.strictEqual(bm.spread, 2);
 assert.strictEqual(S.boldness([null, rx(1, 'one')]).boldness, 1);
 assert.strictEqual(S.boldness([]), null);
 
-// Data facts count only when used: cited on the board or used in the write-up per the examiner.
+// Facts count only when used: cited on the board or used in the write-up per the examiner. Heard on
+// the call ('c') or held in a document ('k'), it is the same rule.
 const dcard = { learningIsTheAnswer: 'yes', hiddenFacts: [{ id: 'k', weight: 2 }, { id: 'c' }] };
 const drun = extra => Object.assign({ revealed: ['c'], had: ['k'], writeup: { kind: 'memo4' }, bet: {}, defence: [] }, extra);
-assert.deepStrictEqual(S.credit(dcard, drun(), grade(3)).unused, ['k']);
-assert.strictEqual(S.points(dcard, drun(), grade(3)).facts, 1 / 3);
-assert.strictEqual(S.points(dcard, drun({ cited: ['k'] }), grade(3)).facts, 1);
-assert.strictEqual(S.points(dcard, drun(), grade(3, { factsUsed: ['k'] })).facts, 1);
-assert.strictEqual(S.points(dcard, drun({ had: [] }), grade(3, { factsUsed: ['k'] })).facts, 1 / 3);  // cannot use what you never had
+assert.deepStrictEqual(S.credit(dcard, drun(), grade(3)).unused, ['c', 'k']);
+assert.deepStrictEqual(S.credit(dcard, drun(), grade(3)).heard, ['c', 'k']);
+assert.strictEqual(S.points(dcard, drun(), grade(3)).facts, 0);
+assert.strictEqual(S.points(dcard, drun({ cited: ['k'] }), grade(3)).facts, 2 / 3);
+assert.strictEqual(S.points(dcard, drun({ cited: ['c'] }), grade(3)).facts, 1 / 3);
+assert.strictEqual(S.points(dcard, drun(), grade(3, { factsUsed: ['k', 'c'] })).facts, 1);
+assert.strictEqual(S.points(dcard, drun({ had: [] }), grade(3, { factsUsed: ['k'] })).facts, 0);  // cannot use what you never had
+assert.strictEqual(S.points(dcard, drun({ revealed: [] }), grade(3, { factsUsed: ['c'] })).facts, 0);  // nor what you never heard
 assert.deepStrictEqual(S.median([grade(3, { factsUsed: ['k'] }), grade(3, { factsUsed: ['k', 'c'] }), grade(3)]).factsUsed, ['k']);
 
 console.log('scoring ok');
