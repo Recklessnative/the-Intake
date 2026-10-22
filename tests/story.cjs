@@ -208,6 +208,8 @@ async function townText(p) {
   let coffee = '';
   const w5 = await playWeek(b, 4, { arc: ACT1 }, async (p, f) => { if (f.last) coffee = await card(p, 'coffee'); });
   if (!w5.mails.includes('Recall: Lehman Brothers files for bankruptcy')) fail('week 5: no recalled Lehman headline');
+  // Pilot results come back: a client from two finished weeks ago writes how it went.
+  if (!w5.mails.includes('First results: ')) fail('week 5: no first-results mail: ' + w5.mails);
   if (!coffee.includes('corrected the 0 to a 2')) fail('week 5: coffee note not corrected: ' + coffee);
   if (!/tape is gone/.test(w5.lift || '') || !/Go home/.test(w5.lift)) fail('week 5: the lift does not offer button 5 after the tender: ' + w5.lift);
   if (w5.errs.length) fail('week 5 errors: ' + w5.errs);

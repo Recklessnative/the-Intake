@@ -55,16 +55,18 @@
     return { text: pick(r, ['None really. ' + s.name + ' is fully on board, so we can start next week.', s.name + ' will handle the internal side; we focus on the content.', 'Low risk: it is training, and nobody objects to training.', 'We inform the staff by mail once the content is ready.']), why: dep ? 'It ignores ' + dep.who + '. ' + (dep.if_ignored || dep.concern) : 'It names no dependency at all.' };
   }
   // The draft: four sound lines and one flaw. Mostly the junior's usual weak spot, sometimes not.
-  function draft(card, junior, seed) {
+  // A junior you coached well on their weak spot twice has learned it (grown): their flaw is now
+  // somewhere else, and they say so.
+  function draft(card, junior, seed, grown) {
     const r = rng(seed + junior.id + card.id);
-    const atypical = r() < 0.3;
+    const atypical = grown || r() < 0.3;
     const flawAt = atypical ? pick(r, LINES.map(([k]) => k).filter(k => k !== junior.weak)) : junior.weak;
     const f = flawed(card, flawAt, r);
     // The junior did a thorough intake: every fact, with where they found it, so you can check
     // each line of the draft against the evidence instead of guessing what they assumed.
     const found = card.hiddenFacts.map(x => ({ fact: x.fact, at: WHERE[(x.foundAt[0] || 'call').split(':')[0]] || 'On the call' }));
     return {
-      junior: junior.id, card: card.id, flaw: flawAt, atypical, why: f.why,
+      junior: junior.id, card: card.id, flaw: flawAt, atypical: atypical && !grown, grown: !!grown, why: f.why,
       found,
       lines: LINES.map(([k, label]) => ({ k, label, text: k === flawAt ? f.text : good(card, k, r) })),
       pick: null, note: '', grade: null
@@ -87,7 +89,26 @@
       pick: null, note: '', grade: null
     };
   }
-  function plan(cards, seed, empty) { return JUNIORS.map((j, i) => empty && j.id === 'bart' ? emptyDraft(cards[i], j) : draft(cards[i], j, seed)); }
+  function plan(cards, seed, empty, grown) { return JUNIORS.map((j, i) => empty && j.id === 'bart' ? emptyDraft(cards[i], j) : draft(cards[i], j, seed, (grown || []).includes(j.id))); }
+  // What the team remembers: per junior, the drafts you reviewed (flaw, whether it was their weak
+  // spot, spot and coaching points). `grownFrom` lists who has learned their weak spot.
+  const WEAK_NAME = { risks: 'the risks', measure: 'how we will know', concept: 'the concept' };
+  function memory(team) {
+    return team.drafts.filter(d => d.grade && !d.empty).map(d => ({ junior: d.junior, flaw: d.flaw, weak: d.flaw === junior(d.junior).weak, spot: d.grade.spot, coach: d.grade.coach }));
+  }
+  function grownFrom(log) {
+    return JUNIORS.filter(j => log.filter(x => x.junior === j.id && x.weak && x.spot > 0 && x.coach >= 4).length >= 2).map(j => j.id);
+  }
+  // A line for Darren's Friday memo about the team, from this week's reviews.
+  function memoLine(team, grown) {
+    const done = memory(team);
+    if (!done.length) return 'P.S. Your team\'s drafts went out unreviewed. A client asked who "Bart" is. Please review them.';
+    const best = done.slice().sort((a, b) => (b.spot + b.coach) - (a.spot + a.coach))[0], worst = done.slice().sort((a, b) => (a.spot + a.coach) - (b.spot + b.coach))[0];
+    const name = id => junior(id).name;
+    if (grown.length) return 'P.S. ' + grown.map(name).join(' and ') + (grown.length > 1 ? ' have' : ' has') + ' got noticeably sharper on ' + grown.map(id => WEAK_NAME[junior(id).weak]).join(' and ') + '. Whatever you are telling them, keep telling them.';
+    if (worst.spot + worst.coach <= 3) return 'P.S. ' + name(worst.junior) + '\'s draft went out with a hole in it. The client noticed. Please talk to ' + name(worst.junior) + ', properly this time.';
+    return 'P.S. ' + name(best.junior) + ' says your feedback was "actually useful". From a junior, that is a medal.';
+  }
   // Reviewing the empty draft: what Bart and Mieke say. It goes in the notebook, not in the score.
   function reviewEmpty(d) {
     d.grade = { spot: 0, coach: 0, total: 0, unscored: true,
@@ -124,7 +145,8 @@
     const d = team.drafts[team.at], j = junior(d.junior), card = cardOf(d.card);
     const page = el('div', 'team-page');
     page.appendChild(el('p', 'team-from', 'From: ' + j.name + ', ' + j.role + ' · Re: ' + card.stakeholder.name + ' (' + card.stakeholder.role + '), "' + card.subject + '"'));
-    page.appendChild(el('p', 'team-ask', '"Hi! Here is my one-pager. Can you check it before I send it? I think it\'s good to go. My notes are attached."'));
+    page.appendChild(el('p', 'team-ask', d.grown ? '"Hi! You told me twice about ' + WEAK_NAME[j.weak] + ', so I checked that part properly this time. Can you look at the rest?"'
+      : '"Hi! Here is my one-pager. Can you check it before I send it? I think it\'s good to go. My notes are attached."'));
     // The case file: the request as it came in, the briefing, what the junior found and who is involved.
     const file = el('details', 'team-file');
     file.open = true;
@@ -216,5 +238,5 @@
     return { total: done.reduce((a, d) => a + d.grade.total, 0), of: scored.length * 10, reviewed: done.length };
   }
 
-  window.Team = { JUNIORS, plan, draft, render, score, spotPoints, junior, LINES, reviewEmpty };
+  window.Team = { JUNIORS, plan, draft, render, score, spotPoints, junior, LINES, reviewEmpty, memory, grownFrom, memoLine };
 })();

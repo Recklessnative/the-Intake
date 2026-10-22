@@ -273,7 +273,7 @@
     state.academy = state.hard || state.one || state.final ? null : { id: Academy.moduleFor(state.weekNo).id, started: false, at: 0, picks: [], done: false };
     const recall = state.hard || state.one || state.final || state.weekNo < 2 ? [] : Standup.pick(scoreHistory(), state.pool, state.weekId, 2);
     state.standup = recall.length ? { items: recall, at: 0, done: false } : null;
-    state.team = !state.one && !state.final && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0))) } : null;
+    state.team = !state.one && !state.final && teamWeek(state.weekNo) ? { at: 0, drafts: Team.plan(pickTeamCards(), state.weekId, Arc.offer('bart', arcNow(0)), Team.grownFrom(teamLog())) } : null;
     state.run = null;
     if (!state.hard && !state.one && !seenIntro()) intro(arrive); else arrive();
   }
@@ -535,6 +535,26 @@
     source: ['Date: Thu, 14 Mar 2041 03:12:09 +0100', 'From: Mail Delivery System <MAILER-DAEMON@synergix.be>', 'X-Restored-From: synergix_pst_2007.bak (71% recovered)'] };
   function hhmm(min) { return String(Math.floor(min / 60) % 24).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
 
+  // Pilot results come back: each week a client from two finished weeks ago writes how it went.
+  // The outcome follows your lever call (the same lines as the Monday check in town), the second
+  // paragraph your measurement. Not in hard mode, Try one case, the operator's week or after the reveal.
+  function laterMail() {
+    if (state.hard || state.one || state.final || Reveal.seen()) return null;
+    const weeks = scoreHistory().weeks.filter(w => w.done && !w.hard && !w.one && w.id !== state.weekId);
+    const w = weeks[weeks.length - 2];
+    if (!w) return null;
+    const reqs = w.requests.filter(x => Town.CHECK[x.card] && state.pool.some(c => c.id === x.card)).sort((a, b) => a.index - b.index);
+    if (!reqs.length) return null;
+    const x = reqs[state.weekNo % reqs.length], card = state.pool.find(c => c.id === x.card), c = Town.CHECK[x.card];
+    const right = x.call && x.call === card.learningIsTheAnswer, meas = ((x.pts || {}).measurement || 0) >= 12;
+    return {
+      from: x.who, subject: 'First results: ' + (card.subject || 'your request').replace(/\.$/, ''), later: true,
+      body: 'Hi,\n\nA quick update, since you asked us to let you know.\n\n' + (x.call ? (right ? c.right : c.wrong) : 'We are still working on it. Nobody quite agreed on what we were fixing.') + '\n\n'
+        + (meas ? 'And because we agreed a baseline up front, I could show the before and after. My director asked for more of this.'
+          : 'My director asked how we know it worked. I said it feels better. That did not go down well. Next time, can we agree up front what we measure?')
+        + '\n\n' + x.who + '\n\n---\nFiled with your scorecard from week ' + (weeks.indexOf(w) + 1) + ': your lever call was ' + (!x.call ? 'not made' : right ? 'right' : 'off') + ', measurement ' + ((x.pts || {}).measurement || 0) + '/20.'
+    };
+  }
   function mailbox() {
     const r = state.run;
     // Every mail has a day of the week (0 = Monday) and a time; the inbox shows newest first.
@@ -556,6 +576,8 @@
       // The recalled headline is that week's news only.
       if (Arc.offer('lehman', now) && Arc.landed('lehman') === now.week) LEHMAN.forEach(m => mails.push(Object.assign({ read: seen(m.subject), day: 0 }, m)));
     }
+    const later = laterMail();
+    if (later) mails.push(Object.assign({ read: seen(later.subject), day: 0, at: 8 * 60 + 4 }, later));
     // The week after the promotion, IT explains the new PC.
     let aeroNews = false;
     try { aeroNews = !!localStorage.getItem('intake-aero-news'); } catch (e) { /* storage blocked */ }
@@ -2536,7 +2558,7 @@
       $('end-team').textContent = 'Your team: ' + t.total + '/' + t.of + ' for your reviews' + (t.reviewed < state.team.drafts.length ? ', with ' + (state.team.drafts.length - t.reviewed) + ' draft(s) sent out unreviewed.' : '.') + ' It does not change your title, but Darren reads it.';
     }
     $('end-memo').hidden = state.hard || state.one;
-    if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted);
+    if (!state.hard && !state.one) $('end-memo-body').textContent = Story.memo(state.weekNo, br ? br.decision : 'none', promoted, state.team ? Team.memoLine(state.team, Team.grownFrom(teamLog()).filter(id => state.team.drafts.some(d => d.junior === id && d.grown))) : '');
     shareCard(score, title);
     show('s-end');
   }
@@ -2940,10 +2962,12 @@
     w.academy = { title: Academy.MODULES.find(m => m.id === A.id).title, right: A.right, of: A.of };
     keepScores(h);
   }
+  // Every draft you reviewed, all weeks: what the team remembers about your coaching.
+  const teamLog = () => scoreHistory().weeks.flatMap(w => (w.team && w.team.by) || []);
   function recordTeam() {
     if (!state.team) return;
     const h = scoreHistory(), w = thisWeek(h);
-    w.team = Team.score(state.team);
+    w.team = Object.assign(Team.score(state.team), { by: Team.memory(state.team) });
     keepScores(h);
   }
   function recordWeek(avg, title, board) {
