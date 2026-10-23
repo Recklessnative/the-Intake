@@ -46,6 +46,122 @@ def tex_posters():
             x, y = rr.uniform(90, 310), rr.uniform(40, 360)
             d.line((x, y, x + rr.uniform(-12, 12), y + rr.uniform(-12, 12)), fill=(200, 194, 178), width=2)
         im.save(os.path.join(TEX, f'town_poster{i}.png'))
+def tex_shops():
+    """What is behind the shop windows on Mill Street, painted as a lit room in a box: back wall, side walls,
+    floor, then the goods. English signs only. Act 2 has more shops to let; act 3 has no shops left."""
+    W, H = 880, 400
+    def room(d, wall, floor, light=(255, 214, 150)):
+        bx0, by0, bx1, by1 = 120, 46, 760, 300
+        d.rectangle((0, 0, W, H), fill=tuple(int(c * 0.55) for c in wall))
+        d.polygon([(0, 0), (bx0, by0), (bx0, by1), (0, H)], fill=tuple(int(c * 0.72) for c in wall))
+        d.polygon([(W, 0), (bx1, by0), (bx1, by1), (W, H)], fill=tuple(int(c * 0.66) for c in wall))
+        d.polygon([(0, H), (bx0, by1), (bx1, by1), (W, H)], fill=floor)
+        d.polygon([(0, 0), (bx0, by0), (bx1, by0), (W, 0)], fill=tuple(int(c * 0.8) for c in wall))
+        d.rectangle((bx0, by0, bx1, by1), fill=wall)
+        return bx0, by0, bx1, by1
+    def finish(im, name, glow=1.0):
+        # Pools of light from the ceiling spots, a little blur, darker corners.
+        g = Image.new('L', (W, H), 0); gd = ImageDraw.Draw(g)
+        for x in (250, 440, 630): gd.ellipse((x - 150, -60, x + 150, 260), fill=int(120 * glow))
+        g = g.filter(ImageFilter.GaussianBlur(60))
+        im = Image.composite(Image.new('RGB', (W, H), (255, 220, 160)), im, g.point(lambda v: int(v * 0.3)))
+        v = Image.new('L', (W, H), 0); vd = ImageDraw.Draw(v); vd.ellipse((-200, -160, W + 200, H + 160), fill=255)
+        v = v.filter(ImageFilter.GaussianBlur(80))
+        im = Image.composite(im, Image.new('RGB', (W, H), (8, 6, 5)), v)
+        im.filter(ImageFilter.GaussianBlur(1.2)).save(os.path.join(TEX, name))
+    rr = random.Random(11)
+    # Books: shelves full of spines, a table of new titles in front.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (150, 120, 90), (90, 60, 40))
+    for k in range(4):
+        y = by0 + 14 + k * 62
+        d.rectangle((bx0 + 10, y + 50, bx1 - 10, y + 56), fill=(70, 45, 25))
+        x = bx0 + 14
+        while x < bx1 - 20:
+            bw = rr.randint(6, 14); bh = rr.randint(34, 48)
+            d.rectangle((x, y + 50 - bh, x + bw, y + 50), fill=rr.choice(((120, 30, 30), (30, 60, 110), (200, 180, 120), (40, 90, 60), (160, 100, 40), (230, 225, 210), (60, 40, 70))))
+            x += bw + 1
+    d.polygon([(220, 330), (660, 330), (720, 400), (160, 400)], fill=(100, 62, 32))
+    for k in range(7):
+        x = 240 + k * 62
+        d.polygon([(x, 318), (x + 46, 318), (x + 50, 338), (x - 4, 338)], fill=rr.choice(((235, 230, 215), (190, 40, 40), (40, 70, 140), (240, 200, 60))))
+    d.rectangle((560, 70, 740, 120), fill=(245, 240, 225)); d.text((650, 95), 'NEW THIS WEEK', font=font(22), fill=(120, 30, 30), anchor='mm')
+    finish(im, 'town_shop_books.png')
+    # Clothes: a rail of coats, two dummies in the window, a sale card.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (150, 120, 100), (90, 70, 55))
+    d.line((bx0 + 30, by0 + 50, bx1 - 30, by0 + 50), fill=(160, 160, 165), width=4)
+    for k in range(24):
+        x = bx0 + 40 + k * 24 + rr.randint(-3, 3)
+        c = rr.choice(((40, 40, 50), (110, 30, 35), (150, 120, 80), (60, 80, 60), (30, 40, 80), (180, 170, 150)))
+        d.line((x, by0 + 50, x, by0 + 60), fill=(150, 150, 150), width=2)
+        d.polygon([(x - 13, by0 + 62), (x + 13, by0 + 62), (x + 16, by0 + 170 + rr.randint(-20, 30)), (x - 16, by0 + 170 + rr.randint(-20, 30))], fill=c)
+    for cx, c in ((250, (120, 30, 40)), (620, (40, 50, 70))):
+        d.ellipse((cx - 22, 100, cx + 22, 146), fill=(225, 215, 200))
+        d.rectangle((cx - 6, 146, cx + 6, 160), fill=(225, 215, 200))
+        d.polygon([(cx - 60, 162), (cx + 60, 162), (cx + 52, 330), (cx - 52, 330)], fill=c)
+        d.rectangle((cx - 4, 330, cx + 4, 384), fill=(60, 60, 60)); d.rectangle((cx - 40, 384, cx + 40, 392), fill=(50, 50, 50))
+    d.rectangle((390, 200, 490, 260), fill=(250, 250, 245)); d.text((440, 230), 'SALE', font=font(36), fill=(200, 20, 20), anchor='mm')
+    finish(im, 'town_shop_clothes.png')
+    # Chemist: white shelves of boxes, a green cross, a counter.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (180, 190, 182), (120, 118, 110))
+    for k in range(4):
+        y = by0 + 20 + k * 52
+        d.rectangle((bx0 + 10, y + 40, bx1 - 160, y + 44), fill=(240, 240, 240))
+        x = bx0 + 16
+        while x < bx1 - 170:
+            bw = rr.randint(14, 26); bh = rr.randint(18, 34)
+            d.rectangle((x, y + 40 - bh, x + bw, y + 40), fill=rr.choice(((250, 250, 250), (90, 150, 210), (230, 120, 60), (120, 190, 120), (240, 220, 120))))
+            x += bw + 3
+    d.rectangle((bx1 - 130, by0 + 30, bx1 - 30, by0 + 130), fill=(245, 245, 245))
+    d.rectangle((bx1 - 95, by0 + 45, bx1 - 65, by0 + 115), fill=(20, 170, 70)); d.rectangle((bx1 - 115, by0 + 65, bx1 - 45, by0 + 95), fill=(20, 170, 70))
+    d.polygon([(150, 330), (700, 330), (740, 400), (110, 400)], fill=(235, 235, 230))
+    finish(im, 'town_shop_chemist.png')
+    # Travel agent: sunny posters, two desks, a rack of brochures.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (210, 200, 170), (110, 90, 70))
+    for k, (sky, sea, line) in enumerate((((80, 170, 230), (30, 110, 170), 'COSTA BRAVA 299'), ((250, 170, 80), (200, 90, 50), 'WEEKEND IN PARIS 99'), ((120, 200, 240), (240, 220, 160), 'CRETE 7 NIGHTS 349'))):
+        x = bx0 + 40 + k * 205
+        d.rectangle((x, by0 + 20, x + 170, by0 + 150), fill=sky); d.rectangle((x, by0 + 100, x + 170, by0 + 150), fill=sea)
+        d.ellipse((x + 110, by0 + 34, x + 150, by0 + 74), fill=(255, 240, 150))
+        d.rectangle((x, by0 + 150, x + 170, by0 + 180), fill=(250, 250, 245)); d.text((x + 85, by0 + 165), line, font=font(15), fill=(30, 30, 60), anchor='mm')
+    for x in (230, 520):
+        d.polygon([(x, 300), (x + 150, 300), (x + 165, 350), (x - 15, 350)], fill=(150, 110, 70))
+        d.rectangle((x + 40, 268, x + 100, 300), fill=(220, 215, 200))
+    for k in range(12):
+        d.rectangle((60 + (k % 4) * 18, 200 + (k // 4) * 50, 74 + (k % 4) * 18, 240 + (k // 4) * 50), fill=rr.choice(((40, 120, 200), (240, 160, 40), (230, 230, 220), (40, 160, 120))))
+    finish(im, 'town_shop_travel.png')
+    # To let: an empty shop, the dust sheet, one chair, the agent's board in the window.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (110, 108, 100), (70, 66, 60))
+    d.polygon([(500, 260), (640, 240), (680, 330), (470, 340)], fill=(160, 158, 150))
+    d.rectangle((300, 250, 340, 256), fill=(60, 45, 30)); d.rectangle((302, 256, 306, 300), fill=(60, 45, 30)); d.rectangle((334, 256, 338, 300), fill=(60, 45, 30)); d.rectangle((300, 205, 306, 250), fill=(60, 45, 30))
+    for k in range(9): d.rectangle((bx0 + k * 70, by1 - 2, bx0 + k * 70 + 50, by1 + 4), fill=(90, 85, 78))
+    d.rectangle((330, 110, 560, 220), fill=(250, 250, 245)); d.rectangle((330, 110, 560, 140), fill=(200, 30, 30))
+    d.text((445, 125), 'TO LET', font=font(26), fill=(255, 255, 255), anchor='mm')
+    d.text((445, 172), 'Retail unit', font=font(22, False), fill=(30, 30, 30), anchor='mm'); d.text((445, 200), 'Ask at City Hall', font=font(18, False), fill=(30, 30, 30), anchor='mm')
+    finish(im, 'town_shop_tolet.png', glow=0.4)
+    # Hardware: pans and buckets, a pegboard of tools, mops in a bin.
+    im = Image.new('RGB', (W, H)); d = ImageDraw.Draw(im)
+    bx0, by0, bx1, by1 = room(d, (170, 160, 130), (100, 85, 65))
+    d.rectangle((bx0 + 20, by0 + 20, bx0 + 300, by0 + 200), fill=(185, 160, 110))
+    for i in range(12):
+        for j in range(8): d.ellipse((bx0 + 30 + i * 23, by0 + 28 + j * 22, bx0 + 33 + i * 23, by0 + 31 + j * 22), fill=(120, 100, 70))
+    for k in range(7):
+        x = bx0 + 40 + k * 38
+        d.line((x, by0 + 40, x, by0 + 110 + rr.randint(0, 50)), fill=rr.choice(((180, 30, 30), (60, 60, 70), (230, 180, 40))), width=6)
+    for k in range(3):
+        y = by0 + 40 + k * 70
+        d.rectangle((bx0 + 340, y + 50, bx1 - 20, y + 56), fill=(80, 60, 40))
+        for i in range(6):
+            x = bx0 + 360 + i * 46
+            c = rr.choice(((160, 160, 165), (40, 40, 45), (180, 60, 40), (40, 90, 150)))
+            d.rectangle((x, y + 18, x + 34, y + 50), fill=c); d.ellipse((x, y + 12, x + 34, y + 24), fill=tuple(min(255, v + 40) for v in c))
+    for k in range(3):
+        x = 280 + k * 140
+        d.polygon([(x, 300), (x + 70, 300), (x + 60, 370), (x + 10, 370)], fill=rr.choice(((200, 40, 40), (40, 110, 180), (230, 190, 40))))
+    finish(im, 'town_shop_hardware.png')
 def tex_window_view(name, size, sky, lights, water=False, seed=1):
     """A dark rainy view for behind a window: sky, a row of houses with lit windows, wet reflections."""
     w, h = size; rr = random.Random(seed)
@@ -122,6 +238,7 @@ if MODE in ('town', 'shot', 'item'):
     tex_sign('town_soup.png', '', (600, 420), (24, 30, 26), (235, 235, 225), 0, lines=[('TONIGHT', 70), ('Soup of the day', 46), ('Croque monsieur', 46), ('Stella · Duvel · Leffe', 40)], bold=False)
     tex_sign('town_slot.png', '', (400, 600), (40, 20, 60), (255, 220, 60), 0, lines=[('JACKPOT', 70), ('7  7  7', 90), ('INSERT COIN', 40)])
     tex_flyers()
+    tex_shops()
 
 # ---------- materials ----------
 M = {}
@@ -242,7 +359,7 @@ def place(o, hot=None, thing=None):
 
 class MB:
     """Many boxes and polygons, one object: a house is one mesh with a few materials."""
-    def __init__(s): s.v, s.f, s.mi, s.mats = [], [], [], []
+    def __init__(s): s.v, s.f, s.mi, s.mats, s.shops = [], [], [], [], []
     def k(s, m):
         if m not in s.mats: s.mats.append(m)
         return s.mats.index(m)
@@ -399,7 +516,9 @@ def windows(b, w, h, floors, d, rng, shop=False, door=True, back=False, lit=LIT,
     for f in range(floors):
         z0 = f * fh
         if f == 0 and not back and shop:
-            b.box(0.4, ys + sgn * 0.06 if not back else ys, 0.25, w - 0.4, ys, fh * 0.85, SHOPWIN if rng.random() < lit * 2.2 else DARKWIN)
+            lit_shop = rng.random() < lit * 2.2
+            b.box(0.4, ys + sgn * 0.06 if not back else ys, 0.25, w - 0.4, ys, fh * 0.85, SHOPWIN if lit_shop else DARKWIN)
+            b.shops.append((0.4, w - 0.4, 0.25, fh * 0.85, lit_shop))
             b.box(0.2, ys + sgn * 0.12, fh * 0.86, w - 0.2, ys, fh * 0.98, rng.choice((mat('awning_r', (0.4, 0.05, 0.05), 0.7), mat('awning_g', (0.05, 0.2, 0.1), 0.7), mat('awning_b', (0.05, 0.08, 0.25), 0.7))))
             continue
         for i in range(n):
@@ -413,6 +532,7 @@ def windows(b, w, h, floors, d, rng, shop=False, door=True, back=False, lit=LIT,
             b.box(cx - ww / 2, ys + sgn * 0.07, zc - wh / 2, cx + ww / 2, ys + sgn * 0.02, zc + wh / 2, pane)
             b.box(cx - ww / 2 - 0.12, ys + sgn * 0.16, zc - wh / 2 - 0.12, cx + ww / 2 + 0.12, ys, zc - wh / 2 - 0.06, STONE)
 
+SHOPS = []   # (house, x, y, z, w, h, face, lit) of every shop window
 def house(name, x, y, w, d, h, face, rng, shop=False, style=None, wall=None, hot=None, lit=None):
     """A Flemish town house, built with its front at local y=0 looking -y, then turned to face S/E/N/W."""
     rng = random.Random(name)   # its own dice, so the same house looks the same in every act and every shot
@@ -454,6 +574,10 @@ def house(name, x, y, w, d, h, face, rng, shop=False, style=None, wall=None, hot
     else:
         b.box(-0.05, -0.05, h, w + 0.05, d + 0.05, h + 0.5, wall)
         b.box(0.3, 0.3, h + 0.02, w - 0.3, d - 0.3, h + 0.45, mat('roofing', (0.08, 0.08, 0.08), 0.6))
+    c, s_ = math.cos(rot), math.sin(rot)
+    for x0, x1, z0, z1, on in b.shops:   # where its shop window is, in the world, for a close-up to fill
+        lx = (x0 + x1) / 2
+        SHOPS.append((name, x + c * lx, y + s_ * lx, (z0 + z1) / 2, x1 - x0, z1 - z0, face, on))
     return b.done(name, (x, y, 0), rot, hot=hot)
 
 def row(prefix, x0, x1, y, face, depth, rng, hmin=8, hmax=13, shops=0.0, skip=(), wmin=5, wmax=8):
@@ -800,13 +924,17 @@ def stool(n, x, y, h=0.78, thing=None):
     cyl(n + '_ring', x, y, 0.28, 0.17, 0.02, CHROME, 16)
 
 def chair(n, x, y, rot=0.0, m=None, upturned=False):
+    """A plain wooden chair. At rot=0 it faces +y: the back is on the -y side."""
     m = m or DARKWOOD
     b = MB()
-    b.box(-0.21, -0.21, 0.44, 0.21, 0.21, 0.48, m)
-    for dx in (-0.18, 0.15):
-        for dy in (-0.18, 0.15): b.box(dx, dy, 0, dx + 0.035, dy + 0.035, 0.44, m)
-    b.box(-0.21, 0.17, 0.48, 0.21, 0.21, 0.92, m)
+    b.box(-0.21, -0.21, 0.44, 0.21, 0.21, 0.475, m)
+    for dx in (-0.19, 0.155):
+        for dy in (-0.19, 0.155): b.box(dx, dy, 0, dx + 0.035, dy + 0.035, 0.44, m)
+    for dx in (-0.19, 0.155): b.box(dx, -0.205, 0.475, dx + 0.035, -0.17, 0.93, m)   # the back posts
+    for z in (0.62, 0.76, 0.87): b.box(-0.17, -0.2, z, 0.17, -0.18, z + 0.055, m)    # three slats
+    b.box(-0.2, -0.205, 0.9, 0.2, -0.165, 0.94, m)                                   # top rail
     o = b.done(n, (x, y, 0), rot)
+    bv = o.modifiers.new('bevel', 'BEVEL'); bv.width = 0.004; bv.segments = 2; bv.limit_method = 'ANGLE'
     if upturned:   # on the table, legs up, for the cleaner
         o.rotation_euler = (math.pi, 0, rot); o.location.z = 0.78 + 0.92
     return o
@@ -816,9 +944,107 @@ def table(n, x, y, r=0.38, h=0.74, m=None):
     cyl(n + '_post', x, y, 0, 0.04, h - 0.03, IRON, 8)
     cyl(n + '_foot', x, y, 0, 0.22, 0.03, IRON, 16)
 
+def soft(o, levels=2):
+    sd = o.modifiers.new('soft', 'SUBSURF'); sd.levels = sd.render_levels = levels
+    return o
+def drape(o, strength=0.025, scale=0.35):
+    """Cloth folds: subdivide, then push the surface about with a cloud texture."""
+    if 'drape' not in bpy.data.textures:
+        tx = bpy.data.textures.new('drape', 'CLOUDS'); tx.noise_scale = scale
+    sd = o.modifiers.new('fine', 'SUBSURF'); sd.levels = sd.render_levels = 3; sd.subdivision_type = 'SIMPLE'
+    d = o.modifiers.new('drape', 'DISPLACE'); d.texture = bpy.data.textures['drape']; d.strength = strength; d.texture_coords = 'GLOBAL'
+    return soft(o, 1)
+def curtain(name, x0, x1, y, z0, z1, m, folds=7, depth=0.05):
+    """A hanging curtain: a strip that waves in x, given some thickness."""
+    b = MB(); n = folds * 6
+    pts = [(x0 + (x1 - x0) * i / n, y + depth * math.sin(i / n * folds * math.tau)) for i in range(n + 1)]
+    for i in range(n):
+        (ax, ay), (bx, by) = pts[i], pts[i + 1]
+        b.poly([(ax, ay, z0), (bx, by, z0), (bx, by, z1), (ax, ay, z1)], m)
+    o = b.done(name)
+    so = o.modifiers.new('thick', 'SOLIDIFY'); so.thickness = 0.012
+    for p_ in o.data.polygons: p_.use_smooth = True
+    return o
+def tex_simple(name, size, draw):
+    im = Image.new('RGB', size); draw(ImageDraw.Draw(im), im); im.save(os.path.join(TEX, name))
+    return name
+
 def pint(n, x, y, z, full=0.7):
     cyl(n, x, y, z, 0.038, 0.16, GLASS, 16, r2=0.044)
     if full: cyl(n + '_beer', x, y, z + 0.005, 0.034, 0.15 * full, mat('beer', (0.55, 0.3, 0.05), 0.1), 16)
+
+def tube(b, p1, p2, r, m, n=8):
+    """A round bar from p1 to p2, added to a mesh builder (no caps)."""
+    a, z = Vector(p1), Vector(p2)
+    ax = (z - a).normalized(); u = ax.orthogonal().normalized(); v = ax.cross(u)
+    ring = lambda c: [c + (u * math.cos(t) + v * math.sin(t)) * r for t in (k * math.tau / n for k in range(n))]
+    ra, rz = ring(a), ring(z)
+    for k in range(n):
+        b.poly([tuple(ra[k]), tuple(ra[(k + 1) % n]), tuple(rz[(k + 1) % n]), tuple(rz[k])], m)
+
+def regulars_things():
+    """At The Junction, each regular is known by a thing left on their stool."""
+    # Seat 1: a wool coat thrown over the stool, one sleeve hanging.
+    coatm = mat('coat', (0.1, 0.11, 0.09), 0.95, bump=0.3, scale=200, var=0.15)
+    b = MB()
+    # Over the seat: a cloth that sags at the sides; then down the front, its folds deepening towards the hem.
+    nx, nz = 16, 8
+    def front(i, j):
+        t, d = i / nx, j / nz
+        x = 2.38 - 0.08 * d + (0.44 + 0.16 * d) * t
+        y = 4.66 - 0.06 * d + (0.008 + 0.03 * d) * math.sin(t * 3 * math.pi + d * 1.3)
+        return (x, y, 0.87 - 0.5 * d - 0.04 * math.sin(t * math.pi * 3) * d)
+    def top(i, j):
+        t, d = i / nx, j / 4
+        x = 2.38 + 0.44 * t
+        return (x, 4.66 + 0.4 * d, 0.87 - (0.05 * abs(t - 0.5) * 2) ** 1.5 + 0.008 * math.sin(d * 7 + t * 9))
+    for i in range(nx):
+        for j in range(nz): b.poly([front(i, j), front(i + 1, j), front(i + 1, j + 1), front(i, j + 1)], coatm)
+        for j in range(4): b.poly([top(i, j + 1), top(i + 1, j + 1), top(i + 1, j), top(i, j)], coatm)
+    o = b.done('coat', thing='seat1')
+    bm = bmesh.new(); bm.from_mesh(o.data); bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.002); bm.to_mesh(o.data); bm.free()
+    so = o.modifiers.new('thick', 'SOLIDIFY'); so.thickness = 0.025; soft(o, 1)
+    for p_ in o.data.polygons: p_.use_smooth = True
+    rod('coat_sleeve', (2.79, 4.64, 0.84), (2.84, 4.6, 0.46), 0.04, coatm, 12, thing='seat1')
+    box('coat_collar', 2.46, 4.9, 0.86, 2.74, 5.02, 0.91, mat('coatcollar', (0.07, 0.07, 0.06), 0.9), thing='seat1', bevel=0.02)
+    # Seat 2: a furled umbrella leaning on the stool, a crook handle.
+    um = mat('umbrella', (0.03, 0.035, 0.06), 0.45, coat=0.3)
+    base, top = Vector((3.98, 4.58, 0.0)), Vector((3.9, 4.92, 0.92))
+    ax = (top - base).normalized(); u = ax.orthogonal().normalized(); v = ax.cross(u)
+    b = MB()
+    prof = [(0.0, 0.004), (0.08, 0.008), (0.1, 0.014), (0.55, 0.05), (0.66, 0.036), (0.7, 0.012)]
+    for (t0, r0), (t1, r1) in zip(prof, prof[1:]):
+        n = 16
+        for k in range(n):
+            w0 = 1.0 if k % 2 == 0 else 0.7; w1 = 1.0 if (k + 1) % 2 == 0 else 0.7
+            a0, a1 = k * math.tau / n, (k + 1) * math.tau / n
+            P = lambda t, r, a, w: tuple(base + ax * t * (top - base).length + (u * math.cos(a) + v * math.sin(a)) * r * (w if 0.1 <= t <= 0.66 else 1))
+            b.poly([P(t0, r0, a0, w0), P(t0, r0, a1, w1), P(t1, r1, a1, w1), P(t1, r1, a0, w0)], um)
+    L = (top - base).length
+    tube(b, base + ax * L * 0.7, top, 0.008, STEEL)
+    hm = mat('crook', (0.25, 0.12, 0.05), 0.35, coat=0.6)
+    c = top + u * 0.05; pts = [c + (-u * math.cos(t) + ax * math.sin(t)) * 0.05 for t in [k * math.pi / 8 for k in range(9)]]
+    for p0, p1 in zip(pts, pts[1:]): tube(b, p0, p1, 0.013, hm)
+    o = b.done('umbrella', thing='seat2')
+    for p_ in o.data.polygons: p_.use_smooth = True
+    box('umbrella_strap', *(tuple(base + ax * L * 0.5 - Vector((0.03, 0.03, 0.02)))), *(tuple(base + ax * L * 0.5 + Vector((0.03, 0.03, 0.02)))), mat('strap', (0.05, 0.05, 0.08), 0.6), thing='seat2')
+    # Seat 3: a yellow hard hat, the peak towards the bar.
+    hh = mat('hardhat', (0.62, 0.3, 0.0), 0.35, coat=0.3, var=0.08, scale=8)
+    ball('hat', 5.1, 4.86, 0.86, 0.15, hh, 1.0, 1.15, 0.85, lumpy=False, thing='seat3').rotation_euler = (0, 0, 0)
+    cyl('hat_brim', 5.1, 4.87, 0.85, 0.19, 0.014, hh, 32, r2=0.185, thing='seat3').scale = (1.0, 1.18, 1.0)
+    box('hat_ridge', 5.085, 4.72, 0.95, 5.115, 5.02, 0.995, hh, thing='seat3', bevel=0.012)
+    box('hat_band', 5.0, 4.7, 0.9, 5.2, 4.72, 0.93, mat('hatband', (0.06, 0.06, 0.06), 0.6), thing='seat3')
+    # Seat 4: a leather satchel, flap and buckles, the strap over the stool.
+    lm = mat('leather', (0.28, 0.14, 0.06), 0.5, bump=0.15, scale=60, var=0.3, coat=0.2)
+    o = box('bag', 6.18, 4.76, 0.84, 6.52, 4.94, 1.1, lm, thing='seat4', bevel=0.025); soft(o, 1)
+    o = box('bag_flap', 6.17, 4.735, 0.95, 6.53, 4.95, 1.115, lm, thing='seat4', bevel=0.01)
+    for k, x_ in enumerate((6.25, 6.45)):
+        box(f'bag_buckle{k}', x_ - 0.018, 4.728, 0.97, x_ + 0.018, 4.735, 1.0, mat('brass', (0.6, 0.45, 0.2), 0.25, metal=1.0), thing='seat4')
+        box(f'bag_tab{k}', x_ - 0.012, 4.732, 0.97, x_ + 0.012, 4.738, 1.06, lm, thing='seat4')
+    b = MB()
+    pts = [Vector((6.2 + 0.3 * k / 10, 4.85 - 0.12 * math.sin(k / 10 * math.pi), 1.1 + 0.2 * math.sin(k / 10 * math.pi))) for k in range(11)]
+    for p0, p1 in zip(pts, pts[1:]): tube(b, p0, p1, 0.01, lm, 6)
+    b.done('bag_strap', thing='seat4')
 
 def build_junction(closed):
     """The Junction, inside: the bar along the back, the departures board over it, windows onto the square."""
@@ -867,10 +1093,7 @@ def build_junction(closed):
             THING[f'pint{k}'] = f'seat{k + 1}'
             cyl(f'mat{k}', x_ + 0.05, 5.55, 1.1, 0.05, 0.004, mat('beermat', (0.85, 0.82, 0.7), 0.8), 16)
     if not closed:
-        box('coat', 2.42, 4.72, 0.55, 2.78, 5.02, 0.84, mat('coat', (0.12, 0.13, 0.1), 0.9, bump=0.3, scale=200), thing='seat1')
-        rod('umbrella', (3.95, 4.62, 0.0), (4.05, 4.95, 0.95), 0.03, mat('umbrella', (0.05, 0.05, 0.08), 0.5), thing='seat2')
-        ball('hat', 5.1, 4.85, 0.9, 0.17, mat('hat', (0.85, 0.7, 0.1), 0.4), 1, 1, 0.6, lumpy=False, thing='seat3')
-        box('bag', 6.2, 4.65, 0.81, 6.5, 4.9, 1.1, mat('bag', (0.35, 0.25, 0.15), 0.8), thing='seat4')
+        regulars_things()
     else:
         # After the reveal: a clipboard on the bar, the operator's Monday check.
         box('clipboard', 4.4, 5.45, 1.1, 4.7, 5.85, 1.115, mat('clip', (0.4, 0.28, 0.15), 0.6), thing='bar')
@@ -894,76 +1117,199 @@ def build_junction(closed):
     light('window_fill', 'AREA', (W_ + 0.6, D_ / 2, 1.7), 40, (0.5, 0.6, 1.0), 3.0, rot=(0, -math.pi / 2, 0), size_y=1.6)
 
 def build_flat(archive, items=()):
-    """Canal Street 12, second floor: a bed, a chair, a window onto the canal. Staff housing."""
+    """Canal Street 12, second floor: a bed, a chair, a window onto the canal. Staff housing, furnished
+    by someone who never lived in it: everything is a little too new and a little too few."""
     W_, D_, H_ = 5.0, 4.2, 2.7
     wall = mat('flatwall', (0.56, 0.54, 0.45), 0.9, bump=0.05, scale=30, var=0.2)
     room(0, 0, W_, D_, H_, wall, mat('lino', (0.32, 0.27, 0.2), 0.35, bump=0.05, scale=2, var=0.3))
     box('wall_e', W_, 0, 0, W_ + 0.2, D_, H_, wall)
     window_wall('win', 0, W_, D_, H_, [(1.6, 3.6)], 'town_view_canal.png' if not archive else 'town_view_dead.png', sill=0.85, top=2.2, wall=wall)
-    box('skirting', 0, D_ - 0.02, 0, W_, D_, 0.1, mat('skirt', (0.3, 0.25, 0.2), 0.5))
-    box('winsill', 1.5, D_ - 0.12, 0.83, 3.7, D_ + 0.05, 0.87, TRIM)
-    # The bed against the west wall, a grey blanket; the scrapbook on it.
-    box('bed_frame', 0.05, 1.6, 0, 1.0, 3.7, 0.38, DARKWOOD)
-    box('bed_mattress', 0.08, 1.63, 0.38, 0.97, 3.67, 0.55, mat('blanket', (0.25, 0.27, 0.3), 0.95, bump=0.4, scale=60))
-    box('pillow', 0.15, 3.25, 0.55, 0.9, 3.6, 0.65, mat('pillow', (0.8, 0.8, 0.76), 0.9))
-    box('bed_head', 0.05, 3.67, 0, 1.0, 3.75, 0.9, DARKWOOD)
-    box('scrapbook', 0.3, 2.2, 0.55, 0.7, 2.7, 0.6, mat('scrap', (0.35, 0.1, 0.08), 0.6), thing='scrapbook')
-    box('scrapbook_p', 0.32, 2.22, 0.6, 0.68, 2.68, 0.605, PAPER, thing='scrapbook')
+    SKIRT = mat('skirt', (0.3, 0.25, 0.2), 0.5)
+    box('skirting', 0, D_ - 0.02, 0, W_, D_, 0.1, SKIRT)
+    box('skirting_w', 0, 0, 0, 0.02, D_, 0.1, SKIRT)
+    box('skirting_e', W_ - 0.02, 0, 0, W_, 1.5, 0.1, SKIRT)
+    box('winsill', 1.5, D_ - 0.14, 0.83, 3.7, D_ + 0.05, 0.87, TRIM, bevel=0.008)
+    # Curtains on a rod, a radiator under the window.
+    CURT = mat('curtain', (0.34, 0.3, 0.2), 0.95, bump=0.15, scale=300, var=0.15)
+    rod('curtain_rod', (1.15, D_ - 0.1, 2.32), (4.05, D_ - 0.1, 2.32), 0.012, IRON)
+    curtain('curtain_l', 1.2, 1.7, D_ - 0.13, 0.75, 2.3, CURT, folds=4, depth=0.03)
+    curtain('curtain_r', 3.5, 4.0, D_ - 0.13, 0.75, 2.3, CURT, folds=4, depth=0.03)
+    RAD = mat('radiator', (0.82, 0.8, 0.74), 0.35)
+    for k in range(14): box(f'rad_fin{k}', 1.95 + k * 0.1, D_ - 0.13, 0.18, 2.0 + k * 0.1, D_ - 0.05, 0.72, RAD, bevel=0.01)
+    box('rad_top', 1.93, D_ - 0.12, 0.7, 3.32, D_ - 0.06, 0.73, RAD, bevel=0.01)
+    # The bed against the west wall: a wooden frame, a mattress, a grey duvet, a pillow; the scrapbook on it.
+    box('bed_frame', 0.05, 1.6, 0.12, 1.0, 3.7, 0.36, DARKWOOD, bevel=0.012)
+    for dx, dy in ((0.06, 1.61), (0.92, 1.61), (0.06, 3.62), (0.92, 3.62)): box(f'bed_leg{dx}{dy}', dx, dy, 0, dx + 0.07, dy + 0.07, 0.12, DARKWOOD)
+    box('bed_mattress', 0.08, 1.63, 0.36, 0.97, 3.67, 0.52, mat('mattress', (0.75, 0.74, 0.7), 0.9), bevel=0.04)
+    duv = box('bed_duvet', 0.04, 1.58, 0.33, 1.01, 3.2, 0.6, mat('blanket', (0.25, 0.28, 0.33), 0.95, bump=0.4, scale=60))
+    drape(duv, 0.035, 0.2)
+    soft(box('pillow', 0.2, 3.24, 0.5, 0.86, 3.6, 0.66, mat('pillow', (0.82, 0.82, 0.78), 0.9)), 2)
+    box('bed_head', 0.05, 3.67, 0.12, 1.0, 3.75, 0.95, DARKWOOD, bevel=0.015)
+    box('scrapbook', 0.3, 2.2, 0.6, 0.7, 2.7, 0.65, mat('scrap', (0.35, 0.1, 0.08), 0.6), thing='scrapbook', bevel=0.006)
+    box('scrapbook_p', 0.32, 2.22, 0.65, 0.68, 2.68, 0.655, PAPER, thing='scrapbook')
+    # A shelf over the bed: a few paperbacks, a jar of coins, a postcard propped against the wall.
+    box('shelf_w', 0.02, 2.2, 1.42, 0.24, 3.3, 1.45, WOOD, bevel=0.004)
+    for k, y_ in enumerate((2.3, 3.2)): box(f'shelf_br{k}', 0.02, y_, 1.3, 0.2, y_ + 0.02, 1.42, IRON)
+    rb = random.Random(12)
+    y_ = 2.27
+    for k in range(9):
+        t_ = rb.uniform(0.025, 0.045); h_ = rb.uniform(0.17, 0.22)
+        c_ = rb.choice(((0.5, 0.1, 0.08), (0.12, 0.2, 0.35), (0.7, 0.62, 0.4), (0.15, 0.3, 0.18), (0.8, 0.78, 0.7)))
+        box(f'book{k}', 0.05, y_, 1.45, 0.2, y_ + t_, 1.45 + h_, mat(f'book{k}', c_, 0.6), bevel=0.002)
+        y_ += t_ + 0.004
+    cyl('coin_jar', 0.13, 2.95, 1.45, 0.045, 0.11, glass_mat('jar', (0.85, 0.9, 0.88), 0.05), 16)
+    cyl('coins', 0.13, 2.95, 1.452, 0.04, 0.03, mat('coins', (0.6, 0.48, 0.25), 0.3, metal=1.0), 16)
+    picture('postcard', 0.03, 3.15, 1.56, 0.15, 0.1, img_mat('postcardm', tex_simple('town_postcard.png', (300, 200), lambda d, im: (d.rectangle((0, 0, 300, 120), fill=(80, 140, 200)), d.rectangle((0, 120, 300, 200), fill=(220, 200, 150)), d.ellipse((200, 20, 260, 80), fill=(250, 220, 90)), d.text((14, 150), 'Greetings from Ostend', font=font(22), fill=(60, 40, 30)))), 0.0, 0.6), '+x')
+    # A poster on the wall by the window: last year's canal festival.
+    def fest(d, im):
+        d.rectangle((0, 0, 400, 560), fill=(232, 222, 196))
+        d.rectangle((24, 24, 376, 330), fill=(40, 70, 110))
+        for k in range(7): d.arc((60 + k * 10, 110 + k * 10, 340 - k * 10, 390 - k * 10), 180, 360, fill=(230, 160, 60), width=6)
+        d.text((200, 380), 'CANAL', font=font(64), fill=(40, 40, 50), anchor='mm')
+        d.text((200, 440), 'FESTIVAL', font=font(48), fill=(40, 40, 50), anchor='mm')
+        d.text((200, 500), 'Lindeveld · August 2006', font=font(22, False), fill=(90, 70, 50), anchor='mm')
+    picture('poster', 0.75, D_ - 0.025, 1.55, 0.45, 0.63, img_mat('festm', tex_simple('town_festival.png', (400, 560), fest), 0.0, 0.7), '-y')
+    box('poster_frame', 0.51, D_ - 0.02, 1.22, 0.99, D_ - 0.005, 1.88, mat('frame', (0.08, 0.08, 0.08), 0.4))
     # The side table with the answering machine, its light blinking.
-    box('side_table', 0.1, 0.95, 0, 0.6, 1.45, 0.55, WOOD)
-    box('machine', 0.18, 1.05, 0.55, 0.48, 1.35, 0.62, BEIGE, thing='machine')
+    box('side_table', 0.1, 0.95, 0.5, 0.6, 1.45, 0.55, WOOD, bevel=0.008)
+    box('side_body', 0.13, 0.98, 0.32, 0.57, 1.42, 0.5, WOOD)
+    box('side_drawer', 0.15, 0.965, 0.35, 0.55, 0.98, 0.47, mat('drawerfront', (0.32, 0.19, 0.09), 0.45), bevel=0.004)
+    cyl('side_knob', 0.35, 0.96, 0.405, 0.012, 0.012, mat('brass', (0.6, 0.45, 0.2), 0.25, metal=1.0), 12).rotation_euler = (math.pi / 2, 0, 0)
+    for dx, dy in ((0.12, 0.97), (0.53, 0.97), (0.12, 1.38), (0.53, 1.38)): box(f'side_leg{dx}{dy}', dx, dy, 0, dx + 0.05, dy + 0.05, 0.32, WOOD)
+    box('machine', 0.18, 1.05, 0.55, 0.48, 1.35, 0.62, BEIGE, thing='machine', bevel=0.008)
     box('machine_led', 0.42, 1.08, 0.62, 0.45, 1.11, 0.625, emit_mat('led', (1, 0.1, 0.05), 25), thing='machine')
-    box('phone', 0.2, 1.1, 0.62, 0.44, 1.22, 0.66, mat('phone', (0.12, 0.12, 0.12), 0.3), thing='machine')
-    # The door in the east wall, a doormat, the brown envelope from Payroll on it.
-    box('door', W_ - 0.06, 1.5, 0, W_, 2.4, 2.05, mat('flatdoor', (0.45, 0.38, 0.28), 0.5))
+    box('phone', 0.2, 1.1, 0.62, 0.44, 1.22, 0.66, mat('phone', (0.12, 0.12, 0.12), 0.3), thing='machine', bevel=0.012)
+    # The door in the east wall, a doormat, the brown envelope from Payroll on it; a hook with your coat.
+    DOORM = mat('flatdoor', (0.45, 0.38, 0.28), 0.5)
+    box('door', W_ - 0.06, 1.5, 0, W_, 2.4, 2.05, DOORM)
+    for k, (z0, z1) in enumerate(((0.25, 0.95), (1.15, 1.85))): box(f'door_panel{k}', W_ - 0.07, 1.62, z0, W_ - 0.06, 2.28, z1, DOORM, bevel=0.01)
+    box('door_frame_l', W_ - 0.08, 1.42, 0, W_, 1.5, 2.12, TRIM); box('door_frame_r', W_ - 0.08, 2.4, 0, W_, 2.48, 2.12, TRIM); box('door_frame_t', W_ - 0.08, 1.42, 2.05, W_, 2.48, 2.12, TRIM)
+    cyl('door_handle', W_ - 0.1, 1.62, 1.0, 0.012, 0.1, CHROME, 10).rotation_euler = (math.pi / 2, 0, 0)
+    box('switch', W_ - 0.015, 2.58, 1.2, W_, 2.66, 1.3, TRIM, bevel=0.004)
     box('doormat', W_ - 0.85, 1.55, 0, W_ - 0.1, 2.35, 0.015, mat('mat', (0.22, 0.16, 0.08), 0.95, bump=0.4, scale=200))
     box('envelope', W_ - 0.7, 1.75, 0.015, W_ - 0.38, 1.97, 0.022, mat('envelope', (0.6, 0.45, 0.25), 0.8), thing='envelope')
-    # A kitchenette along the east wall: a counter, two rings, a boiler on the wall.
-    box('counter', W_ - 0.6, 2.7, 0, W_, D_ - 0.05, 0.9, mat('counter', (0.62, 0.58, 0.5), 0.4))
-    box('hob', W_ - 0.5, 3.4, 0.9, W_ - 0.1, 3.9, 0.92, IRON)
-    box('boiler', W_ - 0.35, 3.45, 1.55, W_, 3.95, 2.25, mat('boiler', (0.8, 0.8, 0.77), 0.4))
-    # The one chair, with the Home Catalogue on it.
-    chair('chair', 2.6, 1.9, math.radians(200), WOOD)
-    box('catalogue', 2.45, 1.75, 0.48, 2.75, 2.1, 0.5, mat('catalogue', (0.85, 0.3, 0.1), 0.5), thing='catalogue')
-    box('table', 2.0, 2.4, 0.72, 3.3, 3.2, 0.76, WOOD)
+    rod('hook', (W_ - 0.01, 1.2, 1.7), (W_ - 0.08, 1.2, 1.72), 0.008, IRON)
+    coat = box('flat_coat', W_ - 0.13, 1.02, 0.85, W_ - 0.03, 1.38, 1.72, mat('coat', (0.42, 0.3, 0.17), 0.9, bump=0.2, scale=250))
+    drape(coat, 0.03, 0.3)
+    # A kitchenette along the east wall: cupboards, a worktop with a sink and two rings, a small fridge,
+    # tiles, a wall cupboard and the boiler.
+    UNIT = mat('unit', (0.66, 0.62, 0.54), 0.45)
+    box('counter', W_ - 0.6, 2.7, 0.08, W_, D_ - 0.05, 0.86, UNIT)
+    box('plinth', W_ - 0.56, 2.7, 0, W_, D_ - 0.05, 0.08, mat('plinth', (0.15, 0.13, 0.11), 0.6))
+    box('worktop', W_ - 0.63, 2.68, 0.86, W_, D_ - 0.03, 0.9, mat('worktop', (0.35, 0.33, 0.3), 0.3, bump=0.05, scale=30, var=0.2), bevel=0.006)
+    for k, (y0, y1) in enumerate(((2.74, 3.3), (3.33, 3.72), (3.75, 4.12))):
+        fr = k == 0
+        box(f'cup_door{k}', W_ - 0.615, y0, 0.12, W_ - 0.6, y1, 0.82, mat('fridge', (0.86, 0.86, 0.84), 0.3) if fr else UNIT, bevel=0.005)
+        box(f'cup_handle{k}', W_ - 0.635, y1 - 0.08 if not fr else y0 + 0.04, 0.62 if not fr else 0.45, W_ - 0.615, y1 - 0.06 if not fr else y0 + 0.06, 0.76, CHROME)
+    box('sink', W_ - 0.5, 3.75, 0.84, W_ - 0.12, 4.08, 0.905, mat('steel', (0.6, 0.6, 0.62), 0.25, metal=1.0), bevel=0.01)
+    box('sink_hole', W_ - 0.47, 3.78, 0.86, W_ - 0.15, 4.05, 0.906, mat('sinkdark', (0.12, 0.12, 0.13), 0.3, metal=1.0))
+    rod('tap', (W_ - 0.06, 3.91, 0.9), (W_ - 0.06, 3.91, 1.08), 0.012, CHROME); rod('tap_spout', (W_ - 0.06, 3.91, 1.08), (W_ - 0.2, 3.91, 1.05), 0.01, CHROME)
+    for k, y_ in enumerate((3.05, 3.4)):
+        cyl(f'ring{k}', W_ - 0.3, y_, 0.9, 0.09, 0.012, IRON, 24)
+        cyl(f'ring{k}_c', W_ - 0.3, y_, 0.9, 0.06, 0.014, mat('ringdark', (0.02, 0.02, 0.02), 0.5), 24)
+    def tiles(d, im):
+        d.rectangle((0, 0, 600, 300), fill=(160, 160, 150))
+        for i in range(12):
+            for j in range(6): d.rectangle((i * 50 + 2, j * 50 + 2, i * 50 + 48, j * 50 + 48), fill=(232, 230, 220) if (i + j) % 7 else (200, 210, 205))
+    picture('tiles', W_ - 0.005, 3.42, 1.2, 1.45, 0.6, img_mat('tilesm', tex_simple('town_tiles.png', (600, 300), tiles), 0.0, 0.25), '-x')
+    box('wallcup', W_ - 0.35, 2.75, 1.55, W_, 3.4, 2.15, UNIT, bevel=0.006)
+    box('wallcup_seam', W_ - 0.352, 3.07, 1.57, W_ - 0.348, 3.08, 2.13, mat('seam', (0.2, 0.2, 0.2), 0.6))
+    box('boiler', W_ - 0.35, 3.45, 1.55, W_, 3.95, 2.25, mat('boiler', (0.8, 0.8, 0.77), 0.4), bevel=0.02)
+    box('boiler_panel', W_ - 0.352, 3.55, 1.62, W_ - 0.34, 3.85, 1.72, mat('boilerpanel', (0.2, 0.22, 0.25), 0.4))
+    box('boiler_led', W_ - 0.355, 3.8, 1.66, W_ - 0.35, 3.82, 1.68, emit_mat('ledg', (0.2, 1, 0.3), 12))
+    # The one chair, at the table, with the Home Catalogue on it; a mug on the table.
+    chair('chair', 2.62, 1.98, math.radians(-12), WOOD)
+    box('catalogue', 2.47, 1.83, 0.475, 2.77, 2.15, 0.495, mat('catalogue', (0.85, 0.3, 0.1), 0.5), thing='catalogue')
+    box('table', 2.0, 2.4, 0.72, 3.3, 3.2, 0.76, WOOD, bevel=0.01)
+    box('table_apron', 2.06, 2.46, 0.64, 3.24, 3.14, 0.72, WOOD)
     for dx, dy in ((2.05, 2.45), (3.2, 2.45), (2.05, 3.1), (3.2, 3.1)): box(f'tleg{dx}{dy}', dx, dy, 0, dx + 0.05, dy + 0.05, 0.72, WOOD)
-    pint('mug', 2.4, 2.8, 0.76, 0)
-    # The bare bulb.
+    MUG = mat('mugcream', (0.85, 0.82, 0.74), 0.3)
+    cyl('mug', 2.4, 2.8, 0.76, 0.042, 0.095, MUG, 24)
+    cyl('mug_tea', 2.4, 2.8, 0.76, 0.037, 0.085, mat('tea', (0.18, 0.08, 0.03), 0.1), 24)
+    rod('mug_handle', (2.45, 2.8, 0.785), (2.45, 2.8, 0.835), 0.01, MUG, 8)
+    # The bare bulb on its cord, from a ceiling rose.
+    cyl('rose', 2.5, 2.0, H_ - 0.03, 0.06, 0.03, TRIM, 16)
     rod('cord', (2.5, 2.0, H_), (2.5, 2.0, 2.2), 0.005, IRON)
     cyl('bulb', 2.5, 2.0, 2.12, 0.05, 0.08, emit_mat('flatbulb', (1, 0.8, 0.55), 20), 12)
     light('bulbL', 'POINT', (2.5, 2.0, 2.05), 80 if not archive else 40, (1, 0.75, 0.5), 0.05)
     light('canal_glow', 'AREA', (2.6, D_ + 0.4, 1.5), 20, (0.5, 0.6, 1.0), 2.0, rot=(math.radians(90), 0, 0))
     # The Home Catalogue: what you have bought turns up here (rendered one at a time, see MODE item).
     ITEMS = {}
-    def it(name):
-        ITEMS.setdefault(name, [])
-        return name
     if 'rug' in items:
-        ITEMS['rug'] = [box('rug', 1.3, 0.9, 0, 3.6, 2.6, 0.012, mat('rug', (0.45, 0.12, 0.08), 0.95, bump=0.3, scale=100, var=0.4))]
+        def rug(d, im):
+            d.rectangle((0, 0, 800, 600), fill=(120, 30, 24))
+            d.rectangle((30, 30, 770, 570), outline=(200, 160, 90), width=14)
+            d.rectangle((60, 60, 740, 540), outline=(40, 50, 80), width=10)
+            for k in range(14): d.ellipse((90 + k * 47, 80, 110 + k * 47, 100), fill=(200, 160, 90)); d.ellipse((90 + k * 47, 500, 110 + k * 47, 520), fill=(200, 160, 90))
+            d.polygon([(400, 150), (620, 300), (400, 450), (180, 300)], fill=(40, 50, 80), outline=(200, 160, 90))
+            d.polygon([(400, 210), (530, 300), (400, 390), (270, 300)], fill=(200, 160, 90))
+            d.ellipse((370, 270, 430, 330), fill=(120, 30, 24))
+        RUG = img_mat('rugm', tex_simple('town_rug.png', (800, 600), rug), 0.0, 0.95)
+        rg = uvbox('rug', 1.3, 0.9, 0, 3.6, 2.6, 0.012, RUG, 'up')
+        fr = [rg]
+        for k in range(24):
+            for x_ in (1.29, 3.61): fr.append(rod(f'fringe{x_}_{k}', (x_, 0.95 + k * 0.068, 0.006), (x_ + (-0.05 if x_ < 2 else 0.05), 0.95 + k * 0.068, 0.004), 0.004, mat('fringe', (0.85, 0.8, 0.68), 0.9), 6))
+        ITEMS['rug'] = fr
     if 'armchair' in items:
         am = mat('armchair', (0.2, 0.28, 0.22), 0.9, bump=0.3, scale=200)
-        b = MB(); b.box(-0.45, -0.45, 0.15, 0.45, 0.45, 0.48, am); b.box(-0.45, 0.3, 0.15, 0.45, 0.48, 1.0, am)
-        b.box(-0.55, -0.45, 0.15, -0.4, 0.48, 0.68, am); b.box(0.4, -0.45, 0.15, 0.55, 0.48, 0.68, am)
-        for dx in (-0.45, 0.4):
-            for dy in (-0.42, 0.4): b.box(dx, dy, 0, dx + 0.05, dy + 0.05, 0.15, DARKWOOD)
-        ITEMS['armchair'] = [b.done('armchair', (3.9, 3.3, 0), math.radians(150))]
+        parts = []
+        piv = (3.72, 3.4)
+        def ap(name, x0, y0, z0, x1, y1, z1, m, lv=2):
+            o = box(name, x0, y0, z0, x1, y1, z1, m)
+            if lv: bv = o.modifiers.new('round', 'BEVEL'); bv.width = 0.045 * lv; bv.segments = 5; bv.limit_method = 'NONE'; soft(o, 1)
+            parts.append(o); return o
+        ap('arm_base', -0.42, -0.42, 0.12, 0.42, 0.42, 0.36, am, 1)
+        ap('arm_seat', -0.31, -0.4, 0.33, 0.31, 0.28, 0.5, am, 1)
+        ap('arm_back', -0.42, 0.26, 0.2, 0.42, 0.46, 1.0, am, 1)
+        ap('arm_l', -0.5, -0.42, 0.15, -0.3, 0.44, 0.66, am, 1); ap('arm_r', 0.3, -0.42, 0.15, 0.5, 0.44, 0.66, am, 1)
+        for dx in (-0.4, 0.34):
+            for dy in (-0.38, 0.36): ap(f'arm_leg{dx}{dy}', dx, dy, 0, dx + 0.05, dy + 0.05, 0.13, DARKWOOD, 0)
+        rot = math.radians(215)
+        for o in parts:
+            o.data.transform(Matrix.Rotation(rot, 4, 'Z')); o.location = (piv[0], piv[1], 0)
+        ITEMS['armchair'] = parts
     if 'lamp' in items:
-        ITEMS['lamp'] = [cyl('lamp_base', 1.3, 3.8, 0, 0.15, 0.03, IRON, 16), cyl('lamp_pole', 1.3, 3.8, 0.03, 0.015, 1.35, IRON, 8),
-                         cyl('lamp_shade', 1.3, 3.8, 1.3, 0.2, 0.25, emit_mat('lampshade', (1, 0.7, 0.4), 1.5), 20, r2=0.12)]
+        SHADE = mat('lampshade_f', (0.85, 0.72, 0.5), 0.9)
+        n_ = SHADE.node_tree.nodes; p_ = n_['Principled BSDF']
+        p_.inputs['Emission Color'].default_value = (1, 0.72, 0.42, 1); p_.inputs['Emission Strength'].default_value = 1.2
+        ITEMS['lamp'] = [cyl('lamp_base', 1.3, 3.8, 0, 0.15, 0.025, IRON, 24), cyl('lamp_pole', 1.3, 3.8, 0.025, 0.012, 1.3, mat('brass', (0.6, 0.45, 0.2), 0.25, metal=1.0), 10),
+                         cyl('lamp_shade', 1.3, 3.8, 1.28, 0.22, 0.28, SHADE, 32, r2=0.13)]
         if MODE != 'item' or PLACE == 'lamp': light('lampL', 'POINT', (1.3, 3.8, 1.35), 25, (1, 0.7, 0.4), 0.1)
     if 'kettle' in items:
-        ITEMS['kettle'] = [cyl('kettle', W_ - 0.3, 3.0, 0.9, 0.1, 0.2, CHROME, 20, r2=0.07), rod('kettle_spout', (W_ - 0.38, 3.0, 0.98), (W_ - 0.48, 3.0, 1.1), 0.015, CHROME)]
+        K = mat('kettlecream', (0.86, 0.84, 0.78), 0.25)
+        kx, ky = W_ - 0.3, 2.95
+        ITEMS['kettle'] = [soft(cyl('kettle', kx, ky, 0.9, 0.09, 0.19, K, 32, r2=0.07), 1), cyl('kettle_base', kx, ky, 0.9, 0.095, 0.02, mat('kettlebase', (0.1, 0.1, 0.1), 0.4), 32),
+                           cyl('kettle_lid', kx, ky, 1.09, 0.06, 0.015, K, 24), cyl('kettle_knob', kx, ky, 1.105, 0.015, 0.02, mat('kettleknob', (0.1, 0.1, 0.1), 0.4), 12),
+                           rod('kettle_h1', (kx + 0.06, ky, 1.05), (kx + 0.13, ky, 1.04), 0.013, K), rod('kettle_h2', (kx + 0.13, ky, 1.04), (kx + 0.12, ky, 0.94), 0.013, K),
+                           rod('kettle_spout', (kx - 0.07, ky, 1.0), (kx - 0.14, ky, 1.08), 0.016, K)]
     if 'plant' in items:
-        ITEMS['plant'] = [cyl('plant_pot', 2.0, D_ - 0.05, 0.87, 0.09, 0.13, mat('pot', (0.55, 0.22, 0.12), 0.7), 16, r2=0.11),
-                          ball('plant', 2.0, D_ - 0.05, 1.1, 0.16, LEAVES[2], 1, 1, 1.3)]
+        P = [cyl('plant_pot', 2.0, D_ - 0.06, 0.87, 0.09, 0.14, mat('terracotta', (0.55, 0.22, 0.12), 0.7, bump=0.1, scale=40), 24, r2=0.11),
+             cyl('plant_soil', 2.0, D_ - 0.06, 0.995, 0.1, 0.01, mat('soil', (0.08, 0.05, 0.03), 0.95), 24)]
+        LEAF = mat('rubberleaf', (0.05, 0.2, 0.07), 0.35, var=0.3, scale=20, coat=0.3)
+        rl = random.Random(4)
+        for k in range(11):
+            a = k * 2.4; h_ = 1.05 + k * 0.035
+            r_ = 0.06 + rl.uniform(0, 0.05)
+            P.append(rod(f'plant_stem{k}', (2.0, D_ - 0.06, 1.0), (2.0 + math.cos(a) * r_ * 0.6, D_ - 0.06 + math.sin(a) * r_ * 0.6, h_), 0.005, mat('stem2', (0.15, 0.25, 0.08), 0.6), 6))
+            lf = ball(f'plant_leaf{k}', 2.0 + math.cos(a) * r_, D_ - 0.06 + math.sin(a) * r_, h_ + 0.02, 0.07, LEAF, 1, 0.42, 0.08, lumpy=False)
+            lf.rotation_euler = (0.5, -0.35, a); P.append(lf)
+        ITEMS['plant'] = P
     if 'radio' in items:
-        ITEMS['radio'] = [box('radio', 2.7, 2.9, 0.76, 3.15, 3.08, 0.98, mat('radio', (0.12, 0.1, 0.09), 0.4)),
-                          box('radio_grill', 2.75, 2.885, 0.8, 2.95, 2.9, 0.94, mat('grill', (0.6, 0.6, 0.6), 0.4, metal=0.8)),
-                          box('radio_dial', 2.98, 2.885, 0.88, 3.1, 2.9, 0.93, emit_mat('dial', (1, 0.7, 0.3), 2))]
+        RAD_ = mat('radio', (0.3, 0.17, 0.08), 0.35, bump=0.05, scale=4, var=0.3, coat=0.4)
+        def grill(d, im):
+            d.rectangle((0, 0, 200, 140), fill=(70, 62, 52))
+            for i in range(0, 200, 8):
+                for j in range(0, 140, 8): d.ellipse((i + 2, j + 2, i + 6, j + 6), fill=(30, 26, 22))
+        ITEMS['radio'] = [box('radio', 2.7, 2.9, 0.76, 3.15, 3.08, 0.98, RAD_, bevel=0.025),
+                          picture('radio_grill', 2.84, 2.894, 0.87, 0.2, 0.15, img_mat('grillm', tex_simple('town_grill.png', (200, 140), grill), 0.0, 0.8), '-y'),
+                          box('radio_dial', 2.97, 2.888, 0.86, 3.1, 2.9, 0.93, emit_mat('dial', (1, 0.7, 0.3), 2)),
+                          rod('radio_knob1', (2.99, 2.9, 0.82), (2.99, 2.875, 0.82), 0.014, mat('knob', (0.08, 0.06, 0.05), 0.3), 16),
+                          rod('radio_knob2', (3.08, 2.9, 0.82), (3.08, 2.875, 0.82), 0.014, mat('knob', (0.08, 0.06, 0.05), 0.3), 16),
+                          rod('radio_aerial', (3.1, 3.05, 0.98), (2.95, 3.12, 1.32), 0.004, CHROME, 6)]
     if archive:
         # Every object has a small white label now: ARCHIVE ITEM, and a number.
         TAG = img_mat('tagm', 'town_tag.png', 0.0, 0.8)
-        for n_, (x_, y_, z_, f_) in {'bed': (0.6, 1.58, 0.45, '-y'), 'chair': (2.62, 1.66, 0.62, '-y'), 'machine': (0.33, 1.03, 0.6, '-y'), 'window': (2.6, D_ - 0.14, 0.75, '-y'), 'counter': (W_ - 0.62, 3.0, 0.7, '-x')}.items():
+        for n_, (x_, y_, z_, f_) in {'bed': (0.6, 1.55, 0.3, '-y'), 'chair': (2.6, 1.78, 0.62, '-y'), 'machine': (0.33, 1.03, 0.6, '-y'), 'window': (2.6, D_ - 0.14, 0.75, '-y'), 'counter': (W_ - 0.62, 3.0, 0.7, '-x')}.items():
             picture('tag_' + n_, x_, y_, z_, 0.16, 0.085, TAG, f_)
     return ITEMS
 
@@ -1058,7 +1404,7 @@ def build_house():
             box(f'drawer{i}_{k}', 0.6, y_, z_, 0.62, y_ + 0.22, z_ + 0.17, mat('drawer', (0.36, 0.22, 0.1), 0.4))
             box(f'pull{i}_{k}', 0.62, y_ + 0.08, z_ + 0.06, 0.64, y_ + 0.14, z_ + 0.09, mat('brass', (0.6, 0.45, 0.2), 0.25, metal=1.0))
     # The corkboard.
-    picture('corkboard', 0.03, 6.3, 1.75, 2.1, 1.4, img_mat('corkm', 'town_cork.png', 0.0, 0.8), '+x', thing='corkboard')
+    picture('corkboard', 0.05, 6.3, 1.75, 2.1, 1.4, img_mat('corkm', 'town_cork.png', 0.0, 0.8), '+x', thing='corkboard')
     box('cork_frame', 0.0, 5.2, 1.0, 0.04, 7.4, 2.5, DARKWOOD, thing='corkboard')
     # The grey machine in the corner (east), green screen, a slot, a card in the tray.
     gm = mat('greymachine', (0.45, 0.46, 0.46), 0.45, var=0.1, scale=10)
@@ -1079,6 +1425,75 @@ def build_house():
         box(f'strip{k}_tube', x_ - 0.6, 4.25, 2.48, x_ + 0.6, 4.35, 2.5, emit_mat('tube', (0.95, 1.0, 0.92), 10))
         light(f'stripL{k}', 'AREA', (x_, 4.3, 2.46), 70, (0.95, 1.0, 0.9), 1.2, size_y=0.2)
     for k in range(4): box(f'radiator{k}', 1.3 + k * 3.5, D_ - 0.35, 0.15, 3.0 + k * 3.5, D_ - 0.2, 0.8, mat('radiator', (0.8, 0.78, 0.72), 0.4))
+    # The west wall: bookcases of binders and paperbacks either side; above the catalogue, a whiteboard with
+    # last Tuesday still on it.
+    rr = random.Random(21)
+    spines = [mat(f'spine{i}', c, 0.6) for i, c in enumerate(((0.35, 0.06, 0.05), (0.06, 0.12, 0.3), (0.6, 0.55, 0.4), (0.08, 0.2, 0.1), (0.5, 0.3, 0.08), (0.75, 0.72, 0.65), (0.15, 0.1, 0.18)))]
+    for c, y0 in enumerate((0.25, 7.5)):
+        b = MB()   # built facing +y, then turned to face the room (+x)
+        b.box(0, 0, 0, 1.3, 0.03, 2.3, DARKWOOD); b.box(0, 0, 2.26, 1.3, 0.42, 2.3, DARKWOOD); b.box(0, 0.38, 0, 1.3, 0.42, 0.1, DARKWOOD)
+        for sx in (0, 1.26): b.box(sx, 0, 0, sx + 0.04, 0.42, 2.3, DARKWOOD)
+        for k in range(5):
+            z_ = 0.12 + k * 0.43
+            b.box(0.04, 0.03, z_, 1.26, 0.42, z_ + 0.03, WOOD)
+            x_ = 0.07; gap = rr.random() < 0.3
+            while x_ < 1.2 - (0.3 if gap else 0):
+                bw = rr.uniform(0.025, 0.07); bh = rr.uniform(0.24, 0.36)
+                b.box(x_, 0.05, z_ + 0.03, x_ + bw, 0.33 + rr.uniform(0, 0.05), z_ + 0.03 + bh, rr.choice(spines))
+                x_ += bw + 0.004
+            if gap:   # a few lying flat in the gap
+                for i in range(3): b.box(x_ + 0.02, 0.08, z_ + 0.03 + i * 0.035, x_ + 0.26, 0.34, z_ + 0.06 + i * 0.035, rr.choice(spines))
+        b.done(f'bookcase{c}', (0.02, y0 + 1.3, 0), -math.pi / 2)
+    wb = tex_simple('town_whiteboard.png', (1000, 500), lambda d, im: (
+        d.rectangle((0, 0, 1000, 500), fill=(236, 238, 236)),
+        d.text((40, 40), 'Tuesday seminar: why training does not transfer', font=font(34, False), fill=(30, 50, 140)),
+        [d.rectangle((60 + k * 300, 140, 300 + k * 300, 260), outline=(30, 50, 140), width=4) for k in range(3)],
+        [d.text((180 + k * 300, 200), t, font=font(30, False), fill=(30, 50, 140), anchor='mm') for k, t in enumerate(('the learner', 'the course', 'the work'))],
+        d.line((300, 200, 360, 200), fill=(200, 30, 30), width=5), d.line((600, 200, 660, 200), fill=(200, 30, 30), width=5),
+        d.text((780, 300), 'most of it is here', font=font(30, False), fill=(200, 30, 30), anchor='mm'),
+        d.line((780, 280, 780, 265), fill=(200, 30, 30), width=4),
+        d.text((40, 400), 'Baldwin & Ford, 1988', font=font(28, False), fill=(60, 60, 60)),
+        d.text((960, 460), 'please do not wipe', font=font(22, False), fill=(120, 120, 120), anchor='rm')))
+    alu = mat('alu', (0.6, 0.6, 0.62), 0.3, metal=0.8)
+    picture('whiteboard', 0.06, 3.1, 2.15, 2.0, 1.0, img_mat('wbm', wb, 0.0, 0.25), '+x')
+    box('whiteboard_frame', 0.0, 2.06, 1.62, 0.05, 4.14, 2.68, alu)
+    box('whiteboard_tray', 0.05, 2.2, 1.6, 0.12, 4.0, 1.64, alu)
+    for k, c in enumerate(((0.05, 0.1, 0.5), (0.6, 0.05, 0.05), (0.05, 0.05, 0.05))):
+        box(f'marker{k}', 0.07, 2.4 + k * 0.18, 1.64, 0.09, 2.53 + k * 0.18, 1.66, mat(f'marker{k}', c, 0.4))
+    # An old runner under the long table, worn pale where the chairs go.
+    def runner(d, im):
+        d.rectangle((0, 0, 1400, 500), fill=(96, 28, 24)); d.rectangle((24, 24, 1376, 476), outline=(150, 110, 60), width=10)
+        d.rectangle((60, 60, 1340, 440), outline=(40, 30, 50), width=6)
+        for k in range(12): d.ellipse((120 + k * 100, 230, 160 + k * 100, 270), fill=(150, 110, 60))
+        rw = random.Random(4)
+        for k in range(9000):
+            x, y = rw.randrange(1400), rw.choice((rw.randrange(40, 150), rw.randrange(350, 460), rw.randrange(500)))
+            d.point((x, y), fill=(130 + rw.randrange(40), 70 + rw.randrange(30), 55))
+    picture('runner', 6.5, 4.3, 0.0, 8.2, 3.6, img_mat('runnerm', tex_simple('town_runner.png', (1400, 500), runner), 0.0, 0.95), 'up', t=0.006)
+    # A flipchart at the head of the table, the tea trolley by the column, spare chairs along the east wall.
+    FX, FY = 2.25, 4.3
+    for k, (dx, dy) in enumerate(((-0.3, -0.25), (0.3, -0.25), (0.0, 0.3))):
+        rod(f'flip_leg{k}', (FX + dx, FY + dy, 0), (FX, FY, 1.8), 0.012, mat('alu', (0.6, 0.6, 0.62), 0.3, metal=0.8))
+    fc = tex_simple('town_flipchart.png', (400, 560), lambda d, im: (
+        d.rectangle((0, 0, 400, 560), fill=(246, 244, 236)),
+        d.text((200, 60), 'CASE CLINIC', font=font(40), fill=(30, 30, 30), anchor='mm'),
+        [d.text((40, 140 + k * 70), t, font=font(30, False), fill=((30, 50, 140), (200, 30, 30), (30, 110, 50), (30, 50, 140))[k]) for k, t in enumerate(('1. sort', '2. find the gap', '3. one line', '4. near miss'))]))
+    picture('flipchart', FX + 0.04, FY, 1.35, 0.7, 0.95, img_mat('flipm', fc, 0.0, 0.7), '+x', thing='table')
+    box('flip_board', FX - 0.02, FY - 0.37, 0.85, FX + 0.04, FY + 0.37, 1.85, mat('flipback', (0.2, 0.2, 0.2), 0.5))
+    tm = mat('trolley', (0.55, 0.56, 0.56), 0.35, metal=0.7)
+    TX, TY = 9.2, 6.7
+    for z_ in (0.25, 0.75):
+        box(f'trolley_top{z_}', TX - 0.4, TY - 0.25, z_, TX + 0.4, TY + 0.25, z_ + 0.03, tm)
+    for dx in (-0.38, 0.38):
+        for dy in (-0.23, 0.23):
+            rod(f'trolley_leg{dx}{dy}', (TX + dx, TY + dy, 0.06), (TX + dx, TY + dy, 0.78), 0.012, tm)
+            cyl(f'trolley_wheel{dx}{dy}', TX + dx, TY + dy, 0.0, 0.035, 0.06, IRON, 10)
+    cyl('urn', TX - 0.18, TY, 0.78, 0.13, 0.42, mat('urn', (0.75, 0.75, 0.76), 0.2, metal=1.0), 24, r2=0.11)
+    cyl('urn_lid', TX - 0.18, TY, 1.2, 0.08, 0.05, IRON, 16)
+    for k in range(6):
+        cyl(f'cup{k}', TX + 0.05 + (k % 3) * 0.11, TY - 0.1 + (k // 3) * 0.17, 0.78, 0.035, 0.07, mat('cup', (0.93, 0.92, 0.88), 0.3, coat=0.5), 14)
+    box('biscuits', TX + 0.05, TY - 0.15, 0.28, TX + 0.35, TY + 0.1, 0.36, mat('biscuittin', (0.5, 0.08, 0.08), 0.3, metal=0.5))
+    for k in range(3): chair(f'spare{k}', 13.55, 5.2 + k * 0.55, -math.pi / 2, WOOD)
     light('warm', 'AREA', (7, 2.0, H_ - 0.1), 150, (1, 0.75, 0.5), 5.0, size_y=3.0)
     light('desklamp', 'POINT', (3.5, 4.0, 1.4), 20, (1, 0.7, 0.4), 0.1)
     box('desklamp_shade', 3.35, 4.45, 1.2, 3.65, 4.75, 1.4, mat('greenshade', (0.05, 0.25, 0.12), 0.3, coat=0.8))
@@ -1099,6 +1514,18 @@ def build_street_detail():
         ball(f'bread{k}', -32.8 + k * 0.6, 21.55, 0.95, 0.16, mat('bread', (0.5, 0.28, 0.1), 0.6, bump=0.3, scale=30), 1.6, 1, 0.7, lumpy=False, thing='bakery')
     box('bread_shelf', -33.4, 21.4, 0.78, -28.6, 21.7, 0.8, WOOD, thing='bakery')
     THING['bakery'] = 'bakery'; THING['bakery_sign'] = 'bakery'
+    # Every other shop window on the street: a lit room behind glass, its light on the wet pavement.
+    kinds = ('books', 'clothes', 'chemist', 'travel', 'hardware', 'tolet')
+    near = sorted((sh for sh in SHOPS if sh[0] != 'bakery' and sh[6] in ('S', 'N') and -75 < sh[1] < -2 and 8 < sh[2] < 28), key=lambda sh: -sh[1])
+    for k, (name, x, y, z, w, h, face, on) in enumerate(near):
+        rr = random.Random(name)
+        kind = 'tolet' if not on or rr.random() < (0.45 if ACT == 2 else 0.15) else kinds[k % 5]
+        sg = -1 if face == 'S' else 1
+        f = '-y' if face == 'S' else '+y'
+        picture(f'shop{k}', x, y + sg * 0.065, z, w, h, img_mat(f'shop_{kind}', f'town_shop_{kind}.png', 0.5 if kind != 'tolet' else 0.2, 0.6), f)
+        box(f'shopglass{k}', x - w / 2, y + sg * 0.09 - 0.004, z - h / 2, x + w / 2, y + sg * 0.09 + 0.004, z + h / 2, GLASS)
+        if kind != 'tolet':
+            light(f'shopspill{k}', 'AREA', (x, y + sg * 0.3, z + h * 0.3), 60, (1, 0.78, 0.5), w * 0.8, rot=(math.radians(-90 if face == 'S' else 90), 0, 0), size_y=0.4)
     # A blank gable on the south side with four posters, faces torn off.
     # A hoarding on the south pavement with four posters, faces torn off.
     box('hoarding', -26.0, 14.05, 0.12, -20.0, 14.15, 2.6, mat('hoarding', (0.22, 0.2, 0.17), 0.8, bump=0.2, scale=10, var=0.5), thing='posters')
@@ -1175,10 +1602,11 @@ elif MODE in ('shot', 'shotmask', 'item'):
         write_json(f'tshot_{PLACE}_ids.json', ids)
         flat_ids(THING, ids, os.path.join(OUT, f'tshot_{PLACE}_mask.png'))
     else:
-        # One catalogue thing on its own: everything else still blocks it, but renders transparent.
+        # One catalogue thing on its own: everything else still blocks it and catches its shadow, but
+        # renders transparent, so the thing sits in the room when the game lays it over the flat.
         keep = set(o.name for o in ITEMS.get(PLACE, []))
         for o in S.objects:
-            if o.type in ('MESH', 'FONT') and o.name not in keep: o.is_holdout = True
+            if o.type in ('MESH', 'FONT') and o.name not in keep: o.is_shadow_catcher = True
         S.render.filepath = os.path.join(OUT, f'titem_{PLACE}.png')
         bpy.ops.render.render(write_still=True)
 print('done', MODE, ARGS)
