@@ -75,7 +75,12 @@ async function page(b, mobile) {
   }, history);
   await p.goto('http://localhost:8767/');
   await p.click('#btn-start');
-  while (!(await p.isVisible('#s-desk'))) await p.click('#btn-sit');
+  // The desk first (js/seat.js), then the boot screen, then Log on.
+  for (let i = 0; i < 40 && !(await p.isVisible('#s-desk.active')); i++) {
+    if (await p.isVisible('#s-seat.active')) await p.click('#seat-list button[data-go="screen"]');
+    else if (await p.isVisible('#s-cubicle.active')) await p.click('#btn-sit');
+    else await p.waitForTimeout(150);
+  }
   await p.waitForFunction(() => window.__intake.state.pool && window.__intake.state.pool.length);
   p.errs = errs;
   return p;

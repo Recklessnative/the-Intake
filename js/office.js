@@ -349,8 +349,13 @@
   // A short film over the page: from your monitor you stand up and the view rises into the floor
   // picture (stand), or the same shot backwards (sit). `under` swaps the screen beneath while the
   // last frame is still up, then the film fades away into it. Any key or click skips.
+  // Each film plays once per working day (`day`, set by the game); after that the move is a quick cut.
+  let day = null;
+  const filmed = {};
   function film(name, under, rate) {
     if (reduced() || saveData() || !document.createElement('video').canPlayType) { under(false); return; }
+    if (day && filmed[name] === day) { document.body.dataset.film = name + '-quick'; under(false); return; }
+    if (day) filmed[name] = day;
     const old = $('office-film');
     if (old) old.remove();
     const f = el('div', 'office-film'); f.id = 'office-film'; f.setAttribute('aria-hidden', 'true');
@@ -371,7 +376,7 @@
       document.body.dataset.film = name + (played ? '-played' : '-failed');
       under(played);
       f.classList.add('out');
-      setTimeout(() => f.remove(), 700);
+      setTimeout(() => f.remove(), 350);
     };
     const key = ev => { if (ev.key === 'Escape' || ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); finish(true); } };
     document.addEventListener('keydown', key, true);
@@ -387,10 +392,23 @@
   // From your desk to the floor.
   // `between`: anything that happens after you stand and before the floor shows (going home overnight).
   function standUp(opts, between) {
-    film('stand', played => { showFloor(opts); if (between) between(); if (!played) { const st = $('office-stage'); st.classList.remove('arrive'); void st.offsetWidth; st.classList.add('arrive'); } });
+    film('stand', played => { showFloor(opts); if (between) between(); if (!played) { const st = $('office-stage'); st.classList.remove('arrive'); void st.offsetWidth; st.classList.add('arrive'); } }, 1.5);
   }
   // From the floor back to your desk: the same shot backwards, a little quicker.
-  function sitDown(then) { closeCard(); film('sit', () => then(), 1.25); }
+  function sitDown(then) { closeCard(); film('sit', played => { then(); if (!played) arrive($('s-seat')); }, 1.6); }
+  function arrive(node) { if (!node) return; node.classList.remove('arrive'); void node.offsetWidth; node.classList.add('arrive'); }
+  // Pictures and films for where you are likely to go next, so nothing pops in late.
+  const warm = new Set();
+  function preload(names) {
+    const fmt = document.createElement('video').canPlayType && document.createElement('video').canPlayType('video/webm') ? 'webm' : 'mp4';
+    const small = window.innerWidth < 1100;
+    names.forEach(n => {
+      const url = /^(stand|sit)$/.test(n) ? MEDIA + n + '.' + fmt : MEDIA + n + (small && n !== 'mask' ? '-960.webp' : '.webp');
+      if (warm.has(url)) return;
+      warm.add(url);
+      if (url.endsWith('.webp')) { const i = new Image(); i.src = url; } else if (window.fetch) fetch(url).catch(() => warm.delete(url));
+    });
+  }
 
-  window.Office = { init: o => { show = o.show; look = o.look || (() => {}); }, show: showFloor, standUp, sitDown, walkIn, close: closeCard };
+  window.Office = { init: o => { show = o.show; look = o.look || (() => {}); }, show: showFloor, standUp, sitDown, walkIn, close: closeCard, preload, arrive, day: k => { day = k; } };
 })();
