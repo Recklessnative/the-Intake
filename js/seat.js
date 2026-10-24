@@ -158,6 +158,14 @@
       b.onclick = () => { closeCard(); if (k === 'screen') screen(); else a.go(); };
       list.appendChild(b);
     });
+    // At phone width the labels on the picture are hidden (as on the floor), so the desk's things
+    // are listed under it instead; on a wider screen these stay hidden and the labels do the work.
+    Object.keys(map.things).filter(id => id !== 'screen' && opts.things[id]).forEach(id => {
+      const b = el('button', 'seat-thing'); b.type = 'button'; b.dataset.thing = id;
+      b.append(el('b', null, opts.things[id].label));
+      b.onclick = () => go(id);
+      list.appendChild(b);
+    });
     if (opts.show) opts.show('s-seat'); else document.querySelectorAll('.screen').forEach(x => x.classList.toggle('active', x.id === 's-seat'));
     if (opts.from) zoomOut(opts.from);
     const first = list.querySelector('button.primary');
