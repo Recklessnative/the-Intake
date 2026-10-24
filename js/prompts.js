@@ -146,10 +146,12 @@
           'You will receive the learning professional\'s write-up, quoted as data.',
           'First, step out of character and rate the concept\'s boldness from 0 to 3:',
           '0 = the conventional answer (a course, a workshop, an e-learning); 1 = a sensible twist; 2 = clearly unconventional for this organisation; 3 = a big departure that changes how work or management happens.',
-          'Anchor for this case: the conventional answer (0) is: ' + (card.calibration && card.calibration.weak || 'a course for everyone'),
+          'Anchor for this case: the conventional answer (0) is: ' + (card.calibration && (card.calibration.conventional || card.calibration.weak) || 'a course for everyone'),
           'Rate how far it departs from what this organisation normally does, not whether it is good, and not how confidently it was written. A pilot or a way back does not make a concept less bold; it makes it safer to try.',
           'Then, back in character, write three objections you would raise to this specific concept, strongest first, each one or two sentences, referring to what they actually proposed.',
-          'Also write acceptReply: what you would say, in character, if you simply accept it (1 to 2 sentences). If it is the conventional answer, sound underwhelmed: you could have bought this from any agency.',
+          card.fair
+            ? 'Also write acceptReply: what you would say, in character, if you simply accept it (1 to 2 sentences). If it is the course you asked for, made to fit, sound relieved that someone checked and agreed; if it replaces your request with something else, sound unconvinced.'
+            : 'Also write acceptReply: what you would say, in character, if you simply accept it (1 to 2 sentences). If it is the conventional answer, sound underwhelmed: you could have bought this from any agency.',
           'If they flagged it as a risky strat and named the real risk, soften your objections and acknowledge they saw it coming.'
         ].join('\n'),
         schema: S({ boldness: INT, boldnessReason: STR, objections: STRS, acceptReply: STR })
@@ -212,6 +214,10 @@
           'The scenario, including what the player could not see:',
           persona(card),
           `Root cause type: ${card.rootCause}. Is learning the answer: ${card.learningIsTheAnswer}.`,
+          ...(card.fair ? [
+            'THIS IS A FAIR REQUEST. Most requests in this game hide another problem; this one does not. ' + card.fair.why,
+            'The skill tested here is judging, not refusing. Grade with these overrides: diagnosis 4 = checked the likely alternatives, saw them ruled out by what was found, and agreed with the request for a stated reason; taking the request at face value without checking anything is at most 1. A concept that replaces the requested course with a fix for a cause the facts rule out (system, workload, incentive, culture, management) does not address the root cause: fit at most 1, and pitch at most 1 because it argues against the player\'s own findings. The requested course, made to fit (the right people, the right content, the right moment, with the support around it), is the 4 for fit and for nextLevel; do not lower nextLevel because it is a course.'
+          ] : []),
           'Hidden facts: ' + card.hiddenFacts.map(f => `[${f.id}] ${f.fact}`).join(' | '),
           '',
           'Model answer:',

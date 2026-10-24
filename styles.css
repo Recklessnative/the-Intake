@@ -960,6 +960,7 @@ body.aero .desk-icon { text-shadow: 0 1px 3px #000; }
 .drill-checks label { display: inline; flex: 1; text-align: left; margin: 0; font-weight: normal; }
 /* Scorecard: one thing to work on up top; why each score folds away. */
 .score-focus { margin: 6px 0 12px; padding: 8px 12px; background: #ffffe1; border: 1px solid #c9b458; border-radius: 4px; font-weight: 600; }
+.score-fair { margin: 6px 0 12px; padding: 8px 12px; background: #eef3fb; border: 1px solid #7f9db9; border-radius: 4px; }
 .score-table details.why { margin-top: 4px; font-size: 13px; }
 .score-table details.why > summary { cursor: pointer; color: var(--title-a); }
 .score-table details.why .ev { margin-top: 4px; }

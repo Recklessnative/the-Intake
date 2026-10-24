@@ -21,6 +21,8 @@ index.forEach(id => {
   if (!c.briefing || !c.briefing.headline || !(c.briefing.points || []).length) fail(id, 'briefing');
   const g = c.gold || {};
   if (!g.real_problem || !g.need_statement || !['yes', 'partly', 'no'].includes(g.is_training_the_lever) || !(g.root_cause_types || []).length) fail(id, 'gold');
+  // A fair request: what they asked for is right, so the lever is yes and the over-reach is the weak answer.
+  if (c.fair_request && (!c.fair_request.why || !c.fair_request.over_reach || g.is_training_the_lever !== 'yes')) fail(id, 'fair_request needs why, over_reach and a yes lever');
   const f = c.hidden_facts || [];
   if (f.length < 3) fail(id, 'fewer than 3 hidden facts');
   if (!f.some(x => x.critical)) fail(id, 'no critical fact');

@@ -38,7 +38,7 @@
     const s = card.stakeholder;
     const dep = card.dependencies[0];
     const ask = String(card.subject || '').replace(/\.$/, '');
-    if (k === 'need') return { text: pick(r, ['They asked for it, so: ' + ask + '.', 'The need is what ' + s.name + ' asked for: ' + lowerFirst(ask) + '.', ask + '. The client knows their people best.', 'Deliver ' + lowerFirst(ask) + ', as requested, and make it engaging.']), why: 'This repeats the request instead of the need. ' + card.needStatement };
+    if (k === 'need') return { text: pick(r, ['They asked for it, so: ' + ask + '.', 'The need is what ' + s.name + ' asked for: ' + lowerFirst(ask) + '.', ask + '. The client knows their people best.', 'Deliver ' + lowerFirst(ask) + ', as requested, and make it engaging.']), why: (card.fair ? 'The request is fair this time, but this line only repeats it, with no evidence for why. ' : 'This repeats the request instead of the need. ') + card.needStatement };
     if (k === 'lever') {
       const right = card.learningIsTheAnswer in LEVER ? card.learningIsTheAnswer : 'partly';
       const wrong = pick(r, Object.keys(LEVER).filter(x => x !== right));
@@ -50,7 +50,7 @@
     }
     if (k === 'concept') {
       const c = card.calibration.weak || pick(r, card.redFlags) || 'A one-day classroom course for everyone.';
-      return { text: c, why: 'This is the conventional answer to the request. It does not fit the cause: ' + card.realProblem };
+      return { text: c, why: card.fair ? 'This refuses a request that was right. ' + card.fair.why : 'This is the conventional answer to the request. It does not fit the cause: ' + card.realProblem };
     }
     return { text: pick(r, ['None really. ' + s.name + ' is fully on board, so we can start next week.', s.name + ' will handle the internal side; we focus on the content.', 'Low risk: it is training, and nobody objects to training.', 'We inform the staff by mail once the content is ready.']), why: dep ? 'It ignores ' + dep.who + '. ' + (dep.if_ignored || dep.concern) : 'It names no dependency at all.' };
   }

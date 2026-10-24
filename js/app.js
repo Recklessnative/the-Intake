@@ -1865,6 +1865,7 @@
     if (step === 'lever') {
       const want = String(r.card.learningIsTheAnswer || '').toLowerCase();
       if (!LEVER_NAMES[want]) return '';
+      if (r.card.fair) return want === b.lever ? 'Mieke: Agreed. They asked for the right thing this time, and you checked before you said so. That happens too.' : 'Mieke: I would have said "' + LEVER_NAMES[want].toLowerCase() + '". Look at what you found: everything else was checked and ruled out. Sometimes the request is simply right.';
       return want === b.lever ? 'Mieke: Agreed, ' + LEVER_NAMES[want].toLowerCase() + '.' : 'Mieke: I would have said "' + LEVER_NAMES[want].toLowerCase() + '". Keep that in mind for the concept.';
     }
     if (step === 'concept') {
@@ -2168,6 +2169,12 @@
     }
     $('score-title').textContent = r.card.stakeholder.name + ': ' + (total >= 70 ? 'handled.' : total >= 45 ? 'survived.' : 'ouch.');
     $('score-total').textContent = total + ' / 100';
+    // Most requests hide another problem. On a fair one, saying yes with evidence was the skill.
+    const fair = r.card.fair;
+    $('score-fair').hidden = !fair;
+    if (fair) $('score-fair').textContent = parts.call === 'yes'
+      ? '✓ A fair request, and you saw it. Not every request hides another problem: this one needed a yes, with evidence, and a course that fits.'
+      : 'This one was a fair request. Not every request hides another problem: ' + fair.why;
     // One thing to work on: the part with the most points left on the table, and its next level.
     // On the worked example the concept and the risks were Mieke's: those parts are not yours to work on.
     const hers = r.board && r.board.example ? ['fit', 'nextLevel', 'risks'] : [];
@@ -2284,7 +2291,7 @@
   // The card's own gold answer, per scorecard part. Model answers are one good answer, not the only one.
   function modelAnswer(card, k) {
     const g = card.goldAnswer || {}, concept = String(g.concept || '').split(' | ');
-    if (k === 'diagnosis') return [card.needStatement, LEVER_LINE[card.learningIsTheAnswer]].filter(Boolean).join(' ');
+    if (k === 'diagnosis') return [card.needStatement, card.fair ? 'A fair request: training is the lever, and what they asked for is close to right.' : LEVER_LINE[card.learningIsTheAnswer]].filter(Boolean).join(' ');
     if (k === 'measurement') return String(g.measurement || '').replace(/ \| /g, '. ').replace(/^./, c => c.toUpperCase());
     if (k === 'fit') return concept[0] || '';
     if (k === 'nextLevel') return concept.slice(1).join(' Or: ');
