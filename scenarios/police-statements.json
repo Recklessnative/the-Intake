@@ -1,0 +1,255 @@
+{
+  "id": "police-statements",
+  "schema_version": 1,
+  "sector": "Local police",
+  "tier": 3,
+  "tier_label": "Hard case: the obvious diagnosis is wrong",
+  "title": "Sent Back With Questions",
+  "briefing": {
+    "headline": "Local police in Belgium: what you should know before the call",
+    "points": [
+      "Since the police reform of 2001, Belgium has a federal police and local police zones; a zone covers one or more municipalities and is run by a chief of police under the mayor or a police council.",
+      "When officers record an offence they write a formal statement, an official report the public prosecutor's office uses to decide whether to prosecute. A statement that misses legal elements comes back, and a case can be dismissed for it.",
+      "Statements are typed in the national police information system from standard templates; the prosecutor's office receives them on paper or electronically.",
+      "New inspectors come out of a provincial police school after a basic course; what they learn there is set nationally and partly by each school.",
+      "Police unions are strong and staffing rules are tight: a zone must keep a minimum number of teams on the street at all hours."
+    ]
+  },
+  "stakeholder": {
+    "name": "Rik Vermeiren",
+    "role": "Chief Commissioner, chief of police",
+    "org": "Police zone Lindeveld, the local police for the city of Lindeveld and two neighbouring municipalities, 186 staff of whom 85 inspectors",
+    "voice": "Calm, precise, slightly formal, thirty years in uniform. Uses the full title of everything. Dry, never sarcastic. Has been sold a 'quality culture trajectory' once and is not going to be sold another; he has done his homework and will show it if asked.",
+    "patience": 3,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Lore Dewitte",
+    "role": "Inspector, out of police school in 2006, intervention team",
+    "voice": "Quick, earnest, slightly anxious about doing it right. Talks fast about the street and slows down, frustrated, about paperwork."
+  },
+  "opening_message": "Good morning. I will be brief. The public prosecutor's office sends back one statement in five from our youngest inspectors as incomplete. Cases get dismissed. I would like a two-day course on writing statements for the 31 inspectors who joined since 2005, given with the deputy prosecutor. I am aware that your profession's first answer is that it is never a training problem. I have looked into it. I would like you to look into it too, and then tell me if I am wrong.",
+  "surface_ask": "A two-day statement-writing course for the 31 inspectors who joined since 2005, given with the deputy prosecutor.",
+  "fair_request": {
+    "why": "Everything that usually hides behind a request like this was checked and ruled out: same software and templates, same teams, a lighter workload, no target on speed. The returns follow one cohort whose basic course cut statement writing to a single day, the omissions are the same six every time, and the young inspectors ask for help. The course the chief asked for is the right lever; the craft is building it on the prosecutor's six omissions and their own returned statements.",
+    "over_reach": "A quality and leadership programme for the whole zone, plus a review of the templates and the workload, instead of the statement-writing course they asked for."
+  },
+  "gold": {
+    "real_problem": "The public prosecutor's office returned 212 statements as incomplete from January to September; 168 of them come from the 31 inspectors who left police school since 2005, against 44 from the 54 older inspectors, on the same teams, shifts, templates and kinds of cases. The basic course they followed was restructured in 2005 and reduced statement writing to one day of theory, where older inspectors had a full week of exercises. The returns cluster on the same six omissions, which the deputy prosecutor listed in a letter. The young inspectors know something is wrong but not what; they ask colleagues and get 'you will learn'. The obvious suspects are ruled out: the information system and templates are the same for everyone, the young inspectors handle fewer files than the older ones, nobody is measured on speed of writing, and a zone-wide 'quality culture trajectory' in 2006 changed nothing. The request is fair: the statement-writing course is the lever.",
+    "root_cause_types": [
+      "skill"
+    ],
+    "is_training_the_lever": "yes",
+    "need_statement": "The 31 inspectors who joined since 2005 need to write statements that hold up at the prosecutor's office, with the legal elements of the offence, the times, signed pages, witness details, seizure numbers and the suspect's own words. The system, workload and culture are not the cause. That calls for the course the chief asked for, built on the six omissions and their own returned statements, with the deputy prosecutor in the room."
+  },
+  "hidden_facts": [
+    {
+      "id": "returns_by_cohort",
+      "fact": "From January to September the prosecutor's office returned 212 statements as incomplete: 168 from the 31 inspectors who joined since 2005 (about one in five of their statements) and 44 from the 54 older inspectors (about one in twenty-five), on the same teams and the same kinds of cases. Eleven cases were dismissed for a defect in the statement, nine of them written by the young inspectors.",
+      "unlocks_when": "The player asks who writes the returned statements, how the returns are spread over inspectors or teams, or for the figures.",
+      "reveal_line": "The figures are unambiguous. One statement in five from the inspectors who joined since 2005. One in twenty-five from the others. Same teams, same nights, same shoplifters.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Statements returned as incomplete by the public prosecutor's office, January to September: 212. Inspectors who joined since 2005 (31): 168 returned of about 860 written (20%). Other inspectors (54): 44 returned of about 1,150 written (4%). Split by intervention team (A to F): the young inspectors' return rate ranges from 17% to 23% in every team. Cases dismissed for a defect in the statement: 11 (9 written by inspectors who joined since 2005).",
+      "data_source": "Monthly returns from the public prosecutor's office, per author"
+    },
+    {
+      "id": "six_omissions",
+      "fact": "In June the deputy prosecutor wrote that the returns come back for the same six omissions: the legal elements of the offence not described (theft written up as 'took the item'), times missing or contradictory, pages of the suspect's hearing not signed, witnesses without full identity and address, seized items without seal numbers, and the suspect's statement summarised instead of written in their own words.",
+      "unlocks_when": "The player asks why the statements are returned, what exactly is missing, or what the prosecutor's office says.",
+      "reveal_line": "The deputy prosecutor wrote to me in June. Six omissions, always the same six. I have the letter. She was more patient in it than I would have been.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:process"
+      ],
+      "data_doc": "Letter from the deputy public prosecutor, 14 June: 'Returned statements, first five months. Recurring omissions, in order of frequency: 1. Constituent elements of the offence not described (for example intent for theft). 2. Times missing, or contradictory between pages. 3. Pages of the hearing not initialled or signed by the person heard. 4. Witnesses without full identity, date of birth and address. 5. Seized items without seal number or description. 6. The statement of the suspect summarised by the officer instead of recorded in their own words. I am willing to help explain these to the officers concerned.'",
+      "data_source": "Correspondence with the public prosecutor's office"
+    },
+    {
+      "id": "school_cut",
+      "fact": "The provincial police school restructured its basic course in 2005: statement writing went from a full week of exercises with written feedback to one day of theory, to make room for other modules.",
+      "unlocks_when": "The player asks how inspectors learn to write statements, what changed in their training, or how the older inspectors learned it.",
+      "reveal_line": "I learned it in a week of exercises, with an instructor and a red pen. Since 2005 the school does it in one day. One day. I have the programme here, if you would like to see it.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:training"
+      ],
+      "data_doc": "Basic course for inspectors, provincial police school. Programme until 2004: 'Writing official reports', 36 hours, exercises with written feedback and a final file. Programme since 2005: 'Official reports and the information system', 7 hours, theory and a demonstration of the templates. In-zone follow-up since the merger: none planned.",
+      "data_source": "Police school programmes and zone training file"
+    },
+    {
+      "id": "same_system",
+      "fact": "The obvious suspects are ruled out: all inspectors use the same information system and the same templates; the young inspectors handle fewer files than the older ones (they are paired on the street); nobody is measured on how fast statements are written; the new shift roster of the spring applies to everyone. In 2006 a consultant ran a 'quality culture trajectory' for all 186 staff, at 40,000 euro: a values day, posters and a charter. The return rate did not move.",
+      "unlocks_when": "The player asks about the software or templates, workload, targets, the roster, management, morale, or what was tried before.",
+      "reveal_line": "Before you ask: same system, same templates for everyone. The young ones carry fewer files, not more. Nobody counts minutes. And we had a quality culture trajectory last year. A values day, a charter, posters. The posters are still up. The returns are too.",
+      "weight": 2,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Files handled per inspector, January to September: inspectors who joined since 2005, average 28; other inspectors, average 39. Overtime per inspector: 61 and 64 hours. Performance indicators for intervention teams: response time and patrol hours; none on statements. Quality culture trajectory 2006 (external consultant, 40,000 euro): values day for all staff, charter, poster campaign; evaluation: satisfaction 3.6/5.",
+      "data_source": "Zone staffing report and 2006 project file"
+    },
+    {
+      "id": "young_ask_help",
+      "fact": "The young inspectors know their statements come back but not why: the returned copies only say 'incomplete, to be supplemented'. They ask older colleagues, who say 'you will learn'. They would like to see a good statement next to a bad one and know what the prosecutor looks for.",
+      "unlocks_when": "The player asks the young inspectors how they experience the returns, what they know about why, or what would help them.",
+      "reveal_line": "I assume they are embarrassed. Nobody likes a returned statement. I have not asked them directly, I admit.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "It comes back with one line: 'incomplete, to be supplemented'. That's it. I rewrote a shoplifting statement three times. I asked the old ones, they say 'you'll learn, we all did'. How? Show me one good one and one bad one next to each other and tell me what the prosecutor reads first. I would sit through two days for that. Gladly. On my day off, even. Don't tell the union."
+    },
+    {
+      "id": "roster_minimum",
+      "fact": "The zone must keep four intervention teams on the street at all times; at most six inspectors can be off the street for training on a weekday, and the deputy prosecutor is available on Tuesday and Thursday afternoons.",
+      "unlocks_when": "The player asks how the course could be organised, how many inspectors can be released at once, or when the deputy prosecutor is free.",
+      "reveal_line": "Four teams on the street, always. On a weekday I can release six inspectors, not more. The deputy prosecutor offered Tuesday and Thursday afternoons.",
+      "weight": 1,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:org"
+      ],
+      "data_doc": "Minimum staffing: four intervention teams at all hours. Maximum release for training on weekdays: six inspectors per half-day, with two weeks' notice to the duty planner. Deputy prosecutor's availability for the zone: Tuesday and Thursday afternoons.",
+      "data_source": "Duty planning rules"
+    }
+  ],
+  "volunteered_facts": [
+    "One statement in five from the inspectors who joined since 2005 comes back from the prosecutor's office.",
+    "The deputy prosecutor has offered to help.",
+    "He expects to be told it is not a training problem, and has checked."
+  ],
+  "constraints": {
+    "budget": "About 12,000 euro left in this year's training budget; the deputy prosecutor's time is free.",
+    "deadline": "The police council reviews the zone's results in January; the prosecutor's office reports dismissals per zone every quarter.",
+    "audience": "31 inspectors who joined since 2005, spread over six intervention teams on a rotating roster; 6 team leaders (sergeants and inspectors-in-chief).",
+    "schedule": "At most six inspectors off the street per weekday half-day, two weeks' notice; the deputy prosecutor is free on Tuesday and Thursday afternoons.",
+    "languages": "Dutch.",
+    "data_available": [
+      "Monthly returns from the prosecutor's office, per author",
+      "The deputy prosecutor's letter on the six omissions",
+      "Police school programmes",
+      "Files and overtime per inspector"
+    ],
+    "data_not_available": [
+      "The content of each returned statement in a summary table (only the paper copies)",
+      "Dismissals before this year by author"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The deputy prosecutor",
+      "concern": "Decides what 'complete' means and has offered her time, but only on two afternoons a week and not for a programme that runs for months.",
+      "if_ignored": "The course teaches the school's theory again, not what her office sends back."
+    },
+    {
+      "who": "The duty planner",
+      "concern": "Can release at most six inspectors per half-day without breaking minimum staffing.",
+      "if_ignored": "Sessions are cancelled the first busy weekend and the course is never finished."
+    },
+    {
+      "who": "Team leaders",
+      "concern": "Read and sign statements before they go out, and say 'you will learn' because nobody taught them how to give feedback on a statement.",
+      "if_ignored": "After the course, nobody checks the next statements and the old habits come back by spring."
+    },
+    {
+      "who": "Police union",
+      "concern": "Wants training in working hours and does not want the young inspectors labelled or individual return rates used in evaluations.",
+      "if_ignored": "The course is seen as a disciplinary measure and the union advises against it."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "A written test on the school's theory of official reports.",
+      "Satisfaction with the two days.",
+      "The zone's total number of returns, which also moves with the number of cases.",
+      "The number of inspectors who attended."
+    ],
+    "gold_plan": {
+      "baseline": "Return rate of statements by the inspectors who joined since 2005 (20%) and by the others (4%), January to September, and the count per omission from the deputy prosecutor's letter.",
+      "behaviour": "Statements by the 31 inspectors that contain the six elements, checked by their team leader on a short checklist before sending for the first two months.",
+      "leading_indicators": "The share of statements the team leader sends back internally before they go out, per omission; how many returned statements the inspectors bring to the sessions.",
+      "business_metric": "Return rate per month for the young cohort against the older one, and cases dismissed for a defect in the statement, in the prosecutor's quarterly report.",
+      "collection": "The prosecutor's monthly returns per author, which the zone already receives, team leaders' checklists, and the quarterly dismissal report."
+    }
+  },
+  "concepts": {
+    "conventional": "A general report-writing and spelling course for all 85 inspectors, given by an external trainer.",
+    "solid": "Yes to the course the chief asked for, built on the evidence: two days for the 31 inspectors who joined since 2005, given as four Tuesday or Thursday afternoons in groups of six with the deputy prosecutor and one experienced inspector, each afternoon on one or two of her six omissions, using the inspectors' own returned statements (anonymised) and a good statement next to a bad one. They leave with a one-page checklist of the six elements. Team leaders get one afternoon on reading a statement against the same checklist, and check the young inspectors' statements for two months. No zone-wide programme, no change to the system or the roster, which are not the cause.",
+    "next_level_examples": [
+      "Rewrite your own: each inspector brings two of their returned statements and leaves with them fixed, so the course clears part of the pile while they learn.",
+      "A one-page checklist of the six elements inside the template folder, signed off by the deputy prosecutor, so the omission is caught before the statement leaves the station.",
+      "Ask the deputy prosecutor's office to write one line on each returned statement saying which of the six omissions it is, so the feedback the inspectors never got arrives with every return."
+    ],
+    "also_valid": [
+      "Running the course in three afternoons instead of four for the inspectors with the lowest return rates, if the duty planner cannot release six people more often.",
+      "Starting with the two most frequent omissions in one afternoon for all 31 before the full course, if the police council wants results by January."
+    ],
+    "red_flags": [
+      "Calling it a culture, motivation or management problem and proposing a programme for the whole zone.",
+      "Blaming the information system, the templates or the workload without checking what the figures show.",
+      "Training all 85 inspectors, including the 54 whose statements come back one time in twenty-five.",
+      "A course on general writing, spelling or style instead of the six legal omissions.",
+      "Leaving out the deputy prosecutor, who defines what 'complete' means.",
+      "Using individual return rates to evaluate or rank the young inspectors."
+    ]
+  },
+  "defence_objections": [
+    "Four afternoons for 31 inspectors in groups of six, with my staffing? That is half a year of planning, and the police council meets in January.",
+    "The team leaders are proud people. If you tell them they have to check the young inspectors' statements, they will ask why they were not asked first.",
+    "And if the returns do not fall? I will have spent this year's budget on what the last consultant would call 'just another course'."
+  ],
+  "question_you_didnt_ask": "Whose statements come back, and what exactly is missing in them?",
+  "actor_notes": [
+    "Rik expects the player to tell him he is wrong. He is not defensive about it; he is prepared. When the player asks about the system, workload, targets, the roster, morale or past initiatives, he answers precisely and with figures. That is the point of this case: every likely hidden cause is checked, and a good player sees it and says yes.",
+    "He mentions the 2006 'quality culture trajectory' with dry irony if the player starts talking about culture, values or mindset.",
+    "If the player proposes a zone-wide programme, a culture approach or a change to the system, he becomes very polite and very cold: 'I see. That is what I paid for last year.'",
+    "He does not know how the young inspectors feel about the returns and assumes they are embarrassed; the floor knows better.",
+    "He respects a player who agrees with evidence and then improves the plan (the deputy prosecutor's six omissions, their own returned statements, team leaders checking afterwards). Agreeing without asking anything earns a polite nod and nothing more."
+  ],
+  "flavour_lines": [
+    "We had a quality culture trajectory in 2006. We have a charter now. It is framed. It has never once been sent back by the prosecutor's office.",
+    "A statement is a letter to a magistrate you will never meet, who has never seen the street. It must be complete without you."
+  ],
+  "second_request": {
+    "opening_message": "The prosecutor's office now complains that statements arrive late. I would like a time management course for the intervention teams.",
+    "after_right": "The returns from the young inspectors went from one in five to one in fourteen. The deputy prosecutor wrote to thank us. That is a first.",
+    "after_wrong": "The zone-wide programme was very well received. The returns did not move. I am, as you see, still polite. A new matter.",
+    "is_training_the_lever": "no",
+    "need_statement": "Statements arrive late because the night teams have two PCs for six teams to type on at the end of their shift; they need typing places, not time management.",
+    "real_problem": "Since the merger, the night shift works from the old Lindeveld station, which has two PCs connected to the information system for six teams. At the end of the shift inspectors queue to type, give up after an hour of overtime and finish the statement two or three days later on a day shift.",
+    "hidden_facts": [
+      {
+        "id": "night_only",
+        "fact": "Almost all late statements come from night shifts.",
+        "unlocks_when": "asks which shifts or teams send late statements",
+        "reveal_line": "Now that you ask: nearly all of them are night statements."
+      },
+      {
+        "id": "two_pcs",
+        "fact": "The night station has two PCs on the information system for six teams.",
+        "unlocks_when": "asks where and on what the night teams type their statements",
+        "reveal_line": "The old station has two terminals on the system. For six teams. They queue."
+      },
+      {
+        "id": "finish_later",
+        "fact": "After an hour of queueing inspectors go home and finish the statement two or three days later.",
+        "unlocks_when": "asks what happens when they cannot finish at the end of the shift",
+        "reveal_line": "After an hour of overtime they go home. The statement waits for their next day shift."
+      }
+    ],
+    "question_you_didnt_ask": "Which statements arrive late, and where are they typed?"
+  }
+}

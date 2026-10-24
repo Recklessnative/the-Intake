@@ -57,10 +57,16 @@ function madeUp(raw, card) {
       'We will track ' + (m.business_metric || 'the main business number') + '.',
       k.solid,
       deps[0] ? deps[0].who + ' may object.' : 'Some people may object.'),
-    weak: memo('They asked for: ' + raw.surface_ask + ' They need training.',
-      'Completion rates and a satisfaction survey after each session.',
-      k.conventional,
-      'Change management.')
+    // On a fair request the weak answer is the over-reach: refusing a request that was right.
+    weak: raw.fair_request
+      ? memo('They asked for: ' + raw.surface_ask + ' But a request like this is a symptom. ' + LEVER.no,
+        'Completion rates and a satisfaction survey after each session.',
+        raw.fair_request.over_reach,
+        'Change management.')
+      : memo('They asked for: ' + raw.surface_ask + ' They need training.',
+        'Completion rates and a satisfaction survey after each session.',
+        k.conventional,
+        'Change management.')
   };
 }
 const material = text => ['INTAKE TRANSCRIPT:', '(none supplied by the harness: grade the write-up on its own)', '', 'WRITE-UP:', '"""', text, '"""', '', 'DEFENCE ROUND:', '(none, the stakeholder accepted the concept)'].join('\n');
