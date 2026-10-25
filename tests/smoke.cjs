@@ -474,6 +474,7 @@ async function followUp() {
       await p.click('#defence-form button[type=submit]');
     }
     await p.waitForSelector('#p-score.active');
+    if (await p.isVisible('#score-fair') !== !!(await p.evaluate(() => window.__intake.state.run.card.fair))) throw new Error('fair-request note on the wrong scorecard');
     if (!(await p.textContent('#score-rows')).includes('Your bet:')) throw new Error('scorecard has no bet row');
     console.log('request', req + 1, await p.textContent('#score-title'), await p.textContent('#score-total'), 'objections', objs);
     if (req === 0) await tip('My scores');
@@ -874,6 +875,8 @@ async function followUp() {
   await p.goto('http://localhost:8765/?debug=1');
   p.on('dialog', d => d.accept().catch(() => {}));
   const weeksBefore = await p.evaluate(() => JSON.parse(localStorage.getItem('intake-scores')).weeks.filter(w => w.requests.length).length);
+  // ...drawn from a pool of one fair request, so its scorecard says so (scenarios/README.md).
+  await p.route('**/scenarios/index.json', r => r.fulfill({ json: ['bus-drivers-dutch'] }), { times: 1 });
   await p.click('#btn-one');
   await logOn();
   const os = await p.evaluate(() => { const s = window.__intake.state; return { one: s.one, tiers: s.cards.map(c => c.difficulty), q: s.run.questionsLeft, standup: !!s.standup, academy: !!s.academy, team: !!s.team }; });
@@ -887,6 +890,10 @@ async function followUp() {
   await p.waitForSelector('#p-defence.active, #p-score.active');
   if (await p.$('#p-defence.active')) { await p.click('#btn-debug'); await p.click('#defence-form button[type=submit]'); }
   await p.waitForSelector('#p-score.active');
+  if (await p.evaluate(() => window.__intake.state.run.card.id) !== 'bus-drivers-dutch') throw new Error('one case did not draw the fair request');
+  const fairNote = await p.isVisible('#score-fair') && await p.textContent('#score-fair');
+  if (!fairNote || !/fair request/.test(fairNote)) throw new Error('fair request not named on the scorecard: ' + fairNote);
+  if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/score-fair.png' });
   if ((await p.textContent('#btn-next')) !== 'Done for today') throw new Error('one case offers more requests');
   await p.click('#btn-next');
   await p.waitForSelector('#s-end.active');

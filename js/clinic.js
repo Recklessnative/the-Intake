@@ -297,6 +297,7 @@
   // The field stamp: which handout's question finds each fact on a live call. One per fact, or none.
   const LENS = {
     'airport-ground-handling': { type_change: 'support', seasonal_starters: 'matrix', lead_moved: 'matrix', lmc_unreported: 'bem', course_content: 'inputs' },
+    'bus-drivers-dutch': { driving_fine: 'bem', formats_tried: 'inputs', levels_differ: 'inputs', drivers_want_it: 'support' },
     'car-dealer-aftersales': { full_booking: 'bem', upsell_bonus: 'bem', quiet_days: 'bem', wavre_exception: 'inputs', workshop_owner_son: 'matrix' },
     'construction-cost-reports': { new_template: 'support', copy_last_month: 'bem' },
     'education-ai-cheating': { regulations: 'bem', induction_gap: 'inputs', tried_and_failed: 'bem', pioneers: 'inputs' },
@@ -315,6 +316,7 @@
     'newspaper-going-online': { scoop_rule: 'matrix', separate_systems: 'bem', already_trained: 'inputs', deadline_day: 'bem' },
     'ngo-volunteer-churn': { phone_line_rule: 'bem', coordinators_volunteers: 'inputs' },
     'pharma-read-and-sign': { trainer_left: 'matrix', sop_length: 'support', mockup: 'inputs', quiz_scores: 'bem' },
+    'police-statements': { same_system: 'bem', returns_by_cohort: 'bem', school_cut: 'inputs', six_omissions: 'support', young_ask_help: 'matrix' },
     'port-crane-safety': { move_bonus: 'bem', double_shifts: 'inputs', previous_programme: 'inputs' },
     'public-service-desk': { booking_access: 'bem', no_walkins_rule: 'bem', friendliness_rated: 'bem', letters: 'support' },
     'tech-sales-motivation': { comp_plan: 'bem', no_coaching: 'matrix', last_offsite: 'inputs' },

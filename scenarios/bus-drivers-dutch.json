@@ -1,0 +1,255 @@
+{
+  "id": "bus-drivers-dutch",
+  "schema_version": 1,
+  "sector": "Public transport",
+  "tier": 1,
+  "tier_label": "Open stakeholder, cause still to find",
+  "title": "Next Stop, Please",
+  "briefing": {
+    "headline": "Regional buses in Flanders: what you should know before the call",
+    "points": [
+      "Most regional bus lines in Flanders are run by the public transport company itself; part of them are subcontracted to private coach companies, which drive under the company's colours, timetable and service rules.",
+      "The subcontract sets service levels: punctuality, cleanliness, ticket sales and how passengers are served. The public transport company checks them with complaints and quarterly mystery rides.",
+      "Under the language legislation, a public service in Flanders serves the public in Dutch. A subcontractor driving a public line is held to the same rule.",
+      "Bus drivers need a D licence and a professional certificate; Flanders has been short of drivers for years, and companies near the language border also recruit in Wallonia.",
+      "Coach companies fall under the joint committee for regional public transport by bus; training hours and paid time are partly set in the sector agreement."
+    ]
+  },
+  "stakeholder": {
+    "name": "Els Vandenberghe",
+    "role": "Operations Manager",
+    "org": "Getevallei Coaches NV, a family coach company in Tienen that runs 14 regional bus lines under contract for the Flemish public transport company, with 71 drivers",
+    "voice": "Former bus driver, twenty years behind the wheel before she ran the depot. Blunt, warm, practical, a little hoarse. Says 'listen' before anything important. Has met consultants before and expects to be told her request is wrong.",
+    "patience": 4,
+    "risk_appetite": 1,
+    "risk_appetite_label": "Low"
+  },
+  "frontline": {
+    "name": "Fabrice Collard",
+    "role": "Bus driver from Jodoigne, eight months at the depot, line 360",
+    "voice": "Friendly, a bit tired, speaks careful English when he must and switches to French when he is upset. Proud of his driving. Embarrassed, not defensive, about the language."
+  },
+  "opening_message": "Listen, I'll be straight with you. Since spring I've hired 26 drivers from Wallonia, because nobody in Flanders wants to drive a bus at five in the morning. Good drivers. But passengers complain they can't get an answer in Dutch, and the public transport company sent us a formal warning in August. I want a proper Dutch course for those 26. In work time, not a CD-ROM. Before January. And before you start: yes, I know, you people always say it's not a training problem.",
+  "surface_ask": "A Dutch course for the 26 French-speaking drivers, in work time, before January.",
+  "fair_request": {
+    "why": "The drivers do everything else as well as the Flemish drivers on the same lines; what they cannot do is serve a passenger in Dutch, they want to learn, and the two cheap formats already failed for reasons of format, not motivation. A Dutch course in work time is the right answer; the craft is shaping it by level and around what passengers actually say.",
+    "over_reach": "A customer-friendliness programme for all 71 drivers, plus a review of the roster and the bonus, instead of the Dutch course they asked for."
+  },
+  "gold": {
+    "real_problem": "Since March the company hired 26 drivers from Wallonia to fill a driver shortage. They drive as well as the Flemish drivers on the same lines: punctuality, accidents, fuel use and ticket sales are the same. What they cannot do is answer a passenger in Dutch about tickets, stops, connections and diversions, so passengers on the three lines they mostly drive complain, and the public transport company has issued a formal warning under the subcontract, with penalty points from January. The cheap fixes failed on format: a Dutch CD-ROM in the canteen (opened by three) and evening classes in their own time at the adult education centre (two enrolled, both dropped out because of the early shifts). The drivers want to learn. Their levels differ widely: six are nearly fluent, eight have school Dutch, twelve are beginners. The request is fair: a Dutch course in work time is the lever. It works best by level and built on what passengers really ask on these lines.",
+    "root_cause_types": [
+      "skill"
+    ],
+    "is_training_the_lever": "yes",
+    "need_statement": "Twenty of the 26 drivers from Wallonia need to handle the everyday passenger situations on their lines in Dutch (tickets, stops, connections, delays and diversions, an incident) by January; the six nearly fluent ones need only the vocabulary of the job. Their driving, service attitude and ticketing are fine. That calls for the Dutch course Els asked for, in paid time at the depot, grouped by level and built on the job."
+  },
+  "hidden_facts": [
+    {
+      "id": "complaint_split",
+      "fact": "Of 118 passenger complaints from January to September, 77 are about lines 360, 361 and 395, which the new drivers mostly drive. 63 of those 77 say the driver did not understand or answered in French. Complaints about delays, driving style or rudeness are as frequent on those lines as on the others.",
+      "unlocks_when": "The player asks what the complaints are actually about, on which lines, or whether they can see the complaints themselves.",
+      "reveal_line": "The complaints? I have them in a folder, I read them all. Most of them are about the three Jodoigne lines, and most of those say the same: he didn't understand me.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "data:kpi",
+        "call"
+      ],
+      "data_doc": "Passenger complaints received, January to September: 118. Lines 360, 361 and 395: 77 complaints, of which 63 coded 'language: not understood or answered in French', 6 'delay', 5 'driving style', 3 'unfriendly'. Other 11 lines: 41 complaints, of which 2 'language', 21 'delay', 9 'driving style', 9 'unfriendly'. Share of shifts on lines 360, 361 and 395 driven by drivers hired since March: 74%.",
+      "data_source": "Complaints log from the public transport company, coded by subject"
+    },
+    {
+      "id": "driving_fine",
+      "fact": "Els checked the obvious alternatives before calling: the new drivers' punctuality (91%), accident claims, fuel use and ticket sales match the Flemish drivers on the same lines, and the ticket machine already has a French menu. Their rosters, pay and bonus are the same as everyone's. It is not attitude, not the vehicles and not the roster.",
+      "unlocks_when": "The player asks how the new drivers do on driving, punctuality, tickets or customer service, or whether something else (roster, pay, vehicles, attitude) could be behind the complaints.",
+      "reveal_line": "Listen, I checked that first, because the last consultant told me it was culture. Punctuality, damage, diesel, ticket sales: same as my Flemish drivers. Same roster, same pay. They're not rude. They're lost.",
+      "weight": 3,
+      "critical": true,
+      "found_at": [
+        "call",
+        "data:kpi"
+      ],
+      "data_doc": "Drivers hired since March (26) against other drivers (45), January to September: punctuality within 3 minutes 91% / 90%; damage claims per 100,000 km 1.4 / 1.6; fuel per 100 km 38.9 / 39.2 litres; ticket sales errors per 1,000 tickets 2.1 / 2.3. Roster pattern, wage scale and safe-driving bonus: identical (sector agreement).",
+      "data_source": "Depot performance report, January to September"
+    },
+    {
+      "id": "warning_letter",
+      "fact": "In August the public transport company sent a formal warning under the subcontract: drivers on its lines must be able to serve passengers in Dutch. From January, every complaint coded 'language' costs penalty points, and enough points let them reallocate the three lines at the next tender.",
+      "unlocks_when": "The player asks about the deadline, what the public transport company demands, what happens if nothing changes, or about the contract.",
+      "reveal_line": "The warning came in August. From January every language complaint is a penalty point. Enough points and those three lines go to someone else at the next tender. That's a third of my work.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "call",
+        "data:policy"
+      ],
+      "data_doc": "Subcontract, annex 4, service rules: 'The driver serves the passenger in Dutch.' Letter of 21 August: formal warning; from 1 January, each substantiated complaint coded 'language' counts as one penalty point; 25 points in a calendar year allow the client to withdraw the lines concerned at the next tender.",
+      "data_source": "Subcontract and warning letter from the public transport company"
+    },
+    {
+      "id": "formats_tried",
+      "fact": "Two cheap fixes were tried. In May HR put a 'Dutch for beginners' CD-ROM on the canteen PC; three drivers opened it. In June the company offered evening classes at the adult education centre in the drivers' own time; two enrolled and both stopped by October, because classes start at seven in the evening and their shifts start at five in the morning.",
+      "unlocks_when": "The player asks what has been tried already, or whether the drivers had any language training so far.",
+      "reveal_line": "HR bought a CD-ROM. Three opened it. Then evening class in Tienen, their own time. Two signed up. Both gave up. Class at seven, alarm at four. You tell me.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training",
+        "call"
+      ],
+      "data_doc": "Language support, drivers hired since March. May: CD-ROM 'Dutch for beginners' installed on the canteen PC; 3 users logged. June: evening course Dutch level 1 at the adult education centre, Tuesdays and Thursdays 19:00-21:30, own time, fees paid by the company: 2 enrolled, 0 still attending in October (reason given: shift times).",
+      "data_source": "HR training file, language support"
+    },
+    {
+      "id": "levels_differ",
+      "fact": "A placement interview by the adult education centre in September found very different levels: six drivers are nearly fluent (bilingual families or school in Brussels), eight have school Dutch they never used, and twelve are beginners. One course for all 26 would bore six and lose twelve.",
+      "unlocks_when": "The player asks how much Dutch the drivers already speak, whether they all have the same level, or whether anyone tested them.",
+      "reveal_line": "Their level? Some of them speak better Dutch than my son, honestly. Others say 'dag' and that's it.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "data:training"
+      ],
+      "data_doc": "Placement interviews, 26 drivers, 12 September. Level 'functional, needs job vocabulary only': 6. Level 'school Dutch, passive, hesitant': 8. Level 'beginner': 12. Note from the language teacher: 'All motivated. The beginners asked for lessons that fit their shifts.'",
+      "data_source": "Adult education centre, placement report"
+    },
+    {
+      "id": "drivers_want_it",
+      "fact": "The drivers want to learn and know what they need: the stops, the tickets, connections, 'the bus is late because', and what to say when something happens on board. They do not want grammar. Fabrice keeps a notebook of the questions passengers ask him.",
+      "unlocks_when": "The player asks the drivers themselves how they feel about Dutch, what goes wrong with passengers, or what would help them.",
+      "reveal_line": "The drivers? I think they'd like it. I never asked them, to be honest.",
+      "weight": 2,
+      "critical": false,
+      "found_at": [
+        "frontline"
+      ],
+      "frontline_line": "I want to learn, monsieur. Really. I bought a dictionary. But a lady asks me something fast at the Tienen station, I say 'pardon', she gets angry, I get red. I keep a little notebook: 'does this bus go to the hospital', 'a ten-ride card', 'where do I change for Leuven'. Always the same twenty questions. Teach me those twenty and the stop names, and I'm fine. Not the grammar of my school, please."
+    }
+  ],
+  "volunteered_facts": [
+    "Twenty-six of her 71 drivers were hired in Wallonia since March, because of the driver shortage in Flanders.",
+    "The public transport company sent a formal warning in August.",
+    "She expects to be told her request is wrong and says so."
+  ],
+  "constraints": {
+    "budget": "About 25,000 euro, partly covered by the sector training fund for bus companies.",
+    "deadline": "Visible progress by 1 January, when penalty points start; the public transport company's next mystery rides are in March.",
+    "audience": "26 drivers hired in Wallonia since March, all on early or late shifts; 6 nearly fluent, 8 with school Dutch, 12 beginners.",
+    "schedule": "Drivers can be freed for at most 4 hours a week, between the morning and afternoon peaks (9:30 to 15:00), if the planner gets two weeks' notice.",
+    "languages": "The drivers are French-speaking; the depot runs in Dutch.",
+    "data_available": [
+      "Passenger complaints by line and subject",
+      "Depot performance report per driver group",
+      "The subcontract and the warning letter",
+      "Placement interviews from the adult education centre"
+    ],
+    "data_not_available": [
+      "Mystery ride results per driver (only per line, quarterly)",
+      "How many passengers gave up asking and did not complain"
+    ]
+  },
+  "dependencies": [
+    {
+      "who": "The planner",
+      "concern": "Has to free 26 drivers for four hours a week between the peaks without cancelling a ride.",
+      "if_ignored": "The lessons get cancelled every time someone is ill, and the course dies by November."
+    },
+    {
+      "who": "Union delegate",
+      "concern": "Wants the course in paid time and does not want the Walloon drivers singled out or tested in a way that could cost them their job.",
+      "if_ignored": "The course is seen as a punishment and the drivers who need it most stay away."
+    },
+    {
+      "who": "The public transport company's contract manager",
+      "concern": "Needs evidence before January that the warning was taken seriously, and runs the mystery rides.",
+      "if_ignored": "The penalty points start counting anyway and the lines go out to tender."
+    },
+    {
+      "who": "Flemish drivers on the same lines",
+      "concern": "The obvious practice partners, but nobody asked them and some grumble about 'the French'.",
+      "if_ignored": "The drivers learn the words in class and never use them at the depot."
+    }
+  ],
+  "measurement": {
+    "traps": [
+      "Hours of class attended, which says nothing about the bus.",
+      "A written grammar test, which the drivers never face on the job.",
+      "Total complaints, which also move with roadworks and winter delays.",
+      "A satisfaction survey after the lessons."
+    ],
+    "gold_plan": {
+      "baseline": "Complaints coded 'language' on lines 360, 361 and 395: 63 in nine months (7 a month); the September placement levels.",
+      "behaviour": "Drivers handling the twenty most frequent passenger situations in Dutch on the bus, checked by a short spoken role play at the depot per level and by one ride along with a Flemish colleague each month.",
+      "leading_indicators": "Attendance per level group, the share of the twenty situations each driver handles in the depot role play, and the drivers' own notebook of questions they could answer.",
+      "business_metric": "Language complaints per month on the three lines, penalty points from January, and the 'served in Dutch' score in the March mystery rides.",
+      "collection": "The monthly complaints log already coded by the public transport company, a role play check per level every four weeks, and the quarterly mystery ride report per line."
+    }
+  },
+  "concepts": {
+    "conventional": "General Dutch evening classes for the drivers at the adult education centre, a full-year course, in their own time.",
+    "solid": "Yes to the Dutch course Els asked for, shaped to the job: for the 20 drivers who need it, two hours twice a week in paid time at the depot between the peaks, in two level groups (beginners, school Dutch), from October to March, built on the twenty passenger situations drivers like Fabrice already note down (tickets, stops, connections, delays and diversions, an incident on board), with role play in a parked bus. The six nearly fluent drivers get a half-day on the job vocabulary only. A Dutch-speaking driver from each line rides along once a month. Agreed with the planner and the union delegate before the first lesson, and shown to the public transport company before January.",
+    "next_level_examples": [
+      "A pocket card in the cab with the stop names, ticket types and the ten phrases for a delay or a diversion, written with the drivers, so the beginners have the words while the course catches up.",
+      "Lessons on the line itself: the teacher rides the 360 with two drivers at a quiet hour and practises with real stops and real questions.",
+      "Pair each new driver with a Flemish driver who wants to learn French, for a coffee each week at the depot: both sides practise, nobody is singled out."
+    ],
+    "also_valid": [
+      "A short intensive block of a week for the twelve beginners before the twice-weekly lessons, if the planner can free them in November.",
+      "Using the sector training fund's language trainer instead of the adult education centre, if lessons can be held at the depot between the peaks."
+    ],
+    "red_flags": [
+      "Calling it an attitude or customer-friendliness problem and proposing a service programme.",
+      "Training all 71 drivers, including the 45 the complaints are not about.",
+      "Hunting for an incentive, roster or vehicle cause that the depot report already rules out.",
+      "Lessons in the drivers' own time again, or another CD-ROM.",
+      "One course for all 26, regardless of level.",
+      "Moving the new drivers off the three lines instead of teaching them, which only moves the complaints."
+    ]
+  },
+  "defence_objections": [
+    "Four hours a week in paid time for twenty drivers? Every hour in class is an hour I pay someone to drive their bus.",
+    "January is in three months. Your course runs until March. What do I show the public transport company in January?",
+    "If you only teach them 'bus Dutch', the union will say I'm training parrots, not colleagues."
+  ],
+  "question_you_didnt_ask": "What do the complaints actually say, and is anything else about these drivers different?",
+  "actor_notes": [
+    "Els is open and quick, but braced: a consultant once told her late buses were 'a culture issue' (it was roadworks). She mentions it if the player starts looking for a hidden cause.",
+    "She has genuinely checked the alternatives and shares the checks readily when asked about driving, punctuality, tickets, pay or the roster. That is the point: a good player asks, sees the alternatives are ruled out, and says yes.",
+    "If the player proposes a friendliness or attitude programme, or training for all 71 drivers, she gets impatient: 'They're not rude. They're lost.'",
+    "She does not know the placement levels in detail (HR has the report) and has never asked the drivers what they need; she assumes some might resist.",
+    "A player who says 'you're right, let's make the course fit the job' wins her over immediately; she then cares mostly about the planner and January."
+  ],
+  "flavour_lines": [
+    "Twenty years I drove the 395. I know every speed bump between Tienen and Jodoigne by its first name.",
+    "Last year a consultant told me our punctuality was a culture problem. It was roadworks. The culture is fine. The roadworks are still there."
+  ],
+  "second_request": {
+    "opening_message": "Now the school line. Parents complain the driver on the 361 is unfriendly to the kids. I want a customer-friendliness course for all the drivers.",
+    "after_right": "Listen: language complaints went from seven a month to one. The contract manager bought me a coffee. Never happened before.",
+    "after_wrong": "The friendliness thing you sold me was nice. The language complaints didn't move. Anyway. New problem.",
+    "is_training_the_lever": "no",
+    "need_statement": "The 361 leaves the school stop four minutes after the bell, so the driver must leave while children are still running for the bus; the timetable needs to move, not the drivers.",
+    "real_problem": "Since the September timetable the 361 leaves the school stop at 15:34, four minutes after the last bell. Children run across the car park, the driver has to leave to keep his connection at Tienen station, and parents see him drive off in front of their children. Every driver on that run gets the same complaints.",
+    "hidden_facts": [
+      {
+        "id": "four_minutes",
+        "fact": "Since September the 361 leaves the school stop at 15:34, four minutes after the last bell at 15:30.",
+        "unlocks_when": "asks when the complaints happen or what changed on that line",
+        "reveal_line": "It's always the afternoon run. The new timetable, 15:34. The bell goes at half past."
+      },
+      {
+        "id": "every_driver",
+        "fact": "Three different drivers drove the run this term and all three got the same complaints.",
+        "unlocks_when": "asks whether it is one driver or several",
+        "reveal_line": "Three drivers on that run since September. Same letters for all three."
+      },
+      {
+        "id": "connection",
+        "fact": "The driver cannot wait: the 361 must make the 15:52 connection at Tienen station, which the timetable planners set.",
+        "unlocks_when": "asks why the driver does not wait for the children",
+        "reveal_line": "Wait? Then he misses the 15:52 at the station and I get complaints from the other end."
+      }
+    ],
+    "question_you_didnt_ask": "Is it one driver or the run itself, and when exactly do the complaints happen?"
+  }
+}

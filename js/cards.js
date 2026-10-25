@@ -28,6 +28,8 @@
       rootCause: list(g.root_cause_types).join(', '),
       rootCauseTypes: list(g.root_cause_types),
       learningIsTheAnswer: g.is_training_the_lever,
+      // A fair request: after checking, what they asked for is the right answer. Most cards are not.
+      fair: raw.fair_request ? { why: raw.fair_request.why || '', overReach: raw.fair_request.over_reach || '' } : null,
       needStatement: g.need_statement,
       hiddenFacts: list(raw.hidden_facts).map(f => ({
         id: f.id, fact: f.fact, unlockedBy: f.unlocks_when, revealLine: f.reveal_line,
@@ -63,7 +65,9 @@
         // The solid answer is the 4: right-sized means the smallest thing that works, not the boldest.
         strong: k.solid,
         passable: [k.solid ? 'Targets the right group but without measurement baseline or dependencies.' : '', list(k.also_valid)[0] || ''].filter(Boolean).join(' '),
-        weak: k.conventional
+        // On a fair request the weak answer is the over-reach: refusing a request that was right.
+        weak: raw.fair_request && raw.fair_request.over_reach || k.conventional,
+        conventional: k.conventional
       },
       nextLevelExamples: list(k.next_level_examples),
       alsoValid: list(k.also_valid),
