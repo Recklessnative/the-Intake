@@ -1103,6 +1103,7 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
    on the floor; the screen zooms out of the CRT when you look at it, and back into it when you lean back. */
 .seat-stage { inset: 0 0 36px 0; user-select: none; -webkit-user-select: none; }
 .seat .seat-line { bottom: 48px; }
+.office-list button.seat-thing { display: none; }
 .screen.leaving { display: block !important; position: fixed; inset: 0; z-index: 60; pointer-events: none; }
 .screen.seat.leaving { display: flex !important; z-index: 1; }
 .screen.zoom-in { position: relative; z-index: 60; transform-origin: var(--zox) var(--zoy); animation: seat-zoom-in .34s cubic-bezier(.2, .7, .2, 1) both; }
@@ -1154,7 +1155,9 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
 @media (max-width: 700px) {
   .screen.office.active { height: auto; min-height: 100vh; justify-content: flex-start; }
   .office-stage { width: 100%; margin-bottom: 0; }
+  .seat-stage { position: relative; inset: auto; flex: none; width: 100%; }   /* the desk on top, its line and list under it, as on the floor */
   .office-tag { display: none; }
+  .office-list button.seat-thing { display: flex; }
   .office-line { position: static; max-width: none; margin: 10px 10px 0; border-radius: 6px; }
   .office-line::before, .office-line::after { display: none; }
   .office-bar { position: static; flex-direction: column; height: auto; width: 100%; margin-top: 10px; }
@@ -1162,7 +1165,11 @@ details.fine > summary { cursor: pointer; color: var(--title-a); }
   .office-list button { flex: none; max-width: none; height: auto; min-height: 36px; padding: 6px 12px; font-size: 14px; }
   .office-list button span { font-size: 12px; }
   .office-tray { justify-content: space-between; height: 36px; border-left: 0; }
-  .office-card, .office-card.left, .office-card.right { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 16px; width: auto; transform: none; }
+  /* The tray stays at the bottom of the phone like a taskbar, and a card opens just above it. */
+  .screen.office.active { padding-bottom: 36px; }
+  .screen.office .office-tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; }
+  .office-card, .office-card.left, .office-card.right { position: fixed; left: 12px !important; right: 12px; top: auto !important; bottom: 48px; width: auto; max-height: calc(100vh - 64px); transform: none;
+    z-index: 5; }   /* the bar is a flex item here, so its z-index 4 counts: the card goes over it */
 }
 @media (prefers-reduced-motion: reduce) { .office-rain { animation: none; } }
 

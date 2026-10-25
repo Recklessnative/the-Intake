@@ -274,11 +274,13 @@ async function followUp() {
   const deskThings = await p.$$eval('#seat-pic .office-tag', l => l.map(b => b.dataset.thing).sort().join(' '));
   if (deskThings !== 'binders calendar coat mug pens phone plant screen sticky tray') throw new Error('desk things wrong: ' + deskThings);
   if (!(await p.textContent('#seat-list')).includes('Log on')) throw new Error('the desk does not say the screen logs you on');
-  await p.click('#seat-pic .office-tag[data-thing="plant"]');
+  // At phone width the labels are hidden and the things are listed under the desk instead.
+  if (MOBILE !== (await p.isVisible('#seat-list button[data-thing="plant"]'))) throw new Error('desk things listed under the desk on the wrong screen size');
+  await p.click(MOBILE ? '#seat-list button[data-thing="plant"]' : '#seat-pic .office-tag[data-thing="plant"]');
   if (!(await p.textContent('#seat-card')).includes('plant')) throw new Error('the plant says nothing');
   await p.click('#seat-card .row button');
   if (!MOBILE) await p.screenshot({ path: (process.argv[3] || require('os').tmpdir()) + '/desk.png' });
-  await p.click('#seat-pic .office-tag[data-thing="screen"]');
+  await p.click(MOBILE ? '#seat-list button[data-go="screen"]' : '#seat-pic .office-tag[data-thing="screen"]');
   await p.waitForSelector('#s-cubicle.active');
   if (await p.evaluate(() => document.body.dataset.walkin) !== 'played') throw new Error('the walk-in film did not play: ' + await p.evaluate(() => document.body.dataset.walkin));
   await p.waitForSelector('#s-cubicle.active');
